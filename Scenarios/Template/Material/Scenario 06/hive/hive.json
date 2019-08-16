@@ -1,0 +1,92 @@
+{
+  "rootNode": {
+    "type": "DIRECTORY",
+    "delta": {
+      "name": "A002R2EC",
+      "checksums": [
+        {
+          "type": "XXHASH64",
+          "value": "c4bbad9ea29ee100"
+        }
+      ]
+    },
+    "children": {
+      "Sidecar.txt": {
+        "type": "FILE",
+        "delta": {
+          "name": "Sidecar.txt",
+          "checksums": [
+            {
+              "type": "XXHASH64",
+              "value": "3ab5a4166b9bde44"
+            }
+          ]
+        }
+      },
+      "asc-mhl": {
+        "type": "DIRECTORY",
+        "delta": {
+          "name": "asc-mhl",
+          "checksums": [
+            {
+              "type": "XXHASH64",
+              "value": "6eab9ac6ecc5964f"
+            }
+          ]
+        },
+        "children": {
+          "A002R2EC_2019-07-16_165311_0001.ascmhl": {
+            "type": "FILE",
+            "delta": {
+              "name": "A002R2EC_2019-07-16_165311_0001.ascmhl",
+              "checksums": [
+                {
+                  "type": "XXHASH64",
+                  "value": "ab58996cf64c5b0c"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "Clips": {
+        "type": "DIRECTORY",
+        "delta": {
+          "name": "Clips",
+          "checksums": [
+            {
+              "type": "XXHASH64",
+              "value": "4c226b42e27d7af3"
+            }
+          ]
+        },
+        "children": {
+          "A002C006_141024_R2EC.mov": {
+            "type": "FILE",
+            "delta": {
+              "name": "A002C006_141024_R2EC.mov",
+              "checksums": [
+                {
+                  "type": "XXHASH64",
+                  "value": "0ea03b369a463d9d"
+                }
+              ]
+            }
+          },
+          "A002C007_141024_R2EC.mov": {
+            "type": "FILE",
+            "delta": {
+              "name": "A002C007_141024_R2EC.mov",
+              "checksums": [
+                {
+                  "type": "XXHASH64",
+                  "value": "7680e5f98f4a80fd"
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

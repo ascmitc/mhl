@@ -1,9 +1,11 @@
 
 # ASC Media Hash List (ASC-MHL) Format Sample Implementation
 
-> The software in this repository aids the specification process of the ASC-MHL format by the Advanced Data Management Subcommittee of the ASC Motion Imaging Technology Council at the [American Society of Cinematographers](https://theasc.com) (ASC). 
+> The software in this repository aids the ongoing specification process of the ASC-MHL format by the Advanced Data Management Subcommittee of the ASC Motion Imaging Technology Council at the [American Society of Cinematographers](https://theasc.com) (ASC). 
 > 
 > This software is work in progress and is not intended to be used as a reference  or in production (yet).
+> 
+> In case you are looking for the current, original specification of MHL, please take a look at [https://mediahashlist.org](https://mediahashlist.org).
 
 Ensuring file integrity when backing up media files in movie productions is of utmost importance. The ASC-MHL document format is used to create a chain of custody by tracking each and every copy made between the media’s initial download on set, all the way through to final archival.
 

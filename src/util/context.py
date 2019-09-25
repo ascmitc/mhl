@@ -4,8 +4,8 @@ import click
 
 class Context(object):
     def __init__(self):
-        self.root = os.getcwd()   # default current dir
-        self.verbose = False      # default not verbose
+        self.root = None      # TODO: would we like to default current working directory if the arg isn't provided?
+        self.verbose = False  # default not verbose
 
     def mhl_dir(self):
         return os.path.join(self.root, 'asc-mhl')  # TODO: ensure my folder name is correct

@@ -4,16 +4,20 @@ import click
 
 
 @click.command()
-@click.option('-r', '--root', type=click.Path(exists=True, file_okay=False, dir_okay=True, writable=True, readable=True,), help='Specify the directory to verify. Default is current directory.')
-@click.option('-q', '--quiet', is_flag=True, help='Disables verbose output of seal verification.')
+@click.argument('folderpath', type=click.Path(exists=True, file_okay=False, readable=True))
+@click.option('--name', '-n', help="Full name of user")
+@click.option('--username', '-u', help="Login name of user")
+@click.option('--comment', '-c', help="Comment string for human readable context")
+@click.option('--hashformat', '-h', type=click.Choice(['xxhash', 'MD5', 'SHA1', 'C4']), multiple=False, default='xxhash')
+@click.option('--generationnumber', '-g', help="Generation number to verify against")
+@click.option('--simulate', '-s', default=False, is_flag=True, help="Simulate only, don't write new ascmhl file")
+@click.option('--directoryhashes', '-d', default=False, is_flag=True, help="Log calculated directory hashes")
+@click.option('--write-xattr', '-wx', default=False, is_flag=True, help="Write hashes as xattr to file system")
+@click.option('--verbose', '-v', default=False, is_flag=True, help="Verbose output")
 @pass_context
-def verify(ctx, root, quiet):
-    ctx.verbose = not quiet
-    if root is not None:
-        ctx.root = root
+def verify(ctx, **kwargs):
+    """Verify a folder and create a new ASC-MHL file"""
+    ctx.verbose = kwargs.get('verbose')
+    ctx.root = kwargs.get('folderpath')
 
-    logger.verbose('my verbose log')
-    logger.info('my info log')
-    logger.error('my error log')
-    logger.fatal('my fatal log')
-    logger.info('FATAL FAILED!!!!!')
+    logger.verbose(f'verifying {ctx.root}')

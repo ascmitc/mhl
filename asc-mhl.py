@@ -21,6 +21,13 @@ ascmhl_toolversion_string = '0.0.3'
 
 
 def create_filehash(filepath, hashformat, write_xattr):
+    """creates a hash value for a file and returns the hex string
+
+    arguments:
+    filepath -- string value, the path to the file
+    hashformat -- string value, one of the supported hash formats, e.g. 'MD5', 'xxhash'
+    write_xattr -- bnool value, write the created hash into the xattr of the the filesystem for that file
+    """
     hash_string = None
     if hashformat == 'MD5':
         hash_string = md5(filepath)
@@ -44,6 +51,12 @@ def create_filehash(filepath, hashformat, write_xattr):
 
 
 def create_datahash(data, hashformat):
+    """creates a hash value for a data blob and returns the hex string
+
+    arguments:
+    data -- binary data
+    hashformat -- string value, one of the supported hash formats, e.g. 'MD5', 'xxhash'
+    """
     file = tempfile.NamedTemporaryFile(delete=False)
     file.write(data)
     file.close()
@@ -99,6 +112,13 @@ def c4(filepath):
 
 
 def datetime_isostring(date, keep_microseconds=False):
+    """create an iso string representation for a date object
+    e.g. for use in XML tags and attributes
+
+    arguments:
+    date -- date object
+    keep_microseconds -- include microseconds in iso
+    """
     utc_offset_sec = time.altzone if time.localtime().tm_isdst else time.timezone
     utc_offset = datetime.timedelta(seconds=-utc_offset_sec)
 
@@ -115,6 +135,7 @@ def datetime_now_isostring():
 
 
 def datetime_now_filename_string():
+    """create a string representation for now() for use as part of the MHL filename """
     return datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%d_%H%M%S')
 
 
@@ -130,19 +151,31 @@ def matches_prefixes(text: str, prefixes: list):
 
 
 class MediaHashList:
+    """class for representing a list of media hashes, e.g. from an MHL file,
+    also uses MediaHash and HashEntry class for storing information
+
+    member variables:
+    root_path -- root path for files
+    media_hashes -- list of MediaHash objects
+    generation_number -- generation number of the corresponding MHL file
+    """
     def __init__(self, root_path):
+        """init empty list"""
         self.root_path = root_path
         self.media_hashes = list()
         self.generation_number = 0
 
     def append_media_hash(self, media_hash):
+        """add one MediaHash object"""
         self.media_hashes.append(media_hash)
 
     def append_media_hash_list(self, other_media_hash_list):
+        """add all MediaHash objects from another media hash list"""
         self.media_hashes = self.media_hashes + other_media_hash_list.media_hashes
 
     # input: strings(relative path)
     def media_hash_for_relative_filepath(self, filepath):
+        """retrieve the stored MediaHash object for a given relative path"""
         for media_hash in self.media_hashes:
             if media_hash.relative_filepath == filepath:
                 return media_hash
@@ -150,6 +183,7 @@ class MediaHashList:
 
     # input: array of strings (relative paths)
     def media_hash_list_for_relative_filepaths(self, filepaths):
+        """retrieve multiple MediaHash objects for a list of given relative paths"""
         directory_media_list = MediaHashList(self.root_path)
         for filepath in sorted(filepaths):
             directory_media_hash = self.media_hash_for_relative_filepath(filepath)
@@ -161,6 +195,15 @@ class MediaHashList:
 
 
 class MediaHash:
+    """class for representing one media hash for a (media) file to be managed by a MediaHashList object
+    uses HashEntry class for storing information
+
+    member variables:
+    relative_filepath -- relative file path to the file (supplements the root_path from the MediaHashList object)
+    filesize -- size of the file
+    last_modification_date -- last modification date as read from the filesystem
+    hash_entries -- list of HashEntry objects to manage hash values (e.g. for different formats)
+    """
     def __init__(self, relative_filepath):
         self.relative_filepath = relative_filepath
         self.filesize = 0
@@ -168,23 +211,27 @@ class MediaHash:
         self.hash_entries = list()
 
     def append_hash_entry(self, hash_entry):
+        """add one HashEntry object"""
         if hash_entry.action == 'new' and not len(self.hash_entries) == 0:
             hash_entry.secondary = True
         self.hash_entries.append(hash_entry)
 
     def hash_entry_for_format(self, hash_format):
+        """retrieve the HashEntry object of a given hash format"""
         for hash_entry in self.hash_entries:
             if hash_entry.hash_format == hash_format:
                 return hash_entry
         return None
 
     def has_hash_entry_of_action(self, action):
+        """retrieve the HashEntry object of a given action"""
         for hash_entry in self.hash_entries:
             if hash_entry.action == action:
                 return True
         return False
 
     def has_verified_or_failed_hash_entry(self):
+        """returns bool value, indicates if the media hash has been verified (either succesfully or unsuccesfully)"""
         if self.has_hash_entry_of_action('verified'):
             return True
         elif self.has_hash_entry_of_action('failed'):
@@ -193,6 +240,7 @@ class MediaHash:
             return False
 
     def log_hash_entry(self, hash_format):
+        """find HashEntry object of a given format and print it"""
         for hash_entry in self.hash_entries:
             if hash_entry.hash_format == hash_format:
                 indicator = " "
@@ -209,6 +257,15 @@ class MediaHash:
 
 
 class HashEntry:
+    """class to store one hash value to be managed by a MediaHash object
+
+    member variables:
+    hash_string -- stringg representation (hex) of the hash value
+    hash_format -- string value, hash format, e.g. 'MD5', 'xxhash'
+    hash_date -- date of creation of the hash value
+    action -- action/result of verification, e.g. 'verified', 'failed', 'new', 'original'
+    secondary -- bool value, indicates if created after the original hash (TBD)
+    """
     def __init__(self, hash_string, hash_format):
         self.hash_string = hash_string
         self.hash_format = hash_format
@@ -217,6 +274,7 @@ class HashEntry:
         self.secondary = False
 
     def matches_hash_entry(self, other_hash_entry):
+        """compare HashEntry objects for matching hash values (and format)"""
         if self.hash_format != other_hash_entry.hash_format:
             return False
         if self.hash_string != other_hash_entry.hash_string:
@@ -225,9 +283,30 @@ class HashEntry:
 
 
 class HashListCreator:
+    """class used to create an MHL XML file
+
+    Main task is to traverse a folder structure and during the traversal write a MHL XML file for a new generation
+    with the traverse and traverse_with_existing_hashes methods.
+
+    member variables:
+    rootPath -- folder where traversal should start
+    verbose -- bool value, enables/disables logging
+    simulate -- bool value, if true doesn't write the MHL file
+    info -- user info (name, email, ..) for MHL header
+    filenameIgnorePrefixes -- ignore all files that start with these prefixes
+    create_directory_hashes -- bool value, if true also computes compound hashes for directories
+    write_xattr -- bool value, also lets create_filehash write the created hash to the filesystem
+    """
+
     supported_hashformats = {'xxhash', 'MD5', 'SHA1', 'C4'}           # is also decreasing priority list for verification
 
     def __init__(self, root_path, info):
+        """initialize the HashListCreator, set default values
+
+        arguments:
+        root_path -- folder where traversal should start
+        info -- user info (name, email, ..) for MHL header
+        """
         if not os.path.exists(root_path) or not os.path.isdir(root_path):
             print("ERR: HashListCreator init: foler \"" + root_path + "\" does not exist.")
             return
@@ -245,6 +324,8 @@ class HashListCreator:
         self.write_xattr = False
 
     def element_hash(self, media_hash):
+        """builds and returns one <hash> element for a given MediaHash object"""
+
         hash_element = etree.Element('hash')
 
         filename_element = etree.SubElement(hash_element, 'filename')
@@ -269,6 +350,8 @@ class HashListCreator:
         return hash_element
 
     def element_creator_info(self, creator_data):
+        """builds and returns one <creatorinfo> element for a given dictionary of information"""
+
         creator_info = objectify.Element('creatorinfo')
         if self.info['name'] is not None:
             creator_info.name = self.info['name']
@@ -285,6 +368,8 @@ class HashListCreator:
         return creator_info
 
     def element_genreference(self, media_hash_list):
+        """builds and returns one <genreference> element referencing a given MHL file"""
+
         genreference_element = etree.Element('genreference')
         path_element = etree.SubElement(genreference_element, 'path')
         path_element.text = media_hash_list.relative_filepath
@@ -297,6 +382,8 @@ class HashListCreator:
         return genreference_element
 
     def element_ascmhlreference(self, ascmhl_relative_path):
+        """builds and returns one <ascmhlreference> element referencing a relative path"""
+
         ascmhlreference_element = etree.Element('ascmhlreference')
         path_element = etree.SubElement(ascmhlreference_element, 'path')
         path_element.text = ascmhl_relative_path
@@ -305,9 +392,21 @@ class HashListCreator:
         return ascmhlreference_element
 
     def traverse(self, hashformat_for_new):
+        """traverse and build an MHL file without comparing to exiting hashes (e.g. generation 0001)
+
+        arguments:
+        hashformat_for_new -- format for new hashes
+        """
         self.traverse_with_existing_hashes(None, hashformat_for_new)
 
     def traverse_with_existing_hashes(self, media_hash_list, hashformat_for_new):
+        """traverse and build an MHL file and compare to exiting hashes
+
+        arguments:
+        media_hash_list -- MediaHashList object withe existing hashes from previous MHL file
+        hashformat_for_new -- format for new hashes
+        """
+
         if self.verbose:
             print("initializing new ASC-MHL file...")
         self._h.startDocument()
@@ -442,6 +541,15 @@ class HashListCreator:
         return number_of_failed_verifications
 
     def recurse(self, folderpath, hashformat, info):
+        """sets up recursive traversal of an embedded folder that has an ascmhl folder itself
+        and calls traverse_with_existing_hashes on a new HashListCreator
+
+        arguments:
+
+        folderpath -- path of embedded folder with own ascmhl folder
+        hashformat -- format for new hashes
+        info -- user info (name, email, ..) for MHL header
+        """
 
         folder_manager = HashListFolderManager(folderpath)
         folder_manager.verbose = self.verbose
@@ -477,6 +585,12 @@ class HashListCreator:
     # return:
     # - MediaHash
     def media_hash_for_directory_with_contents(self, directory_path, file_media_list, directory_media_list, hash_format):
+        """creates a compound hash (as a MediaHash object) for a directory , based on the directories contents
+
+        arguments:
+        file_media_list -- MediaList for all files in directory
+        directory_media_list -- MediaList for all directory hashes for all directories in directory
+        """
 
         directory_content_items_hash_list = file_media_list
         directory_content_items_hash_list.append_media_hash_list(directory_media_list)
@@ -508,6 +622,8 @@ class HashListCreator:
         return directory_hash
 
     def xml_string(self):
+        """finalizes the XML string"""
+
         tree = self._h.etree
         xml_string: bytes = lxml.etree.tostring(tree.getroot(), pretty_print=True, xml_declaration=True,
                                                 encoding="utf-8")
@@ -515,6 +631,14 @@ class HashListCreator:
 
 
 class HashListFolderManager:
+    """class for managing an asc-mhl folder with MHL files
+
+    is used to write a ready XML string to a new MHL file, and also includes lots of helper functions
+
+    member variables:
+    folderpath -- path to the enclosing folder (not the asc-mhl folder itself, but one up)
+    """
+
     ascmhl_folder_name = "asc-mhl"
     ascmhl_file_extension = ".ascmhl"
 
@@ -528,6 +652,7 @@ class HashListFolderManager:
         self.folderpath = folderpath
 
     def ascmhl_folder_path(self):
+        """absolute path of the asc-mhl folder"""
         path = os.path.join(self.folderpath, HashListFolderManager.ascmhl_folder_name)
         return path
 
@@ -535,6 +660,7 @@ class HashListFolderManager:
         return os.path.exists(self.ascmhl_folder_path())
 
     def ascmhl_folder_exists_above_up_to_but_excluding(self, rootpath):
+        """finds out if self is embedded within a folder that itself has an asc-mhl folder"""
         if os.path.relpath(self.folderpath, rootpath) is None:
             return False
         #path = os.path.dirname(os.path.normpath(self.folderpath))
@@ -571,6 +697,11 @@ class HashListFolderManager:
         return ascmhl['latest_filename']
 
     def _ascmhl_files(self, query_generation_number=None):
+        """find all MHL files in the asc-mhl folder, returns information about found generations
+
+        arguments:
+        query_generation_number -- find additional information about a specific generation
+        """
         ascmhl_folder_path = self.ascmhl_folder_path()
         if ascmhl_folder_path is None:
             return None
@@ -640,6 +771,7 @@ class HashListFolderManager:
             return self.path_for_ascmhl_file(filename)
 
     def write_ascmhl(self, xml_string):
+        """writes a given XML string into a new MHL file"""
         filepath = self.path_for_new_ascmhl_file()
         if filepath is not None:
             # if self.verbose:
@@ -658,6 +790,16 @@ class HashListFolderManager:
 
 
 class HashListReader:
+    """class to read an MHL file into a MediaHashList object
+
+    this is used to read MHL files of earlier generations
+
+    member variables:
+    filepath -- path to MHL file
+    verbose -- bool value, enables / disbales log
+    media_hash_list -- MediaHashList object representing the MHL file
+    generation_number -- generation number of the MHL file
+    """
     def __init__(self, filepath, generation_number):
         # print("DBG: filename " + filename )
         self.filepath = filepath
@@ -666,6 +808,8 @@ class HashListReader:
         self.generation_number = generation_number
 
     def parse(self):
+        """parsing the MHL XML file and building the MediaHashList for the media_hash_list member variable"""
+
         print("Verifying against hashes from \"" + os.path.basename(self.filepath) + "\"...")
 
         tree = etree.parse(self.filepath)

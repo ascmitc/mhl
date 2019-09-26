@@ -6,11 +6,11 @@ import getpass
 
 class Context(object):
     """
-    Context is a custom object intended to wrap root runtime configurations... most of which are provided upon CLI invocation via arguments.
+    Context is a custom object intended to wrap root runtime configurations... most of which are provided upon CLI invocation via options.
     """
     def __init__(self):
         self.sys_username = getpass.getuser()
-        self.root = None  # TODO: would we like to default current working directory if the arg isn't provided?
+        self.root = None  # TODO: would we like to default to current working directory if the root arg isn't provided?
         self.name = None
         self.comment = None
         self.hash_format = None
@@ -23,11 +23,11 @@ class Context(object):
     def load_args(self, **kwargs):
         """
         sets all context properties based on the values contained in the kwargs.
-        intended to be called directly with the arguments provided to the cli.
-        :param kwargs: all arguments/options from the cli passed along as key word args.
+        intended to be called directly with the arguments and options provided to the cli upon invocation.
+        :param kwargs: all arguments/options from the cli passed along as key-word-arguments.
         :return: none
         """
-        self.root = kwargs.get('folderpath')
+        self.root = kwargs.get('rootpath')
         self.name = kwargs.get('name')
         self.comment = kwargs.get('comment')
         self.hash_format = kwargs.get('hash-format')
@@ -36,15 +36,6 @@ class Context(object):
         self.files_only = kwargs.get('files-only')
         self.write_xattr = kwargs.get('write-xattr')
         self.verbose = kwargs.get('verbose')
-
-    @property
-    def mhl_dir(self):
-        return os.path.join(self.root, 'asc-mhl')
-
-    def traverse_tree(self):
-        ignore_prefixes = [self.mhl_dir, '.']
-        for tree_node in traverse.post_order_lexicographic(self.root, ignore_prefixes):
-            yield tree_node
 
 
 """

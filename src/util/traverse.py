@@ -8,7 +8,7 @@ def post_order_lexicographic(top, ignore_paths):
 
     :param top: the directory being iterated
     :param ignore_paths: paths included in ignore_paths will not be yielded to the caller
-    :return: yields results in the order necessary for composite directory hashes
+    :return: yields results in folder chunks, in the order necessary for composite directory hashes
     """
     # create a sorted list of our immediate children
     names = os.listdir(top)

@@ -1,5 +1,3 @@
-from src.util import traverse
-import os
 import click
 import getpass
 

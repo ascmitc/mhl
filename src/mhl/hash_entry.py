@@ -1,4 +1,5 @@
 from src.util.datetime import datetime_now_isostring_with_microseconds
+from src.util import logger
 
 
 class MediaHash:
@@ -56,12 +57,11 @@ class MediaHash:
                     indicator = "!"
                 elif hash_entry.action == 'directory':
                     indicator = "d"
-
-                print("{0} {1}: {2} {3}: {4}".format(indicator,
-                                                     hash_entry.hash_format.rjust(6),
-                                                     hash_entry.hash_string.ljust(32),
-                                                     (hash_entry.action if hash_entry.action is not None else "").ljust(10),
-                                                     self.relative_filepath))
+                logger.info("{0} {1}: {2} {3}: {4}".format(indicator,
+                                                           hash_entry.hash_format.rjust(6),
+                                                           hash_entry.hash_string.ljust(32),
+                                                           (hash_entry.action if hash_entry.action is not None else "").ljust(10),
+                                                           self.relative_filepath))
 
 
 class HashEntry:

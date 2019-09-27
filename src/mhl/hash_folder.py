@@ -104,8 +104,7 @@ class HashListFolderManager:
                                 highest_generation_number = generation_number
                                 latest_filename = filename
                         else:
-                            print("ERROR: name of ascmhl file \"{0}\" doesn't conform to naming convention.",
-                                  filename)
+                            logger.error(f'name of ascmhl file {filename} doesnt conform to naming convention')
             result_tuple = {'earliest_filename': earliest_filename,
                             'earliest_generation_number': lowest_generation_number,
                             'latest_filename': latest_filename,
@@ -149,8 +148,7 @@ class HashListFolderManager:
         """writes a given XML string into a new MHL file"""
         filepath = self.path_for_new_ascmhl_file()
         if filepath is not None:
-            # if self.verbose:
-            print("Writing \"" + filepath + "\"")
+            logger.verbose(f'writing {filepath}')
             with open(filepath, 'wb') as file:
                 # FIXME: check if file could be created
                 file.write(xml_string.encode('utf8'))

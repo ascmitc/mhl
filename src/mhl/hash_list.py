@@ -70,7 +70,7 @@ class MediaHashList:
             if directory_media_hash is not None:
                 directory_media_list.append_media_hash(directory_media_hash)
             else:
-                print("WARNING: couldn't find MediaHash for \"{0}\"".format(filepath))
+                logger.error(f'no media_hash for {filepath}')
         return directory_media_list
 
 
@@ -92,8 +92,7 @@ class HashListReader:
 
     def parse(self):
         """parsing the MHL XML file and building the MediaHashList for the media_hash_list member variable"""
-
-        print("Verifying against hashes from \"" + os.path.basename(self.filepath) + "\"...")
+        logger.info(f'verifying against hashes from {os.path.basename(self.filepath)}')
 
         tree = etree.parse(self.filepath)
         hashlist_element = tree.getroot()
@@ -155,8 +154,7 @@ class HashListCreator:
         info -- user info (name, email, ..) for MHL header
         """
         if not os.path.exists(root_path) or not os.path.isdir(root_path):
-            print("ERR: HashListCreator init: foler \"" + root_path + "\" does not exist.")
-            return
+            logger.fatal(f'root_path does not exist: {root_path}')
         if not root_path.endswith(os.path.sep):
             root_path = root_path + os.path.sep
 
@@ -277,10 +275,6 @@ class HashListCreator:
         number_of_failed_verifications = 0
 
         for root, directories, filenames in os.walk(self.rootPath, topdown=False):
-            # if os.path.basename(os.path.normpath(root)) in self.foldernameIgnores is not None:
-            #   continue
-            # print("DBG: traversing folder \"{0}\"...".format(root))
-
             # recurse?
             if root is not self.rootPath:
                 folder_manager = HashListFolderManager(root)
@@ -323,11 +317,9 @@ class HashListCreator:
                                         hash_entry.action = 'verified'
                                     else:
                                         hash_entry.action = 'failed'
-                                        if self.verbose:
-                                            print("\nERROR: hash mismatch for \"{0}\"! old {1}: {2}, new {3}: {4}\n"
-                                                  .format(relative_filepath,
-                                                          hashformat, previous_hash_entry.hash_string,
-                                                          hashformat, hash_string))
+                                        logger.error(f'hash mismatch for {relative_filepath} '
+                                                     f'old {hashformat}: {previous_hash_entry.hash_string}, '
+                                                     f'new{hashformat}: {hash_string}')
                                         number_of_failed_verifications = number_of_failed_verifications + 1
                                 else:
                                     hash_entry = previous_hash_entry
@@ -380,7 +372,7 @@ class HashListCreator:
                         xattr.setxattr(root, "com.theasc.asc-mhl.xxhash",
                                        current_directory_media_hash.hash_entry_for_format(directory_hash_format).hash_string.encode('utf8'))
                     except IOError:
-                        print("ERR: couldn't set xattr for \"{0}\", errno {1}".format(root, IOError))
+                        logger.error(f'error setting xattr for {root} errno {IOError}')
 
         self._h.endElementNS((None, 'hashes'), 'hashes')
 
@@ -406,7 +398,7 @@ class HashListCreator:
         ascmhl_generationnumber = folder_manager.earliest_ascmhl_generation_number()
         ascmhl_path = folder_manager.path_for_ascmhl_generation_number(ascmhl_generationnumber)
 
-        print("Traversing\"" + folderpath + "\"...")
+        logger.verbose(f'traversing {folderpath}')
 
         reader = HashListReader(ascmhl_path, ascmhl_generationnumber)
         reader.verbose = self.verbose
@@ -453,9 +445,8 @@ class HashListCreator:
             media_hash = directory_content_items_hash_list.media_hash_for_relative_filepath(relative_filepath)
             hash_entry = media_hash.hash_entry_for_format(hash_format)
             if hash_entry is None:
-                print("ERROR: cannot create directory hash of format {0}, no such hash format available for \"{1}\"".
-                      format(hash_format, media_hash.relative_filepath))
-                exit(103)
+                logger.error(f'cannot create {hash_format} for: {media_hash.relative_filepath}')
+                click.get_current_context().exit(103)
 
             hash_data = binascii.unhexlify(hash_entry.hash_string)
             collected_hash_data = collected_hash_data + hash_data

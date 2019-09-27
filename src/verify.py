@@ -47,7 +47,7 @@ def verify(ctx, **kwargs):
 
         number_failures = creator.traverse_with_existing_hashes(reader.media_hash_list, ctx.hash_format)
         if number_failures > 0:
-            print("ERROR: verification failed for {0} file(s)".format(number_failures))
+            logger.error(f'FAILED verification for {number_failures} file(s)')
         if not ctx.simulate:
             folder_manager.write_ascmhl(creator.xml_string())
     else:

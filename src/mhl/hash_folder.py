@@ -1,5 +1,4 @@
 from src.util.datetime import datetime_now_filename_string
-from src.mhl import pass_context
 from src.util import logger
 import os
 import re

@@ -1,28 +1,17 @@
-from src.util.datetime import datetime_now_filename_string, datetime_isostring, datetime_now_isostring
-
-from src.mhl import mhl_dir
-from src.mhl.context import pass_context
-from src.mhl.hash import *
-from src.mhl.hash_entry import *
-from src.mhl.hash_folder import *
-
+from src.util.datetime import datetime_isostring, datetime_now_isostring
+from src.mhl.hash import xxhash64, create_filehash, create_datahash
+from src.mhl.hash_entry import MediaHash, HashEntry
+from src.mhl.hash_folder import HashListFolderManager
 from src.util import matches_prefixes
 from src.util import logger
-
-import click
-
-import lxml
 from lxml import objectify, etree, sax
-
+import lxml
 import datetime
-import time
 import platform
 import os
-import subprocess
-import re
 import xattr
-import tempfile
 import binascii
+import click
 
 # TODO: these should be defined dynamically. check the command invoked and the version programmatically so this doesn't have to be updated.
 ascmhl_toolname_string = 'ascmhl-verify'

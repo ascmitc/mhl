@@ -25,14 +25,14 @@ class Context(object):
         :param kwargs: all arguments/options from the cli passed along as key-word-arguments.
         :return: none
         """
-        self.root = kwargs.get('rootpath')
+        self.root = kwargs.get('root_path')
         self.name = kwargs.get('name')
         self.comment = kwargs.get('comment')
-        self.hash_format = kwargs.get('hash-format')
-        self.generation_number = kwargs.get('generation-number')
+        self.hash_format = kwargs.get('hash_format')
+        self.generation_number = kwargs.get('generation_number')
         self.simulate = kwargs.get('simulate')
-        self.files_only = kwargs.get('files-only')
-        self.write_xattr = kwargs.get('write-xattr')
+        self.files_only = kwargs.get('files_only')
+        self.write_xattr = kwargs.get('write_xattr')
         self.verbose = kwargs.get('verbose')
 
 

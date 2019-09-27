@@ -2,6 +2,9 @@ from os.path import join, isdir
 import os
 
 
+# TODO: implement this on next refactor. this is not yet integrated into mhl script.
+#  iteration logic should not be in the same place as the thing using the iterator when it is this complicated.
+#  therefor we should use this generator to easily separate the traversal from the hash computation and xml building
 def post_order_lexicographic(top, ignore_paths):
     """
     iterates a file system in the order necessary to generate composite tree hashes.

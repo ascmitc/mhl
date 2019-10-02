@@ -1,5 +1,4 @@
 import click
-import getpass
 
 
 class Context(object):
@@ -7,14 +6,14 @@ class Context(object):
     Context is a custom object intended to wrap root runtime configurations... most of which are provided upon CLI invocation via options.
     """
     def __init__(self):
-        self.sys_username = getpass.getuser()
+        self.sys_username = None
         self.root = None  # TODO: would we like to default to current working directory if the root arg isn't provided?
         self.name = None
         self.comment = None
         self.hash_format = None
         self.generation_number = None
         self.simulate = None
-        self.files_only = None
+        self.directory_hashes = None
         self.write_xattr = None
         self.verbose = None
 
@@ -31,7 +30,7 @@ class Context(object):
         self.hash_format = kwargs.get('hash_format')
         self.generation_number = kwargs.get('generation_number')
         self.simulate = kwargs.get('simulate')
-        self.files_only = kwargs.get('files_only')
+        self.directory_hashes = kwargs.get('directory_hashes')
         self.write_xattr = kwargs.get('write_xattr')
         self.verbose = kwargs.get('verbose')
 

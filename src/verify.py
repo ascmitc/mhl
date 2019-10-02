@@ -4,16 +4,18 @@ from src.mhl.hash_folder import HashListFolderManager
 from src.mhl.hash_list import HashListCreator, HashListReader
 import click
 import os
+import getpass
 
 
 @click.command()
 @click.argument('root_path', type=click.Path(exists=True, file_okay=False, readable=True))
 @click.option('--name', '-n', help="Full name of user")
+@click.option('--username', '-u', default=getpass.getuser(), help="Login name of user")
 @click.option('--comment', '-c', help="Comment string for human readable context")
-@click.option('--hash_format', '-h', type=click.Choice(['xxhash', 'MD5', 'SHA1', 'C4']), multiple=False, default='xxhash')
+@click.option('--hash_format', '-h', type=click.Choice(['xxhash', 'MD5', 'SHA1', 'C4']), multiple=False, default='xxhash', help="Algorithm")
 @click.option('--generation_number', '-g', default=0, help="Generation number to verify against")
 @click.option('--simulate', '-s', default=False, is_flag=True, help="Simulate only, don't write new ascmhl file")
-@click.option('--files_only', '-fo', default=False, is_flag=True, help="Disregard folder hashes and only compute file hashes")
+@click.option('--directory_hashes', '-d', default=False, is_flag=True, help="Disregard folder hashes and only compute file hashes")
 @click.option('--write_xattr', '-wx', default=False, is_flag=True, help="Write hashes as xattr to file system")
 @click.option('--verbose', '-v', default=False, is_flag=True, help="Verbose output")
 @pass_context
@@ -37,7 +39,7 @@ def verify(ctx, **kwargs):
         'name': ctx.name,
         'comment': ctx.comment
     })
-    creator.create_directory_hashes = not ctx.files_only
+    creator.create_directory_hashes = ctx.directory_hashes
     creator.write_xattr = ctx.write_xattr
     creator.simulate = ctx.simulate
 

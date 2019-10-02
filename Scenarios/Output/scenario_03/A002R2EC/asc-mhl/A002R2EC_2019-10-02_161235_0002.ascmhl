@@ -1,0 +1,37 @@
+<?xml version='1.0' encoding='utf-8'?>
+<hashlist version="2.0">
+  <creatorinfo>
+    <username>jon</username>
+    <hostname>Jonathans-MacBook-Pro-3.local</hostname>
+    <toolname>ascmhl-verify</toolname>
+    <toolversion>0.0.3</toolversion>
+    <creationdate>2019-10-02T16:12:35-04:00</creationdate>
+    <process>verify</process>
+  </creatorinfo>
+  <hashes rootPath="/Volumes/imagine/ascmhl/Scenarios/Output/scenario_03/A002R2EC/">
+    <hash>
+      <filename>Clips/A002C006_141024_R2EC.mov</filename>
+      <filesize>5</filesize>
+      <lastmodificationdate>2019-10-02T16:12:34-04:00</lastmodificationdate>
+      <MD5 action="original">f5ac8127b3b6b85cdc13f237c6005d80</MD5>
+    </hash>
+    <hash>
+      <filename>Clips/A002C007_141024_R2EC.mov</filename>
+      <filesize>4</filesize>
+      <lastmodificationdate>2019-10-02T16:12:34-04:00</lastmodificationdate>
+      <MD5 action="original">614dd0e977becb4c6f7fa99e64549b12</MD5>
+    </hash>
+    <hash>
+      <filename>asc-mhl/A002R2EC_2019-10-02_161234_0001.ascmhl</filename>
+      <filesize>1172</filesize>
+      <lastmodificationdate>2019-10-02T16:12:34-04:00</lastmodificationdate>
+      <MD5 action="original">5f1edb82b8ffab2569041f5a952faeaa</MD5>
+    </hash>
+    <hash>
+      <filename>Sidecar.txt</filename>
+      <filesize>58</filesize>
+      <lastmodificationdate>2019-10-02T16:12:34-04:00</lastmodificationdate>
+      <MD5 action="original">6425c5a180ca0f420dd2b25be4536a91</MD5>
+    </hash>
+  </hashes>
+</hashlist>

@@ -1,0 +1,27 @@
+<?xml version='1.0' encoding='utf-8'?>
+<hashlist version="2.0">
+  <creatorinfo>
+    <username>jon</username>
+    <hostname>Jonathans-MacBook-Pro-3.local</hostname>
+    <toolname>ascmhl-verify</toolname>
+    <toolversion>0.0.3</toolversion>
+    <creationdate>2019-10-02T16:12:35-04:00</creationdate>
+    <process>verify</process>
+  </creatorinfo>
+  <hashes rootPath="/Volumes/imagine/ascmhl/Scenarios/Output/scenario_05/Reels/">
+    <hash>
+      <filename>Summary.txt</filename>
+      <filesize>47</filesize>
+      <lastmodificationdate>2019-10-02T16:12:35-04:00</lastmodificationdate>
+      <xxhash action="original">b7219c53e6093233</xxhash>
+    </hash>
+  </hashes>
+  <ascmhlreference>
+    <path>A002R2EC/asc-mhl/A002R2EC_2019-10-02_161235_0002.ascmhl</path>
+    <xxhash>7c5ae7706084f22c</xxhash>
+  </ascmhlreference>
+  <ascmhlreference>
+    <path>A003R2EC/asc-mhl/A003R2EC_2019-10-02_161235_0002.ascmhl</path>
+    <xxhash>563fc350e953dd12</xxhash>
+  </ascmhlreference>
+</hashlist>

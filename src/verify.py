@@ -13,7 +13,7 @@ import getpass
 @click.option('--username', '-u', default=getpass.getuser(), help="Login name of user")
 @click.option('--comment', '-c', help="Comment string for human readable context")
 @click.option('--hash_format', '-h', type=click.Choice(['xxhash', 'MD5', 'SHA1', 'C4']), multiple=False, default='xxhash', help="Algorithm")
-@click.option('--generation_number', '-g', default=0, help="Generation number to verify against")
+@click.option('--generation_number', '-g', default=1, help="Generation number to verify against")
 @click.option('--simulate', '-s', default=False, is_flag=True, help="Simulate only, don't write new ascmhl file")
 @click.option('--directory_hashes', '-d', default=False, is_flag=True, help="Disregard folder hashes and only compute file hashes")
 @click.option('--write_xattr', '-wx', default=False, is_flag=True, help="Write hashes as xattr to file system")
@@ -22,7 +22,7 @@ import getpass
 def verify(ctx, **kwargs):
     """Verify a folder and create a new ASC-MHL file"""
     ctx.load_args(**kwargs)
-    logger.verbose(f'verifying {ctx.root}')
+    logger.info(f'traversing {ctx.root}')
 
     folder_manager = HashListFolderManager(ctx.root)
     if ctx.generation_number is None:
@@ -30,7 +30,8 @@ def verify(ctx, **kwargs):
 
     # TODO: functions like "path_for_ascmhl_generation_number" can be global functions and can ask the context for the data needed.
     ascmhl_path = folder_manager.path_for_ascmhl_generation_number(ctx.generation_number)
-    if ctx.generation_number and ascmhl_path is None:
+    logger.info(f'ascmhl_path {ascmhl_path}')
+    if ctx.generation_number != 1 and ascmhl_path is None:
         logger.fatal(f'no matching mhl file for generation number {ctx.generation_number}')
 
     # TODO: anything that needs this "info" type of data should be refactored to just grab it from the context. out of time.

@@ -308,7 +308,7 @@ class HashListCreator:
                                         hash_entry.action = 'failed'
                                         logger.error(f'hash mismatch for {relative_filepath} '
                                                      f'old {hashformat}: {previous_hash_entry.hash_string}, '
-                                                     f'new{hashformat}: {hash_string}')
+                                                     f'new {hashformat}: {hash_string}')
                                         number_of_failed_verifications = number_of_failed_verifications + 1
                                 else:
                                     hash_entry = previous_hash_entry
@@ -387,7 +387,7 @@ class HashListCreator:
         ascmhl_generationnumber = folder_manager.earliest_ascmhl_generation_number()
         ascmhl_path = folder_manager.path_for_ascmhl_generation_number(ascmhl_generationnumber)
 
-        logger.info(f'traversing "{folderpath}"')
+        logger.verbose(f'traversing embedded mhl directory: "{folderpath}"')
 
         reader = HashListReader(ascmhl_path, ascmhl_generationnumber)
         reader.verbose = self.verbose

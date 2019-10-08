@@ -4,23 +4,23 @@
     <hostname>Jonathans-MacBook-Pro-3.local</hostname>
     <toolname>ascmhl-verify</toolname>
     <toolversion>0.0.3</toolversion>
-    <creationdate>2019-10-08T09:28:39-04:00</creationdate>
+    <creationdate>2019-10-08T09:37:18-04:00</creationdate>
     <process>verify</process>
   </creatorinfo>
   <hashes rootPath="/Volumes/imagine/ascmhl/Scenarios/Output/scenario_05/Reels/">
     <hash>
       <filename>Summary.txt</filename>
       <filesize>47</filesize>
-      <lastmodificationdate>2019-10-08T09:28:39-04:00</lastmodificationdate>
+      <lastmodificationdate>2019-10-08T09:37:18-04:00</lastmodificationdate>
       <xxhash action="original">b7219c53e6093233</xxhash>
     </hash>
   </hashes>
   <ascmhlreference>
-    <path>A002R2EC/asc-mhl/A002R2EC_2019-10-08_092839_0002.ascmhl</path>
-    <xxhash>f6e901bf0fd3b941</xxhash>
+    <path>A002R2EC/asc-mhl/A002R2EC_2019-10-08_093718_0002.ascmhl</path>
+    <xxhash>5405a34d1f1d7185</xxhash>
   </ascmhlreference>
   <ascmhlreference>
-    <path>A003R2EC/asc-mhl/A003R2EC_2019-10-08_092839_0002.ascmhl</path>
-    <xxhash>61da23d5fb5d6493</xxhash>
+    <path>A003R2EC/asc-mhl/A003R2EC_2019-10-08_093718_0002.ascmhl</path>
+    <xxhash>4a31d6607a7b680c</xxhash>
   </ascmhlreference>
 </hashlist>

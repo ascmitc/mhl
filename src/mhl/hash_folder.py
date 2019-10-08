@@ -147,7 +147,7 @@ class HashListFolderManager:
         """writes a given XML string into a new MHL file"""
         filepath = self.path_for_new_ascmhl_file()
         if filepath is not None:
-            logger.verbose(f'writing {filepath}')
+            logger.info(f'writing {filepath}')
             with open(filepath, 'wb') as file:
                 # FIXME: check if file could be created
                 file.write(xml_string.encode('utf8'))

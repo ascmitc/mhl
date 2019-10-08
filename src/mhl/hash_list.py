@@ -387,7 +387,7 @@ class HashListCreator:
         ascmhl_generationnumber = folder_manager.earliest_ascmhl_generation_number()
         ascmhl_path = folder_manager.path_for_ascmhl_generation_number(ascmhl_generationnumber)
 
-        logger.verbose(f'traversing {folderpath}')
+        logger.info(f'traversing {folderpath}')
 
         reader = HashListReader(ascmhl_path, ascmhl_generationnumber)
         reader.verbose = self.verbose

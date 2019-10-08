@@ -4,26 +4,26 @@
     <hostname>Jonathans-MacBook-Pro-3.local</hostname>
     <toolname>ascmhl-verify</toolname>
     <toolversion>0.0.3</toolversion>
-    <creationdate>2019-10-08T09:58:38-04:00</creationdate>
+    <creationdate>2019-10-08T10:01:46-04:00</creationdate>
     <process>verify</process>
   </creatorinfo>
-  <hashes rootPath="/Volumes/imagine/ascmhl/Scenarios/Output/scenario_03/A002R2EC/">
+  <hashes rootPath="/Volumes/imagine/ascmhl/Scenarios/Output/scenario_07/A002R2EC/">
     <hash>
       <filename>Clips/A002C006_141024_R2EC.mov</filename>
       <filesize>5</filesize>
-      <lastmodificationdate>2019-10-08T09:58:38-04:00</lastmodificationdate>
+      <lastmodificationdate>2019-10-08T10:01:46-04:00</lastmodificationdate>
       <xxhash action="original">0ea03b369a463d9d</xxhash>
     </hash>
     <hash>
       <filename>Clips/A002C007_141024_R2EC.mov</filename>
       <filesize>4</filesize>
-      <lastmodificationdate>2019-10-08T09:58:38-04:00</lastmodificationdate>
+      <lastmodificationdate>2019-10-08T10:01:46-04:00</lastmodificationdate>
       <xxhash action="original">7680e5f98f4a80fd</xxhash>
     </hash>
     <hash>
       <filename>Sidecar.txt</filename>
       <filesize>58</filesize>
-      <lastmodificationdate>2019-10-08T09:58:38-04:00</lastmodificationdate>
+      <lastmodificationdate>2019-10-08T10:01:46-04:00</lastmodificationdate>
       <xxhash action="original">3ab5a4166b9bde44</xxhash>
     </hash>
   </hashes>

@@ -30,7 +30,6 @@ def verify(ctx, **kwargs):
 
     # TODO: functions like "path_for_ascmhl_generation_number" can be global functions and can ask the context for the data needed.
     ascmhl_path = folder_manager.path_for_ascmhl_generation_number(ctx.generation_number)
-    logger.info(f'ascmhl_path {ascmhl_path}')
     if ctx.generation_number != 1 and ascmhl_path is None:
         logger.fatal(f'no matching mhl file for generation number {ctx.generation_number}')
 

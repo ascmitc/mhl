@@ -49,6 +49,9 @@ def verify(ctx, **kwargs):
 
         number_failures = creator.traverse_with_existing_hashes(reader.media_hash_list, ctx.hash_format)
         if number_failures > 0:
+            # TODO: Patrick: remove info log once _create_README script properly reads stderr output. 
+            #  this logs to both info and error because the scenarios are not properly setup to read stderr output.
+            logger.info(f'ERROR: verification failed for {number_failures} file(s)')
             logger.error(f'FAILED verification for {number_failures} file(s)')
         if not ctx.simulate:
             folder_manager.write_ascmhl(creator.xml_string())

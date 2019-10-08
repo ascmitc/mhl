@@ -44,27 +44,7 @@ $ brew install python3
 $ brew postinstall python3
 ```
 
-The xxhash tool is required:
-
-```shell
-$ brew install xxhash
-```
-
-### Python package requirements
-
-The command line tool uses three Python packages:
-
-* ``lxml`` for creating and reading XML,
-* ``click`` for parsing command line arguments, and
-* ``xattr`` for writing extended attributes
-
-Use the ``pip3`` command to install these packages:
-
-```shell
-$ pip3 install -r requirements.txt
-```
-
-If you run into version conflicts with already installed packages, consider using a [Virtual Environment](https://docs.python.org/3/tutorial/venv.html):
+Install dependencies using a [Virtual Environment](https://docs.python.org/3/tutorial/venv.html):
 
 ```shell
 $ python3 -m venv env

@@ -1,10 +1,7 @@
-/.DS_Store
-/Material/.DS_Store
-.DS_Store
+*.DS_Store
 /scenarios/Temp
-/scenarios/Template/.DS_Store
-/scenarios/Template/A002R2EC/.DS_Store
-/scenarios/Template/A002R2EC/Clips/.DS_Store
 /TODOs.md
 /venv
+/env
 /.idea
+/asc-mhl

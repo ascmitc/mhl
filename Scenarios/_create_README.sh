@@ -68,7 +68,7 @@ sed -i -e 's/'"$PATHPREFIX"'/[…]/g' README.md
 
 
 echo >> README.md
-echo "The created ASC-MHL files can be found in the \`\`asc-mhl\`\` folders amongst the scenario output files in the [Output/](Output/) folder." >> README.md
+echo "The ASC-MHL files can be found in the \`\`asc-mhl\`\` folders amongst the scenario output files in the [Output/](Output/) folder." >> README.md
 echo >> README.md
 
 rm -rf README.md-e

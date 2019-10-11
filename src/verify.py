@@ -26,15 +26,20 @@ def verify(ctx, **kwargs):
     ctx.load_args(**kwargs)
     logger.info(f'traversing {ctx.root}')
 
-    number_failures = 0
-
     folder_manager = HashListFolderManager(ctx.root)
     if ctx.generation_number is None:
         ctx.generation_number = folder_manager.earliest_ascmhl_generation_number()
 
     if not ctx.skip_chain_verification:
         chain = Chain(folder_manager.ascmhl_chainfile_path())
-        number_failures = number_failures + chain.verify_all()
+        number_ascmhl_failures = chain.verify_all()
+        if number_ascmhl_failures > 0:
+            # TODO: Patrick: remove info log once _create_README script properly reads stderr output.
+            #  this logs to both info and error because the scenarios are not properly setup to read stderr output.
+            logger.info(f'ERROR: verification failed for {number_ascmhl_failures} ascmhl file(s), didn\'t verify files')
+            logger.error(f'FAILED verification for {number_ascmhl_failures} ascmhl file(s), didn\'t verify files')
+            click.get_current_context().exit(110)
+
     else:
         logger.info('skipping chain verification')
 
@@ -57,7 +62,7 @@ def verify(ctx, **kwargs):
         reader = HashListReader(ascmhl_path, ctx.generation_number)
         reader.parse()
 
-        number_failures = number_failures + creator.traverse_with_existing_hashes(reader.media_hash_list, ctx.hash_format)
+        number_failures = creator.traverse_with_existing_hashes(reader.media_hash_list, ctx.hash_format)
         if number_failures > 0:
             # TODO: Patrick: remove info log once _create_README script properly reads stderr output. 
             #  this logs to both info and error because the scenarios are not properly setup to read stderr output.

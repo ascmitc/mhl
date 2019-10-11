@@ -45,6 +45,12 @@ echo "\`\`\`" >> README.md
 ./scenario_07.sh >> README.md
 echo "\`\`\`" >> README.md
 
+echo "## scenario_08.sh" >> README.md
+echo "\`\`\`" >> README.md
+./scenario_08.sh >> README.md
+echo "\`\`\`" >> README.md
+
+
 PATHPREFIX="Writing \""$(PWD)
 PATHPREFIX=$PATHPREFIX"/"
 PATHPREFIX=$(echo $PATHPREFIX | sed 's/\//\\\//g')

@@ -8,3 +8,4 @@
 ./scenario_05.sh
 ./scenario_06.sh
 ./scenario_07.sh
+./scenario_08.sh

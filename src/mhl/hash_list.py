@@ -81,7 +81,7 @@ class HashListReader:
 
     def parse(self):
         """parsing the MHL XML file and building the MediaHashList for the media_hash_list member variable"""
-        logger.info(f'verifying against hashes from {os.path.basename(self.filepath)}')
+        logger.info(f'verifying files against hashes from {os.path.basename(self.filepath)}')
 
         tree = etree.parse(self.filepath)
         hashlist_element = tree.getroot()
@@ -283,7 +283,7 @@ class HashListCreator:
             # asc-mhl folder?
             foldername = os.path.basename(os.path.normpath(root))
             if foldername in self.foldernameIgnores:
-                logger.info(f'    skipping folder \"{foldername}\"')
+                logger.verbose(f'skipping folder \"{foldername}\"')
                 continue
 
             # verify files

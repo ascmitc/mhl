@@ -2,6 +2,7 @@ from src.mhl import pass_context
 from src.util import logger
 from src.mhl.hash_folder import HashListFolderManager
 from src.mhl.hash_list import HashListCreator, HashListReader
+from src.mhl.chain import Chain, ChainGeneration
 import click
 import os
 import getpass
@@ -16,6 +17,7 @@ import getpass
 @click.option('--generation_number', '-g', default=1, help="Generation number to verify against")
 @click.option('--simulate', '-s', default=False, is_flag=True, help="Simulate only, don't write new ascmhl file")
 @click.option('--directory_hashes', '-d', default=False, is_flag=True, help="Disregard folder hashes and only compute file hashes")
+@click.option('--skipchainverification', '-sc', default=False, is_flag=True, help="Skip chain verification")
 @click.option('--write_xattr', '-wx', default=False, is_flag=True, help="Write hashes as xattr to file system")
 @click.option('--verbose', '-v', default=False, is_flag=True, help="Verbose output")
 @pass_context
@@ -24,9 +26,17 @@ def verify(ctx, **kwargs):
     ctx.load_args(**kwargs)
     logger.info(f'traversing {ctx.root}')
 
+    number_failures = 0
+
     folder_manager = HashListFolderManager(ctx.root)
     if ctx.generation_number is None:
         ctx.generation_number = folder_manager.earliest_ascmhl_generation_number()
+
+    if not ctx.skip_chain_verification:
+        chain = Chain(folder_manager.ascmhl_chainfile_path())
+        number_failures = number_failures + chain.verify_all()
+    else:
+        logger.info('skipping chain verification')
 
     # TODO: functions like "path_for_ascmhl_generation_number" can be global functions and can ask the context for the data needed.
     ascmhl_path = folder_manager.path_for_ascmhl_generation_number(ctx.generation_number)
@@ -47,7 +57,7 @@ def verify(ctx, **kwargs):
         reader = HashListReader(ascmhl_path, ctx.generation_number)
         reader.parse()
 
-        number_failures = creator.traverse_with_existing_hashes(reader.media_hash_list, ctx.hash_format)
+        number_failures = number_failures + creator.traverse_with_existing_hashes(reader.media_hash_list, ctx.hash_format)
         if number_failures > 0:
             # TODO: Patrick: remove info log once _create_README script properly reads stderr output. 
             #  this logs to both info and error because the scenarios are not properly setup to read stderr output.

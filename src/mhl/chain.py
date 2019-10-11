@@ -20,6 +20,11 @@ class Chain:
 		if os.path.isfile(self.filepath):
 			self._parse_file()
 
+	def ascmhl_folder_path(self):
+		"""absolute path of the enclosing asc-mhl folder"""
+		path = os.path.dirname(self.filepath)
+		return path
+
 	def _parse_file(self):
 		""" reads chain file and builds self.generations list
 		"""
@@ -32,6 +37,7 @@ class Chain:
 			if not line.startswith("#"):
 				generation = ChainGeneration.with_line_in_chainfile(line)
 				if generation is not None:
+					generation.chain = self
 					self.generations.append(generation)
 				else:
 					logger.error("cannot read line")
@@ -44,17 +50,18 @@ class Chain:
 		"""verifies asc-mhl files of all listed generations in chain file
 
 		result value:
-		True - everything ok
-		False - verification of one or more generations failed
+		0 - everything ok
+		>0 - number of verification failures
 		"""
 
-		result = True
+		logger.info(f'verifying chain {self.filepath}')
+		number_of_failures = 0
 		for generation in self.generations:
 			result = generation.verify_hash()
 			if result is False:
-				result = False
+				number_of_failures = number_of_failures + 1
 
-		return result
+		return number_of_failures
 
 	def append_new_generation_to_file(self, generation):
 		""" appends an externally created Generation object to the chain file
@@ -74,6 +81,7 @@ class Chain:
 
 		# …and store here
 		# FIXME: only if successfully written to file
+		generation.chain = self
 		self.generations.append(generation)
 
 	# FIXME: return success
@@ -86,9 +94,10 @@ class ChainGeneration:
 	generation_number -- integer, -1 means invalid
 	ascmhl_filename --
 	hashformat --
-	filehash --
+	hash_string --
 	signature_identifier -- opt, used to find public key
 	signature -- opt, base64 encoded
+	chain -- needed for absolute path resolution
 	"""
 
 	def __init__(self):
@@ -100,9 +109,10 @@ class ChainGeneration:
 		self.generation_number = -1  # integer, -1 means invalid
 		self.ascmhl_filename = None
 		self.hashformat = None
-		self.filehash = None
+		self.hash_string = None
 		self.signature_identifier = None  # opt, used to find public key
 		self.signature = None  # opt, base64 encoded
+		self.chain = None;
 
 	@classmethod
 	def with_line_in_chainfile(cls, line_string):
@@ -116,18 +126,20 @@ class ChainGeneration:
 			logger.error("cannot read line \"{line}\"")
 			return None
 
-		cls.generation_number = int(parts[0])
-		cls.ascmhl_filename = parts[1]
-		cls.hashformat = (parts[2])[:-1]
-		cls.filehash = parts[3]
+		generation = cls()
+
+		generation.generation_number = int(parts[0])
+		generation.ascmhl_filename = parts[1]
+		generation.hashformat = (parts[2])[:-1]
+		generation.hash_string = parts[3]
 
 		if parts.__len__() == 6:
-			cls.signature_identifier = parts[5]
-			cls.signature = parts[6]
+			generation.signature_identifier = parts[5]
+			generation.signature = parts[6]
 
 		# TODO sanity checks
 
-		return cls
+		return generation
 
 	@classmethod
 	def with_new_ascmhl_file(cls, generation_number, filepath, hashformat):
@@ -135,12 +147,15 @@ class ChainGeneration:
 		"""
 
 		# TODO check if ascmhl file exists
+
 		generation = cls()
 
 		generation.generation_number = generation_number
 		generation.ascmhl_filename = os.path.basename(os.path.normpath(filepath))
 		generation.hashformat = hashformat
-		generation.filehash = create_filehash(filepath, hashformat)
+
+		# TODO somehow pass in xxattr flag from context ?
+		generation.hash_string = create_filehash(filepath, hashformat)
 
 		return generation
 
@@ -153,7 +168,7 @@ class ChainGeneration:
 		generation = ChainGeneration.with_new_ascmhl_file(generation_number, filepath, hashformat)
 
 		# creating signature for Sidecar.txt
-		# $ openssl rsautl -sign -inkey mykey.pem -keyform PEM -in self.filehash > sig.dat
+		# $ openssl rsautl -sign -inkey mykey.pem -keyform PEM -in self.hash_string > sig.dat
 		# $ base64 -i sig.dat -o sig.base64.txt
 
 		generation.signature_identifier = signature_identifier
@@ -170,7 +185,7 @@ class ChainGeneration:
 		result_string = str(self.generation_number).zfill(4) + " " + \
 						self.ascmhl_filename + " " + \
 						self.hashformat + ": " + \
-						self.filehash
+						self.hash_string
 
 		if self.is_signed():
 			result_string = result_string + " " + self.signature_identifier + " " + self.signature
@@ -210,13 +225,27 @@ class ChainGeneration:
 		False - verification failed
 		"""
 
-		return False
+		ascmhl_file_path = os.path.join(self.chain.ascmhl_folder_path(), self.ascmhl_filename)
+
+		# TODO somehow pass in xxattr flag from context ?
+		current_filehash = create_filehash(ascmhl_file_path , self.hashformat)
+
+		if current_filehash != self.hash_string:
+			logger.error(f'hash mismatch for {self.ascmhl_filename} '
+						 f'old {self.hashformat}: {self.hash_string}, '
+						 f'new {self.hashformat}: {current_filehash}')
+			# logger.error(f'wrong hash \"{current_filehash}\" for {self.ascmhl_filename} (should be \"{self.hash_string}\")')
+			self.log_chain_generation(True, 'failed')
+			return False
+		else:
+			self.log_chain_generation(False, 'verified')
+			return True
 
 		# digest again in order to compare hashes
 		# $ openssl dgst -sha1 self.ascmhl_filename
 
 		# return result of hash comparison:
-		# return (digest_hash == self.filehash)
+		# return (digest_hash == self.hash_string)
 
 	def verify_signature(self, public_key_filepath):
 		"""verifies the signature against  available hash
@@ -237,3 +266,13 @@ class ChainGeneration:
 
 		# return result of hash comparison:
 		# return (digest_hash == decoded has from signature)
+
+	def log_chain_generation(self, failed, action):
+		indicator = " "
+		if failed:
+			indicator = "!"
+		logger.info("{0} {1}: {2} {3}: {4}".format(indicator,
+												   self.hashformat.rjust(6),
+												   self.hash_string.ljust(32),
+												   action.ljust(10),
+												   self.ascmhl_filename))

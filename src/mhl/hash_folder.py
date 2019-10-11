@@ -18,6 +18,7 @@ class HashListFolderManager:
     ascmhl_folder_name = "asc-mhl"
     ascmhl_file_extension = ".ascmhl"
     ascmhl_chainfile_name = "chain.txt"
+    hashformat_for_ascmhl_files = 'MD5'
 
     def __init__(self, folderpath):
         # TODO: we shouldn't be setting verbosity on these classes. reference context for value when needed
@@ -29,7 +30,12 @@ class HashListFolderManager:
 
     def ascmhl_folder_path(self):
         """absolute path of the asc-mhl folder"""
-        path = os.path.join(self.folderpath, HashListFolderManager.ascmhl_folder_name)
+        path = os.path.join(os.path.normpath(self.folderpath), HashListFolderManager.ascmhl_folder_name)
+        return path
+
+    def ascmhl_chainfile_path(self):
+        """absolute path of the chain file"""
+        path = os.path.join(self.ascmhl_folder_path(), HashListFolderManager.ascmhl_chainfile_name)
         return path
 
     def ascmhl_folder_exists(self):
@@ -154,10 +160,10 @@ class HashListFolderManager:
                 # FIXME: check if file could be created
                 file.write(xml_string.encode('utf8'))
 
-            chain = Chain(os.path.join(self.ascmhl_folder_path(), HashListFolderManager.ascmhl_chainfile_name))
+            chain = Chain(self.ascmhl_chainfile_path())
             generation = ChainGeneration.with_new_ascmhl_file(self.latest_ascmhl_generation_number(),
                                                               filepath,
-                                                              'MD5')
+                                                              HashListFolderManager.hashformat_for_ascmhl_files)
             chain.append_new_generation_to_file(generation)
 
             return filepath

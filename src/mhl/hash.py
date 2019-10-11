@@ -3,7 +3,7 @@ import xattr
 import tempfile
 import hashlib
 import xxhash
-
+import subprocess
 
 def create_filehash(filepath, hashformat, write_xattr = False):
     """creates a hash value for a file and returns the hex string
@@ -98,3 +98,63 @@ def c4(file_path):
 
     c4_string = "c4" + c4_string.ljust(c4id_length - 2, zero)
     return c4_string
+
+def sign_hash(hash_string, private_key_filepath):
+    """ create a base64-encoded signature for hash value
+
+    :param hash_string:             the has to sign    # FIXME: sign the hash data or the hash string?
+    :param private_key_filepath:    path to PEM file with private key
+    :return:
+    """
+
+    temp_hash_file = tempfile.NamedTemporaryFile('w+', delete=False)
+    temp_hash_file.write(hash_string)
+    temp_hash_file.close()
+
+    temp_sig_file = tempfile.NamedTemporaryFile(delete=False)
+
+    # $ openssl rsautl -sign -inkey mykey.pem -keyform PEM -in self.hash_string > sig.dat
+    # $ base64 -i sig.dat -o sig.base64.txt
+
+    result_string = subprocess.check_output(['openssl',
+                                             'rsautl', '-sign',
+                                             '-inkey', private_key_filepath,
+                                             '-keyform', 'PEM',
+                                             '-in', temp_hash_file.name,
+                                             '-out', temp_sig_file.name], encoding="utf-8")
+    # TODO check for errors
+
+    result_string = subprocess.check_output(['base64',
+                                             '-i', temp_sig_file.name], encoding="utf-8")
+    # TODO check for errors
+
+    return result_string
+
+
+def check_signature(signature_string, public_key_filepath):
+
+    temp_sig_file = tempfile.NamedTemporaryFile('w+', delete=False)
+    temp_sig_file.write(signature_string)
+    temp_sig_file.close()
+
+    temp_sig_data_file = tempfile.NamedTemporaryFile(delete=False)
+
+    # verifying (only shows the hash that was signed)
+    # $ base64 -D -i sig.base64.txt -o sig.dat
+    # $ openssl rsautl -verify -inkey pubkey.pem -pubin -keyform PEM -in sig.dat
+
+    result_string = subprocess.check_output(['base64', '-D',
+                                             '-i', temp_sig_file.name,
+                                             '-o', temp_sig_data_file.name], encoding="utf-8")
+    # TODO check for errors
+
+    result_string = subprocess.check_output(['openssl',
+                                             'rsautl', '-verify',
+                                             '-inkey', public_key_filepath,
+                                             '-pubin',
+                                             '-keyform', 'PEM',
+                                             '-in', temp_sig_data_file.name], encoding="utf-8")
+    # TODO check for errors
+
+    return result_string
+

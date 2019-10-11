@@ -18,6 +18,8 @@ import getpass
 @click.option('--simulate', '-s', default=False, is_flag=True, help="Simulate only, don't write new ascmhl file")
 @click.option('--directory_hashes', '-d', default=False, is_flag=True, help="Disregard folder hashes and only compute file hashes")
 @click.option('--skipchainverification', '-sc', default=False, is_flag=True, help="Skip chain verification")
+@click.option('--chainsignatureidentifier', '-csi', default=None, help="Identifier for signer")
+@click.option('--chainsignatureprivatekey', '-csp', default=None, help="Path to private key (PEM) file for signing")
 @click.option('--write_xattr', '-wx', default=False, is_flag=True, help="Write hashes as xattr to file system")
 @click.option('--verbose', '-v', default=False, is_flag=True, help="Verbose output")
 @pass_context
@@ -69,10 +71,21 @@ def verify(ctx, **kwargs):
             logger.info(f'ERROR: verification failed for {number_failures} file(s)')
             logger.error(f'FAILED verification for {number_failures} file(s)')
         if not ctx.simulate:
-            folder_manager.write_ascmhl(creator.xml_string())
+            if ctx.chain_signature_identifier is not None and \
+                ctx.chain_signature_private_key is not None:
+                folder_manager.write_ascmhl(creator.xml_string(),
+                                            ctx.chain_signature_identifier, ctx.chain_signature_private_key)
+            else:
+                folder_manager.write_ascmhl(creator.xml_string())
     else:
         creator.traverse(ctx.hash_format)
         if not ctx.simulate:
             if not os.path.exists(folder_manager.ascmhl_folder_path()):
                 os.makedirs(folder_manager.ascmhl_folder_path())
-            folder_manager.write_ascmhl(creator.xml_string())
+
+            if ctx.chain_signature_identifier is not None and \
+                ctx.chain_signature_private_key is not None:
+                folder_manager.write_ascmhl(creator.xml_string(),
+                                            ctx.chain_signature_identifier, ctx.chain_signature_private_key)
+            else:
+                folder_manager.write_ascmhl(creator.xml_string())

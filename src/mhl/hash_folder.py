@@ -151,7 +151,7 @@ class HashListFolderManager:
         if filename is not None:
             return self.path_for_ascmhl_file(filename)
 
-    def write_ascmhl(self, xml_string):
+    def write_ascmhl(self, xml_string, signature_identifier=None, private_key_filepath=None):
         """writes a given XML string into a new MHL file"""
         filepath = self.path_for_new_ascmhl_file()
         if filepath is not None:
@@ -161,9 +161,17 @@ class HashListFolderManager:
                 file.write(xml_string.encode('utf8'))
 
             chain = Chain(self.ascmhl_chainfile_path())
-            generation = ChainGeneration.with_new_ascmhl_file(self.latest_ascmhl_generation_number(),
-                                                              filepath,
-                                                              HashListFolderManager.hashformat_for_ascmhl_files)
+            if private_key_filepath is None:
+                generation = ChainGeneration.with_new_ascmhl_file(self.latest_ascmhl_generation_number(),
+                                                                  filepath,
+                                                                  HashListFolderManager.hashformat_for_ascmhl_files)
+            else:
+                generation = ChainGeneration.\
+                    with_new_ascmhl_file_and_signature(self.latest_ascmhl_generation_number(),
+                                                       filepath,
+                                                       HashListFolderManager.hashformat_for_ascmhl_files,
+                                                       signature_identifier, private_key_filepath)
+
             chain.append_new_generation_to_file(generation)
 
             return filepath

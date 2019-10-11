@@ -50,6 +50,10 @@ echo "\`\`\`" >> README.md
 ./scenario_08.sh >> README.md
 echo "\`\`\`" >> README.md
 
+echo "## scenario_09.sh" >> README.md
+echo "\`\`\`" >> README.md
+./scenario_09.sh >> README.md
+echo "\`\`\`" >> README.md
 
 PATHPREFIX="Writing \""$(PWD)
 PATHPREFIX=$PATHPREFIX"/"

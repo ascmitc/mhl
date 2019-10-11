@@ -1,5 +1,6 @@
 from src.util import logger
 from src.mhl.hash import create_filehash
+from src.mhl.hash import sign_hash, check_signature
 
 import os
 
@@ -34,13 +35,20 @@ class Chain:
 
 		for line in lines:
 			line = line.rstrip().lstrip()
-			if not line.startswith("#"):
+			if line != "" and not line.startswith("#"):
 				generation = ChainGeneration.with_line_in_chainfile(line)
 				if generation is not None:
 					generation.chain = self
 					self.generations.append(generation)
 				else:
 					logger.error("cannot read line")
+
+	def generation_with_generation_number(self, number):
+
+		for generation in self.generations:
+			if generation.generation_number == number:
+				return generation
+		return None
 
 	# TODO sanity checks
 	# - if generation numbers are sequential and complete
@@ -72,7 +80,13 @@ class Chain:
 		# - if generation number is sequential
 
 		# immediately write to file
-		logger.info(f'appending chain generation for \"{generation.ascmhl_filename}\" to chain file')
+		if generation.is_signed():
+			logger.info(
+				f'appending chain generation for \"{generation.ascmhl_filename}\" with signature for '
+				f'{generation.signature_identifier} to chain file')
+		else:
+			logger.info(
+				f'appending chain generation for \"{generation.ascmhl_filename}\" to chain file')
 
 		with open(self.filepath, 'a') as file:
 			file.write(generation.line_for_chainfile() + "\n")
@@ -134,8 +148,8 @@ class ChainGeneration:
 		generation.hash_string = parts[3]
 
 		if parts.__len__() == 6:
-			generation.signature_identifier = parts[5]
-			generation.signature = parts[6]
+			generation.signature_identifier = parts[4]
+			generation.signature = parts[5]
 
 		# TODO sanity checks
 
@@ -167,12 +181,10 @@ class ChainGeneration:
 
 		generation = ChainGeneration.with_new_ascmhl_file(generation_number, filepath, hashformat)
 
-		# creating signature for Sidecar.txt
-		# $ openssl rsautl -sign -inkey mykey.pem -keyform PEM -in self.hash_string > sig.dat
-		# $ base64 -i sig.dat -o sig.base64.txt
+		signature_string = sign_hash(generation.hash_string, private_key_filepath)
 
 		generation.signature_identifier = signature_identifier
-		# generation.signature = # TODO content of sig.base64.txt file
+		generation.signature = signature_string
 
 		return generation
 
@@ -234,7 +246,6 @@ class ChainGeneration:
 			logger.error(f'hash mismatch for {self.ascmhl_filename} '
 						 f'old {self.hashformat}: {self.hash_string}, '
 						 f'new {self.hashformat}: {current_filehash}')
-			# logger.error(f'wrong hash \"{current_filehash}\" for {self.ascmhl_filename} (should be \"{self.hash_string}\")')
 			self.log_chain_generation(True, 'failed')
 			return False
 		else:
@@ -258,21 +269,34 @@ class ChainGeneration:
 		False - verification of signature failed
 		"""
 
-		return False
-
-		# verifying (only shows the hash that was signed)
-		# $ base64 -D -i sig.base64.txt -o sig.dat
-		# $ openssl rsautl -verify -inkey pubkey.pem -pubin -keyform PEM -in sig.dat
+		signature_hash = check_signature(self.signature, public_key_filepath)
 
 		# return result of hash comparison:
-		# return (digest_hash == decoded has from signature)
+		if signature_hash != self.hash_string:
+			logger.error(f'signature verification failed for {self.ascmhl_filename} with '
+						 f'public key at {public_key_filepath}')
+			self.log_chain_generation(True, 'sign error')
+			return False
+		else:
+			self.log_chain_generation(False, 'verified')
+			return True
+
 
 	def log_chain_generation(self, failed, action):
 		indicator = " "
 		if failed:
 			indicator = "!"
-		logger.info("{0} {1}: {2} {3}: {4}".format(indicator,
-												   self.hashformat.rjust(6),
-												   self.hash_string.ljust(32),
-												   action.ljust(10),
-												   self.ascmhl_filename))
+
+		if self.is_signed():
+			logger.info("{0} {1}: {2} {3}: {4} (signed by {5})".format(indicator,
+																	   self.hashformat.rjust(6),
+																	   self.hash_string.ljust(32),
+																	   action.ljust(10),
+																	   self.ascmhl_filename,
+																	   self.signature_identifier))
+		else:
+			logger.info("{0} {1}: {2} {3}: {4}".format(indicator,
+													   self.hashformat.rjust(6),
+													   self.hash_string.ljust(32),
+													   action.ljust(10),
+													   self.ascmhl_filename))

@@ -10,6 +10,7 @@ def mhl_cli():
 
 mhl_cli.add_command(src.verify)
 mhl_cli.add_command(src.read)
+mhl_cli.add_command(src.checksignature)
 
 if __name__ == '__main__':
     mhl_cli()

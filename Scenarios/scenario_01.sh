@@ -12,7 +12,7 @@ mkdir -p ./Output/scenario_$SCENARIO
 cp -r ./Template/A002R2EC ./Output/scenario_$SCENARIO/
 
 echo
-echo "Step 1A (imaginary): The card is copied to a travel drive."
+echo "Step 1A: The card is copied to a travel drive."
 echo "Step 1B: The files are verified on the travel drive."
 
 echo

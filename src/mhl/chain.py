@@ -62,7 +62,9 @@ class Chain:
 		>0 - number of verification failures
 		"""
 
-		logger.info(f'verifying chain {self.filepath}')
+		if self.generations is not None and self.generations.__len__() > 0:
+			logger.info(f'verifying chain {self.filepath}')
+
 		number_of_failures = 0
 		for generation in self.generations:
 			result = generation.verify_hash()
@@ -275,10 +277,10 @@ class ChainGeneration:
 		if signature_hash != self.hash_string:
 			logger.error(f'signature verification failed for {self.ascmhl_filename} with '
 						 f'public key at {public_key_filepath}')
-			self.log_chain_generation(True, 'sign error')
+			self.log_chain_generation(True, 'sig failed')
 			return False
 		else:
-			self.log_chain_generation(False, 'verified')
+			self.log_chain_generation(False, 'sig ok')
 			return True
 
 

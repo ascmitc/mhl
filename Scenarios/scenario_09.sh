@@ -4,7 +4,7 @@ SCENARIO="09"
 
 echo
 echo "Scenario $SCENARIO:"
-echo "In this scenario a copy is made, and the MHL file is digitally signed."
+echo "In this scenario two copies are made, while the first MHL file is digitally signed."
 echo "The signature gets checked afterwards."
 
 rm -rf ./Output/scenario_$SCENARIO
@@ -22,10 +22,28 @@ COMMAND="asc-mhl.py verify -csi abc@example.com -csp $(pwd)/Template/Material/Sc
 echo "$ $COMMAND"
 ../$COMMAND
 
+echo
+echo "Step 2A: The card is copied again."
+echo "Step 2B: The files are verified on the travel drive."
 
 echo
-echo "Step 2: The signature is checked with a public key."
 
+COMMAND="asc-mhl.py verify $(pwd)/Output/scenario_$SCENARIO/A002R2EC"
+echo "$ $COMMAND"
+../$COMMAND
+
+
+echo
+echo "Step 3A: The chain is verified."
+
+echo
+
+COMMAND="asc-mhl.py verify -s $(pwd)/Output/scenario_$SCENARIO/A002R2EC"
+echo "$ $COMMAND"
+../$COMMAND
+
+echo 
+echo "Step 3B: The signature is checked with a public key."
 echo
 
 COMMAND="asc-mhl.py checksignature -g 1 -csp $(pwd)/Template/Material/Scenario09/abc-public-key.pem $(pwd)/Output/scenario_$SCENARIO/A002R2EC"

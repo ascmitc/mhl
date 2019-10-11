@@ -5,7 +5,7 @@ import hashlib
 import xxhash
 
 
-def create_filehash(filepath, hashformat, write_xattr):
+def create_filehash(filepath, hashformat, write_xattr = False):
     """creates a hash value for a file and returns the hex string
 
     arguments:

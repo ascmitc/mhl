@@ -1,5 +1,6 @@
 from src.util.datetime import datetime_now_filename_string
 from src.util import logger
+from src.mhl.chain import Chain, ChainGeneration
 import os
 import re
 import click
@@ -16,6 +17,7 @@ class HashListFolderManager:
 
     ascmhl_folder_name = "asc-mhl"
     ascmhl_file_extension = ".ascmhl"
+    ascmhl_chainfile_name = "chain.txt"
 
     def __init__(self, folderpath):
         # TODO: we shouldn't be setting verbosity on these classes. reference context for value when needed
@@ -151,6 +153,13 @@ class HashListFolderManager:
             with open(filepath, 'wb') as file:
                 # FIXME: check if file could be created
                 file.write(xml_string.encode('utf8'))
+
+            chain = Chain(os.path.join(self.ascmhl_folder_path(), HashListFolderManager.ascmhl_chainfile_name))
+            generation = ChainGeneration.with_new_ascmhl_file(self.latest_ascmhl_generation_number(),
+                                                              filepath,
+                                                              'MD5')
+            chain.append_new_generation_to_file(generation)
+
             return filepath
 
     def file_is_in_ascmhl_folder(self, filepath):

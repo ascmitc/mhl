@@ -280,6 +280,12 @@ class HashListCreator:
                 elif folder_manager.ascmhl_folder_exists_above_up_to_but_excluding(self.rootPath):
                     continue
 
+            # asc-mhl folder?
+            foldername = os.path.basename(os.path.normpath(root))
+            if foldername in self.foldernameIgnores:
+                logger.info(f'    skipping folder \"{foldername}\"')
+                continue
+
             # verify files
             file_media_list = MediaHashList(root)
             for filename in sorted(filenames):

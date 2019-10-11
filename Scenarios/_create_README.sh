@@ -84,8 +84,8 @@ rm -rf README.md-e
 # $ env/bin/activate
 # $ hive seal [....]/asc-mhl-tools/Scenarios/Output/scenario_06/A002R2EC
 # 
-# copy and paste output into Scenarios/Template/Material/Scenario 06/hive-output.rtf
-# move "Scenarios/Output/scenario_06/A002R2EC/hive" to "Scenarios/Template/Material/Scenario 06"
+# copy and paste output into Scenarios/Template/Material/Scenario06/hive-output.rtf
+# move "Scenarios/Output/scenario_06/A002R2EC/hive" to "Scenarios/Template/Material/Scenario06"
 
 
 

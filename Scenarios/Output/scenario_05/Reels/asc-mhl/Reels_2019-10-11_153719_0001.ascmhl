@@ -1,0 +1,26 @@
+<?xml version='1.0' encoding='utf-8'?>
+<hashlist version="2.0">
+  <creatorinfo>
+    <hostname>donkey.local</hostname>
+    <toolname>ascmhl-verify</toolname>
+    <toolversion>0.0.3</toolversion>
+    <creationdate>2019-10-11T15:37:19+02:00</creationdate>
+    <process>verify</process>
+  </creatorinfo>
+  <hashes rootPath="/Users/ptr/Development/MediaHashList/mhl/Scenarios/Output/scenario_05/Reels/">
+    <hash>
+      <filename>Summary.txt</filename>
+      <filesize>47</filesize>
+      <lastmodificationdate>2019-10-11T15:37:18+02:00</lastmodificationdate>
+      <xxhash action="original">b7219c53e6093233</xxhash>
+    </hash>
+  </hashes>
+  <ascmhlreference>
+    <path>A002R2EC/asc-mhl/A002R2EC_2019-10-11_153719_0002.ascmhl</path>
+    <xxhash>d92eccb1c3a31e1b</xxhash>
+  </ascmhlreference>
+  <ascmhlreference>
+    <path>A003R2EC/asc-mhl/A003R2EC_2019-10-11_153719_0002.ascmhl</path>
+    <xxhash>c6a2d0cfd1bf938c</xxhash>
+  </ascmhlreference>
+</hashlist>

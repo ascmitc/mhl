@@ -1,5 +1,6 @@
 from src.util.datetime import datetime_now_filename_string
 from src.util import logger
+from src.mhl.chain import Chain, ChainGeneration
 import os
 import re
 import click
@@ -16,6 +17,8 @@ class HashListFolderManager:
 
     ascmhl_folder_name = "asc-mhl"
     ascmhl_file_extension = ".ascmhl"
+    ascmhl_chainfile_name = "chain.txt"
+    hashformat_for_ascmhl_files = 'MD5'
 
     def __init__(self, folderpath):
         # TODO: we shouldn't be setting verbosity on these classes. reference context for value when needed
@@ -27,7 +30,12 @@ class HashListFolderManager:
 
     def ascmhl_folder_path(self):
         """absolute path of the asc-mhl folder"""
-        path = os.path.join(self.folderpath, HashListFolderManager.ascmhl_folder_name)
+        path = os.path.join(os.path.normpath(self.folderpath), HashListFolderManager.ascmhl_folder_name)
+        return path
+
+    def ascmhl_chainfile_path(self):
+        """absolute path of the chain file"""
+        path = os.path.join(self.ascmhl_folder_path(), HashListFolderManager.ascmhl_chainfile_name)
         return path
 
     def ascmhl_folder_exists(self):
@@ -143,7 +151,7 @@ class HashListFolderManager:
         if filename is not None:
             return self.path_for_ascmhl_file(filename)
 
-    def write_ascmhl(self, xml_string):
+    def write_ascmhl(self, xml_string, signature_identifier=None, private_key_filepath=None):
         """writes a given XML string into a new MHL file"""
         filepath = self.path_for_new_ascmhl_file()
         if filepath is not None:
@@ -151,6 +159,21 @@ class HashListFolderManager:
             with open(filepath, 'wb') as file:
                 # FIXME: check if file could be created
                 file.write(xml_string.encode('utf8'))
+
+            chain = Chain(self.ascmhl_chainfile_path())
+            if private_key_filepath is None:
+                generation = ChainGeneration.with_new_ascmhl_file(self.latest_ascmhl_generation_number(),
+                                                                  filepath,
+                                                                  HashListFolderManager.hashformat_for_ascmhl_files)
+            else:
+                generation = ChainGeneration.\
+                    with_new_ascmhl_file_and_signature(self.latest_ascmhl_generation_number(),
+                                                       filepath,
+                                                       HashListFolderManager.hashformat_for_ascmhl_files,
+                                                       signature_identifier, private_key_filepath)
+
+            chain.append_new_generation_to_file(generation)
+
             return filepath
 
     def file_is_in_ascmhl_folder(self, filepath):

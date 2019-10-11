@@ -4,14 +4,14 @@ SCENARIO="01A"
 
 echo
 echo "Scenario $SCENARIO:"
-echo "This is the most basic example, this time with adding additional descriptive metadata."
+echo "This is the most basic example, this time adding additional descriptive metadata."
 
 rm -rf ./Output/scenario_$SCENARIO
 mkdir -p ./Output/scenario_$SCENARIO
 cp -r ./Template/A002R2EC ./Output/scenario_$SCENARIO/
 
 echo
-echo "Step 1A (imaginary): The card is copied to a travel drive."
+echo "Step 1A: The card is copied to a travel drive."
 echo "Step 1B: The files are verified on the travel drive, and additional metadata is added to the"
 echo "         ASC-MHL file."
 

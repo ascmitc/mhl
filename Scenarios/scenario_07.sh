@@ -4,16 +4,18 @@ SCENARIO="07"
 
 echo
 echo "Scenario $SCENARIO:"
-echo "Writing extended attributes (xxattr) to file system (for files and folders) during verification."
+echo "Writing extended attributes (xxattr) for files and folders during verification."
+echo
 echo "Hashes stored in extended attributes might be required by systems used further down the"
-echo "workflow, so the hashes in the ASC-MHL file can be written to extended attributes on demand."
+echo "workflow, so the hashes from the ASC-MHL file can also be written to extended attributes"
+echo "on demand."
 
 rm -rf ./Output/scenario_$SCENARIO
 mkdir -p ./Output/scenario_$SCENARIO
 cp -r ./Template/A002R2EC ./Output/scenario_$SCENARIO/
 
 echo
-echo "Step 1A (imaginary): The card is copied to a travel drive."
+echo "Step 1A: The card is copied to a travel drive."
 echo "Step 1B: The files are verified on the travel drive."
 
 echo
@@ -40,7 +42,7 @@ echo "$ $COMMAND"
 eval ../$COMMAND
 
 echo
-echo "Step 4: Inspecting extended attributes again - hash attributes are set now."
+echo "Step 4: Inspecting extended attributes again - hash attributes are now set."
 
 echo
 

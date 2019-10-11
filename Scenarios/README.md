@@ -12,28 +12,32 @@ Step 1B: The files are verified on the travel drive.
 
 $ asc-mhl.py verify […]Output/scenario_01/A002R2EC
 traversing […]Output/scenario_01/A002R2EC
+verifying chain […]Output/scenario_01/A002R2EC/asc-mhl/chain.txt
   xxhash: 0ea03b369a463d9d                 original  : Clips/A002C006_141024_R2EC.mov
   xxhash: 7680e5f98f4a80fd                 original  : Clips/A002C007_141024_R2EC.mov
   xxhash: 3ab5a4166b9bde44                 original  : Sidecar.txt
-writing […]Output/scenario_01/A002R2EC/asc-mhl/A002R2EC_2019-10-08_100916_0001.ascmhl
+writing […]Output/scenario_01/A002R2EC/asc-mhl/A002R2EC_2019-10-11_153717_0001.ascmhl
+appending chain generation for "A002R2EC_2019-10-11_153717_0001.ascmhl" to chain file
 
 ```
 ## scenario_01A.sh
 ```
 
 Scenario 01A:
-This is the most basic example, this time with adding additional descriptive metadata.
+This is the most basic example, this time adding additional descriptive metadata.
 
-Step 1A (imaginary): The card is copied to a travel drive.
+Step 1A: The card is copied to a travel drive.
 Step 1B: The files are verified on the travel drive, and additional metadata is added to the
          ASC-MHL file.
 
 $ asc-mhl.py verify -n "John Doe" -u jodo -c "This is a verification in scenario 01A" […]Output/scenario_01A/A002R2EC
 traversing […]Output/scenario_01A/A002R2EC
+verifying chain […]Output/scenario_01A/A002R2EC/asc-mhl/chain.txt
   xxhash: 0ea03b369a463d9d                 original  : Clips/A002C006_141024_R2EC.mov
   xxhash: 7680e5f98f4a80fd                 original  : Clips/A002C007_141024_R2EC.mov
   xxhash: 3ab5a4166b9bde44                 original  : Sidecar.txt
-writing […]Output/scenario_01A/A002R2EC/asc-mhl/A002R2EC_2019-10-08_100916_0001.ascmhl
+writing […]Output/scenario_01A/A002R2EC/asc-mhl/A002R2EC_2019-10-11_153717_0001.ascmhl
+appending chain generation for "A002R2EC_2019-10-11_153717_0001.ascmhl" to chain file
 
 ```
 ## scenario_02.sh
@@ -48,22 +52,26 @@ Step 1B: The files are verified on the travel drive.
 
 $ asc-mhl.py verify […]Output/scenario_02/A002R2EC
 traversing […]Output/scenario_02/A002R2EC
+verifying chain […]Output/scenario_02/A002R2EC/asc-mhl/chain.txt
   xxhash: 0ea03b369a463d9d                 original  : Clips/A002C006_141024_R2EC.mov
   xxhash: 7680e5f98f4a80fd                 original  : Clips/A002C007_141024_R2EC.mov
   xxhash: 3ab5a4166b9bde44                 original  : Sidecar.txt
-writing […]Output/scenario_02/A002R2EC/asc-mhl/A002R2EC_2019-10-08_100916_0001.ascmhl
+writing […]Output/scenario_02/A002R2EC/asc-mhl/A002R2EC_2019-10-11_153717_0001.ascmhl
+appending chain generation for "A002R2EC_2019-10-11_153717_0001.ascmhl" to chain file
 
 Step 2A (imaginary): The card is copied from the travel drive to a file server.
 Step 2B: The files are verified on the file server.
 
 $ asc-mhl.py verify […]Output/scenario_02/A002R2EC
 traversing […]Output/scenario_02/A002R2EC
-verifying against hashes from A002R2EC_2019-10-08_100916_0001.ascmhl
+verifying chain […]Output/scenario_02/A002R2EC/asc-mhl/chain.txt
+     MD5: e1f52765f96aea501e7c3c529668192f verified  : A002R2EC_2019-10-11_153717_0001.ascmhl
+verifying files against hashes from A002R2EC_2019-10-11_153717_0001.ascmhl
   xxhash: 0ea03b369a463d9d                 verified  : Clips/A002C006_141024_R2EC.mov
   xxhash: 7680e5f98f4a80fd                 verified  : Clips/A002C007_141024_R2EC.mov
-  xxhash: 7ba11eaa8f3ceb60                 new       : asc-mhl/A002R2EC_2019-10-08_100916_0001.ascmhl
   xxhash: 3ab5a4166b9bde44                 verified  : Sidecar.txt
-writing […]Output/scenario_02/A002R2EC/asc-mhl/A002R2EC_2019-10-08_100916_0002.ascmhl
+writing […]Output/scenario_02/A002R2EC/asc-mhl/A002R2EC_2019-10-11_153718_0002.ascmhl
+appending chain generation for "A002R2EC_2019-10-11_153718_0002.ascmhl" to chain file
 
 ```
 ## scenario_03.sh
@@ -72,127 +80,130 @@ writing […]Output/scenario_02/A002R2EC/asc-mhl/A002R2EC_2019-10-08_100916_0002
 Scenario 03:
 In this scenario the first hashes are created using the xxhash format. Different hash formats
 might be required by systems used further down the workflow, so the second copy is verified
-against the existin xxhash hashes, and additional MD5 hashes can be created and stored during
+against the existing xxhash hashes, and additional MD5 hashes can be created and stored during
 that process on demand.
 
-Step 1A (imaginary): The card is copied to a travel drive.
+Step 1A: The card is copied to a travel drive.
 Step 1B: The files are verified on the travel drive by creating xxhash hashes.
 
 $ asc-mhl.py verify […]Output/scenario_03/A002R2EC
 traversing […]Output/scenario_03/A002R2EC
+verifying chain […]Output/scenario_03/A002R2EC/asc-mhl/chain.txt
   xxhash: 0ea03b369a463d9d                 original  : Clips/A002C006_141024_R2EC.mov
   xxhash: 7680e5f98f4a80fd                 original  : Clips/A002C007_141024_R2EC.mov
   xxhash: 3ab5a4166b9bde44                 original  : Sidecar.txt
-writing […]Output/scenario_03/A002R2EC/asc-mhl/A002R2EC_2019-10-08_100916_0001.ascmhl
+writing […]Output/scenario_03/A002R2EC/asc-mhl/A002R2EC_2019-10-11_153718_0001.ascmhl
+appending chain generation for "A002R2EC_2019-10-11_153718_0001.ascmhl" to chain file
 
-Step 2A (imaginary): The card is copied from the travel drive to a file server.
+Step 2A: The card is copied from the travel drive to a file server.
 Step 2B: The files are verified on the file server, and additional ("secondary") MD5 hashes
          are created.
 
 $ asc-mhl.py verify -h "MD5" […]Output/scenario_03/A002R2EC
 traversing […]Output/scenario_03/A002R2EC
-verifying against hashes from A002R2EC_2019-10-08_100916_0001.ascmhl
+verifying chain […]Output/scenario_03/A002R2EC/asc-mhl/chain.txt
+     MD5: 2e18a569e03ef38dd19d70507d8fe4e4 verified  : A002R2EC_2019-10-11_153718_0001.ascmhl
+verifying files against hashes from A002R2EC_2019-10-11_153718_0001.ascmhl
   xxhash: 0ea03b369a463d9d                 verified  : Clips/A002C006_141024_R2EC.mov
      MD5: f5ac8127b3b6b85cdc13f237c6005d80 new       : Clips/A002C006_141024_R2EC.mov
   xxhash: 7680e5f98f4a80fd                 verified  : Clips/A002C007_141024_R2EC.mov
      MD5: 614dd0e977becb4c6f7fa99e64549b12 new       : Clips/A002C007_141024_R2EC.mov
-     MD5: cb143e7ac8fb94d95d15682a66ed7205 new       : asc-mhl/A002R2EC_2019-10-08_100916_0001.ascmhl
   xxhash: 3ab5a4166b9bde44                 verified  : Sidecar.txt
      MD5: 6425c5a180ca0f420dd2b25be4536a91 new       : Sidecar.txt
-writing […]Output/scenario_03/A002R2EC/asc-mhl/A002R2EC_2019-10-08_100916_0002.ascmhl
+writing […]Output/scenario_03/A002R2EC/asc-mhl/A002R2EC_2019-10-11_153718_0002.ascmhl
+appending chain generation for "A002R2EC_2019-10-11_153718_0002.ascmhl" to chain file
 
 ```
 ## scenario_04.sh
 ```
 
 Scenario 04:
-Copying a folder to a travel drive and from there to a file server with hash mismatch in one
-file.
+Copying a folder to a travel drive and from there to a file server with a hash mismatch in
+one file.
 
-Step 1A (imaginary): The card is copied to a travel drive.
+Step 1A: The card is copied to a travel drive.
 Step 1B: The files are verified on the travel drive.
 
 $ asc-mhl.py verify […]Output/scenario_04/A002R2EC
 traversing […]Output/scenario_04/A002R2EC
+verifying chain […]Output/scenario_04/A002R2EC/asc-mhl/chain.txt
   xxhash: 0ea03b369a463d9d                 original  : Clips/A002C006_141024_R2EC.mov
   xxhash: 7680e5f98f4a80fd                 original  : Clips/A002C007_141024_R2EC.mov
   xxhash: 3ab5a4166b9bde44                 original  : Sidecar.txt
-writing […]Output/scenario_04/A002R2EC/asc-mhl/A002R2EC_2019-10-08_100916_0001.ascmhl
+writing […]Output/scenario_04/A002R2EC/asc-mhl/A002R2EC_2019-10-11_153718_0001.ascmhl
+appending chain generation for "A002R2EC_2019-10-11_153718_0001.ascmhl" to chain file
 
-Step 3A (imaginary): The card is copied from the travel drive to a file server. During the copy
+Step 2A: The card is copied from the travel drive to a file server. During the copy
          the file "Sidecar.txt" becomes corrupt (altered).
-Step 3B: The files are verified on the file server.
+Step 2B: The files are verified on the file server.
 
 $ asc-mhl.py verify […]Output/scenario_04/A002R2EC
 traversing […]Output/scenario_04/A002R2EC
-verifying against hashes from A002R2EC_2019-10-08_100916_0001.ascmhl
+verifying chain […]Output/scenario_04/A002R2EC/asc-mhl/chain.txt
+     MD5: ae18bc4fb35725876f8f2a1f61de6e20 verified  : A002R2EC_2019-10-11_153718_0001.ascmhl
+verifying files against hashes from A002R2EC_2019-10-11_153718_0001.ascmhl
   xxhash: 0ea03b369a463d9d                 verified  : Clips/A002C006_141024_R2EC.mov
   xxhash: 7680e5f98f4a80fd                 verified  : Clips/A002C007_141024_R2EC.mov
-  xxhash: cc2e4a45324ebc0b                 new       : asc-mhl/A002R2EC_2019-10-08_100916_0001.ascmhl
 ! xxhash: d60ed728dc0b8d2c                 failed    : Sidecar.txt
 ERROR: verification failed for 1 file(s)
-writing […]Output/scenario_04/A002R2EC/asc-mhl/A002R2EC_2019-10-08_100916_0002.ascmhl
-
-Step 4: The files are verified again, against the hashes from ASC-MHL file with generation 02.
-
-$ asc-mhl.py verify -s -g 2 […]Output/scenario_04/A002R2EC
-traversing […]Output/scenario_04/A002R2EC
-verifying against hashes from A002R2EC_2019-10-08_100916_0002.ascmhl
-  xxhash: 0ea03b369a463d9d                 verified  : Clips/A002C006_141024_R2EC.mov
-  xxhash: 7680e5f98f4a80fd                 verified  : Clips/A002C007_141024_R2EC.mov
-  xxhash: cc2e4a45324ebc0b                 verified  : asc-mhl/A002R2EC_2019-10-08_100916_0001.ascmhl
-  xxhash: b61a5e8efc53f9bb                 new       : asc-mhl/A002R2EC_2019-10-08_100916_0002.ascmhl
-  xxhash: d60ed728dc0b8d2c                 verified  : Sidecar.txt
+writing […]Output/scenario_04/A002R2EC/asc-mhl/A002R2EC_2019-10-11_153718_0002.ascmhl
+appending chain generation for "A002R2EC_2019-10-11_153718_0002.ascmhl" to chain file
 
 ```
 ## scenario_05.sh
 ```
 
 Scenario 05:
-Copying two single reels to a "Reels" folder on a travel drive, and the entire "Reels" 
+Copying two camera mags to a `Reels` folder on a travel drive, and the entire `Reels` folder 
 folder to a server.
 
-Step 1A (imaginary): The card A002 is copied to a travel drive.
+Step 1A: The card A002 is copied to a travel drive.
 Step 1B: The files are verified on the travel drive.
 
 $ asc-mhl.py verify […]Output/scenario_05/Reels/A002R2EC
 traversing […]Output/scenario_05/Reels/A002R2EC
+verifying chain […]Output/scenario_05/Reels/A002R2EC/asc-mhl/chain.txt
   xxhash: 0ea03b369a463d9d                 original  : Clips/A002C006_141024_R2EC.mov
   xxhash: 7680e5f98f4a80fd                 original  : Clips/A002C007_141024_R2EC.mov
   xxhash: 3ab5a4166b9bde44                 original  : Sidecar.txt
-writing […]Output/scenario_05/Reels/A002R2EC/asc-mhl/A002R2EC_2019-10-08_100916_0001.ascmhl
+writing […]Output/scenario_05/Reels/A002R2EC/asc-mhl/A002R2EC_2019-10-11_153718_0001.ascmhl
+appending chain generation for "A002R2EC_2019-10-11_153718_0001.ascmhl" to chain file
 
-Step 2A (imaginary): The card A003 is copied to a travel drive.
+Step 2A: The card A003 is copied to a travel drive.
 Step 2B: The files are verified on the travel drive.
 
 $ asc-mhl.py verify […]Output/scenario_05/Reels/A003R2EC
 traversing […]Output/scenario_05/Reels/A003R2EC
+verifying chain […]Output/scenario_05/Reels/A003R2EC/asc-mhl/chain.txt
   xxhash: 52392f79a36d6571                 original  : Clips/A003C011_141024_R2EC.mov
   xxhash: 104a1844733bba51                 original  : Clips/A003C012_141024_R2EC.mov
   xxhash: e5dda75a353d8b34                 original  : Sidecar.txt
-writing […]Output/scenario_05/Reels/A003R2EC/asc-mhl/A003R2EC_2019-10-08_100917_0001.ascmhl
+writing […]Output/scenario_05/Reels/A003R2EC/asc-mhl/A003R2EC_2019-10-11_153718_0001.ascmhl
+appending chain generation for "A003R2EC_2019-10-11_153718_0001.ascmhl" to chain file
 
-Step 3A (imaginary): The entire folder "Reels" is copied from the travel drive to a file
+Step 3A: The entire folder `Reels` is copied from the travel drive to a file
          server.
-Step 3B: A summary file "Summary.txt" is added to the "Reels" folder.
-Step 3C: The "Reels" folder is verified on the file server.
+Step 3B: An arbitrary file `Summary.txt` is added to the `Reels` folder.
+Step 3C: The `Reels` folder is verified on the file server.
 
 $ asc-mhl.py verify […]Output/scenario_05/Reels
 traversing […]Output/scenario_05/Reels
-verifying against hashes from A002R2EC_2019-10-08_100916_0001.ascmhl
+verifying chain […]Output/scenario_05/Reels/asc-mhl/chain.txt
+verifying files against hashes from A002R2EC_2019-10-11_153718_0001.ascmhl
   xxhash: 0ea03b369a463d9d                 verified  : Clips/A002C006_141024_R2EC.mov
   xxhash: 7680e5f98f4a80fd                 verified  : Clips/A002C007_141024_R2EC.mov
-  xxhash: 89e526e0356a6431                 new       : asc-mhl/A002R2EC_2019-10-08_100916_0001.ascmhl
   xxhash: 3ab5a4166b9bde44                 verified  : Sidecar.txt
-writing […]Output/scenario_05/Reels/A002R2EC/asc-mhl/A002R2EC_2019-10-08_100917_0002.ascmhl
-verifying against hashes from A003R2EC_2019-10-08_100917_0001.ascmhl
+writing […]Output/scenario_05/Reels/A002R2EC/asc-mhl/A002R2EC_2019-10-11_153719_0002.ascmhl
+appending chain generation for "A002R2EC_2019-10-11_153719_0002.ascmhl" to chain file
+verifying files against hashes from A003R2EC_2019-10-11_153718_0001.ascmhl
   xxhash: 52392f79a36d6571                 verified  : Clips/A003C011_141024_R2EC.mov
   xxhash: 104a1844733bba51                 verified  : Clips/A003C012_141024_R2EC.mov
-  xxhash: bf01abbc04c954ff                 new       : asc-mhl/A003R2EC_2019-10-08_100917_0001.ascmhl
   xxhash: e5dda75a353d8b34                 verified  : Sidecar.txt
-writing […]Output/scenario_05/Reels/A003R2EC/asc-mhl/A003R2EC_2019-10-08_100917_0002.ascmhl
+writing […]Output/scenario_05/Reels/A003R2EC/asc-mhl/A003R2EC_2019-10-11_153719_0002.ascmhl
+appending chain generation for "A003R2EC_2019-10-11_153719_0002.ascmhl" to chain file
   xxhash: b7219c53e6093233                 original  : Summary.txt
-writing […]Output/scenario_05/Reels/asc-mhl/Reels_2019-10-08_100917_0001.ascmhl
+writing […]Output/scenario_05/Reels/asc-mhl/Reels_2019-10-11_153719_0001.ascmhl
+appending chain generation for "Reels_2019-10-11_153719_0001.ascmhl" to chain file
 
 ```
 ## scenario_06.sh
@@ -208,10 +219,12 @@ Step 1B: The files are verified on the travel drive.
 
 $ asc-mhl.py verify […]Output/scenario_06/A002R2EC
 traversing […]Output/scenario_06/A002R2EC
+verifying chain […]Output/scenario_06/A002R2EC/asc-mhl/chain.txt
   xxhash: 0ea03b369a463d9d                 original  : Clips/A002C006_141024_R2EC.mov
   xxhash: 7680e5f98f4a80fd                 original  : Clips/A002C007_141024_R2EC.mov
   xxhash: 3ab5a4166b9bde44                 original  : Sidecar.txt
-writing […]Output/scenario_06/A002R2EC/asc-mhl/A002R2EC_2019-10-08_100917_0001.ascmhl
+writing […]Output/scenario_06/A002R2EC/asc-mhl/A002R2EC_2019-10-11_153719_0001.ascmhl
+appending chain generation for "A002R2EC_2019-10-11_153719_0001.ascmhl" to chain file
 
 Step 2: The files are verified again, and folder hashes are calculated and displayed (folder
         hashes are created by concatenating the hashes of the contents of a directory and
@@ -219,33 +232,37 @@ Step 2: The files are verified again, and folder hashes are calculated and displ
 
 $ asc-mhl.py verify -s -d […]Output/scenario_06/A002R2EC
 traversing […]Output/scenario_06/A002R2EC
-verifying against hashes from A002R2EC_2019-10-08_100917_0001.ascmhl
+verifying chain […]Output/scenario_06/A002R2EC/asc-mhl/chain.txt
+     MD5: 7d8e6aafa691faedb72942c07b038669 verified  : A002R2EC_2019-10-11_153719_0001.ascmhl
+verifying files against hashes from A002R2EC_2019-10-11_153719_0001.ascmhl
   xxhash: 0ea03b369a463d9d                 verified  : Clips/A002C006_141024_R2EC.mov
   xxhash: 7680e5f98f4a80fd                 verified  : Clips/A002C007_141024_R2EC.mov
 d xxhash: 4c226b42e27d7af3                 directory : Clips
-  xxhash: feb0c07ee5973a0c                 new       : asc-mhl/A002R2EC_2019-10-08_100917_0001.ascmhl
-d xxhash: 69219c6de609de2e                 directory : asc-mhl
   xxhash: 3ab5a4166b9bde44                 verified  : Sidecar.txt
-d xxhash: 4298e88816cfc68d                 directory : .
+d xxhash: de755f773988d0cf                 directory : .
 
 ```
 ## scenario_07.sh
 ```
 
 Scenario 07:
-Writing extended attributes (xxattr) to file system (for files and folders) during verification.
-Hashes stored in extended attributes might be required by systems used further down the
-workflow, so the hashes in the ASC-MHL file can be written to extended attributes on demand.
+Writing extended attributes (xxattr) for files and folders during verification.
 
-Step 1A (imaginary): The card is copied to a travel drive.
+Hashes stored in extended attributes might be required by systems used further down the
+workflow, so the hashes from the ASC-MHL file can also be written to extended attributes
+on demand.
+
+Step 1A: The card is copied to a travel drive.
 Step 1B: The files are verified on the travel drive.
 
 $ asc-mhl.py verify […]Output/scenario_07/A002R2EC
 traversing […]Output/scenario_07/A002R2EC
+verifying chain […]Output/scenario_07/A002R2EC/asc-mhl/chain.txt
   xxhash: 0ea03b369a463d9d                 original  : Clips/A002C006_141024_R2EC.mov
   xxhash: 7680e5f98f4a80fd                 original  : Clips/A002C007_141024_R2EC.mov
   xxhash: 3ab5a4166b9bde44                 original  : Sidecar.txt
-writing […]Output/scenario_07/A002R2EC/asc-mhl/A002R2EC_2019-10-08_100917_0001.ascmhl
+writing […]Output/scenario_07/A002R2EC/asc-mhl/A002R2EC_2019-10-11_153719_0001.ascmhl
+appending chain generation for "A002R2EC_2019-10-11_153719_0001.ascmhl" to chain file
 
 Step 2: Inspecting extended attributes - no hash attributes are set.
 
@@ -257,21 +274,78 @@ Step 3: The files are verified again, and hashes are written into the extended a
 
 $ asc-mhl.py verify -s -wx […]Output/scenario_07/A002R2EC
 traversing […]Output/scenario_07/A002R2EC
-verifying against hashes from A002R2EC_2019-10-08_100917_0001.ascmhl
+verifying chain […]Output/scenario_07/A002R2EC/asc-mhl/chain.txt
+     MD5: 1298e77f8f630c2bafbc81f2d5506689 verified  : A002R2EC_2019-10-11_153719_0001.ascmhl
+verifying files against hashes from A002R2EC_2019-10-11_153719_0001.ascmhl
   xxhash: 0ea03b369a463d9d                 verified  : Clips/A002C006_141024_R2EC.mov
   xxhash: 7680e5f98f4a80fd                 verified  : Clips/A002C007_141024_R2EC.mov
-  xxhash: 8d6f89c8f0c8572b                 new       : asc-mhl/A002R2EC_2019-10-08_100917_0001.ascmhl
   xxhash: 3ab5a4166b9bde44                 verified  : Sidecar.txt
 
-Step 4: Inspecting extended attributes again - hash attributes are set now.
+Step 4: Inspecting extended attributes again - hash attributes are now set.
 
 $ /usr/bin/xattr -r -l […]Output/scenario_07/A002R2EC | grep theasc.asc-mhl.
 […]Output/scenario_07/A002R2EC/Clips/A002C006_141024_R2EC.mov: com.theasc.asc-mhl.xxhash: 0ea03b369a463d9d
 […]Output/scenario_07/A002R2EC/Clips/A002C007_141024_R2EC.mov: com.theasc.asc-mhl.xxhash: 7680e5f98f4a80fd
 […]Output/scenario_07/A002R2EC/Sidecar.txt: com.theasc.asc-mhl.xxhash: 3ab5a4166b9bde44
-[…]Output/scenario_07/A002R2EC/asc-mhl/A002R2EC_2019-10-08_100917_0001.ascmhl: com.theasc.asc-mhl.xxhash: 8d6f89c8f0c8572b
+
+```
+## scenario_08.sh
+```
+
+Scenario 08:
+In this scenario a copy is made, and then a copy of the copy. During the second copy the ASC-MHL file
+becomes corrupt (altered).
+
+Step 1A: The card is copied to a travel drive.
+Step 1B: The files are verified on the travel drive.
+
+$ asc-mhl.py verify […]Output/scenario_08/A002R2EC
+traversing […]Output/scenario_08/A002R2EC
+verifying chain […]Output/scenario_08/A002R2EC/asc-mhl/chain.txt
+  xxhash: 0ea03b369a463d9d                 original  : Clips/A002C006_141024_R2EC.mov
+  xxhash: 7680e5f98f4a80fd                 original  : Clips/A002C007_141024_R2EC.mov
+  xxhash: 3ab5a4166b9bde44                 original  : Sidecar.txt
+writing […]Output/scenario_08/A002R2EC/asc-mhl/A002R2EC_2019-10-11_153720_0001.ascmhl
+appending chain generation for "A002R2EC_2019-10-11_153720_0001.ascmhl" to chain file
+
+Step 2A: The card is copied from the travel drive to a file server. During the copy
+         the ASC-MHL with generation 0001 becomes corrupt (altered).
+Step 2B: The files are verified on the file server.
+
+$ asc-mhl.py verify […]Output/scenario_08/A002R2EC
+traversing […]Output/scenario_08/A002R2EC
+verifying chain […]Output/scenario_08/A002R2EC/asc-mhl/chain.txt
+!    MD5: 931df3a1edd06727b90d25bf089f952a failed    : A002R2EC_2019-10-11_153720_0001.ascmhl
+ERROR: verification failed for 1 ascmhl file(s), didn't verify files
+
+```
+## scenario_09.sh
+```
+
+Scenario 09:
+In this scenario a copy is made, and the MHL file is digitally signed.
+The signature gets checked afterwards.
+
+Step 1A: The card is copied to a travel drive.
+Step 1B: The files are verified on the travel drive, the ASCMHL file gets signed with
+         a private key.
+
+$ asc-mhl.py verify -csi abc@example.com -csp […]Template/Material/Scenario09/abc-private-key.pem […]Output/scenario_09/A002R2EC
+traversing […]Output/scenario_09/A002R2EC
+verifying chain […]Output/scenario_09/A002R2EC/asc-mhl/chain.txt
+  xxhash: 0ea03b369a463d9d                 original  : Clips/A002C006_141024_R2EC.mov
+  xxhash: 7680e5f98f4a80fd                 original  : Clips/A002C007_141024_R2EC.mov
+  xxhash: 3ab5a4166b9bde44                 original  : Sidecar.txt
+writing […]Output/scenario_09/A002R2EC/asc-mhl/A002R2EC_2019-10-11_153720_0001.ascmhl
+appending chain generation for "A002R2EC_2019-10-11_153720_0001.ascmhl" with signature for abc@example.com to chain file
+
+Step 2: The signature is checked with a public key.
+
+$ asc-mhl.py checksignature -g 1 -csp […]Template/Material/Scenario09/abc-public-key.pem […]Output/scenario_09/A002R2EC
+checking signature for generation 1
+     MD5: 49bea3ea174615c056d396799b7a30aa verified  : A002R2EC_2019-10-11_153720_0001.ascmhl (signed by abc@example.com)
 
 ```
 
-The created ASC-MHL files can be found in the ``asc-mhl`` folders amongst the scenario output files in the [Output/](Output/) folder.
+The ASC-MHL files can be found in the ``asc-mhl`` folders amongst the scenario output files in the [Output/](Output/) folder.
 

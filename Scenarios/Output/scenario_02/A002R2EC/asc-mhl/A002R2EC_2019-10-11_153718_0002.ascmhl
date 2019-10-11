@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='utf-8'?>
+<hashlist version="2.0">
+  <creatorinfo>
+    <hostname>donkey.local</hostname>
+    <toolname>ascmhl-verify</toolname>
+    <toolversion>0.0.3</toolversion>
+    <creationdate>2019-10-11T15:37:18+02:00</creationdate>
+    <process>verify</process>
+  </creatorinfo>
+  <genreference>
+    <path>asc-mhl/A002R2EC_2019-10-11_153717_0001.ascmhl</path>
+    <xxhash>4511dbbbfbf7b8bf</xxhash>
+  </genreference>
+  <hashes rootPath="/Users/ptr/Development/MediaHashList/mhl/Scenarios/Output/scenario_02/A002R2EC/">
+    <hash>
+      <filename>Clips/A002C006_141024_R2EC.mov</filename>
+      <filesize>5</filesize>
+      <lastmodificationdate>2019-10-11T15:37:17+02:00</lastmodificationdate>
+      <xxhash action="verified">0ea03b369a463d9d</xxhash>
+    </hash>
+    <hash>
+      <filename>Clips/A002C007_141024_R2EC.mov</filename>
+      <filesize>4</filesize>
+      <lastmodificationdate>2019-10-11T15:37:17+02:00</lastmodificationdate>
+      <xxhash action="verified">7680e5f98f4a80fd</xxhash>
+    </hash>
+    <hash>
+      <filename>Sidecar.txt</filename>
+      <filesize>58</filesize>
+      <lastmodificationdate>2019-10-11T15:37:17+02:00</lastmodificationdate>
+      <xxhash action="verified">3ab5a4166b9bde44</xxhash>
+    </hash>
+  </hashes>
+</hashlist>

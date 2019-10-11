@@ -7,18 +7,25 @@
 > 
 > In case you are looking for the current, original specification of MHL, please take a look at [https://mediahashlist.org](https://mediahashlist.org).
 
-Ensuring file integrity when backing up media files in movie productions is of utmost importance. The ASC-MHL document format is used to create a chain of custody by tracking each and every copy made between the media’s initial download on set, all the way through to final archival.
+Ensuring file integrity when backing up and verifying files during production and post production is of utmost importance. The ASC-MHL is used to create a chain of custody by tracking each and every copy made between the media’s initial download on set, all the way through to final archival.
 
-The ASC-MHL format uses common checksum methods for hashing files and folders, and documents these hashes together with essential file metadata in an XML format that is human readable.
+The ASC-MHL uses common checksum methods for hashing files and folders, but standardizes what information is gathered, where the checksum is placed, and documents these hashes together with essential file metadata in an XML format that is human readable.
 
 ## Features
 
 The ASC-MHL sample implementation can
 
-* create ASC-MHL XML files based on given file hierarchies in the file system,
-* verify hashes against previous generations of ASC-MHL files, and
-* export hashes for use in other systems.
+* create ASC-MHL XML files based on given file hierarchies in a file system
+* verify hashes against previous generations of ASC-MHL files
+* export hashes for use in other systems
 
+ASC-MHL supports the hash formats
+
+* xxHash
+* MD5
+* SHA1
+* SHA256
+* C4
 
 ## Repository content
 

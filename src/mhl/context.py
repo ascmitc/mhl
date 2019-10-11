@@ -13,6 +13,9 @@ class Context(object):
         self.hash_format = None
         self.generation_number = None
         self.simulate = None
+        self.skip_chain_verification = None
+        self.chain_signature_identifier = None
+        self.chain_signature_private_key = None
         self.directory_hashes = None
         self.write_xattr = None
         self.verbose = None
@@ -30,6 +33,9 @@ class Context(object):
         self.hash_format = kwargs.get('hash_format')
         self.generation_number = kwargs.get('generation_number')
         self.simulate = kwargs.get('simulate')
+        self.skip_chain_verification = kwargs.get('skipchainverification')
+        self.chain_signature_identifier = kwargs.get('chainsignatureidentifier')
+        self.chain_signature_private_key = kwargs.get('chainsignatureprivatekey')
         self.directory_hashes = kwargs.get('directory_hashes')
         self.write_xattr = kwargs.get('write_xattr')
         self.verbose = kwargs.get('verbose')

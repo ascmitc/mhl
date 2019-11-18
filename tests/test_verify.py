@@ -6,126 +6,55 @@ import os
 from contextlib import contextmanager
 
 # TODO: make the cli output testable without regex(i.e. don't include dynamic data such as dates in output like filenames)
+# TODO: consider a table-test driven style
 
 
-class IsolatedInvoker(object):
-    def __init__(self):
-        self.runner = CliRunner()
-        self.root = None
-        self.result = None
-
-    def verify(self):
-        self.result = self.runner.invoke(mhl_cli, ['verify', self.root])
-        return self.result
-
-
-class A002R2EC(IsolatedInvoker):
+@contextmanager
+def A002R2EC():
     """
-    A002R2EC creates a bit equivalent match to the Scenarios/Output/A002R2EC Template structure inside of a temporary isolated fs directory.
+    function used to recreate the A002R2EC template structure from scratch in a new temp dir each test invocation
+    :return:
     """
-    def __init__(self):
-        super().__init__()
-        self.root = "A002R2EC"
-
-    @contextmanager
-    def __enter__(self):
-        with self.runner.isolated_filesystem() as iso_fs:
-            os.mkdir(self.root)
-            os.mkdir(f'{self.root}/Clips')
-            with open('Sidecar.txt', 'w') as f:
+    root = 'A002R2EC'
+    runner = CliRunner()
+    try:
+        with runner.isolated_filesystem():
+            os.mkdir(root)
+            os.mkdir(f'{root}/Clips')
+            with open(f'{root}/Sidecar.txt', 'w') as f:
                 f.write('BLOREM ipsum dolor sit amet, consetetur sadipscing elitr.\n')
-            with open('A002R2EC/Clips/A002C006_141024_R2EC.mov', 'w') as f:
+            with open(f'{root}/Clips/A002C006_141024_R2EC.mov', 'w') as f:
                 f.write('abcd\n')
-            with open('A002R2EC/Clips/A002C007_141024_R2EC.mov', 'w') as f:
+            with open(f'{root}/Clips/A002C007_141024_R2EC.mov', 'w') as f:
                 f.write('def\n')
-            print('yielding')
-            yield iso_fs
-            print('exiting yield')
-
-    def __exit__(self):
-        pass
+            yield runner
+    finally:
+        print('exiting context manager')
 
 
-def test_verification_succeeds():
+def test_verify_succeeds_on_no_change():
     """
     tests that verification succeeds if we verify against an unchanged structure.
     :return:
     """
-    runner = CliRunner()
-    with runner.isolated_filesystem():
-        os.mkdir('A002R2EC')
-        os.mkdir('A002R2EC/Clips')
-        with open('Sidecar.txt', 'w') as f:
-            f.write('BLOREM ipsum dolor sit amet, consetetur sadipscing elitr.\n')
-        with open('A002R2EC/Clips/A002C006_141024_R2EC.mov', 'w') as f:
-            f.write('abcd\n')
-        with open('A002R2EC/Clips/A002C007_141024_R2EC.mov', 'w') as f:
-            f.write('def\n')
-
-        first_result = runner.invoke(mhl_cli, ['verify', 'A002R2EC/Clips'])
-        print(first_result.output)
-        assert first_result.exit_code == 0
-
-        second_result = runner.invoke(mhl_cli, ['verify', 'A002R2EC/Clips'])
-        print(second_result.output)
-        assert second_result.exit_code == 0
+    with A002R2EC() as runner:
+        result = runner.invoke(mhl_cli, ['verify', 'A002R2EC'])
+        assert result.exit_code == 0
+        result = runner.invoke(mhl_cli, ['verify', 'A002R2EC'])
+        assert result.exit_code == 0
 
 
-# def test_verification_fails_on_file_changed():
-#     """
-#     tests that verification fails if we verify against a modified structure.
-#     :return:
-#     """
-#     runner = CliRunner()
-#     with runner.isolated_filesystem():
-#         os.mkdir('A002R2EC')
-#         os.mkdir('A002R2EC/Clips')
-#         with open('Sidecar.txt', 'w') as f:
-#             f.write('BLOREM ipsum dolor sit amet, consetetur sadipscing elitr.\n')
-#         with open('A002R2EC/Clips/A002C006_141024_R2EC.mov', 'w') as f:
-#             f.write('abcd\n')
-#         with open('A002R2EC/Clips/A002C007_141024_R2EC', 'w') as f:
-#             f.write('def\n')
-#
-#         result = runner.invoke(mhl_cli, ['verify', 'A002R2EC/Clips'])
-#         print(result.output)
-#         assert result.exit_code == 0
-#
-#         # now change a file and ensure verification fails
-#         with open('A002R2EC/Clips/A002C007_141024_R2EC', 'w') as f:
-#             f.write('ghi\n')
-#
-#         result = runner.invoke(mhl_cli, ['verify', 'A002R2EC/Clips'])
-#         print(result.output)
-#         # assert that our program failed by exiting with an exit code of 1
-#         assert result.exit_code == 1
-#
-#
-# def test_verification_fails_on_file_added():
-#     """
-#     tests that verification fails if we verify against a structure that has an added file.
-#     :return:
-#     """
-#     runner = CliRunner()
-#     with runner.isolated_filesystem():
-#         os.mkdir('A002R2EC')
-#         os.mkdir('A002R2EC/Clips')
-#         with open('Sidecar.txt', 'w') as f:
-#             f.write('BLOREM ipsum dolor sit amet, consetetur sadipscing elitr.\n')
-#         with open('A002R2EC/Clips/A002C006_141024_R2EC.mov', 'w') as f:
-#             f.write('abcd\n')
-#         with open('A002R2EC/Clips/A002C007_141024_R2EC', 'w') as f:
-#             f.write('def\n')
-#
-#         result = runner.invoke(mhl_cli, ['verify', 'A002R2EC/Clips'])
-#         print(result.output)
-#         assert result.exit_code == 0
-#
-#         # now change a file and ensure verification fails
-#         with open('A002R2EC/Clips/A002C008_141024_R2EC', 'w') as f:
-#             f.write('xyz\n')
-#
-#         result = runner.invoke(mhl_cli, ['verify', 'A002R2EC/Clips'])
-#         print(result.output)
-#         # assert that our program exiting with an exit code of 1
-#         assert result.exit_code == 1
+def test_verify_fails_on_modify_file():
+    """
+    tests that verification fails if we verify against a modified structure.
+    :return:
+    """
+    with A002R2EC() as runner:
+        result = runner.invoke(mhl_cli, ['verify', 'A002R2EC'])
+        assert result.exit_code == 0
+        # now modify the sidecar file and ensure our verify function exits with code 1
+        with open('A002R2EC/Sidecar.txt', 'w') as f:
+            f.write('NOT THE ORIGINAL CONTENTS!!!\n')
+        result = runner.invoke(mhl_cli, ['verify', 'A002R2EC'])
+        print(result.output)
+        assert result.exit_code == 1

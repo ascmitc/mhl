@@ -6,3 +6,4 @@
 /.idea
 /asc-mhl
 __pycache__
+*.egg-info

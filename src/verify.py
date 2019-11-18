@@ -69,7 +69,7 @@ def verify(ctx, **kwargs):
             # TODO: Patrick: remove info log once _create_README script properly reads stderr output. 
             #  this logs to both info and error because the scenarios are not properly setup to read stderr output.
             logger.info(f'ERROR: verification failed for {number_failures} file(s)')
-            logger.error(f'FAILED verification for {number_failures} file(s)')
+            logger.fatal(f'FAILED verification for {number_failures} file(s)')
         if not ctx.simulate:
             if ctx.chain_signature_identifier is not None and \
                 ctx.chain_signature_private_key is not None:

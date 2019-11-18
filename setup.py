@@ -7,9 +7,9 @@ setup(
     # TODO: update install_requires... might be missing some
     install_requires=[
         'Click',
-        'xattr'
         'xxhash',
         'lxml',
+        'tree',
     ],
     entry_points='''
         [console_scripts]

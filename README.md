@@ -110,6 +110,13 @@ And the new folder ``/PATH/TO/FOLDER/asc-mhl/`` will contain the first ASC-MHL f
 
 For more advanced use of ``asc-mhl.py`` please see the scripts in the ``Scenarios``folder (see below).
 
+## Testing
+
+The tests are written via pytest. It must be installed in your venv to run the tests. See: 
+[PyTest Getting Started](https://docs.pytest.org/en/latest/getting-started.html)
+
+To invoke the tests, simply run the `pytest` command from the source control root directory.
+
 ## Running ``Scenarios`` scripts
 
 The scripts in the ``Scenarios`` folder implement several scenarios and output of the ``asc-mhl.py`` tool.

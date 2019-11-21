@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" 
+targetNamespace="http://theasc.com/ASC-MHL" 
+xmlns:tns="http://theasc.com/ASC-MHL">
+
+    <complexType name="HashListType">
+    	<sequence>
+    		<element name="creatorinfo" type="tns:CreatorInfoType"></element>
+    		<element name="hashes" type="tns:HashesType"></element>
+    	</sequence>
+    </complexType>
+
+    <element name="hashlist" type="tns:HashListType"></element>
+
+    <group name="hashlist">
+    	<sequence>
+    		<element name="creatorinfo" type="string" maxOccurs="1" minOccurs="1"></element>
+    		<element name="hashes" type="string" maxOccurs="1" minOccurs="1"></element>
+    	</sequence>
+    </group>
+
+    <complexType name="HashesType">
+    	<sequence>
+    		<element name="hash" type="tns:HashType" maxOccurs="unbounded" minOccurs="1"></element>
+    	</sequence>
+    	<attribute name="rootPath" type="string"></attribute>
+    </complexType>
+    
+    <complexType name="HashType">
+    	<sequence>
+    		<element name="filename" type="string"></element>
+    		<element name="filesize" type="int"></element>
+    		<element name="lastmodificationdate" type="dateTime"></element>
+    		<sequence>
+    			<element name="xxhash" type="tns:HashFormatType" maxOccurs="1" minOccurs="0"></element>
+    			<element name="md5" type="tns:HashFormatType" maxOccurs="1" minOccurs="0"></element>
+    		</sequence>
+    	</sequence>
+
+    </complexType>
+
+    <simpleType name="ActionType">
+    	<restriction base="string">
+    		<enumeration value="original2"></enumeration>
+    		<enumeration value="verified"></enumeration>
+    		<enumeration value="new"></enumeration>
+    	</restriction>
+    </simpleType>
+
+    <complexType name="HashFormatType">
+    	<simpleContent>
+    		<extension base="string">
+    			<attribute name="action" type="string"></attribute>
+    		</extension>
+    	</simpleContent>
+    </complexType>
+
+    <element name="xxhash" type="tns:HashFormatType"></element>
+    <element name="md5" type="tns:HashFormatType"></element>
+
+
+    <complexType name="CreatorInfoType" mixed="true">
+    	<all>
+    		<element name="hostname" type="string" maxOccurs="1" minOccurs="1"></element>
+    		<element name="toolversion" type="string" maxOccurs="1" minOccurs="1"></element>
+    		<element name="toolname" type="tns:ToolType" maxOccurs="1" minOccurs="1"></element>
+    		<element name="creationdate" type="dateTime" maxOccurs="1" minOccurs="1"></element>
+    		<element name="process" type="string" maxOccurs="1" minOccurs="1"></element>
+    	</all>
+    </complexType>
+    
+    <complexType name="ToolType">
+    	<simpleContent>
+    		<extension base="string">
+    			<attribute name="version" type="string"></attribute>
+    		</extension>
+    	</simpleContent>
+    </complexType>
+</schema>

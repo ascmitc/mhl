@@ -1,9 +1,7 @@
-from src.mhl import pass_context
 import sys
 import click
 
 
-@pass_context
 def verbose(ctx, msg, *args):
     """Logs a message to stdout only if verbose is enabled."""
     if ctx.verbose:

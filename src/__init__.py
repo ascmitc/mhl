@@ -1,3 +1,3 @@
-from .verify import verify
-from .read import read
-from .checksignature import checksignature
+from .read_mhlfile import readmhlfile
+from .read_chainfile import readchainfile
+

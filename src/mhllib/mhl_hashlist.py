@@ -1,4 +1,3 @@
-from .mhl_hashlist_reader import MHLHashListReader
 from src.util.datetime import datetime_now_isostring_with_microseconds
 from src.util import logger
 
@@ -16,7 +15,7 @@ class MHLHashList:
 
 	model member variables:
 	history -- MHLHistory object for context
-	mediahashes -- list of MHLMediaHash objects
+	media_hashes -- list of MHLMediaHash objects
 
 	attribute member variables:
 	generation_number -- generation number of the represented MHL file
@@ -26,19 +25,13 @@ class MHLHashList:
 	"""
 
 	# init
-
-	@staticmethod
-	def hashlist_with_filepath(filepath, history, context):
-		reader = MHLHashListReader(filepath, history, context)
-		reader.parse()
-		return reader.hashlist
 	
-	def __init__(self, history):
-		self.history = history
-		self.creatorinfo = self.empty_creatorinfo()
-		self.mediahashes = list()
+	def __init__(self):
+		self.history = None
+		self.creator_info = None
+		self.media_hashes = list()
 		self.filename = None
-		self.generation_number = -1
+		self.generation_number = None
 
 	# build
 
@@ -46,12 +39,13 @@ class MHLHashList:
 		hash = MHLMediaHash(self)
 		return hash
 
-	def append_hash(self, mediahash):
-		self.mediahashes.append(mediahash)
+	def append_hash(self, media_hash):
+		media_hash.hash_list = self
+		self.media_hashes.append(media_hash)
 
-	def empty_creatorinfo(self):
-		creatorinfo = MHLCreatorInfo(self)
-		return creatorinfo
+	def append_creator_info(self, creator_info):
+		creator_info.hash_list = self
+		self.creator_info = creator_info
 
 	# log
 
@@ -59,30 +53,30 @@ class MHLHashList:
 		logger.info("      filename: {0}".format(self.filename))
 		logger.info("    generation: {0}".format(self.generation_number))
 
-		self.creatorinfo.log()
-		for mediahash in self.mediahashes:
-			mediahash.log()
+		self.creator_info.log()
+		for media_hash in self.media_hashes:
+			media_hash.log()
 
 
 class MHLCreatorInfo:
 	
 	# init
 	
-	def __init__(self, hashlist):
-		self.hashlist = hashlist
-		self.hostname = None
-		self.toolname = None
-		self.toolversion = None
-		self.creationdate = None
+	def __init__(self):
+		self.hash_list = None
+		self.host_name = None
+		self.tool_name = None
+		self.tool_version = None
+		self.creation_date = None
 		self.process = None
 	
 	# log
 	
 	def log(self):
-		logger.info("      hostname: {0}".format(self.hostname))
-		logger.info("      toolname: {0}".format(self.toolname))
-		logger.info("   toolversion: {0}".format(self.toolversion))
-		logger.info("  creationdate: {0}".format(self.creationdate))
+		logger.info("     host_name: {0}".format(self.host_name))
+		logger.info("     tool_name: {0}".format(self.tool_name))
+		logger.info("  tool_version: {0}".format(self.tool_version))
+		logger.info(" creation_date: {0}".format(self.creation_date))
 		logger.info("       process: {0}".format(self.process))
 
 
@@ -99,8 +93,8 @@ class MHLMediaHash:
 		* initialize new, empty MHLHashEntry for adding one hash value
 
 	model member variables:
-	hashlist -- MHLHashList object for context
-	hashentries -- list of HashEntry objects to manage hash values (e.g. for different formats)
+	hash_list -- MHLHashList object for context
+	hash_entries -- list of HashEntry objects to manage hash values (e.g. for different formats)
 
 	attribute member variables:
 	relative_filepath -- relative file path to the file (supplements the root_path from the MHLHashList object)
@@ -112,40 +106,39 @@ class MHLMediaHash:
 	
 	# init
 	
-	def __init__(self, hashlist):
-		self.hashlist= hashlist
-		self.hashentries = list()
-	
-	# build
-	
-	def empty_hashentry(self):
-		hashentry = MHLHashEntry(self)
-		hashentry.hash_date = datetime_now_isostring_with_microseconds()
-		return hashentry
+	def __init__(self):
+		self.hash_list = None
+		self.hash_entries = list()
+		self.relative_filepath = None
+		self.filesize = None
+		self.last_modification_date = None
 
-	def append_hashentry(self, hashentry):
-		self.hashentries.append(hashentry)
+	# build
+
+	def append_hash_entry(self, hash_entry):
+		hash_entry.media_hash = self
+		self.hash_entries.append(hash_entry)
 
 	# log
 	
 	def log(self):
-		for hashentry in self.hashentries:
-			self.log_hash_entry(hashentry.hash_format)
+		for hash_entry in self.hash_entries:
+			self.log_hash_entry(hash_entry.hash_format)
 	
 	def log_hash_entry(self, hash_format):
 		"""find HashEntry object of a given format and print it"""
-		for hashentry in self.hashentries:
-			if hashentry.hash_format == hash_format:
+		for hash_entry in self.hash_entries:
+			if hash_entry.hash_format == hash_format:
 				indicator = " "
-				if hashentry.action == 'failed':
+				if hash_entry.action == 'failed':
 					indicator = "!"
-				elif hashentry.action == 'directory':
+				elif hash_entry.action == 'directory':
 					indicator = "d"
 				logger.info("{0} {1}: {2} {3}: {4}".format(indicator,
-														   hashentry.hashformat.rjust(6),
-														   hashentry.hash_string.ljust(32),
+														   hash_entry.hash_format.rjust(6),
+														   hash_entry.hash_string.ljust(32),
 														   (
-															   hashentry.action if hashentry.action is not None else "").ljust(
+															   hash_entry.action if hash_entry.action is not None else "").ljust(
 															   10),
 														   self.relative_filepath))
 
@@ -155,7 +148,7 @@ class MHLHashEntry:
 	managed by a MHLMediaHash object
 
 	model member variables:
-	mediahash -- MHLMediaHash object for context
+	media_hash -- MHLMediaHash object for context
 
 	attribute member variables:
 	hash_string -- string representation (hex) of the hash value
@@ -167,11 +160,10 @@ class MHLHashEntry:
 	other member variables:
 	"""
 
-	def __init__(self, mediahash):
-		self.mediahash = mediahash
-		
+	def __init__(self):
+		self.media_hash = None
 		self.hash_string = None
 		self.hash_format = None
-		self.hash_date = None
+		self.hash_date = datetime_now_isostring_with_microseconds()
 		self.action = None
 		self.secondary = False

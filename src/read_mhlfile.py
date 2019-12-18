@@ -1,5 +1,4 @@
-from src.mhllib.mhl_hashlist import MHLHashList
-from src.mhllib.mhl_history import MHLHistory
+from src.mhllib.mhl_hashlist_reader import MHLHashListReader
 from src.mhllib.mhl_context import MHLContext
 import click
 
@@ -14,8 +13,7 @@ def readmhlfile(filepath, verbose):
     context = MHLContext()
     context.verbose = verbose
 
-    history = MHLHistory()
-    hashlist = MHLHashList.hashlist_with_filepath(filepath, history, context)
+    hashlist = MHLHashListReader.parse(filepath)
     
     if context.verbose:
         hashlist.log()

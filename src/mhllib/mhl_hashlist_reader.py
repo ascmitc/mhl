@@ -1,76 +1,47 @@
 from src.util import logger
 from .mhl_defines import ascmhl_supported_hashformats
+from .mhl_hashlist import MHLHashList, MHLCreatorInfo, MHLMediaHash, MHLHashEntry
 
 import os
 from lxml import objectify, etree, sax
 
 class MHLHashListReader:
 	"""class to read an MHL file into a MHLHashList object
-
-	member variables:
-	filepath -- path to MHL file
-	hash_list -- MHLHashList object representing the MHL file
-	generation_number -- generation number of the MHL file
 	"""
-	
-	def __init__(self, filepath, history, context):
-		self.filepath = filepath
-		self.hashlist = None
-		self.generation_number = history.generation_number_for_filename(self.filename())
-		self.history = history
-		self.context = context
-		
-	def filename(self):
-		return os.path.relpath(self.filepath,
-							   start=os.path.dirname(self.filepath))
-		
-	def parse(self):
-		"""parsing the MHL XML file and building the MHLHashList for the hash_list member variable"""
-		logger.info(f'parsing \"{os.path.basename(self.filepath)}\"...')
-		
-		tree = etree.parse(self.filepath)
-		hashlist_element = tree.getroot()
-		
-		self.hashlist = self.history.empty_hashlist()
-		self.hashlist.generation_number = self.generation_number
-		self.hashlist.filename = self.filename()
 
-		for section in hashlist_element.getchildren():
+	@staticmethod
+	def parse(filepath):
+		"""parsing the MHL XML file and building the MHLHashList for the hash_list member variable"""
+		logger.info(f'parsing \"{os.path.basename(filepath)}\"...')
+		
+		tree = etree.parse(filepath)
+		hash_list_element = tree.getroot()
+		
+		hash_list = MHLHashList()
+
+		for section in hash_list_element.getchildren():
 			if section.tag == 'creatorinfo':
-				hostname = section.xpath('hostname')[0].text
-				toolname = section.xpath('toolname')[0].text
-				toolversion = section.xpath('toolversion')[0].text
-				creationdate = section.xpath('creationdate')[0].text
-				process = section.xpath('process')[0].text
-			
-				self.hashlist.creatorinfo.hostname = hostname
-				self.hashlist.creatorinfo.toolname = toolname
-				self.hashlist.creatorinfo.toolversion = toolversion
-				self.hashlist.creatorinfo.creationdate = creationdate
-				self.hashlist.creatorinfo.process = process
+				creator_info = MHLCreatorInfo()
+				creator_info.host_name = section.xpath('hostname')[0].text
+				creator_info.tool_name = section.xpath('toolname')[0].text
+				creator_info.tool_version = section.xpath('toolversion')[0].text
+				creator_info.creation_date = section.xpath('creationdate')[0].text
+				creator_info.process = section.xpath('process')[0].text
+				hash_list.append_creator_info(creator_info)
 
 			if section.tag == 'hashes':
-
 				hashes = section.getchildren()
 				for hash_element in hashes:
-					relative_filepath = hash_element.xpath('filename')[0].text
-					
-					mediahash = self.hashlist.empty_hash()
-					mediahash.relative_filepath = relative_filepath
+					media_hash = MHLMediaHash()
+					media_hash.relative_filepath = hash_element.xpath('filename')[0].text
 
-					for hashformat in ascmhl_supported_hashformats:
-						hashentry_element = hash_element.xpath(hashformat)
-						if hashentry_element :
-							hash_string = hash_element.xpath(hashformat)[0].text
-							hashentry = mediahash.empty_hashentry()
-							hashentry.hash_string = hash_string
-							hashentry.hashformat = hashformat
-							mediahash.append_hashentry(hashentry)
+					for hash_format in ascmhl_supported_hashformats:
+						hash_entry_element = hash_element.xpath(hash_format)
+						if hash_entry_element:
+							hash_entry = MHLHashEntry()
+							hash_entry.hash_format = hash_format
+							hash_entry.hash_string = hash_element.xpath(hash_format)[0].text
+							media_hash.append_hash_entry(hash_entry)
 							
-					self.hashlist.append_hash(mediahash)
-
-#					if self.context.verbose:
-#						mediahash.log()
-			
-
-						
+					hash_list.append_hash(media_hash)
+		return hash_list

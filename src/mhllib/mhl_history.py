@@ -1,5 +1,3 @@
-from .mhl_hashlist import MHLHashList
-from .mhl_chain import MHLChain
 from src.util import logger
 import os
 
@@ -24,19 +22,12 @@ class MHLHistory:
 	root_path -- path where the mhl folder resides
 	"""
 
-	def __init__(self, asc_mhl_path=None):
+	def __init__(self):
 		self.hash_lists = list()
-		self.asc_mhl_path = asc_mhl_path
-
-	def empty_hashlist(self):
-		hash_list = MHLHashList(self)
-		return hash_list
-
-	def empty_chain(self):
-		chain = MHLChain(self)
-		return chain
+		self.asc_mhl_path = None
 
 	def append_hash_list(self, hash_list):
+		hash_list.history = self
 		self.hash_lists.append(hash_list)
 
 	

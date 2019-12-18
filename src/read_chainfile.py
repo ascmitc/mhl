@@ -1,5 +1,4 @@
-from src.mhllib.mhl_chain import MHLChain
-from src.mhllib.mhl_history import MHLHistory
+from src.mhllib.mhl_chain_reader import MHLChainReader
 from src.mhllib.mhl_context import MHLContext
 import click
 
@@ -14,8 +13,7 @@ def readchainfile(filepath, verbose):
     context = MHLContext()
     context.verbose = verbose
 
-    history = MHLHistory()
-    chain = MHLChain.chain_with_filepath(filepath, history, context)
+    chain = MHLChainReader.parse(filepath)
     
     if context.verbose:
         chain.log()

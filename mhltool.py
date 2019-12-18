@@ -10,6 +10,7 @@ def mhltool_cli():
 
 mhltool_cli.add_command(src.readmhlfile)
 mhltool_cli.add_command(src.readchainfile)
+mhltool_cli.add_command(src.readmhlhistory)
 
 if __name__ == '__main__':
     mhltool_cli()

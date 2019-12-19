@@ -1,6 +1,5 @@
 from src.mhllib.mhl_history_reader import MHLHistoryParser
 from src.mhllib.mhl_context import MHLContext
-from src.mhllib.mhl_defines import ascmhl_folder_name
 import click
 import os
 
@@ -14,7 +13,7 @@ def readmhlhistory(root_path, verbose):
     context = MHLContext()
     context.verbose = verbose
 
-    history = MHLHistoryParser.parse(os.path.join(root_path,ascmhl_folder_name))
+    history = MHLHistoryParser.parse(root_path)
     
     if context.verbose:
         history.log()

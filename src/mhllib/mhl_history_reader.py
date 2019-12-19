@@ -3,6 +3,7 @@ import re
 from src.mhllib import mhl_defines
 from src.mhllib.mhl_history import MHLHistory
 from src.mhllib.mhl_hashlist_reader import MHLHashListReader
+from src.mhllib.mhl_defines import ascmhl_folder_name
 from src.util import logger
 
 class MHLHistoryParser:
@@ -15,9 +16,10 @@ class MHLHistoryParser:
 	folderpath -- path to the enclosing folder (not the asc-mhl folder itself, but one up)
 	"""
 	@staticmethod
-	def parse(asc_mhl_folder_path):
+	def parse(root_path):
 		"""finds all MHL files in the asc-mhl folder, returns the mhl_history instance with all mhl_hashlists """
 
+		asc_mhl_folder_path = os.path.join(root_path, ascmhl_folder_name)
 		for root, directories, filenames in os.walk(asc_mhl_folder_path):
 			history = MHLHistory()
 			history.asc_mhl_path = asc_mhl_folder_path

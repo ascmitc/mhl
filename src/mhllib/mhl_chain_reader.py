@@ -21,7 +21,7 @@ class MHLChainReader:
 					logger.error("cannot read line")
 					continue
 				chain.append_generation(generation)
-		
+
 		return chain
 
 	@staticmethod

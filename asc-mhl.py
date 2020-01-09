@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import click
 import src
 
@@ -11,6 +11,7 @@ def mhltool_cli():
 mhltool_cli.add_command(src.readmhlfile)
 mhltool_cli.add_command(src.readchainfile)
 mhltool_cli.add_command(src.readmhlhistory)
+mhltool_cli.add_command(src.verify)
 
 if __name__ == '__main__':
     mhltool_cli()

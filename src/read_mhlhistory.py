@@ -1,4 +1,4 @@
-from src.mhllib.mhl_history_reader import MHLHistoryParser
+from src.mhllib.mhl_history_xml_backend import MHLHistoryXMLBackend
 from src.mhllib.mhl_context import MHLContext
 import click
 import os
@@ -13,7 +13,7 @@ def readmhlhistory(root_path, verbose):
     context = MHLContext()
     context.verbose = verbose
 
-    history = MHLHistoryParser.parse(root_path)
+    history = MHLHistoryXMLBackend.parse(root_path)
     
     if context.verbose:
         history.log()

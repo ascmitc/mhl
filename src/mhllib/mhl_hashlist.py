@@ -33,6 +33,18 @@ class MHLHashList:
 		self.filename = None
 		self.generation_number = None
 
+	# methods to query for hashes
+	def find_media_hash_for_path(self, relative_path):
+		"""Searches the history for the first (original) hash of a file
+
+		starts with the first generation, if we don't find it there we continue to look in all other generations
+		until we've found the first appearance of the give file.
+		"""
+		for media_hash in self.media_hashes:
+			if media_hash.relative_filepath == relative_path:
+				return media_hash
+		return None
+
 	# build
 
 	def empty_hash(self):
@@ -113,7 +125,14 @@ class MHLMediaHash:
 		self.filesize = None
 		self.last_modification_date = None
 
-	# build
+	# methods to query for hashes
+	def find_hash_entry_for_format(self, hash_format):
+		for hash_entry in self.hash_entries:
+			if hash_entry.hash_format == hash_format:
+				return hash_entry
+		return None
+
+	# methods to build a media hash
 
 	def append_hash_entry(self, hash_entry):
 		hash_entry.media_hash = self

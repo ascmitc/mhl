@@ -14,10 +14,12 @@ class MHLHashListXMLBackend:
 	def parse(filepath):
 		"""parsing the MHL XML file and building the MHLHashList for the hash_list member variable"""
 		logger.info(f'parsing \"{os.path.basename(filepath)}\"...')
-		
-		tree = etree.parse(filepath)
-		hash_list_element = tree.getroot()
-		
+
+		# for the fake file system in the tests to work we don't use the etree.parse since it uses a native
+		# c reading method that is not compatible with pyfakefs we instead read the content first and parse it directly
+		with open(filepath, 'rb') as file:
+			data = file.read()
+			hash_list_element = etree.fromstring(data)
 		hash_list = MHLHashList()
 
 		for section in hash_list_element.getchildren():

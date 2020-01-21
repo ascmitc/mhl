@@ -1,5 +1,9 @@
+from __future__ import annotations
+from typing import List
+from datetime import datetime
 from src.util.datetime import datetime_now_isostring_with_microseconds
 from src.util import logger
+#from .mhl_history import MHLHistory
 
 class MHLHashList:
 	"""
@@ -24,8 +28,13 @@ class MHLHashList:
 	filename -- file name of the represented MHL file
 	"""
 
+	history: MHLHistory
+	creator_info: MHLCreatorInfo
+	media_hashes: List[MHLMediaHash]
+	filename: str
+	generation_number: int
+
 	# init
-	
 	def __init__(self):
 		self.history = None
 		self.creator_info = None
@@ -115,9 +124,13 @@ class MHLMediaHash:
 
 	other member variables:
 	"""
-	
+	hash_list: MHLHashList
+	hash_entries: List[MHLHashEntry]
+	relative_filepath: str
+	filesize: int
+	last_modification_date: datetime
+
 	# init
-	
 	def __init__(self):
 		self.hash_list = None
 		self.hash_entries = list()
@@ -178,6 +191,13 @@ class MHLHashEntry:
 
 	other member variables:
 	"""
+
+	media_hash: MHLMediaHash
+	hash_string: str
+	hash_format: str
+	hash_date: datetime
+	action: str
+	secondary: bool
 
 	def __init__(self):
 		self.media_hash = None

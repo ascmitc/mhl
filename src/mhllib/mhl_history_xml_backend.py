@@ -43,7 +43,26 @@ class MHLHistoryXMLBackend:
 		hash_lists.sort(key=lambda x: x.generation_number)
 		for hash_list in hash_lists:
 			history.append_hash_list(hash_list)
+
+		MHLHistoryXMLBackend.find_and_load_child_histories(history)
 		return history
+
+	@staticmethod
+	def find_and_load_child_histories(history: MHLHistory) -> None:
+		"""traverses the whole file system tree inside the history to find all sub histories"""
+		history_root = history.get_root_path()
+		for root, directories, filenames in os.walk(history_root):
+			# print(f'root: \"{root}\" directories: \"{directories}\"')
+			if root != history_root and 'asc-mhl' in directories:
+				print(f'parse mhl in folder: \"{root}\" not going deeper')
+				child_history = MHLHistoryXMLBackend.parse(root)
+				child_history.parent_history = history
+				history.append_child_history(child_history)
+				directories.clear()
+
+		# update parent children mapping with the found children
+		history.update_child_history_mapping()
+
 
 	@staticmethod
 	def create_new_generation(history, new_hash_list):

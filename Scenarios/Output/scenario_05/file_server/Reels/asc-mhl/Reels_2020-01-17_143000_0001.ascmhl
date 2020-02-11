@@ -1,0 +1,18 @@
+<?xml version='1.0' encoding='utf-8'?>
+<hashlist version="2.0">
+  <creatorinfo>
+    <hostname>myHost.local</hostname>
+    <toolname>verify</toolname>
+    <toolversion>0.0.1</toolversion>
+    <creationdate>2020-01-17T14:30:00+00:00</creationdate>
+    <process>verify</process>
+  </creatorinfo>
+  <hashes rootPath="/file_server/Reels">
+    <hash>
+      <filename>Summary.txt</filename>
+      <filesize>48</filesize>
+      <lastmodificationdate>2020-01-17T14:30:00+00:00</lastmodificationdate>
+      <xxhash action="original">0ac48e431d4538ba</xxhash>
+    </hash>
+  </hashes>
+</hashlist>

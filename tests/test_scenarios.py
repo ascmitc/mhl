@@ -120,7 +120,8 @@ def copy_fake_directory_to_real_fs(fake_dir: str, real_dir: str, fake_fs):
 @freeze_time("2020-01-16 09:15:00")
 def test_scenario_01(fs, reference, A002R2EC):
     """
-
+    This is the most basic example. A camera card is copied to a travel drive and an ASC-MHL file is
+    created with hashes of all files on the card.
     """
 
     # assume the card is copied to a travel drive.
@@ -137,7 +138,8 @@ def test_scenario_01(fs, reference, A002R2EC):
 @freeze_time("2020-01-16 09:15:00")
 def test_scenario_02(fs, reference, A002R2EC):
     """
-
+    In this scenario a copy is made, and then a copy of the copy. Two ASC-MHL are created during
+    this process, documenting the history of both copy processes.
     """
 
     # assume the card is copied to a travel drive.
@@ -166,6 +168,71 @@ def test_scenario_02(fs, reference, A002R2EC):
         assert compare_file_content('scenario_02',
                                     '/file_server/A002R2EC/asc-mhl/A002R2EC_2020-01-16_091500_0001.ascmhl')
         assert compare_file_content('scenario_02',
+                                    '/file_server/A002R2EC/asc-mhl/A002R2EC_2020-01-17_143000_0002.ascmhl')
+
+
+@freeze_time("2020-01-16 09:15:00")
+def test_scenario_03(fs, reference, A002R2EC):
+    """
+    In this scenario the first hashes are created using the xxhash format. Different hash formats
+    might be required by systems used further down the workflow, so the second copy is verified
+    against the existing xxhash hashes, and additional MD5 hashes can be created and stored during
+    that process on demand.
+    """
+
+    # assume the card is copied to a travel drive.
+    shutil.copytree('/A002R2EC', '/travel_01/A002R2EC')
+
+    # create original mhl generation of first copy
+    runner = CliRunner()
+    result = runner.invoke(verify, ['/travel_01/A002R2EC'])
+    assert result.exit_code == 0
+
+    with freeze_time("2020-01-17 14:30:00"):
+        # assume the card is copied from the travel drive to a file server
+        shutil.copytree('/travel_01/A002R2EC', '/file_server/A002R2EC')
+
+        # The files are verified on the file server, and additional ("secondary") MD5 hashes are created.
+        result = runner.invoke(verify, ['-h', 'MD5', '/file_server/A002R2EC'])
+        assert result.exit_code == 0
+        replace_reference_files_if_needed('scenario_03', ['/travel_01', '/file_server'], fs)
+
+        # the second generation will include both the generated secondary hashes and the original hash verified
+        assert compare_file_content('scenario_03',
+                                    '/file_server/A002R2EC/asc-mhl/A002R2EC_2020-01-17_143000_0002.ascmhl')
+
+
+@freeze_time("2020-01-16 09:15:00")
+def test_scenario_04(fs, reference, A002R2EC):
+    """
+    Copying a folder to a travel drive and from there to a file server with a hash mismatch in
+    one file.
+    """
+
+    # assume the card is copied to a travel drive.
+    shutil.copytree('/A002R2EC', '/travel_01/A002R2EC')
+
+    # create original mhl generation of first copy
+    runner = CliRunner()
+    result = runner.invoke(verify, ['/travel_01/A002R2EC'])
+    assert result.exit_code == 0
+
+    with freeze_time("2020-01-17 14:30:00"):
+        # assume the card is copied from the travel drive to a file server
+        shutil.copytree('/travel_01/A002R2EC', '/file_server/A002R2EC')
+
+        # simulate that during the copy the `Sidecar.txt` got corrupt (altered)
+        with open('/file_server/A002R2EC/Sidecar.txt', "a") as file:
+            file.write('!!')
+
+        # The files are verified on the file server, the altered file will cause the verification to fail.
+        result = runner.invoke(verify, ['/file_server/A002R2EC'])
+        # TODO: the verify tool should not return exit code 0 if verification fails
+        assert result.exit_code == 0
+        replace_reference_files_if_needed('scenario_04', ['/travel_01', '/file_server'], fs)
+
+        # the second generation will include the failed verification result
+        assert compare_file_content('scenario_04',
                                     '/file_server/A002R2EC/asc-mhl/A002R2EC_2020-01-17_143000_0002.ascmhl')
 
 

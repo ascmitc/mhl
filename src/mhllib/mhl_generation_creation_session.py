@@ -80,6 +80,7 @@ class MHLGenerationCreationSession:
 		return new_hash_list
 
 	def commit(self, creator_info):
+		# TODO: make this method create the generations of the children bottom up, so each history can reference the children correctly
 		for history, new_hash_list in self.new_hash_lists.items():
 			new_hash_list.creator_info = creator_info
 			MHLHistoryXMLBackend.create_new_generation(history, new_hash_list)

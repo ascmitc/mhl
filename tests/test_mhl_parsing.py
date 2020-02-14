@@ -93,7 +93,7 @@ def test_child_history_verify(fs, nested_mhl_histories):
     """
 
     runner = CliRunner()
-    result = runner.invoke(verify, ['/root'])
+    result = runner.invoke(verify.verify, ['/root'])
     assert result.exit_code == 0
 
     assert os.path.isfile('/root/asc-mhl/root_2020-01-16_091500_0002.ascmhl')

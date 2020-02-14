@@ -119,5 +119,10 @@ def test_child_history_verify(fs, nested_mhl_histories):
     assert b_history.hash_lists[1].media_hashes[0].hash_entries[0].action == 'original'
     assert b_history.hash_lists[1].media_hashes[1].hash_entries[0].action == 'verified'
 
+    # check that the mhl references are correct
+    assert root_history.hash_lists[1].referenced_hash_lists[0] == aa_history.hash_lists[1]
+    assert root_history.hash_lists[1].referenced_hash_lists[1] == b_history.hash_lists[1]
+    assert b_history.hash_lists[1].referenced_hash_lists[0] == bb_history.hash_lists[1]
+    assert len(aa_history.hash_lists[1].referenced_hash_lists) == 0
 
 

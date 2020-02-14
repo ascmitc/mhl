@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import Tuple, List, Dict
 from src.util import logger
-from src.mhllib.mhl_hashlist import MHLHashList, MHLHashEntry, MHLMediaHash
+from src.mhllib.mhl_hashlist import MHLHashList, MHLHashEntry, MHLMediaHash, MHLHashListReference
 import os
 
 
@@ -131,6 +131,12 @@ class MHLHistory:
 			dir_path = os.path.dirname(dir_path)
 		return self, relative_path
 
+	def hash_list_with_file_name(self, file_name) -> MHLHashList:
+		for hash_list in self.hash_lists:
+			if hash_list.get_file_name() == file_name:
+				return hash_list
+		return None
+
 	def append_child_history(self, child_history: MHLHistory) -> None:
 		self.child_histories.append(child_history)
 
@@ -145,6 +151,24 @@ class MHLHistory:
 
 		if self.parent_history is not None:
 			self.parent_history.update_child_history_mapping()
+
+	@staticmethod
+	def walk_child_histories(history: MHLHistory):
+		for child in history.child_histories:
+			yield from MHLHistory.walk_child_histories(child)
+		yield history
+
+	def resolve_hash_list_references(self) -> None:
+		"""for all hash lists resolve existing hash list references by searching them in the child histories"""
+		for hash_list in self.hash_lists:
+			for reference in hash_list.hash_list_references:
+				reference_path = os.path.dirname(os.path.dirname(reference.path))
+				history = self.child_history_mappings[reference_path]
+				referenced_hash_list = history.hash_list_with_file_name(os.path.basename(reference.path))
+				assert referenced_hash_list is not None
+				assert referenced_hash_list.get_xxhash64() == reference.xxhash
+				hash_list.referenced_hash_lists.append(referenced_hash_list)
+
 
 	# accessors
 	def log(self):

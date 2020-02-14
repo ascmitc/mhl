@@ -239,7 +239,8 @@ def test_scenario_04(fs, reference, A002R2EC):
 @freeze_time("2020-01-16 09:15:00")
 def test_scenario_05(fs, reference, A002R2EC, A003R2EC):
     """
-
+    Copying two camera mags to a `Reels` folder on a travel drive, and the entire `Reels` folder
+    folder to a server.
     """
 
     os.makedirs('/travel_01/Reels')

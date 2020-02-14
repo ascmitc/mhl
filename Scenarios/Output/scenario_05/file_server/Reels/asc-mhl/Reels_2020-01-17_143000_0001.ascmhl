@@ -15,4 +15,12 @@
       <xxhash action="original">0ac48e431d4538ba</xxhash>
     </hash>
   </hashes>
+  <ascmhlreference>
+    <path>A002R2EC/asc-mhl/A002R2EC_2020-01-17_143000_0002.ascmhl</path>
+    <xxhash>87210d6e0589c31c</xxhash>
+  </ascmhlreference>
+  <ascmhlreference>
+    <path>A003R2EC/asc-mhl/A003R2EC_2020-01-17_143000_0002.ascmhl</path>
+    <xxhash>40116e7da1ca1487</xxhash>
+  </ascmhlreference>
 </hashlist>

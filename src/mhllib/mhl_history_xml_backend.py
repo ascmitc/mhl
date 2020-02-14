@@ -1,6 +1,7 @@
 import os
 import re
-from src.mhllib import mhl_defines
+from typing import List
+from src.mhllib import mhl_defines, MHLHashList
 from src.mhllib.mhl_history import MHLHistory
 from src.mhllib.mhl_hashlist_xml_backend import MHLHashListXMLBackend
 from src.mhllib.mhl_defines import ascmhl_folder_name
@@ -30,12 +31,12 @@ class MHLHistoryXMLBackend:
 					# A002R2EC_2019-06-21_082301_0005.ascmhl
 					parts = re.findall(r'(.*)_(.+)_(.+)_(\d+)\.ascmhl', filename)
 					if parts.__len__() == 1 and parts[0].__len__() == 4:
-						filepath = os.path.join(asc_mhl_folder_path, filename)
-						hash_list = MHLHashListXMLBackend.parse(filepath)
+						file_path = os.path.join(asc_mhl_folder_path, filename)
+						hash_list = MHLHashListXMLBackend.parse(file_path)
 
 						generation_number = int(parts[0][3])
 						hash_list.generation_number = generation_number
-						hash_list.filename = filename
+						hash_list.file_path = file_path
 						hash_lists.append(hash_list)
 					else:
 						logger.error(f'name of ascmhl file {filename} doesnt conform to naming convention')
@@ -45,6 +46,7 @@ class MHLHistoryXMLBackend:
 			history.append_hash_list(hash_list)
 
 		MHLHistoryXMLBackend.find_and_load_child_histories(history)
+
 		return history
 
 	@staticmethod
@@ -62,10 +64,10 @@ class MHLHistoryXMLBackend:
 
 		# update parent children mapping with the found children
 		history.update_child_history_mapping()
-
+		history.resolve_hash_list_references()
 
 	@staticmethod
-	def create_new_generation(history, new_hash_list):
+	def write_new_generation(history: MHLHistory, new_hash_list: MHLHashList):
 		MHLHistoryXMLBackend._validate_new_hash_list(history, new_hash_list)
 		file_name, generation_number = MHLHistoryXMLBackend._new_generation_filename(history)
 		file_path = os.path.join(history.asc_mhl_path, file_name)

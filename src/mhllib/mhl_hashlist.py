@@ -1,8 +1,9 @@
 from __future__ import annotations
 from typing import List
 from datetime import datetime
+import os
 from src.util.datetime import datetime_now_isostring_with_microseconds
-from src.util import logger
+from src.util import logger, hashing
 #from .mhl_history import MHLHistory
 
 class MHLHashList:
@@ -31,16 +32,20 @@ class MHLHashList:
 	history: MHLHistory
 	creator_info: MHLCreatorInfo
 	media_hashes: List[MHLMediaHash]
-	filename: str
+	referenced_hash_lists = List['MHLHashList']
+	hash_list_references = List['MHLHashListReference']
+	file_path: str
 	generation_number: int
 
 	# init
 	def __init__(self):
 		self.history = None
 		self.creator_info = None
-		self.media_hashes = list()
-		self.filename = None
+		self.media_hashes = []
+		self.file_path = None
 		self.generation_number = None
+		self.referenced_hash_lists = []
+		self.hash_list_references = []
 
 	# methods to query for hashes
 	def find_media_hash_for_path(self, relative_path):
@@ -53,6 +58,12 @@ class MHLHashList:
 			if media_hash.relative_filepath == relative_path:
 				return media_hash
 		return None
+
+	def get_file_name(self):
+		return os.path.basename(self.file_path)
+
+	def get_xxhash64(self):
+		return hashing.xxhash64(self.file_path)
 
 	# build
 
@@ -68,10 +79,14 @@ class MHLHashList:
 		creator_info.hash_list = self
 		self.creator_info = creator_info
 
+	def append_hash_list_reference(self, reference: MHLHashListReference):
+		reference.hash_list = self
+		self.hash_list_references.append(reference)
+
 	# log
 
 	def log(self):
-		logger.info("      filename: {0}".format(self.filename))
+		logger.info("      filename: {0}".format(self.get_file_name()))
 		logger.info("    generation: {0}".format(self.generation_number))
 
 		self.creator_info.log()
@@ -206,3 +221,16 @@ class MHLHashEntry:
 		self.hash_date = datetime_now_isostring_with_microseconds()
 		self.action = None
 		self.secondary = False
+
+
+class MHLHashListReference:
+	"""
+	class to store the ascmhlreference to a child history mhl file
+	"""
+	hash_list: MHLHashList
+	path: str
+	xxhash: str
+
+	def __init__(self):
+		self.path = None
+		self.xxhash = None

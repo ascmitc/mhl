@@ -1,7 +1,7 @@
 from src.util import logger
 from src.util.datetime import datetime_isostring
 from .mhl_defines import ascmhl_supported_hashformats
-from .mhl_hashlist import MHLHashList, MHLCreatorInfo, MHLMediaHash, MHLHashEntry
+from .mhl_hashlist import MHLHashList, MHLCreatorInfo, MHLMediaHash, MHLHashEntry, MHLHashListReference
 
 import os
 from lxml import objectify, etree, sax
@@ -21,6 +21,7 @@ class MHLHashListXMLBackend:
 			data = file.read()
 			hash_list_element = etree.fromstring(data)
 		hash_list = MHLHashList()
+		hash_list.file_path = filepath
 
 		for section in hash_list_element.getchildren():
 			if section.tag == 'creatorinfo':
@@ -50,10 +51,16 @@ class MHLHashListXMLBackend:
 							media_hash.append_hash_entry(hash_entry)
 							
 					hash_list.append_hash(media_hash)
+			if section.tag == 'ascmhlreference':
+				hash_list_reference = MHLHashListReference()
+				hash_list_reference.path = section.xpath('path')[0].text
+				hash_list_reference.xxhash = section.xpath('xxhash')[0].text
+				hash_list.append_hash_list_reference(hash_list_reference)
+
 		return hash_list
 
 	@staticmethod
-	def write_hash_list(hash_list, file_path):
+	def write_hash_list(hash_list: MHLHashList, file_path: str):
 		xml_context = sax.ElementTreeContentHandler()
 		xml_context.startDocument()
 		xml_context.startElementNS((None, 'hashlist'), 'hashlist', {(None, 'version'): "2.0"})
@@ -73,6 +80,10 @@ class MHLHashListXMLBackend:
 			hash_element = MHLHashListXMLBackend._media_hash_xml_element(media_hash)
 			hashes_element.append(hash_element)
 
+		for ref_hash_list in hash_list.referenced_hash_lists:
+			reference_element = MHLHashListXMLBackend._ascmhlreference_xml_element(ref_hash_list, file_path)
+			hashlist_element.append(reference_element)
+
 		xml_string: bytes = etree.tostring(xml_context.etree.getroot(), pretty_print=True, xml_declaration=True,
 												encoding="utf-8")
 
@@ -82,6 +93,8 @@ class MHLHashListXMLBackend:
 		with open(file_path, 'wb') as file:
 			# FIXME: check if file could be created
 			file.write(xml_string)
+
+		hash_list.file_path = file_path
 
 
 	@staticmethod
@@ -107,6 +120,22 @@ class MHLHashListXMLBackend:
 			hashformat_element = etree.SubElement(hash_element, hash_entry.hash_format,
 												  attrib=hashformat_element_attributes)
 			hashformat_element.text = hash_entry.hash_string
+
+		objectify.deannotate(hash_element, cleanup_namespaces=True, xsi_nil=True)
+		return hash_element
+
+	@staticmethod
+	def _ascmhlreference_xml_element(hash_list: MHLHashList, file_path: str):
+		"""builds and returns one <ascmhlreference> element for a given HashList object"""
+
+		hash_element = etree.Element('ascmhlreference')
+
+		path_element = etree.SubElement(hash_element, 'path')
+		root_path = os.path.dirname(os.path.dirname(file_path))
+		relative_path = os.path.relpath(hash_list.file_path, root_path)
+		path_element.text = relative_path
+		xxhash_element = etree.SubElement(hash_element, 'xxhash')
+		xxhash_element.text = hash_list.get_xxhash64()
 
 		objectify.deannotate(hash_element, cleanup_namespaces=True, xsi_nil=True)
 		return hash_element

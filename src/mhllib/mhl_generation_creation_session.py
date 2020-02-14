@@ -1,7 +1,8 @@
-from typing import Dict
+from collections import defaultdict
+from typing import Dict, List
 from src.util import logger
 from .mhl_history import MHLHistory
-from .mhl_hashlist import MHLHashList, MHLMediaHash, MHLHashEntry
+from .mhl_hashlist import MHLHashList, MHLMediaHash, MHLHashEntry, MHLCreatorInfo
 from .mhl_hashlist_xml_backend import MHLHashListXMLBackend
 from .mhl_history_xml_backend import MHLHistoryXMLBackend
 
@@ -26,7 +27,7 @@ class MHLGenerationCreationSession:
 
 	def __init__(self, history: MHLHistory):
 		self.root_history = history
-		self.new_hash_lists = {}
+		self.new_hash_lists = defaultdict(MHLHashList)
 
 	def append_file_hash(self, file_path, file_size, file_modification_date, hash_format, hash_string):
 
@@ -57,7 +58,7 @@ class MHLGenerationCreationSession:
 				hash_entry.secondary = True
 
 		# in case the same file is hashes multiple times we want to add all hash entries
-		new_hash_list = self.get_hash_list(history)
+		new_hash_list = self.new_hash_lists[history]
 		existing_media_hash = new_hash_list.find_media_hash_for_path(history_relative_path)
 		if existing_media_hash is not None:
 			media_hash = existing_media_hash
@@ -72,18 +73,28 @@ class MHLGenerationCreationSession:
 		if existing_media_hash != media_hash:
 			new_hash_list.append_hash(media_hash)
 
-	def get_hash_list(self, history: MHLHistory) -> MHLHashList:
-		if history in self.new_hash_lists:
-			return self.new_hash_lists[history]
-		new_hash_list = MHLHashList()
-		self.new_hash_lists[history] = new_hash_list
-		return new_hash_list
+	def commit(self, creator_info: MHLCreatorInfo):
+		"""
+		this method needs to create the generations of the children bottom up
+		# so each history can reference the children correctly and can get the actual hash of the file
+		"""
 
-	def commit(self, creator_info):
-		# TODO: make this method create the generations of the children bottom up, so each history can reference the children correctly
-		for history, new_hash_list in self.new_hash_lists.items():
+		# store all references to child histories we will need when committing the parent history
+		referenced_hash_lists: Dict[MHLHistory, List[MHLHashList]] = defaultdict(list)
+
+		for history in MHLHistory.walk_child_histories(self.root_history):
+			if history not in self.new_hash_lists:
+				if history not in referenced_hash_lists:
+					continue
+				new_hash_list = MHLHashList()
+			else:
+				new_hash_list = self.new_hash_lists[history]
+			new_hash_list.referenced_hash_lists = referenced_hash_lists[history]
 			new_hash_list.creator_info = creator_info
-			MHLHistoryXMLBackend.create_new_generation(history, new_hash_list)
+			MHLHistoryXMLBackend.write_new_generation(history, new_hash_list)
+			if history.parent_history is not None:
+				referenced_hash_lists[history.parent_history].append(new_hash_list)
+
 
 	def log(self):
 		logger.info("mhl verify session")

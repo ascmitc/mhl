@@ -25,21 +25,21 @@ def nested_mhl_histories(fs):
     # create mhl histories on different directly levels
     fs.create_file('/root/Stuff.txt', contents='stuff\n')
     runner = CliRunner()
-    result = runner.invoke(verify, ['/root'])
+    result = runner.invoke(verify.verify, ['/root'])
     assert result.exit_code == 0
 
     fs.create_file('/root/A/AA/AA1.txt', contents='AA1\n')
     fs.create_file('/root/A/AB/AB1.txt', contents='AB1\n')
-    result = runner.invoke(verify, ['/root/A/AA'])
+    result = runner.invoke(verify.verify, ['/root/A/AA'])
     assert result.exit_code == 0
 
     fs.create_file('/root/B/B1.txt', contents='B1\n')
-    result = runner.invoke(verify, ['/root/B'])
+    result = runner.invoke(verify.verify, ['/root/B'])
     assert result.exit_code == 0
 
     fs.create_file('/root/B/BA/BA1.txt', contents='BA1\n')
     fs.create_file('/root/B/BB/BB1.txt', contents='BB1\n')
-    result = runner.invoke(verify, ['/root/B/BB'])
+    result = runner.invoke(verify.verify, ['/root/B/BB'])
     assert result.exit_code == 0
 
 
@@ -74,7 +74,7 @@ def test_child_history_parsing(fs, nested_mhl_histories):
     # check if the correct (child) histories are returned for a given path
     assert root_history.find_history_for_path('Stuff.txt')[0] == root_history
     assert root_history.find_history_for_path('A/AA/AA1.txt')[0] == aa_history
-    assert root_history.find_history_for_path('A/AB/AB1.txt')[0] is root_history
+    assert root_history.find_history_for_path('A/AB/AB1.txt')[0] == root_history
     assert root_history.find_history_for_path('B/B1.txt')[0] == b_history
     assert root_history.find_history_for_path('B/BA/BA1.txt')[0] == b_history
     assert root_history.find_history_for_path('B/BB/BB1.txt')[0] == bb_history
@@ -126,3 +126,81 @@ def test_child_history_verify(fs, nested_mhl_histories):
     assert len(aa_history.hash_lists[1].referenced_hash_lists) == 0
 
 
+@freeze_time("2020-01-16 09:15:00")
+def test_child_history_partial_verification_ba_1_file(fs, nested_mhl_histories):
+    """
+
+    """
+
+    # create an additional file the verify_paths command will not add since we only pass it a single file
+    fs.create_file('/root/B/B2.txt', contents='B2\n')
+    runner = CliRunner()
+    result = runner.invoke(verify.verify_paths, ['/root', '/root/B/B1.txt'])
+    assert result.exit_code == 0
+
+    # two new generations have been written
+    assert os.path.isfile('/root/asc-mhl/root_2020-01-16_091500_0002.ascmhl')
+    assert os.path.isfile('/root/B/asc-mhl/B_2020-01-16_091500_0002.ascmhl')
+
+    root_history = MHLHistoryXMLBackend.parse('/root')
+    assert len(root_history.hash_lists) == 2
+
+    aa_history = root_history.child_histories[0]
+    b_history = root_history.child_histories[1]
+    bb_history = root_history.child_histories[1].child_histories[0]
+
+    # the root hash list only contains a mhl reference to the hash list of the B history, no media hashes
+    assert len(root_history.hash_lists[1].media_hashes) == 0
+    assert root_history.hash_lists[1].referenced_hash_lists[0] == b_history.hash_lists[1]
+    # the B hash list contains the media hash of the verified file
+    assert b_history.hash_lists[1].media_hashes[0].relative_filepath == 'B1.txt'
+    assert b_history.hash_lists[1].media_hashes[0].hash_entries[0].action == 'verified'
+    # the created B2 file is not referenced in the B history, only B1
+    assert len(b_history.hash_lists[1].media_hashes) == 1
+
+    # the other histories don't have a new generation
+    assert not os.path.isfile('/root/A/AA/asc-mhl/AA_2020-01-16_091500_0002.ascmhl')
+    assert not os.path.isfile('/root/B/BB/asc-mhl/BB_2020-01-16_091500_0002.ascmhl')
+    assert aa_history.latest_generation_number() == 1
+    assert bb_history.latest_generation_number() == 1
+
+
+@freeze_time("2020-01-16 09:15:00")
+def test_child_history_partial_verification_bb_folder(fs, nested_mhl_histories):
+    """
+
+    """
+
+    # create an additional file the verify_paths command will find because we pass it a folder
+    fs.create_file('/root/B/BB/BB2.txt', contents='BB2\n')
+    runner = CliRunner()
+    result = runner.invoke(verify.verify_paths, ['/root', '/root/B/BB'])
+    assert result.exit_code == 0
+
+    assert os.path.isfile('/root/asc-mhl/root_2020-01-16_091500_0002.ascmhl')
+    assert os.path.isfile('/root/B/asc-mhl/B_2020-01-16_091500_0002.ascmhl')
+    assert os.path.isfile('/root/B/BB/asc-mhl/BB_2020-01-16_091500_0002.ascmhl')
+
+    root_history = MHLHistoryXMLBackend.parse('/root')
+    assert len(root_history.hash_lists) == 2
+
+    aa_history = root_history.child_histories[0]
+    b_history = root_history.child_histories[1]
+    bb_history = root_history.child_histories[1].child_histories[0]
+
+    # the root and the B hash lists only contains a mhl reference to the hash list
+    # down the folder hierarchy, no media hashes
+    assert len(root_history.hash_lists[1].media_hashes) == 0
+    assert root_history.hash_lists[1].referenced_hash_lists[0] == b_history.hash_lists[1]
+    assert len(b_history.hash_lists[1].media_hashes) == 0
+    assert b_history.hash_lists[1].referenced_hash_lists[0] == bb_history.hash_lists[1]
+
+    # the BB hash list contains the media hash of the verified files in BB
+    assert bb_history.hash_lists[1].media_hashes[0].relative_filepath == 'BB1.txt'
+    assert bb_history.hash_lists[1].media_hashes[0].hash_entries[0].action == 'verified'
+    assert bb_history.hash_lists[1].media_hashes[1].relative_filepath == 'BB2.txt'
+    assert bb_history.hash_lists[1].media_hashes[1].hash_entries[0].action == 'original'
+
+    # the other histories don't have a new generation
+    assert not os.path.isfile('/root/A/AA/asc-mhl/AA_2020-01-16_091500_0002.ascmhl')
+    assert aa_history.latest_generation_number() == 1

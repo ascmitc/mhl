@@ -54,9 +54,9 @@ class MHLHistoryXMLBackend:
 		"""traverses the whole file system tree inside the history to find all sub histories"""
 		history_root = history.get_root_path()
 		for root, directories, filenames in os.walk(history_root):
-			# print(f'root: \"{root}\" directories: \"{directories}\"')
 			if root != history_root and 'asc-mhl' in directories:
-				print(f'parse mhl in folder: \"{root}\" not going deeper')
+				# we parse the mhl folder and clear the directories so we are not going deeper
+				# everything beneath is handled by the child history
 				child_history = MHLHistoryXMLBackend.parse(root)
 				child_history.parent_history = history
 				history.append_child_history(child_history)

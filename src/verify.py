@@ -1,4 +1,4 @@
-from src.mhllib.mhl_history_xml_backend import MHLHistoryXMLBackend
+from src.mhllib.mhl_history_fs_backend import MHLHistoryFSBackend
 from src.mhllib.mhl_generation_creation_session import MHLGenerationCreationSession
 from src.mhllib.mhl_context import MHLContext
 from src.mhllib.mhl_hashlist import MHLCreatorInfo
@@ -25,7 +25,7 @@ def verify(root_path, verbose, hash_format):
     if not os.path.isabs(root_path):
         root_path = os.path.join(os.getcwd(), root_path)
 
-    existing_history = MHLHistoryXMLBackend.parse(root_path)
+    existing_history = MHLHistoryFSBackend.parse(root_path)
 
     # start a verification session on the existing history
     session = MHLGenerationCreationSession(existing_history)
@@ -59,7 +59,7 @@ def verify_paths(root_path, paths, verbose, hash_format):
     if not os.path.isabs(root_path):
         root_path = os.path.join(os.getcwd(), root_path)
 
-    existing_history = MHLHistoryXMLBackend.parse(root_path)
+    existing_history = MHLHistoryFSBackend.parse(root_path)
     # start a verification session on the existing history
     session = MHLGenerationCreationSession(existing_history)
 

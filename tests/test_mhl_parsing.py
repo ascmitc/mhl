@@ -4,7 +4,7 @@ import time
 from freezegun import freeze_time
 from click.testing import CliRunner
 from src import verify
-from src.mhllib.mhl_history_xml_backend import MHLHistoryXMLBackend
+from src.mhllib.mhl_history_fs_backend import MHLHistoryFSBackend
 
 scenario_output_path = '../Scenarios/Output'
 fake_ref_path = '/ref'
@@ -49,7 +49,7 @@ def test_child_history_parsing(fs, nested_mhl_histories):
 
     """
 
-    root_history = MHLHistoryXMLBackend.parse('/root')
+    root_history = MHLHistoryFSBackend.parse('/root')
     assert len(root_history.child_histories) == 2
 
     aa_history = root_history.child_histories[0]
@@ -101,7 +101,7 @@ def test_child_history_verify(fs, nested_mhl_histories):
     assert os.path.isfile('/root/B/asc-mhl/B_2020-01-16_091500_0002.ascmhl')
     assert os.path.isfile('/root/B/BB/asc-mhl/BB_2020-01-16_091500_0002.ascmhl')
 
-    root_history = MHLHistoryXMLBackend.parse('/root')
+    root_history = MHLHistoryFSBackend.parse('/root')
     assert len(root_history.hash_lists) == 2
 
     assert root_history.hash_lists[1].media_hashes[0].relative_filepath == 'A/AB/AB1.txt'
@@ -142,7 +142,7 @@ def test_child_history_partial_verification_ba_1_file(fs, nested_mhl_histories):
     assert os.path.isfile('/root/asc-mhl/root_2020-01-16_091500_0002.ascmhl')
     assert os.path.isfile('/root/B/asc-mhl/B_2020-01-16_091500_0002.ascmhl')
 
-    root_history = MHLHistoryXMLBackend.parse('/root')
+    root_history = MHLHistoryFSBackend.parse('/root')
     assert len(root_history.hash_lists) == 2
 
     aa_history = root_history.child_histories[0]
@@ -181,7 +181,7 @@ def test_child_history_partial_verification_bb_folder(fs, nested_mhl_histories):
     assert os.path.isfile('/root/B/asc-mhl/B_2020-01-16_091500_0002.ascmhl')
     assert os.path.isfile('/root/B/BB/asc-mhl/BB_2020-01-16_091500_0002.ascmhl')
 
-    root_history = MHLHistoryXMLBackend.parse('/root')
+    root_history = MHLHistoryFSBackend.parse('/root')
     assert len(root_history.hash_lists) == 2
 
     aa_history = root_history.child_histories[0]

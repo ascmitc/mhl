@@ -10,7 +10,7 @@ from src.mhllib.mhl_defines import ascmhl_folder_name
 from src.util import logger
 from src.util.datetime import datetime_now_filename_string
 
-class MHLHistoryXMLBackend:
+class MHLHistoryFSBackend:
 	"""
 	class for reading an asc-mhl folder with MHL files
 
@@ -53,7 +53,7 @@ class MHLHistoryXMLBackend:
 		for hash_list in hash_lists:
 			history.append_hash_list(hash_list)
 
-		MHLHistoryXMLBackend.find_and_load_child_histories(history)
+		MHLHistoryFSBackend.find_and_load_child_histories(history)
 
 		return history
 
@@ -65,7 +65,7 @@ class MHLHistoryXMLBackend:
 			if root != history_root and 'asc-mhl' in directories:
 				# we parse the mhl folder and clear the directories so we are not going deeper
 				# everything beneath is handled by the child history
-				child_history = MHLHistoryXMLBackend.parse(root)
+				child_history = MHLHistoryFSBackend.parse(root)
 				child_history.parent_history = history
 				history.append_child_history(child_history)
 				directories.clear()
@@ -76,8 +76,8 @@ class MHLHistoryXMLBackend:
 
 	@staticmethod
 	def write_new_generation(history: MHLHistory, new_hash_list: MHLHashList):
-		MHLHistoryXMLBackend._validate_new_hash_list(history, new_hash_list)
-		file_name, generation_number = MHLHistoryXMLBackend._new_generation_filename(history)
+		MHLHistoryFSBackend._validate_new_hash_list(history, new_hash_list)
+		file_name, generation_number = MHLHistoryFSBackend._new_generation_filename(history)
 		file_path = os.path.join(history.asc_mhl_path, file_name)
 		new_hash_list.generation_number = generation_number
 		MHLHashListXMLBackend.write_hash_list(new_hash_list, file_path)

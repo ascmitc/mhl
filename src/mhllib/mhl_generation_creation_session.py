@@ -4,7 +4,7 @@ from src.util import logger
 from .mhl_history import MHLHistory
 from .mhl_hashlist import MHLHashList, MHLMediaHash, MHLHashEntry, MHLCreatorInfo
 from .mhl_hashlist_xml_backend import MHLHashListXMLBackend
-from .mhl_history_xml_backend import MHLHistoryXMLBackend
+from .mhl_history_fs_backend import MHLHistoryFSBackend
 from .mhl_chain_txt_backend import MHLChainTXTBackend
 
 
@@ -92,7 +92,7 @@ class MHLGenerationCreationSession:
 				new_hash_list = self.new_hash_lists[history]
 			new_hash_list.referenced_hash_lists = referenced_hash_lists[history]
 			new_hash_list.creator_info = creator_info
-			MHLHistoryXMLBackend.write_new_generation(history, new_hash_list)
+			MHLHistoryFSBackend.write_new_generation(history, new_hash_list)
 			if history.parent_history is not None:
 				referenced_hash_lists[history.parent_history].append(new_hash_list)
 

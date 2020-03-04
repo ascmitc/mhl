@@ -27,7 +27,7 @@ class MHLHistoryFSBackend:
 		history = MHLHistory()
 		history.asc_mhl_path = asc_mhl_folder_path
 
-		file_path = os.path.join(asc_mhl_folder_path, "chain.txt")	#FIXME make "chain.txt" a variable
+		file_path = os.path.join(asc_mhl_folder_path, MHLChainTXTBackend.chain_filename)
 		chain = MHLChainTXTBackend.parse(file_path)
 		history.set_chain(chain)
 

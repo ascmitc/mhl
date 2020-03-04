@@ -2,6 +2,7 @@ from src.util import logger
 from .mhl_chain import MHLChain, MHLChainGeneration
 from .mhl_history import MHLHistory
 from .mhl_hashlist import MHLHashList
+from src.util.hashing import create_filehash
 
 import os
 
@@ -9,13 +10,18 @@ class MHLChainTXTBackend:
 	"""class to read a chain.txt file into a MHLChain object
 	"""
 
+	chain_filename = "chain.txt"
+
 	@staticmethod
 	def parse(filepath):
 		"""parsing the chain.txt file and building the MHLChain for the chain member variable"""
-		#logger.info(f'parsing \"{os.path.basename(filepath)}\"... TBI')		#FIXME
+		logger.info(f'parsing \"{os.path.basename(filepath)}\"...')
 
 		chain = MHLChain()
 		chain.file_path = filepath
+
+		if not os.path.exists(filepath):
+			return chain
 
 		lines = [line.rstrip('\n') for line in open(filepath)]
 
@@ -55,10 +61,51 @@ class MHLChainTXTBackend:
 		# TODO sanity checks
 		return generation
 
+
 	@staticmethod
 	def write_chain(chain: MHLChain, new_hash_list: MHLHashList):
-		#logger.info(f'writing \"{os.path.basename(chain.file_path)}\"... TBI') 	#FIXME
-		#logger.info(f'   -> appending \"{new_hash_list.file_path}\"... TBI')  # FIXME
-		foo = 1
+		logger.info(f'writing \"{os.path.basename(chain.file_path)}\"...')
+		MHLChainTXTBackend._append_new_generation_to_file(chain, new_hash_list)
 
+	@staticmethod
+	def _line_for_chainfile(chain_generation: MHLChainGeneration):
+		"""creates a text line for appending a generation to a chain file
+		"""
+		result_string = str(chain_generation.generation_number).zfill(4) + " " + \
+						chain_generation.ascmhl_filename + " " + \
+						chain_generation.hashformat + ": " + \
+						chain_generation.hash_string
 
+		return result_string
+
+	@staticmethod
+	def _append_new_generation_to_file(chain: MHLChain, hash_list: MHLHashList):
+		""" appends an externally created Generation object to the chain file
+		"""
+
+		hash_format = "MD5"	#TODO make configurable?
+
+		# get a new generation for a hashlist
+		generation = MHLChainGeneration()
+		generation.generation_number = hash_list.generation_number
+		generation.hashformat = hash_format
+		generation.hash_string = create_filehash(hash_format, hash_list.file_path)
+		generation.ascmhl_filename = hash_list.get_file_name()
+
+		# TODO sanity checks
+		# - if generation is already part of self.generations
+		# - if generation number is sequential
+
+		# immediately write to file
+		logger.info(f'   appending chain generation for \"{generation.ascmhl_filename}\" to chain file')
+		file_path = os.path.join(chain.history.asc_mhl_path, MHLChainTXTBackend.chain_filename)
+
+		with open(file_path, 'a') as file:
+			file.write(MHLChainTXTBackend._line_for_chainfile(generation) + "\n")
+
+		# FIXME: check if file could be created
+
+		# …and store here
+		# FIXME: only if successfully written to file
+		generation.chain = chain
+		chain.generations.append(generation)

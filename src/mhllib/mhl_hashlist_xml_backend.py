@@ -62,7 +62,7 @@ class MHLHashListXMLBackend:
 	@staticmethod
 	def write_hash_list(hash_list: MHLHashList, file_path: str):
 
-		#logger.info(f'writing \"{os.path.basename(file_path)}\"...')
+		logger.info(f'writing \"{os.path.basename(file_path)}\"...')
 
 		xml_context = sax.ElementTreeContentHandler()
 		xml_context.startDocument()

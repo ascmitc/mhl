@@ -13,13 +13,14 @@ class MHLChain:
 	generations -- list of MHLChainGeneration objects
 
 	attribute member variables:
-	filepath -- absolute path to chain file
+	file path -- absolute path to chain file
 	"""
 
 	# init
 
 	def __init__(self):
 		self.history = None
+		self.file_path = None
 		self.filepath = None
 		self.generations = list()
 

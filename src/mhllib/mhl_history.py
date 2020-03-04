@@ -17,6 +17,7 @@ class MHLHistory:
 		* initialize new, empty MHLHashList for adding files/hashes, define path and filename for new MHLHashList
 
 	model member variables:
+	chain -- content of the chain file
 	hashlists -- list of MHLHashList (one for each generation / MHL file)
 	child_histories -- list of all direct child histories
 	parent_history -- the one parent history if any
@@ -27,7 +28,7 @@ class MHLHistory:
 	other member variables:
 	root_path -- path where the mhl folder resides
 	"""
-
+	chain: MHLChain
 	hash_lists: List[MHLHashList]
 	asc_mhl_path: str
 	child_histories: List[MHLHistory]
@@ -35,6 +36,7 @@ class MHLHistory:
 	parent_history: MHLHistory
 
 	def __init__(self):
+		self.chain = None
 		self.hash_lists = []
 		self.child_histories = []
 		self.child_history_mappings = {}

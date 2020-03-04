@@ -26,7 +26,7 @@ class MHLHashList:
 	generation_number -- generation number of the represented MHL file
 
 	other member variables:
-	filename -- file name of the represented MHL file
+	file path -- file path of the represented MHL file
 	"""
 
 	history: MHLHistory

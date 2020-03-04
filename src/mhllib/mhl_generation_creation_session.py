@@ -5,6 +5,7 @@ from .mhl_history import MHLHistory
 from .mhl_hashlist import MHLHashList, MHLMediaHash, MHLHashEntry, MHLCreatorInfo
 from .mhl_hashlist_xml_backend import MHLHashListXMLBackend
 from .mhl_history_xml_backend import MHLHistoryXMLBackend
+from .mhl_chain_txt_backend import MHLChainTXTBackend
 
 
 class MHLGenerationCreationSession:
@@ -95,6 +96,7 @@ class MHLGenerationCreationSession:
 			if history.parent_history is not None:
 				referenced_hash_lists[history.parent_history].append(new_hash_list)
 
+			MHLChainTXTBackend.write_chain(history.chain)
 
 	def log(self):
 		logger.info("mhl verify session")

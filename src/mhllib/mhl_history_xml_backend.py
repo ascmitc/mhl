@@ -3,6 +3,8 @@ import re
 from typing import List
 from src.mhllib import mhl_defines, MHLHashList
 from src.mhllib.mhl_history import MHLHistory
+from src.mhllib.mhl_chain import MHLChain
+from src.mhllib.mhl_chain_txt_backend import MHLChainTXTBackend
 from src.mhllib.mhl_hashlist_xml_backend import MHLHashListXMLBackend
 from src.mhllib.mhl_defines import ascmhl_folder_name
 from src.util import logger
@@ -24,6 +26,12 @@ class MHLHistoryXMLBackend:
 		asc_mhl_folder_path = os.path.join(root_path, ascmhl_folder_name)
 		history = MHLHistory()
 		history.asc_mhl_path = asc_mhl_folder_path
+
+		file_path = os.path.join(asc_mhl_folder_path, "chain.txt")	#FIXME make "chain.txt" a variable
+		chain = MHLChainTXTBackend.parse(file_path)
+		chain.history = history
+		history.chain = chain
+
 		hash_lists = []
 		for root, directories, filenames in os.walk(asc_mhl_folder_path):
 			for filename in filenames:

@@ -43,6 +43,10 @@ class MHLHistory:
 		self.parent_history = None
 		self.asc_mhl_path = None
 
+	def set_chain(self, chain):
+		chain.history = self
+		self.chain = chain
+
 	def append_hash_list(self, hash_list):
 		hash_list.history = self
 		self.hash_lists.append(hash_list)

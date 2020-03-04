@@ -29,8 +29,7 @@ class MHLHistoryFSBackend:
 
 		file_path = os.path.join(asc_mhl_folder_path, "chain.txt")	#FIXME make "chain.txt" a variable
 		chain = MHLChainTXTBackend.parse(file_path)
-		chain.history = history
-		history.chain = chain
+		history.set_chain(chain)
 
 		hash_lists = []
 		for root, directories, filenames in os.walk(asc_mhl_folder_path):
@@ -44,7 +43,6 @@ class MHLHistoryFSBackend:
 
 						generation_number = int(parts[0][3])
 						hash_list.generation_number = generation_number
-						hash_list.file_path = file_path
 						hash_lists.append(hash_list)
 					else:
 						logger.error(f'name of ascmhl file {filename} doesnt conform to naming convention')

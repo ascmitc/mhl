@@ -1,3 +1,12 @@
+"""
+__author__ = "Patrick Renner"
+__copyright__ = "Copyright 2020, Pomfort GmbH"
+
+__license__ = "MIT"
+__maintainer__ = "Patrick Renner, Alexander Sahm"
+__email__ = "opensource@pomfort.com"
+"""
+
 from src.util import logger
 from .mhl_chain import MHLChain, MHLChainGeneration
 from .mhl_history import MHLHistory

@@ -1,3 +1,12 @@
+"""
+__author__ = "Patrick Renner, Alexander Sahm"
+__copyright__ = "Copyright 2020, Pomfort GmbH"
+
+__license__ = "MIT"
+__maintainer__ = "Patrick Renner, Alexander Sahm"
+__email__ = "opensource@pomfort.com"
+"""
+
 from src.mhllib.mhl_history_fs_backend import MHLHistoryFSBackend
 from src.mhllib.mhl_context import MHLContext
 import click

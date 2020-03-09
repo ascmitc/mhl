@@ -1,3 +1,12 @@
+"""
+__author__ = "Jon Waggoner, Patrick Renner"
+__copyright__ = "Copyright 2020, Pomfort GmbH"
+
+__license__ = "MIT"
+__maintainer__ = "Patrick Renner"
+__email__ = "opensource@pomfort.com"
+"""
+
 import datetime
 import time
 

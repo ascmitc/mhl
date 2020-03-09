@@ -1,3 +1,12 @@
+"""
+__author__ = "Patrick Renner, Alexander Sahm"
+__copyright__ = "Copyright 2020, Pomfort GmbH"
+
+__license__ = "MIT"
+__maintainer__ = "Patrick Renner, Alexander Sahm"
+__email__ = "opensource@pomfort.com"
+"""
+
 from __future__ import annotations
 from typing import Tuple, List, Dict
 from src.util import logger

@@ -1,4 +1,13 @@
 #!/usr/bin/env python3
+"""
+__author__ = "Patrick Renner, Alexander Sahm"
+__copyright__ = "Copyright 2020, Pomfort GmbH"
+
+__license__ = "MIT"
+__maintainer__ = "Patrick Renner, Alexander Sahm"
+__email__ = "opensource@pomfort.com"
+"""
+
 import click
 from src import verify, debug_commands
 

@@ -1,3 +1,12 @@
+"""
+__author__ = "Alexander Sahm"
+__copyright__ = "Copyright 2020, Pomfort GmbH"
+
+__license__ = "MIT"
+__maintainer__ = "Patrick Renner, Alexander Sahm"
+__email__ = "opensource@pomfort.com"
+"""
+
 from src.util import logger
 from src.util.datetime import datetime_isostring
 from .mhl_defines import ascmhl_supported_hashformats

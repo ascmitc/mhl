@@ -96,7 +96,7 @@ class MHLGenerationCreationSession:
 			if history.parent_history is not None:
 				referenced_hash_lists[history.parent_history].append(new_hash_list)
 
-			MHLChainTXTBackend.write_chain(history.chain, self.new_hash_lists[history])
+			MHLChainTXTBackend.write_chain(history.chain, new_hash_list)
 
 	def log(self):
 		logger.info("mhl verify session")

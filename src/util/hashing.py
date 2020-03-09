@@ -10,6 +10,11 @@ def generate_checksum(csum_type, file_path):
     :return: hexdigest of the checksum
     """
     csum = csum_type()
+
+    if file_path is None:
+        print("ERROR: file_path is None")
+        return None
+
     with open(file_path, 'rb') as fd:
         # process files in 1MB chunks so that large files won't cause excessive memory consumption.
         chunk = fd.read(1024 * 1024)

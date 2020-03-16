@@ -7,10 +7,11 @@ __maintainer__ = "Patrick Renner, Alexander Sahm"
 __email__ = "opensource@pomfort.com"
 """
 
-from src.mhllib.mhl_history_fs_backend import MHLHistoryFSBackend
-from src.mhllib.mhl_context import MHLContext
+from .context import MHLContext
+from .history_fs_backend import MHLHistoryFSBackend
+from .chain_txt_backend import MHLChainTXTBackend
+from .hashlist_xml_backend import MHLHashListXMLBackend
 import click
-import os
 
 
 @click.command()
@@ -23,7 +24,7 @@ def readchainfile(filepath, verbose):
     context = MHLContext()
     context.verbose = verbose
 
-    chain = MHLChainReader.parse(filepath)
+    chain = MHLChainTXTBackend.parse(filepath)
 
     if context.verbose:
         chain.log()

@@ -7,18 +7,19 @@ __maintainer__ = "Patrick Renner, Alexander Sahm"
 __email__ = "opensource@pomfort.com"
 """
 
-from src.mhllib.mhl_history_fs_backend import MHLHistoryFSBackend
-from src.mhllib.mhl_generation_creation_session import MHLGenerationCreationSession
-from src.mhllib.mhl_context import MHLContext
-from src.mhllib.mhl_hashlist import MHLCreatorInfo
-from src.mhllib.mhl_defines import ascmhl_folder_name
-from .util.hashing import create_filehash
-from src.util.datetime import datetime_now_isostring
-import click
-from .util.traverse import post_order_lexicographic
-import os
+
 import datetime
+import os
 import platform
+import click
+
+from .context import MHLContext, MHLCreatorInfo
+from .hasher import create_filehash
+from .history_fs_backend import MHLHistoryFSBackend
+from .generator import MHLGenerationCreationSession
+from .traverse import post_order_lexicographic
+from . import utils
+
 
 @click.command()
 @click.argument('root_path', type=click.Path(exists=True))
@@ -95,7 +96,7 @@ def commit_session(session):
     creator_info = MHLCreatorInfo()
     creator_info.tool_version = "0.0.1"
     creator_info.tool_name = "verify"
-    creator_info.creation_date = datetime_now_isostring()
+    creator_info.creation_date = utils.datetime_now_isostring()
     creator_info.host_name = platform.node()
     creator_info.process = "verify"
     session.commit(creator_info)
@@ -116,7 +117,3 @@ def process_file_path(existing_history, file_path, hash_format, session):
                                  existing_hash_format, hash_in_existing_format)
     current_format_hash = create_filehash(hash_format, file_path)
     session.append_file_hash(file_path, file_size, file_modification_date, hash_format, current_format_hash)
-
-
-
-

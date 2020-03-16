@@ -122,7 +122,7 @@ $ ./scenario01.sh
 
 These scripts use the folder structure in ``Template/`` as a template and creates new folder structures and ASC-MHL files in a new folder ``Temp/``.
 
-Sample output of all scenario scripts can be found in the [README.md](Scenarios/README.md) file of the ``Scenarios/`` folder. 
+Sample output of all scenario scripts can be found in the [README.md](examples/scenarios/README.md) file of the ``Scenarios/`` folder. 
 The created ASC-MHL files can also be found in the ``Output/`` folder. 
 
 ## Licensing

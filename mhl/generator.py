@@ -9,12 +9,12 @@ __email__ = "opensource@pomfort.com"
 
 from collections import defaultdict
 from typing import Dict, List
-from src.util import logger
-from .mhl_history import MHLHistory
-from .mhl_hashlist import MHLHashList, MHLMediaHash, MHLHashEntry, MHLCreatorInfo
-from .mhl_hashlist_xml_backend import MHLHashListXMLBackend
-from .mhl_history_fs_backend import MHLHistoryFSBackend
-from .mhl_chain_txt_backend import MHLChainTXTBackend
+from . import logger
+from .history import MHLHistory
+from .hashlist import MHLHashList, MHLMediaHash, MHLHashEntry
+from .context import MHLCreatorInfo
+from .history_fs_backend import MHLHistoryFSBackend
+from .chain_txt_backend import MHLChainTXTBackend
 
 
 class MHLGenerationCreationSession:

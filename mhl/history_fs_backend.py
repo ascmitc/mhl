@@ -9,15 +9,15 @@ __email__ = "opensource@pomfort.com"
 
 import os
 import re
-from typing import List
-from src.mhllib import mhl_defines, MHLHashList
-from src.mhllib.mhl_history import MHLHistory
-from src.mhllib.mhl_chain import MHLChain
-from src.mhllib.mhl_chain_txt_backend import MHLChainTXTBackend
-from src.mhllib.mhl_hashlist_xml_backend import MHLHashListXMLBackend
-from src.mhllib.mhl_defines import ascmhl_folder_name
-from src.util import logger
-from src.util.datetime import datetime_now_filename_string
+
+from . import logger
+from .__version__ import ascmhl_folder_name, ascmhl_file_extension
+from .hashlist import MHLHashList
+from .history import MHLHistory
+from .chain_txt_backend import MHLChainTXTBackend
+from .hashlist_xml_backend import MHLHashListXMLBackend
+from .utils import datetime_now_filename_string
+
 
 class MHLHistoryFSBackend:
 	"""
@@ -43,7 +43,7 @@ class MHLHistoryFSBackend:
 		hash_lists = []
 		for root, directories, filenames in os.walk(asc_mhl_folder_path):
 			for filename in filenames:
-				if filename.endswith(mhl_defines.ascmhl_file_extension):
+				if filename.endswith(ascmhl_file_extension):
 					# A002R2EC_2019-06-21_082301_0005.ascmhl
 					parts = re.findall(r'(.*)_(.+)_(.+)_(\d+)\.ascmhl', filename)
 					if parts.__len__() == 1 and parts[0].__len__() == 4:

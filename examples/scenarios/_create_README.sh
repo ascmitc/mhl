@@ -82,10 +82,10 @@ rm -rf README.md-e
 # $ cd hive-master/cli
 # $ python3 -m venv env
 # $ env/bin/activate
-# $ hive seal [....]/asc-mhl-tools/Scenarios/Output/scenario_06/A002R2EC
+# $ hive seal [....]/asc-mhl-tools/scenarios/Output/scenario_06/A002R2EC
 # 
-# copy and paste output into Scenarios/Template/Material/Scenario06/hive-output.rtf
-# move "Scenarios/Output/scenario_06/A002R2EC/hive" to "Scenarios/Template/Material/Scenario06"
+# copy and paste output into scenarios/Template/Material/Scenario06/hive-output.rtf
+# move "scenarios/Output/scenario_06/A002R2EC/hive" to "scenarios/Template/Material/Scenario06"
 
 
 

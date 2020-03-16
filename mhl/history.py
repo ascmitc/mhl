@@ -7,11 +7,13 @@ __maintainer__ = "Patrick Renner, Alexander Sahm"
 __email__ = "opensource@pomfort.com"
 """
 
+
 from __future__ import annotations
-from typing import Tuple, List, Dict
-from src.util import logger
-from src.mhllib.mhl_hashlist import MHLHashList, MHLHashEntry, MHLMediaHash, MHLHashListReference
 import os
+from typing import Tuple, List, Dict
+from . import logger
+from .chain import MHLChain
+from .hashlist import MHLHashList, MHLHashEntry, MHLMediaHash
 
 
 class MHLHistory:

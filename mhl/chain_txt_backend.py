@@ -7,13 +7,12 @@ __maintainer__ = "Patrick Renner, Alexander Sahm"
 __email__ = "opensource@pomfort.com"
 """
 
-from src.util import logger
-from .mhl_chain import MHLChain, MHLChainGeneration
-from .mhl_history import MHLHistory
-from .mhl_hashlist import MHLHashList
-from src.util.hashing import create_filehash
-
+from . import logger
+from .chain import MHLChain, MHLChainGeneration
+from .hashlist import MHLHashList
+from .hasher import create_filehash
 import os
+
 
 class MHLChainTXTBackend:
 	"""class to read a chain.txt file into a MHLChain object

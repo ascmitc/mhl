@@ -12,10 +12,11 @@ import os
 import time
 from freezegun import freeze_time
 from click.testing import CliRunner
-from src import verify
-from src.mhllib.mhl_history_fs_backend import MHLHistoryFSBackend
 
-scenario_output_path = '../Scenarios/Output'
+from mhl.history_fs_backend import MHLHistoryFSBackend
+import mhl.commands
+
+scenario_output_path = 'examples/scenarios/Output'
 fake_ref_path = '/ref'
 
 
@@ -34,21 +35,21 @@ def nested_mhl_histories(fs):
     # create mhl histories on different directly levels
     fs.create_file('/root/Stuff.txt', contents='stuff\n')
     runner = CliRunner()
-    result = runner.invoke(verify.verify, ['/root'])
+    result = runner.invoke(mhl.commands.verify, ['/root'])
     assert result.exit_code == 0
 
     fs.create_file('/root/A/AA/AA1.txt', contents='AA1\n')
     fs.create_file('/root/A/AB/AB1.txt', contents='AB1\n')
-    result = runner.invoke(verify.verify, ['/root/A/AA'])
+    result = runner.invoke(mhl.commands.verify, ['/root/A/AA'])
     assert result.exit_code == 0
 
     fs.create_file('/root/B/B1.txt', contents='B1\n')
-    result = runner.invoke(verify.verify, ['/root/B'])
+    result = runner.invoke(mhl.commands.verify, ['/root/B'])
     assert result.exit_code == 0
 
     fs.create_file('/root/B/BA/BA1.txt', contents='BA1\n')
     fs.create_file('/root/B/BB/BB1.txt', contents='BB1\n')
-    result = runner.invoke(verify.verify, ['/root/B/BB'])
+    result = runner.invoke(mhl.commands.verify, ['/root/B/BB'])
     assert result.exit_code == 0
 
 
@@ -102,7 +103,7 @@ def test_child_history_verify(fs, nested_mhl_histories):
     """
 
     runner = CliRunner()
-    result = runner.invoke(verify.verify, ['/root'])
+    result = runner.invoke(mhl.commands.verify, ['/root'])
     assert result.exit_code == 0
 
     assert os.path.isfile('/root/asc-mhl/root_2020-01-16_091500_0002.ascmhl')
@@ -144,7 +145,7 @@ def test_child_history_partial_verification_ba_1_file(fs, nested_mhl_histories):
     # create an additional file the verify_paths command will not add since we only pass it a single file
     fs.create_file('/root/B/B2.txt', contents='B2\n')
     runner = CliRunner()
-    result = runner.invoke(verify.verify_paths, ['/root', '/root/B/B1.txt'])
+    result = runner.invoke(mhl.commands.verify_paths, ['/root', '/root/B/B1.txt'])
     assert result.exit_code == 0
 
     # two new generations have been written
@@ -183,7 +184,7 @@ def test_child_history_partial_verification_bb_folder(fs, nested_mhl_histories):
     # create an additional file the verify_paths command will find because we pass it a folder
     fs.create_file('/root/B/BB/BB2.txt', contents='BB2\n')
     runner = CliRunner()
-    result = runner.invoke(verify.verify_paths, ['/root', '/root/B/BB'])
+    result = runner.invoke(mhl.commands.verify_paths, ['/root', '/root/B/BB'])
     assert result.exit_code == 0
 
     assert os.path.isfile('/root/asc-mhl/root_2020-01-16_091500_0002.ascmhl')

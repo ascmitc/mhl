@@ -1,14 +1,12 @@
-"""
-__author__ = "Jon Waggoner, Patrick Renner"
-__copyright__ = "Copyright 2020, Pomfort GmbH"
-
-__license__ = "MIT"
-__maintainer__ = "Patrick Renner"
-__email__ = "opensource@pomfort.com"
-"""
-
 import datetime
 import time
+
+
+def matches_prefixes(text: str, prefixes: list):
+    for prefix in prefixes:
+        if text.startswith(prefix):
+            return True
+    return False
 
 
 def datetime_isostring(date, keep_microseconds=False):

@@ -13,6 +13,7 @@ import time
 from freezegun import freeze_time
 from click.testing import CliRunner
 
+import mhl._debug_commands
 from mhl.history_fs_backend import MHLHistoryFSBackend
 import mhl.commands
 
@@ -145,7 +146,7 @@ def test_child_history_partial_verification_ba_1_file(fs, nested_mhl_histories):
     # create an additional file the verify_paths command will not add since we only pass it a single file
     fs.create_file('/root/B/B2.txt', contents='B2\n')
     runner = CliRunner()
-    result = runner.invoke(mhl.commands.verify_paths, ['/root', '/root/B/B1.txt'])
+    result = runner.invoke(mhl._debug_commands.verify_paths, ['/root', '/root/B/B1.txt'])
     assert result.exit_code == 0
 
     # two new generations have been written
@@ -184,7 +185,7 @@ def test_child_history_partial_verification_bb_folder(fs, nested_mhl_histories):
     # create an additional file the verify_paths command will find because we pass it a folder
     fs.create_file('/root/B/BB/BB2.txt', contents='BB2\n')
     runner = CliRunner()
-    result = runner.invoke(mhl.commands.verify_paths, ['/root', '/root/B/BB'])
+    result = runner.invoke(mhl._debug_commands.verify_paths, ['/root', '/root/B/BB'])
     assert result.exit_code == 0
 
     assert os.path.isfile('/root/asc-mhl/root_2020-01-16_091500_0002.ascmhl')

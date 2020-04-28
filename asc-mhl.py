@@ -20,8 +20,10 @@ def mhltool_cli():
 mhltool_cli.add_command(_debug_commands.readmhlfile)
 mhltool_cli.add_command(_debug_commands.readchainfile)
 mhltool_cli.add_command(_debug_commands.readmhlhistory)
+mhltool_cli.add_command(_debug_commands.verify_paths)
+
 mhltool_cli.add_command(commands.verify)
-mhltool_cli.add_command(commands.verify_paths)
+
 
 if __name__ == '__main__':
     mhltool_cli()

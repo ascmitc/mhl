@@ -8,7 +8,7 @@ __email__ = "opensource@pomfort.com"
 """
 import os
 import click
-from .commands import process_file_path, commit_session
+from .commands import seal_file_path, commit_session
 from .generator import MHLGenerationCreationSession
 from. import logger
 from .history_fs_backend import MHLHistoryFSBackend
@@ -87,9 +87,9 @@ def verify_paths(root_path, paths, verbose, hash_format):
                     file_path = os.path.join(folder_path, item_name)
                     if is_dir:
                         continue
-                    process_file_path(existing_history, file_path, hash_format, session)
+                    seal_file_path(existing_history, file_path, hash_format, session)
         else:
-            process_file_path(existing_history, path, hash_format, session)
+            seal_file_path(existing_history, path, hash_format, session)
 
     commit_session(session)
 

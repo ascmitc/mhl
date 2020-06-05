@@ -11,8 +11,6 @@ import pytest
 import os
 import shutil
 import filecmp
-import time
-import platform
 import difflib
 from freezegun import freeze_time
 from click.testing import CliRunner
@@ -23,21 +21,6 @@ import mhl.commands
 
 scenario_output_path = 'examples/scenarios/Output'
 fake_ref_root_path = '/ref'
-
-
-@pytest.fixture(scope="session", autouse=True)
-def set_timezone():
-    """Fakes the host timezone to UTC so we don't get different mhl files if the tests run on different time zones
-    seems like freezegun can't handle timezones like we want"""
-    os.environ['TZ'] = 'UTZ'
-    time.tzset()
-
-
-@pytest.fixture(autouse=True)
-def set_hostname(monkeypatch):
-    def fake_hostname():
-        return 'myHost.local'
-    monkeypatch.setattr(platform, 'node', fake_hostname)
 
 
 @pytest.fixture()

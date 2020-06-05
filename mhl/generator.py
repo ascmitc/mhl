@@ -107,14 +107,6 @@ class MHLGenerationCreationSession:
 
 			MHLChainTXTBackend.write_chain(history.chain, new_hash_list)
 
-	def check_for_missing_files(self):
-		"""
-		Compares the content of previous hash lists with the new hash lists created during the session
-		if a file is missing on the file system (e.g. because it has been deleted) an error is printed
-		"""
-
-
-
 	def log(self):
 		logger.info("mhl verify session")
 		logger.info("root_path: {0}".format(self.root_history.get_root_path()))

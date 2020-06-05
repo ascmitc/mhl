@@ -15,6 +15,7 @@ import click
 
 from .context import MHLContext, MHLCreatorInfo
 from .hasher import create_filehash
+from . import logger
 from .history_fs_backend import MHLHistoryFSBackend
 from .generator import MHLGenerationCreationSession
 from .traverse import post_order_lexicographic
@@ -25,17 +26,22 @@ from . import utils
 @click.argument('root_path', type=click.Path(exists=True))
 @click.option('--verbose', '-v', default=False, is_flag=True, help="Verbose output")
 @click.option('--hash_format', '-h', type=click.Choice(['xxhash', 'MD5', 'SHA1', 'C4']), multiple=False, default='xxhash', help="Algorithm")
-def verify(root_path, verbose, hash_format):
+def seal(root_path, verbose, hash_format):
     """
-    read an ASC-MHL file
+
     """
     context = MHLContext()
     context.verbose = verbose
+    logger.verbose_logging = verbose
 
     if not os.path.isabs(root_path):
         root_path = os.path.join(os.getcwd(), root_path)
 
     existing_history = MHLHistoryFSBackend.parse(root_path)
+
+    # we collect all paths we expect to find first and remove every path that we actually found while
+    # traversing the file system, so this set will at the end contain the file paths not found in the file system
+    not_found_paths = existing_history.set_of_file_paths()
 
     # start a verification session on the existing history
     session = MHLGenerationCreationSession(existing_history)
@@ -44,13 +50,23 @@ def verify(root_path, verbose, hash_format):
             file_path = os.path.join(folder_path, item_name)
             if is_dir:
                 continue
-
             process_file_path(existing_history, file_path, hash_format, session)
+            not_found_paths.discard(file_path)
 
     commit_session(session)
 
     if context.verbose:
         existing_history.log()
+
+    check_missing_files(not_found_paths)
+
+
+def check_missing_files(not_found_paths):
+    if len(not_found_paths) > 0:
+        logger.error(f"{len(not_found_paths)} missing files: ")
+        for path in not_found_paths:
+            logger.error(f"  {path}")
+        raise logger.CompletenessCheckFailedException("Files referenced in the mhl history are missing")
 
 
 def commit_session(session):

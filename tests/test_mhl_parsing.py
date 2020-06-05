@@ -36,21 +36,21 @@ def nested_mhl_histories(fs):
     # create mhl histories on different directly levels
     fs.create_file('/root/Stuff.txt', contents='stuff\n')
     runner = CliRunner()
-    result = runner.invoke(mhl.commands.verify, ['/root'])
+    result = runner.invoke(mhl.commands.seal, ['/root'])
     assert result.exit_code == 0
 
     fs.create_file('/root/A/AA/AA1.txt', contents='AA1\n')
     fs.create_file('/root/A/AB/AB1.txt', contents='AB1\n')
-    result = runner.invoke(mhl.commands.verify, ['/root/A/AA'])
+    result = runner.invoke(mhl.commands.seal, ['/root/A/AA'])
     assert result.exit_code == 0
 
     fs.create_file('/root/B/B1.txt', contents='B1\n')
-    result = runner.invoke(mhl.commands.verify, ['/root/B'])
+    result = runner.invoke(mhl.commands.seal, ['/root/B'])
     assert result.exit_code == 0
 
     fs.create_file('/root/B/BA/BA1.txt', contents='BA1\n')
     fs.create_file('/root/B/BB/BB1.txt', contents='BB1\n')
-    result = runner.invoke(mhl.commands.verify, ['/root/B/BB'])
+    result = runner.invoke(mhl.commands.seal, ['/root/B/BB'])
     assert result.exit_code == 0
 
 
@@ -104,7 +104,7 @@ def test_child_history_verify(fs, nested_mhl_histories):
     """
 
     runner = CliRunner()
-    result = runner.invoke(mhl.commands.verify, ['/root'])
+    result = runner.invoke(mhl.commands.seal, ['/root'])
     assert result.exit_code == 0
 
     assert os.path.isfile('/root/asc-mhl/root_2020-01-16_091500_0002.ascmhl')
@@ -215,3 +215,37 @@ def test_child_history_partial_verification_bb_folder(fs, nested_mhl_histories):
     # the other histories don't have a new generation
     assert not os.path.isfile('/root/A/AA/asc-mhl/AA_2020-01-16_091500_0002.ascmhl')
     assert aa_history.latest_generation_number() == 1
+
+
+@freeze_time("2020-01-16 09:15:00")
+def test_seal_error_missing_file(fs, nested_mhl_histories):
+    """
+    test that sealing fails if there is a file missing on the file system that is referenced by one of the histories
+    """
+
+    root_history = MHLHistoryFSBackend.parse('/root')
+    paths = root_history.set_of_file_paths()
+
+    assert paths == {'/root/B/B1.txt', '/root/B/BB/BB1.txt', '/root/Stuff.txt', '/root/A/AA/AA1.txt'}
+    os.remove('/root/A/AA/AA1.txt')
+    runner = CliRunner()
+    result = runner.invoke(mhl.commands.seal, ['/root'])
+    assert result.exit_code == 15
+    assert '/root/A/AA/AA1.txt' in result.output
+    assert '1 missing files:' in result.output
+
+    # the actual seal has been written to disk anyways we expect the history contain
+    # the new not yet referenced files (/root/B/BA/BA1.txt and /root/A/AB/AB1.txt) as well now
+    root_history = MHLHistoryFSBackend.parse('/root')
+    paths = root_history.set_of_file_paths()
+
+    # since we scan all generations for file paths we now get old files, missing files and new files here
+    assert paths == {'/root/B/BB/BB1.txt', '/root/B/B1.txt', '/root/B/BA/BA1.txt', '/root/A/AA/AA1.txt',
+                     '/root/Stuff.txt', '/root/A/AB/AB1.txt'}
+
+    # since the file /root/A/AA/AA1.txt is still missing all further seal attempts will still fail
+    runner = CliRunner()
+    result = runner.invoke(mhl.commands.seal, ['/root'])
+    assert result.exit_code == 15
+    assert '/root/A/AA/AA1.txt' in result.output
+    assert '1 missing files:' in result.output

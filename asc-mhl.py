@@ -22,7 +22,7 @@ mhltool_cli.add_command(_debug_commands.readchainfile)
 mhltool_cli.add_command(_debug_commands.readmhlhistory)
 mhltool_cli.add_command(_debug_commands.verify_paths)
 
-mhltool_cli.add_command(commands.verify)
+mhltool_cli.add_command(commands.seal)
 
 
 if __name__ == '__main__':

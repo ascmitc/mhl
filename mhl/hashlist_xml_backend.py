@@ -24,7 +24,7 @@ class MHLHashListXMLBackend:
 	@staticmethod
 	def parse(filepath):
 		"""parsing the MHL XML file and building the MHLHashList for the hash_list member variable"""
-		logger.info(f'parsing \"{os.path.basename(filepath)}\"...')
+		logger.debug(f'parsing \"{os.path.basename(filepath)}\"...')
 
 		# for the fake file system in the tests to work we don't use the etree.parse since it uses a native
 		# c reading method that is not compatible with pyfakefs we instead read the content first and parse it directly
@@ -73,7 +73,7 @@ class MHLHashListXMLBackend:
 	@staticmethod
 	def write_hash_list(hash_list: MHLHashList, file_path: str):
 
-		logger.info(f'writing \"{os.path.basename(file_path)}\"...')
+		logger.verbose(f'writing \"{os.path.basename(file_path)}\"...')
 
 		xml_context = sax.ElementTreeContentHandler()
 		xml_context.startDocument()

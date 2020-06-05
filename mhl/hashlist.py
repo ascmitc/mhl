@@ -70,6 +70,12 @@ class MHLHashList:
                 return media_hash
         return None
 
+    def set_of_file_paths(self, root_path) -> set[str]:
+        all_paths = set()
+        for media_hash in self.media_hashes:
+            all_paths.add(os.path.join(root_path, media_hash.relative_filepath))
+        return all_paths
+
     def get_file_name(self):
         return os.path.basename(self.file_path)
 

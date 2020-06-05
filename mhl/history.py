@@ -148,6 +148,14 @@ class MHLHistory:
 			dir_path = os.path.dirname(dir_path)
 		return self, relative_path
 
+	def set_of_file_paths(self) -> set[str]:
+		all_paths = set()
+		for hash_list in self.hash_lists:
+			all_paths.update(hash_list.set_of_file_paths(self.get_root_path()))
+		for child_history in self.child_histories:
+			all_paths.update(child_history.set_of_file_paths())
+		return all_paths
+
 	def hash_list_with_file_name(self, file_name) -> MHLHashList:
 		for hash_list in self.hash_lists:
 			if hash_list.get_file_name() == file_name:

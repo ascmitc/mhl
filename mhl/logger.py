@@ -10,10 +10,19 @@ __email__ = "opensource@pomfort.com"
 import sys
 import click
 
+verbose_logging = False
+debug_logging = False
 
-def verbose(ctx, msg, *args):
+
+def debug(msg, *args):
+    """Logs a message to stdout only if debug is enabled."""
+    if debug_logging:
+        info(msg, *args)
+
+
+def verbose(msg, *args):
     """Logs a message to stdout only if verbose is enabled."""
-    if ctx.verbose:
+    if verbose_logging:
         info(msg, *args)
 
 
@@ -37,3 +46,7 @@ def fatal(msg, *args):
         msg %= args
     click.echo(click.style(msg, fg='red', bold=True, blink=True), file=sys.stderr)
     click.get_current_context().abort()
+
+
+class CompletenessCheckFailedException(click.ClickException):
+    exit_code = 15

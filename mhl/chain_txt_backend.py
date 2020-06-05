@@ -23,7 +23,7 @@ class MHLChainTXTBackend:
 	@staticmethod
 	def parse(filepath):
 		"""parsing the chain.txt file and building the MHLChain for the chain member variable"""
-		logger.info(f'parsing \"{os.path.basename(filepath)}\"...')
+		logger.debug(f'parsing \"{os.path.basename(filepath)}\"...')
 
 		chain = MHLChain()
 		chain.file_path = filepath
@@ -72,7 +72,7 @@ class MHLChainTXTBackend:
 
 	@staticmethod
 	def write_chain(chain: MHLChain, new_hash_list: MHLHashList):
-		logger.info(f'writing \"{os.path.basename(chain.file_path)}\"...')
+		logger.debug(f'writing \"{os.path.basename(chain.file_path)}\"...')
 		MHLChainTXTBackend._append_new_generation_to_file(chain, new_hash_list)
 
 	@staticmethod
@@ -105,7 +105,7 @@ class MHLChainTXTBackend:
 		# - if generation number is sequential
 
 		# immediately write to file
-		logger.info(f'   appending chain generation for \"{generation.ascmhl_filename}\" to chain file')
+		logger.debug(f'   appending chain generation for \"{generation.ascmhl_filename}\" to chain file')
 		file_path = os.path.join(chain.history.asc_mhl_path, MHLChainTXTBackend.chain_filename)
 
 		with open(file_path, 'a') as file:

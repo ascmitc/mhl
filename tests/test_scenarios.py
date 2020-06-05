@@ -138,7 +138,7 @@ def test_scenario_01(fs, reference, A002R2EC):
 
     # create original mhl generation
     runner = CliRunner()
-    result = runner.invoke(mhl.commands.verify, ['/travel_01/A002R2EC'])
+    result = runner.invoke(mhl.commands.seal, ['/travel_01/A002R2EC'])
     assert result.exit_code == 0
     replace_reference_files_if_needed('scenario_01', ['/travel_01/A002R2EC'], fs)
     assert compare_file_content('scenario_01', '/travel_01/A002R2EC/asc-mhl/A002R2EC_2020-01-16_091500_0001.ascmhl')
@@ -156,7 +156,7 @@ def test_scenario_02(fs, reference, A002R2EC):
 
     # create original mhl generation of first copy
     runner = CliRunner()
-    result = runner.invoke(mhl.commands.verify, ['/travel_01/A002R2EC'])
+    result = runner.invoke(mhl.commands.seal, ['/travel_01/A002R2EC'])
     assert result.exit_code == 0
 
     with freeze_time("2020-01-17 14:30:00"):
@@ -164,7 +164,7 @@ def test_scenario_02(fs, reference, A002R2EC):
         shutil.copytree('/travel_01/A002R2EC', '/file_server/A002R2EC')
 
         # create second mhl generation by verifying hashes on the file server
-        result = runner.invoke(mhl.commands.verify, ['/file_server/A002R2EC'])
+        result = runner.invoke(mhl.commands.seal, ['/file_server/A002R2EC'])
         assert result.exit_code == 0
         replace_reference_files_if_needed('scenario_02', ['/travel_01', '/file_server'], fs)
 
@@ -194,7 +194,7 @@ def test_scenario_03(fs, reference, A002R2EC):
 
     # create original mhl generation of first copy
     runner = CliRunner()
-    result = runner.invoke(mhl.commands.verify, ['/travel_01/A002R2EC'])
+    result = runner.invoke(mhl.commands.seal, ['/travel_01/A002R2EC'])
     assert result.exit_code == 0
 
     with freeze_time("2020-01-17 14:30:00"):
@@ -202,7 +202,7 @@ def test_scenario_03(fs, reference, A002R2EC):
         shutil.copytree('/travel_01/A002R2EC', '/file_server/A002R2EC')
 
         # The files are verified on the file server, and additional ("secondary") MD5 hashes are created.
-        result = runner.invoke(mhl.commands.verify, ['-h', 'MD5', '/file_server/A002R2EC'])
+        result = runner.invoke(mhl.commands.seal, ['-h', 'MD5', '/file_server/A002R2EC'])
         assert result.exit_code == 0
         replace_reference_files_if_needed('scenario_03', ['/travel_01', '/file_server'], fs)
 
@@ -223,7 +223,7 @@ def test_scenario_04(fs, reference, A002R2EC):
 
     # create original mhl generation of first copy
     runner = CliRunner()
-    result = runner.invoke(mhl.commands.verify, ['/travel_01/A002R2EC'])
+    result = runner.invoke(mhl.commands.seal, ['/travel_01/A002R2EC'])
     assert result.exit_code == 0
 
     with freeze_time("2020-01-17 14:30:00"):
@@ -235,7 +235,7 @@ def test_scenario_04(fs, reference, A002R2EC):
             file.write('!!')
 
         # The files are verified on the file server, the altered file will cause the verification to fail.
-        result = runner.invoke(mhl.commands.verify, ['/file_server/A002R2EC'])
+        result = runner.invoke(mhl.commands.seal, ['/file_server/A002R2EC'])
         # TODO: the verify tool should not return exit code 0 if verification fails
         assert result.exit_code == 0
         replace_reference_files_if_needed('scenario_04', ['/travel_01', '/file_server'], fs)
@@ -259,7 +259,7 @@ def test_scenario_05(fs, reference, A002R2EC, A003R2EC):
     shutil.copytree('/A002R2EC', '/travel_01/Reels/A002R2EC')
     # create first mhl generation of A002R2EC
     runner = CliRunner()
-    result = runner.invoke(mhl.commands.verify, ['/travel_01/Reels/A002R2EC'])
+    result = runner.invoke(mhl.commands.seal, ['/travel_01/Reels/A002R2EC'])
     assert result.exit_code == 0
 
     # the card A003R2EC is copied in the same Reels folder on the same travel drive.
@@ -267,7 +267,7 @@ def test_scenario_05(fs, reference, A002R2EC, A003R2EC):
 
     # create first mhl generation of A003R2EC
     runner = CliRunner()
-    result = runner.invoke(mhl.commands.verify, ['/travel_01/Reels/A003R2EC'])
+    result = runner.invoke(mhl.commands.seal, ['/travel_01/Reels/A003R2EC'])
     assert result.exit_code == 0
 
     with freeze_time("2020-01-17 14:30:00"):
@@ -280,7 +280,7 @@ def test_scenario_05(fs, reference, A002R2EC, A003R2EC):
 
         # The `Reels` folder is verified on the file server.
         runner = CliRunner()
-        result = runner.invoke(mhl.commands.verify, ['/file_server/Reels'])
+        result = runner.invoke(mhl.commands.seal, ['/file_server/Reels'])
         assert result.exit_code == 0
         replace_reference_files_if_needed('scenario_05', ['/travel_01', '/file_server'], fs)
 

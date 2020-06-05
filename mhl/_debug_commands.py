@@ -9,8 +9,8 @@ __email__ = "opensource@pomfort.com"
 import os
 import click
 from .commands import process_file_path, commit_session
-from .context import MHLContext
 from .generator import MHLGenerationCreationSession
+from. import logger
 from .history_fs_backend import MHLHistoryFSBackend
 from .chain_txt_backend import MHLChainTXTBackend
 from .hashlist_xml_backend import MHLHashListXMLBackend
@@ -24,12 +24,10 @@ def readchainfile(filepath, verbose):
     """
     read an ASC-MHL file
     """
-    context = MHLContext()
-    context.verbose = verbose
 
     chain = MHLChainTXTBackend.parse(filepath)
 
-    if context.verbose:
+    if verbose:
         chain.log()
 
 
@@ -40,12 +38,10 @@ def readmhlfile(filepath, verbose):
     """
     read an ASC-MHL file
     """
-    context = MHLContext()
-    context.verbose = verbose
 
     hashlist = MHLHashListXMLBackend.parse(filepath)
 
-    if context.verbose:
+    if verbose:
         hashlist.log()
 
 
@@ -56,12 +52,10 @@ def readmhlhistory(root_path, verbose):
     """
     read an ASC-MHL file
     """
-    context = MHLContext()
-    context.verbose = verbose
 
     history = MHLHistoryFSBackend.parse(root_path)
-    
-    if context.verbose:
+
+    if verbose:
         history.log()
 
 
@@ -75,8 +69,7 @@ def verify_paths(root_path, paths, verbose, hash_format):
     """
     read an ASC-MHL file
     """
-    context = MHLContext()
-    context.verbose = verbose
+    logger.verbose_logging = verbose
 
     if not os.path.isabs(root_path):
         root_path = os.path.join(os.getcwd(), root_path)
@@ -100,5 +93,5 @@ def verify_paths(root_path, paths, verbose, hash_format):
 
     commit_session(session)
 
-    if context.verbose:
+    if verbose:
         existing_history.log()

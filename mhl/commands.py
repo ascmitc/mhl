@@ -13,7 +13,7 @@ import os
 import platform
 import click
 
-from .context import MHLContext, MHLCreatorInfo
+from .context import MHLCreatorInfo
 from .hasher import create_filehash
 from . import logger
 from .history_fs_backend import MHLHistoryFSBackend
@@ -30,8 +30,6 @@ def seal(root_path, verbose, hash_format):
     """
 
     """
-    context = MHLContext()
-    context.verbose = verbose
     logger.verbose_logging = verbose
 
     if not os.path.isabs(root_path):
@@ -55,13 +53,13 @@ def seal(root_path, verbose, hash_format):
 
     commit_session(session)
 
-    if context.verbose:
+    if verbose:
         existing_history.log()
 
-    check_missing_files(not_found_paths)
+    test_for_missing_files(not_found_paths)
 
 
-def check_missing_files(not_found_paths):
+def test_for_missing_files(not_found_paths):
     if len(not_found_paths) > 0:
         logger.error(f"{len(not_found_paths)} missing files: ")
         for path in not_found_paths:

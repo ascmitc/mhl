@@ -21,15 +21,15 @@ scenario_output_path = 'examples/scenarios/Output'
 fake_ref_path = '/ref'
 
 
-@pytest.fixture(scope="session", autouse=True)
-def set_timezone():
-    """Fakes the host timezone to UTC so we don't get different mhl files if the tests run on different time zones
-    seems like freezegun can't handle timezones like we want"""
-    os.environ['TZ'] = 'UTZ'
-    time.tzset()
+def test_seal_succeed(fs):
+    fs.create_file('/root/Stuff.txt', contents='stuff\n')
+    fs.create_file('/root/A/A1.txt', contents='A1\n')
+
+    runner = CliRunner()
+    result = runner.invoke(mhl.commands.seal, ['/root'])
+    assert result.exit_code == 0
 
 
-@freeze_time("2020-01-16 09:15:00")
 def test_seal_directory_hashes(fs):
     fs.create_file('/root/Stuff.txt', contents='stuff\n')
     fs.create_file('/root/A/A1.txt', contents='A1\n')
@@ -64,8 +64,18 @@ def test_seal_directory_hashes(fs):
     assert '/root/A: 72406b81dae7dd63' in result.output
 
 
-@freeze_time("2020-01-16 09:15:00")
-def test_seal_error_missing_file(fs, nested_mhl_histories):
+def test_seal_fail_altered_file(fs, simple_mhl_history):
+    # alter a file
+    with open('/root/Stuff.txt', "a") as file:
+        file.write('!!')
+
+    runner = CliRunner()
+    result = runner.invoke(mhl.commands.seal, ['/root'])
+    assert result.exit_code == 12
+    assert '/root/Stuff.txt' in result.output
+
+
+def test_seal_fail_missing_file(fs, nested_mhl_histories):
     """
     test that sealing fails if there is a file missing on the file system that is referenced by one of the histories
     """
@@ -81,7 +91,7 @@ def test_seal_error_missing_file(fs, nested_mhl_histories):
     assert '/root/A/AA/AA1.txt' in result.output
     assert '1 missing files:' in result.output
 
-    # the actual seal has been written to disk anyways we expect the history contain
+    # the actual seal has been written to disk anyways we expect the history to contain
     # the new not yet referenced files (/root/B/BA/BA1.txt and /root/A/AB/AB1.txt) as well now
     root_history = MHLHistoryFSBackend.parse('/root')
     paths = root_history.set_of_file_paths()

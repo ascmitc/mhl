@@ -219,8 +219,7 @@ def test_scenario_04(fs, reference, A002R2EC):
 
         # The files are verified on the file server, the altered file will cause the verification to fail.
         result = runner.invoke(mhl.commands.seal, ['/file_server/A002R2EC'])
-        # TODO: the verify tool should not return exit code 0 if verification fails
-        assert result.exit_code == 0
+        assert result.exit_code == 12
         replace_reference_files_if_needed('scenario_04', ['/travel_01', '/file_server'], fs)
 
         # the second generation will include the failed verification result

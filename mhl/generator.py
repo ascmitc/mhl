@@ -39,7 +39,7 @@ class MHLGenerationCreationSession:
 		self.root_history = history
 		self.new_hash_lists = defaultdict(MHLHashList)
 
-	def append_file_hash(self, file_path, file_size, file_modification_date, hash_format, hash_string):
+	def append_file_hash(self, file_path, file_size, file_modification_date, hash_format, hash_string) -> bool:
 
 		relative_path = self.root_history.get_relative_file_path(file_path)
 		# TODO: handle if path is outside of history root path
@@ -62,6 +62,9 @@ class MHLGenerationCreationSession:
 					hash_entry.action = 'verified'
 				else:
 					hash_entry.action = 'failed'
+					logger.error(f'hash mismatch for {file_path} '
+								 f'old {hash_format}: {existing_hash_entry.hash_string}, '
+								 f'new {hash_format}: {hash_string}')
 			else:
 				# in case there is no hash entry for this hash format yet, we mark this hash as secondary
 				hash_entry.action = 'new'
@@ -82,6 +85,7 @@ class MHLGenerationCreationSession:
 		# only add the media hash if it's not already in the hash_list
 		if existing_media_hash != media_hash:
 			new_hash_list.append_hash(media_hash)
+		return hash_entry.action is not 'failed'
 
 	def commit(self, creator_info: MHLCreatorInfo):
 		"""

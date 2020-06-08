@@ -13,7 +13,7 @@ from datetime import datetime
 import os
 
 from . import logger
-from .hasher import xxhash64
+from .hasher import create_filehash
 from .context import MHLCreatorInfo
 from .utils import datetime_now_isostring_with_microseconds
 
@@ -80,7 +80,7 @@ class MHLHashList:
         return os.path.basename(self.file_path)
 
     def get_xxhash64(self):
-        return xxhash64(self.file_path)
+        return create_filehash('xxhash', self.file_path)
 
     # build
 

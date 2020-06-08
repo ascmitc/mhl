@@ -14,19 +14,21 @@ import platform
 import click
 
 from .context import MHLCreatorInfo
-from .hasher import create_filehash
+from .hasher import create_filehash, context_type_for_hash_format
 from . import logger
 from .history_fs_backend import MHLHistoryFSBackend
 from .generator import MHLGenerationCreationSession
 from .traverse import post_order_lexicographic
 from . import utils
+import binascii
 
 
 @click.command()
 @click.argument('root_path', type=click.Path(exists=True))
 @click.option('--verbose', '-v', default=False, is_flag=True, help="Verbose output")
+@click.option('--directory_hashes', '-d', default=False, is_flag=True, help="Create directory hashes")
 @click.option('--hash_format', '-h', type=click.Choice(['xxhash', 'MD5', 'SHA1', 'C4']), multiple=False, default='xxhash', help="Algorithm")
-def seal(root_path, verbose, hash_format):
+def seal(root_path, verbose, hash_format, directory_hashes):
     """
 
     """
@@ -43,13 +45,27 @@ def seal(root_path, verbose, hash_format):
 
     # start a verification session on the existing history
     session = MHLGenerationCreationSession(existing_history)
+
     for folder_path, children in post_order_lexicographic(root_path, ['.DS_Store', 'asc-mhl']):
+        # generate directory hashes
+        dir_hash_context = None
+        if directory_hashes:
+            dir_hash_context = context_type_for_hash_format(hash_format)()
         for item_name, is_dir in children:
             file_path = os.path.join(folder_path, item_name)
             if is_dir:
                 continue
-            seal_file_path(existing_history, file_path, hash_format, session)
+            hash_string = seal_file_path(existing_history, file_path, hash_format, session)
             not_found_paths.discard(file_path)
+            if dir_hash_context:
+                # in case of C4 we can't easily use the binary value so we encode the hash string instead
+                if hash_format is 'C4':
+                    hash_binary = hash_string.encode('utf-8')
+                else:
+                    hash_binary = binascii.unhexlify(hash_string)
+                dir_hash_context.update(hash_binary)
+        if dir_hash_context:
+            logger.verbose(f'dir hash of {folder_path}: {dir_hash_context.hexdigest()}')
 
     commit_session(session)
 
@@ -140,7 +156,7 @@ def commit_session(session):
     session.commit(creator_info)
 
 
-def seal_file_path(existing_history, file_path, hash_format, session):
+def seal_file_path(existing_history, file_path, hash_format, session) -> str:
     relative_path = existing_history.get_relative_file_path(file_path)
     file_size = os.path.getsize(file_path)
     file_modification_date = datetime.datetime.fromtimestamp(os.path.getmtime(file_path))
@@ -155,3 +171,4 @@ def seal_file_path(existing_history, file_path, hash_format, session):
                                  existing_hash_format, hash_in_existing_format)
     current_format_hash = create_filehash(hash_format, file_path)
     session.append_file_hash(file_path, file_size, file_modification_date, hash_format, current_format_hash)
+    return current_format_hash

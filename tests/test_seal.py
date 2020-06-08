@@ -29,6 +29,40 @@ def set_timezone():
     time.tzset()
 
 
+@freeze_time("2020-01-16 09:15:00")
+def test_seal_directory_hashes(fs):
+    fs.create_file('/root/Stuff.txt', contents='stuff\n')
+    fs.create_file('/root/A/A1.txt', contents='A1\n')
+
+    runner = CliRunner()
+    result = runner.invoke(mhl.commands.seal, ['/root', '-d', '-v'])
+    assert result.exit_code == 0
+    assert '/root/A: d3904ee76bba3d2a' in result.output
+    assert '/root: 2a2892724fbdd6f5' in result.output
+
+    # add some more files and folders
+    fs.create_file('/root/B/B1.txt', contents='B1\n')
+    fs.create_file('/root/A/A2.txt', contents='A2\n')
+    os.mkdir('/root/emptyFolderA')
+    os.mkdir('/root/emptyFolderB')
+
+    runner = CliRunner()
+    result = runner.invoke(mhl.commands.seal, ['/root', '-d', '-v'])
+    assert result.exit_code == 0
+    assert '/root/A: 5bc783e2bd1566e3' in result.output
+    assert '/root/B: aab0eba57cd1aca9' in result.output
+    assert '/root/emptyFolderA: ef46db3751d8e999' in result.output
+    assert '/root/emptyFolderB: ef46db3751d8e999' in result.output
+    assert '/root: 2a2892724fbdd6f5' in result.output
+
+    # altering the content of one file leads to a different directory hash
+    with open('/root/A/A2.txt', "a") as file:
+        file.write('!!')
+
+    runner = CliRunner()
+    result = runner.invoke(mhl.commands.seal, ['/root', '-d', '-v'])
+    assert '/root/A: 72406b81dae7dd63' in result.output
+
 
 @freeze_time("2020-01-16 09:15:00")
 def test_seal_error_missing_file(fs, nested_mhl_histories):

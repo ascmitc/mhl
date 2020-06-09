@@ -60,6 +60,7 @@ class MHLGenerationCreationSession:
 			if existing_hash_entry is not None:
 				if existing_hash_entry.hash_string == hash_string:
 					hash_entry.action = 'verified'
+					logger.verbose(f'verification of file {file_path}: OK')
 				else:
 					hash_entry.action = 'failed'
 					logger.error(f'hash mismatch for {file_path} '

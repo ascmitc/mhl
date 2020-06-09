@@ -8,7 +8,7 @@ __email__ = "opensource@pomfort.com"
 """
 
 from __future__ import annotations
-from typing import List
+from typing import List, Dict
 from datetime import datetime
 import os
 
@@ -43,6 +43,7 @@ class MHLHashList:
 
     creator_info: MHLCreatorInfo
     media_hashes: List[MHLMediaHash]
+    media_hashes_path_map: Dict[str, MHLMediaHash]
     referenced_hash_lists = List['MHLHashList']
     hash_list_references = List['MHLHashListReference']
     file_path: str
@@ -57,18 +58,11 @@ class MHLHashList:
         self.generation_number = None
         self.referenced_hash_lists = []
         self.hash_list_references = []
+        self.media_hashes_path_map = {}
 
     # methods to query for hashes
     def find_media_hash_for_path(self, relative_path):
-        """Searches the history for the first (original) hash of a file
-
-        starts with the first generation, if we don't find it there we continue to look in all other generations
-        until we've found the first appearance of the give file.
-        """
-        for media_hash in self.media_hashes:
-            if media_hash.relative_filepath == relative_path:
-                return media_hash
-        return None
+        return self.media_hashes_path_map.get(relative_path)
 
     def set_of_file_paths(self, root_path) -> set[str]:
         all_paths = set()
@@ -88,9 +82,10 @@ class MHLHashList:
         hash = MHLMediaHash(self)
         return hash
 
-    def append_hash(self, media_hash):
+    def append_hash(self, media_hash: MHLMediaHash):
         media_hash.hash_list = self
         self.media_hashes.append(media_hash)
+        self.media_hashes_path_map[media_hash.relative_filepath] = media_hash
 
     def append_creator_info(self, creator_info):
         creator_info.hash_list = self

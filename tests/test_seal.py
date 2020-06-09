@@ -38,22 +38,24 @@ def test_seal_directory_hashes(fs):
     result = runner.invoke(mhl.commands.seal, ['/root', '-d', '-v'])
     assert result.exit_code == 0
     assert '/root/A: d3904ee76bba3d2a' in result.output
-    assert '/root: 2a2892724fbdd6f5' in result.output
+    assert '/root: 8ac6ba5025dd1b00' in result.output
 
     # add some more files and folders
     fs.create_file('/root/B/B1.txt', contents='B1\n')
     fs.create_file('/root/A/A2.txt', contents='A2\n')
+    fs.create_file('/root/A/AA/AA1.txt', contents='AA1\n')
     os.mkdir('/root/emptyFolderA')
     os.mkdir('/root/emptyFolderB')
 
     runner = CliRunner()
     result = runner.invoke(mhl.commands.seal, ['/root', '-d', '-v'])
     assert result.exit_code == 0
-    assert '/root/A: 5bc783e2bd1566e3' in result.output
+    assert '/root/A/AA: e087271288708445' in result.output
+    assert '/root/A: 68bc559cd04e74df' in result.output
     assert '/root/B: aab0eba57cd1aca9' in result.output
     assert '/root/emptyFolderA: ef46db3751d8e999' in result.output
     assert '/root/emptyFolderB: ef46db3751d8e999' in result.output
-    assert '/root: 2a2892724fbdd6f5' in result.output
+    assert '/root: 65b99a36eb76e524' in result.output
 
     # altering the content of one file leads to a different directory hash
     with open('/root/A/A2.txt', "a") as file:
@@ -61,7 +63,8 @@ def test_seal_directory_hashes(fs):
 
     runner = CliRunner()
     result = runner.invoke(mhl.commands.seal, ['/root', '-d', '-v'])
-    assert '/root/A: 72406b81dae7dd63' in result.output
+    assert 'hash mismatch for /root/A/A2.txt' in result.output
+    assert '/root/A: ed93a2f6a5a132e8' in result.output
 
 
 def test_seal_fail_altered_file(fs, simple_mhl_history):

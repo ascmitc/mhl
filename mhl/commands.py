@@ -47,6 +47,8 @@ def seal(root_path, verbose, hash_format, directory_hashes):
     session = MHLGenerationCreationSession(existing_history)
 
     num_failed_verifications = 0
+    # store the directory hashes of sub folders so we can use it when calculating the hash of the parent folder
+    dir_hash_mappings = {}
     for folder_path, children in post_order_lexicographic(root_path, ['.DS_Store', 'asc-mhl']):
         # generate directory hashes
         dir_hash_context = None
@@ -55,11 +57,14 @@ def seal(root_path, verbose, hash_format, directory_hashes):
         for item_name, is_dir in children:
             file_path = os.path.join(folder_path, item_name)
             if is_dir:
-                continue
-            hash_string, success = seal_file_path(existing_history, file_path, hash_format, session)
-            if not success:
-                num_failed_verifications += 1
-            not_found_paths.discard(file_path)
+                if not dir_hash_context:
+                    continue
+                hash_string = dir_hash_mappings.pop(file_path)
+            else:
+                hash_string, success = seal_file_path(existing_history, file_path, hash_format, session)
+                if not success:
+                    num_failed_verifications += 1
+                not_found_paths.discard(file_path)
             if dir_hash_context:
                 # in case of C4 we can't easily use the binary value so we encode the hash string instead
                 if hash_format is 'C4':
@@ -68,7 +73,9 @@ def seal(root_path, verbose, hash_format, directory_hashes):
                     hash_binary = binascii.unhexlify(hash_string)
                 dir_hash_context.update(hash_binary)
         if dir_hash_context:
-            logger.verbose(f'dir hash of {folder_path}: {dir_hash_context.hexdigest()}')
+            dir_hash = dir_hash_context.hexdigest()
+            dir_hash_mappings[folder_path] = dir_hash
+            logger.verbose(f'dir hash of {folder_path}: {dir_hash}')
 
     commit_session(session)
 

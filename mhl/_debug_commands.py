@@ -62,7 +62,7 @@ def readmhlhistory(root_path, verbose):
 
 
 @click.command()
-@click.argument('root_path', type=click.Path(exists=True))
+@click.argument('root_path', type=click.Path(exists=False))
 def create_dummy_file_structure(root_path):
     """
     create a potentially huge set of dummy files to test how the commands can handle large file systems
@@ -73,7 +73,7 @@ def create_dummy_file_structure(root_path):
     dummy_folder = os.path.join(root_path, 'dummy_fs')
     if os.path.exists(dummy_folder):
         shutil.rmtree(dummy_folder)
-    os.mkdir(dummy_folder)
+    os.makedirs(dummy_folder, exist_ok=True)
     create_dummy_folder(dummy_folder, '', folder_depth)
 
 

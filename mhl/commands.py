@@ -30,12 +30,15 @@ import binascii
 @click.option('--hash_format', '-h', type=click.Choice(['xxhash', 'MD5', 'SHA1', 'C4']), multiple=False, default='xxhash', help="Algorithm")
 def seal(root_path, verbose, hash_format, directory_hashes):
     """
-
+    Creates a new generation from the content of a folder hierarchy.
+    All files are hashed and will be compared to previous records in the `asc-mhl` folder if they exists.
     """
     logger.verbose_logging = verbose
 
     if not os.path.isabs(root_path):
         root_path = os.path.join(os.getcwd(), root_path)
+
+    logger.verbose(f'seal folder at path: {root_path}')
 
     existing_history = MHLHistoryFSBackend.parse(root_path)
 
@@ -67,7 +70,7 @@ def seal(root_path, verbose, hash_format, directory_hashes):
                 not_found_paths.discard(file_path)
             if dir_hash_context:
                 # in case of C4 we can't easily use the binary value so we encode the hash string instead
-                if hash_format is 'C4':
+                if hash_format == 'C4':
                     hash_binary = hash_string.encode('utf-8')
                 else:
                     hash_binary = binascii.unhexlify(hash_string)
@@ -78,9 +81,6 @@ def seal(root_path, verbose, hash_format, directory_hashes):
             logger.verbose(f'dir hash of {folder_path}: {dir_hash}')
 
     commit_session(session)
-
-    if verbose:
-        existing_history.log()
 
     if num_failed_verifications > 0:
         raise logger.VerificationFailedException()
@@ -93,12 +93,16 @@ def seal(root_path, verbose, hash_format, directory_hashes):
 @click.option('--verbose', '-v', default=False, is_flag=True, help="Verbose output")
 def check(root_path, verbose):
     """
-
+    Checks existing generations against the file system.
+    Traverses through the content of a folder, hashes all found files and compares ("verifies") the hashes
+    against the records in the asc-mhl folder.
     """
     logger.verbose_logging = verbose
 
     if not os.path.isabs(root_path):
         root_path = os.path.join(os.getcwd(), root_path)
+
+    logger.verbose(f'check folder at path: {root_path}')
 
     existing_history = MHLHistoryFSBackend.parse(root_path)
 
@@ -109,8 +113,6 @@ def check(root_path, verbose):
     # traversing the file system, so this set will at the end contain the file paths not found in the file system
     not_found_paths = existing_history.set_of_file_paths()
 
-    error_new_files = False
-    error_verify = False
     num_failed_verifications = 0
     num_new_files = 0
     for folder_path, children in post_order_lexicographic(root_path, ['.DS_Store', 'asc-mhl']):
@@ -142,9 +144,6 @@ def check(root_path, verbose):
                 num_failed_verifications += 1
 
             not_found_paths.discard(file_path)
-
-    if verbose:
-        existing_history.log()
 
     if num_failed_verifications > 0:
         raise logger.VerificationFailedException()

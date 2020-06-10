@@ -55,6 +55,7 @@ class MHLGenerationCreationSession:
 
 		if original_hash_entry is None:
 			hash_entry.action = 'original'
+			logger.verbose(f'created original hash for {file_path} {hash_format}: {hash_string}')
 		else:
 			existing_hash_entry = history.find_first_hash_entry_for_path(history_relative_path, hash_format)
 			if existing_hash_entry is not None:
@@ -70,6 +71,7 @@ class MHLGenerationCreationSession:
 				# in case there is no hash entry for this hash format yet, we mark this hash as secondary
 				hash_entry.action = 'new'
 				hash_entry.secondary = True
+				logger.verbose(f'created new hash for {file_path} {hash_format}: {hash_string}')
 
 		# in case the same file is hashes multiple times we want to add all hash entries
 		new_hash_list = self.new_hash_lists[history]

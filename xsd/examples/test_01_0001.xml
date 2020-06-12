@@ -1,33 +1,49 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<hashlist
-xmlns="http://theasc.com/ASC-MHL" 
+<hashlist version="2"
+xmlns="http://theasc.com/ASCMHL" 
 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-xsi:schemaLocation="http://theasc.com/ASC-MHL/ASC-MHL ASC-MHL.xsd">
+xsi:schemaLocation="http://theasc.com/ASCMHL/ASCMHL ASCMHL.xsd">
   <creatorinfo>
-    <hostname>donkey.local</hostname>
-    <toolname>ascmhl-verify</toolname>
-    <toolversion>0.0.3</toolversion>
     <creationdate>2019-10-11T15:56:03+02:00</creationdate>
-    <process>verify</process>
+    <tool version="0.0.3">ascmhl-tool</tool>
+    <hostname>donkey.local</hostname>
+    <author email="foo@bar.foo.foo.com" phone="+1 234 567 890 88">Liz Foo</author>
+    <author email="zed@bar.foo.foo.com" phone="+1 234 567 890 99">Ben Zed</author>
+    <location>Munich, Germany</location>
+    <process type="in-place" />
+    <ignore>
+      <pattern>.DSStore</pattern>      
+    </ignore>
   </creatorinfo>
+  <metadata>
+    test
+    <foo bar="1">lorem</foo>
+  </metadata>
   <hashes rootPath="/Users/ptr/Development/MediaHashList/mhl/Scenarios/Output/scenario_01/A002R2EC/">
     <hash>
-      <filename>Clips/A002C006_141024_R2EC.mov</filename>
+      <path>Clips/A002C006_141024_R2EC.mov</path>
       <filesize>5</filesize>
       <lastmodificationdate>2019-10-11T15:56:03+02:00</lastmodificationdate>
-      <xxhash action="original">0ea03b369a463d9d</xxhash>
+      <xxh64 action="original">0ea03b369a463d9d</xxh64>
     </hash>
     <hash>
-      <filename>Clips/A002C007_141024_R2EC.mov</filename>
+      <path>Clips/A002C007_141024_R2EC.mov</path>
       <filesize>4</filesize>
       <lastmodificationdate>2019-10-11T15:56:03+02:00</lastmodificationdate>
-      <xxhash action="original">7680e5f98f4a80fd</xxhash>
+      <xxh64 action="original">7680e5f98f4a80fd</xxh64>
+    </hash>
+    <hash directory="true">
+      <path>Clips/</path>
+      <lastmodificationdate>2019-10-11T15:56:05+02:00</lastmodificationdate>
+      <xxh64>7680e5f98f4a80fd</xxh64>
+      <metadata>test2</metadata>
     </hash>
     <hash>
-      <filename>Sidecar.txt</filename>
+      <path>Sidecar.txt</path>
       <filesize>58</filesize>
       <lastmodificationdate>2019-10-11T15:56:03+02:00</lastmodificationdate>
-      <xxhash action="original">3ab5a4166b9bde44</xxhash>
+      <xxh64 action="original">3ab5a4166b9bde44</xxh64>
+      <metadata bar="Foo" />
     </hash>
   </hashes>
 </hashlist>

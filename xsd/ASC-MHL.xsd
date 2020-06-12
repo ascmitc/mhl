@@ -1,41 +1,96 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<schema targetNamespace="http://theasc.com/ASC-MHL" elementFormDefault="qualified"
-    xmlns="http://www.w3.org/2001/XMLSchema" xmlns:mhl="http://theasc.com/ASC-MHL">
+<schema targetNamespace="http://theasc.com/ASCMHL" elementFormDefault="qualified"
+    xmlns="http://www.w3.org/2001/XMLSchema" xmlns:ascmhl="http://theasc.com/ASCMHL">
 
     <complexType name="HashListType">
         <sequence>
-            <element name="creatorinfo" type="mhl:CreatorInfoType"/>
-            <element name="hashes" type="mhl:HashesType"/>
+            <element name="creatorinfo" type="ascmhl:CreatorInfoType"/>
+            <element name="metadata" type="ascmhl:MetadataType" minOccurs="0"/>
+            <element name="hashes" type="ascmhl:HashesType" minOccurs="1"/>
         </sequence>
+        <attribute fixed="2" name="version" use="required"/>
     </complexType>
 
-    <element name="hashlist" type="mhl:HashListType"/>
-
-    <group name="hashlist">
+    <complexType name="CreatorInfoType" mixed="true">
         <sequence>
-            <element name="creatorinfo" type="string" maxOccurs="1" minOccurs="1"/>
-            <element name="hashes" type="string" maxOccurs="1" minOccurs="1"/>
+            <element name="creationdate" type="dateTime" maxOccurs="1" minOccurs="1"/>
+            <element name="tool" type="ascmhl:ToolType" maxOccurs="1" minOccurs="1"/>
+            <element name="hostname" type="string" maxOccurs="1" minOccurs="1"/>
+            <element maxOccurs="unbounded" minOccurs="0" name="author" type="ascmhl:AuthorType"/>
+            <element minOccurs="0" name="location"/>
+            <element name="process" type="ascmhl:ProcessType" maxOccurs="1" minOccurs="1"/>
+            <element name="ignore" type="ascmhl:IgnoreType" minOccurs="0"/>
         </sequence>
-    </group>
-
+    </complexType>
+    <simpleType name="EmailAddressAttributeType">
+        <restriction base="string">
+            <pattern value="[^@]+@[^\.]+\..+"/>
+        </restriction>
+    </simpleType>
+    <complexType name="AuthorType">
+        <simpleContent>
+            <extension base="string">
+                <attribute name="email" type="ascmhl:EmailAddressAttributeType"/>
+                <attribute name="phone" type="string"/>
+                <attribute name="role" type="string"/>
+            </extension>
+        </simpleContent>
+    </complexType>
+    <complexType name="ToolType">
+        <simpleContent>
+            <extension base="string">
+                <attribute name="version" type="string"/>
+            </extension>
+        </simpleContent>
+    </complexType>
+    <complexType block="" name="ProcessType">
+        <attribute name="type" use="required">
+            <simpleType>
+                <restriction base="string">
+                    <enumeration value="in-place"/>
+                    <enumeration value="transfer"/>
+                </restriction>
+            </simpleType>
+        </attribute>
+        <attribute name="hashSource" use="optional">
+            <simpleType>
+                <restriction base="string">
+                    <enumeration value="file"/>
+                    <enumeration value="source"/>
+                    <enumeration value="source+file"/>
+                    <enumeration value="other"/>
+                </restriction>
+            </simpleType>
+        </attribute>
+    </complexType>
+    <complexType name="IgnoreType">
+        <sequence>
+            <element maxOccurs="unbounded" name="pattern" type="string"/>
+        </sequence>
+    </complexType>
     <complexType name="HashesType">
         <sequence>
-            <element name="hash" type="mhl:HashType" maxOccurs="unbounded" minOccurs="1"/>
+            <element name="hash" type="ascmhl:HashType" maxOccurs="unbounded" minOccurs="1"/>
         </sequence>
         <attribute name="rootPath" type="string"/>
     </complexType>
-
     <complexType name="HashType">
         <sequence>
-            <element name="filename" type="string"/>
-            <element name="filesize" type="int"/>
+            <element name="path" type="string"/>
+            <element name="filesize" type="int" minOccurs="0" nillable="false"/>
             <element name="lastmodificationdate" type="dateTime"/>
             <sequence>
-                <element name="xxhash" type="mhl:HashFormatType" maxOccurs="1" minOccurs="0"/>
-                <element name="md5" type="mhl:HashFormatType" maxOccurs="1" minOccurs="0"/>
+                <element name="md5" type="ascmhl:HashFormatType" maxOccurs="1" minOccurs="0"/>
+                <element name="sha1" type="ascmhl:HashFormatType" maxOccurs="1" minOccurs="0"/>
+                <element name="xxh32" type="ascmhl:HashFormatType" maxOccurs="1" minOccurs="0"/>
+                <element name="xxh64" type="ascmhl:HashFormatType" maxOccurs="1" minOccurs="0"/>
+                <element name="xxh3" type="ascmhl:HashFormatType" maxOccurs="1" minOccurs="0"/>
+                <element name="c4" type="ascmhl:HashFormatType" maxOccurs="1" minOccurs="0"/>
             </sequence>
+            <element minOccurs="0" name="metadata" type="ascmhl:MetadataType"/>
         </sequence>
 
+        <attribute name="directory" type="ascmhl:DirectoryAttributeType"/>
     </complexType>
 
     <simpleType name="ActionAttributeType">
@@ -45,34 +100,23 @@
             <enumeration value="verified"/>
         </restriction>
     </simpleType>
-
+    <simpleType name="DirectoryAttributeType">
+        <restriction base="string">
+            <enumeration value="true"/>
+            <enumeration value="false"/>
+        </restriction>
+    </simpleType>
     <complexType name="HashFormatType">
         <simpleContent>
             <extension base="string">
-                <attribute name="action" type="mhl:ActionAttributeType"/>
+                <attribute name="action" type="ascmhl:ActionAttributeType"/>
             </extension>
         </simpleContent>
     </complexType>
-
-    <element name="xxhash" type="mhl:HashFormatType"/>
-    <element name="md5" type="mhl:HashFormatType"/>
-
-
-    <complexType name="CreatorInfoType" mixed="true">
-        <all>
-            <element name="hostname" type="string" maxOccurs="1" minOccurs="1"/>
-            <element name="toolversion" type="string" maxOccurs="1" minOccurs="1"/>
-            <element name="toolname" type="mhl:ToolType" maxOccurs="1" minOccurs="1"/>
-            <element name="creationdate" type="dateTime" maxOccurs="1" minOccurs="1"/>
-            <element name="process" type="string" maxOccurs="1" minOccurs="1"/>
-        </all>
+    <complexType name="MetadataType">
+        <complexContent>
+            <extension base="anyType"/>
+        </complexContent>
     </complexType>
-
-    <complexType name="ToolType">
-        <simpleContent>
-            <extension base="string">
-                <attribute name="version" type="string"/>
-            </extension>
-        </simpleContent>
-    </complexType>
+    <element name="hashlist" type="ascmhl:HashListType"/>
 </schema>

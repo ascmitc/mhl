@@ -12,14 +12,15 @@ xsi:schemaLocation="http://theasc.com/ASCMHL/ASCMHL ASCMHL.xsd">
     <location>Munich, Germany</location>
     <process type="in-place" />
     <ignore>
-      <pattern>.DSStore</pattern>      
+      <pattern>*.DS_Store</pattern>      
+      <pattern>/tmp</pattern>      
     </ignore>
   </creatorinfo>
   <metadata>
     test
     <foo bar="1">lorem</foo>
   </metadata>
-  <hashes rootPath="/Users/ptr/Development/MediaHashList/mhl/Scenarios/Output/scenario_01/A002R2EC/">
+  <hashes rootpath="/Users/ptr/Development/MediaHashList/mhl/Scenarios/Output/scenario_01/A002R2EC/">
     <hash>
       <path>Clips/A002C006_141024_R2EC.mov</path>
       <filesize>5</filesize>
@@ -42,7 +43,8 @@ xsi:schemaLocation="http://theasc.com/ASCMHL/ASCMHL ASCMHL.xsd">
       <path>Sidecar.txt</path>
       <filesize>58</filesize>
       <lastmodificationdate>2019-10-11T15:56:03+02:00</lastmodificationdate>
-      <xxh64 action="original">3ab5a4166b9bde44</xxh64>
+      <xxh64 action="failed">3ab5a4166b9bde44</xxh64>
+      <xxh64 action="new">b9bde443ab5a4166</xxh64>
       <metadata bar="Foo" />
     </hash>
   </hashes>

@@ -1,7 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<schema targetNamespace="http://theasc.com/ASCMHL" elementFormDefault="qualified"
-    xmlns="http://www.w3.org/2001/XMLSchema" xmlns:ascmhl="http://theasc.com/ASCMHL">
-
+<schema 
+    targetNamespace="http://theasc.com/ASCMHL" 
+    elementFormDefault="qualified"
+    xmlns="http://www.w3.org/2001/XMLSchema" 
+    xmlns:ascmhl="http://theasc.com/ASCMHL">
+    
+    <simpleType name="EmailAddressAttributeType">
+        <restriction base="string">
+            <pattern value="[^@]+@[^\.]+\..+"/>
+        </restriction>
+    </simpleType>
+    <simpleType name="ActionAttributeType">
+        <restriction base="string">
+            <enumeration value="original"/>
+            <enumeration value="new"/>
+            <enumeration value="verified"/>
+            <enumeration value="failed"/>
+        </restriction>
+    </simpleType>
+    <simpleType name="DirectoryAttributeType">
+        <restriction base="string">
+            <enumeration value="true"/>
+            <enumeration value="false"/>
+        </restriction>
+    </simpleType>
+    
     <complexType name="HashListType">
         <sequence>
             <element name="creatorinfo" type="ascmhl:CreatorInfoType"/>
@@ -10,8 +33,7 @@
         </sequence>
         <attribute fixed="2" name="version" use="required"/>
     </complexType>
-
-    <complexType name="CreatorInfoType" mixed="true">
+    <complexType name="CreatorInfoType">
         <sequence>
             <element name="creationdate" type="dateTime" maxOccurs="1" minOccurs="1"/>
             <element name="tool" type="ascmhl:ToolType" maxOccurs="1" minOccurs="1"/>
@@ -22,11 +44,6 @@
             <element name="ignore" type="ascmhl:IgnoreType" minOccurs="0"/>
         </sequence>
     </complexType>
-    <simpleType name="EmailAddressAttributeType">
-        <restriction base="string">
-            <pattern value="[^@]+@[^\.]+\..+"/>
-        </restriction>
-    </simpleType>
     <complexType name="AuthorType">
         <simpleContent>
             <extension base="string">
@@ -52,7 +69,7 @@
                 </restriction>
             </simpleType>
         </attribute>
-        <attribute name="hashSource" use="optional">
+        <attribute name="hashsource" use="optional">
             <simpleType>
                 <restriction base="string">
                     <enumeration value="file"/>
@@ -72,40 +89,25 @@
         <sequence>
             <element name="hash" type="ascmhl:HashType" maxOccurs="unbounded" minOccurs="1"/>
         </sequence>
-        <attribute name="rootPath" type="string"/>
+        <attribute name="rootpath" type="string" use="required"/>
     </complexType>
     <complexType name="HashType">
         <sequence>
             <element name="path" type="string"/>
             <element name="filesize" type="int" minOccurs="0" nillable="false"/>
             <element name="lastmodificationdate" type="dateTime"/>
-            <sequence>
-                <element name="md5" type="ascmhl:HashFormatType" maxOccurs="1" minOccurs="0"/>
-                <element name="sha1" type="ascmhl:HashFormatType" maxOccurs="1" minOccurs="0"/>
+            <sequence maxOccurs="unbounded">
+                <element name="md5" type="ascmhl:HashFormatType" minOccurs="0"/>
+                <element name="sha1" type="ascmhl:HashFormatType" minOccurs="0"/>
+                <element name="c4" type="ascmhl:HashFormatType" minOccurs="0"/>
                 <element name="xxh32" type="ascmhl:HashFormatType" maxOccurs="1" minOccurs="0"/>
                 <element name="xxh64" type="ascmhl:HashFormatType" maxOccurs="1" minOccurs="0"/>
                 <element name="xxh3" type="ascmhl:HashFormatType" maxOccurs="1" minOccurs="0"/>
-                <element name="c4" type="ascmhl:HashFormatType" maxOccurs="1" minOccurs="0"/>
             </sequence>
             <element minOccurs="0" name="metadata" type="ascmhl:MetadataType"/>
         </sequence>
-
         <attribute name="directory" type="ascmhl:DirectoryAttributeType"/>
     </complexType>
-
-    <simpleType name="ActionAttributeType">
-        <restriction base="string">
-            <enumeration value="original"/>
-            <enumeration value="new"/>
-            <enumeration value="verified"/>
-        </restriction>
-    </simpleType>
-    <simpleType name="DirectoryAttributeType">
-        <restriction base="string">
-            <enumeration value="true"/>
-            <enumeration value="false"/>
-        </restriction>
-    </simpleType>
     <complexType name="HashFormatType">
         <simpleContent>
             <extension base="string">

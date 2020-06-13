@@ -1,0 +1,16 @@
+Scenario 01:
+This is the most basic example. A camera card is copied to a travel drive and an ASC-MHL file is
+created with hashes of all files on the card.
+
+Assume the source card /A002R2EC is copied to a travel drive /travel_01.
+
+Seal the copy on the travel drive /travel_01 to create the original mhl generation.
+
+$ ascmhl.py seal ['-v', '/travel_01/A002R2EC']
+seal folder at path: /travel_01/A002R2EC
+created original hash for /travel_01/A002R2EC/Clips/A002C006_141024_R2EC.mov xxhash: 0ea03b369a463d9d
+created original hash for /travel_01/A002R2EC/Clips/A002C007_141024_R2EC.mov xxhash: 7680e5f98f4a80fd
+created original hash for /travel_01/A002R2EC/Sidecar.txt xxhash: 3ab5a4166b9bde44
+writing "A002R2EC_2020-01-16_091500_0001.ascmhl"...
+
+

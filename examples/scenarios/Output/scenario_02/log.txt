@@ -1,0 +1,31 @@
+Scenario 02:
+In this scenario a copy is made, and then a copy of the copy. Two ASC-MHL are created during
+this process, documenting the history of both copy processes.
+
+Assume the source card /A002R2EC is copied to a travel drive /travel_01.
+
+Seal the copy on the travel drive /travel_01 to create the original mhl generation.
+
+$ ascmhl.py seal ['-v', '/travel_01/A002R2EC']
+seal folder at path: /travel_01/A002R2EC
+created original hash for /travel_01/A002R2EC/Clips/A002C006_141024_R2EC.mov xxhash: 0ea03b369a463d9d
+created original hash for /travel_01/A002R2EC/Clips/A002C007_141024_R2EC.mov xxhash: 7680e5f98f4a80fd
+created original hash for /travel_01/A002R2EC/Sidecar.txt xxhash: 3ab5a4166b9bde44
+writing "A002R2EC_2020-01-16_091500_0001.ascmhl"...
+
+
+
+Assume the travel drive arrives at a facility on the next day.
+And the folder A002R2EC is copied there from the travel drive to a file server at /file_server.
+
+Sealing the folder A002R2EC again on the file server
+this will verify all hashes, check for completeness and create a second generation
+
+$ ascmhl.py seal ['-v', '/file_server/A002R2EC']
+seal folder at path: /file_server/A002R2EC
+verification of file /file_server/A002R2EC/Clips/A002C006_141024_R2EC.mov: OK
+verification of file /file_server/A002R2EC/Clips/A002C007_141024_R2EC.mov: OK
+verification of file /file_server/A002R2EC/Sidecar.txt: OK
+writing "A002R2EC_2020-01-17_143000_0002.ascmhl"...
+
+

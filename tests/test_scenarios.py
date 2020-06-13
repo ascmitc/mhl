@@ -82,18 +82,33 @@ def dirs_are_equal(dir1, dir2):
     return result
 
 
-def compare_dir_content(reference, dir_path):
+def compare_dir_content(reference: str, dir_path: str) -> bool:
     if os.path.isabs(dir_path):
         relative_path = dir_path.lstrip(os.sep)
     else:
         relative_path = dir_path
     ref_path = os.path.join(fake_ref_root_path, reference, relative_path)
-
     if os.path.isdir(dir_path) is True and os.path.isdir(ref_path) is True:
         result = dirs_are_equal(ref_path, dir_path)
     else:
         result = False
 
+    return result
+
+
+def compare_file_content(reference: str, path: str) -> bool:
+    if os.path.isabs(path):
+        relative_path = path.lstrip(os.sep)
+    else:
+        relative_path = path
+    ref_path = os.path.join(fake_ref_root_path, reference, relative_path)
+    if os.path.isfile(path) is True and os.path.isfile(ref_path) is True:
+        result = filecmp.cmp(ref_path, path, shallow=False)
+        if result is not True:
+            print('\ngot different files:\n')
+            print_diff_of_files(ref_path, path)
+    else:
+        result = False
     return result
 
 
@@ -131,7 +146,16 @@ def compare_files_against_reference(scenario_reference: str, folder_paths: List[
             result &= compare_dir_content(scenario_reference, folder_path)
         else:
             copy_fake_directory_to_real_fs(folder_path, real_ref_path, fake_fs)
+            # also copy the log file
+            with open('/log.txt', 'rb') as file:
+                data = file.read()
+            with Pause(fake_fs):
+                with open(os.path.join(real_ref_path, 'log.txt'), 'w+b') as dst_file:
+                    dst_file.write(data)
 
+    if compare_mode:
+        # we always assume a log.txt to exists for each scenario, compare it as well to check differences in tool output
+        result &= compare_file_content(scenario_reference, '/log.txt')
     return result
 
 
@@ -149,106 +173,133 @@ def copy_fake_directory_to_real_fs(fake_dir: str, real_dir: str, fake_fs):
                 with open(os.path.join(current_real_dir, file_name), 'w+b') as dst_file:
                     dst_file.write(data)
 
+def log_message( message: str):
+    log_path = '/log.txt'
+    with open(log_path, "a") as file:
+        file.write(message)
+        file.write('\n')
+
+
+def execute_command(click_cmd, args):
+    runner = CliRunner()
+    log_message('')
+    log_message(f'$ ascmhl.py {click_cmd.name} {args}')
+    result = runner.invoke(click_cmd, args)
+    log_message(result.output)
+    log_message('')
+    return result
+
 
 @freeze_time("2020-01-16 09:15:00")
 def test_scenario_01(fs, reference, A002R2EC):
-    """
-    This is the most basic example. A camera card is copied to a travel drive and an ASC-MHL file is
-    created with hashes of all files on the card.
-    """
+    log_message('Scenario 01:')
+    log_message('This is the most basic example. A camera card is copied to a travel drive and an ASC-MHL file is')
+    log_message('created with hashes of all files on the card.')
+    log_message('')
 
-    # assume the card is copied to a travel drive.
+    log_message('Assume the source card /A002R2EC is copied to a travel drive /travel_01.')
     shutil.copytree('/A002R2EC', '/travel_01/A002R2EC')
 
-    # create original mhl generation
-    runner = CliRunner()
-    result = runner.invoke(mhl.commands.seal, ['/travel_01/A002R2EC'])
+    log_message('')
+    log_message('Seal the copy on the travel drive /travel_01 to create the original mhl generation.')
+    result = execute_command(mhl.commands.seal, ['-v', '/travel_01/A002R2EC'])
     assert result.exit_code == 0
     assert compare_files_against_reference('scenario_01', ['/travel_01'], fs)
 
 
 @freeze_time("2020-01-16 09:15:00")
 def test_scenario_02(fs, reference, A002R2EC):
-    """
-    In this scenario a copy is made, and then a copy of the copy. Two ASC-MHL are created during
-    this process, documenting the history of both copy processes.
-    """
+    log_message('Scenario 02:')
+    log_message('In this scenario a copy is made, and then a copy of the copy. Two ASC-MHL are created during')
+    log_message('this process, documenting the history of both copy processes.')
+    log_message('')
 
-    # assume the card is copied to a travel drive.
+    log_message('Assume the source card /A002R2EC is copied to a travel drive /travel_01.')
     shutil.copytree('/A002R2EC', '/travel_01/A002R2EC')
 
-    # create original mhl generation of first copy
-    runner = CliRunner()
-    result = runner.invoke(mhl.commands.seal, ['/travel_01/A002R2EC'])
+    log_message('')
+    log_message('Seal the copy on the travel drive /travel_01 to create the original mhl generation.')
+    result = execute_command(mhl.commands.seal, ['-v', '/travel_01/A002R2EC'])
     assert result.exit_code == 0
 
     with freeze_time("2020-01-17 14:30:00"):
-        # assume the card is copied from the travel drive to a file server
+        log_message('')
+        log_message('Assume the travel drive arrives at a facility on the next day.')
+        log_message('And the folder A002R2EC is copied there from the travel drive to a file server at /file_server.')
         shutil.copytree('/travel_01/A002R2EC', '/file_server/A002R2EC')
 
-        # create second mhl generation by verifying hashes on the file server
-        result = runner.invoke(mhl.commands.seal, ['/file_server/A002R2EC'])
+        log_message('')
+        log_message('Sealing the folder A002R2EC again on the file server')
+        log_message('this will verify all hashes, check for completeness and create a second generation')
+        result = execute_command(mhl.commands.seal, ['-v', '/file_server/A002R2EC'])
         assert result.exit_code == 0
         assert compare_files_against_reference('scenario_02', ['/travel_01', '/file_server'], fs)
-
-        # verify there is only first generation on the travel drive, no second generation
-        # but a second generation on the file server
 
 
 @freeze_time("2020-01-16 09:15:00")
 def test_scenario_03(fs, reference, A002R2EC):
-    """
-    In this scenario the first hashes are created using the xxhash format. Different hash formats
-    might be required by systems used further down the workflow, so the second copy is verified
-    against the existing xxhash hashes, and additional MD5 hashes can be created and stored during
-    that process on demand.
-    """
+    log_message('Scenario 03:')
+    log_message('In this scenario the first hashes are created using the xxhash format. Different hash formats')
+    log_message('might be required by systems used further down the workflow, so the second copy is verified')
+    log_message('against the existing xxhash hashes, and additional MD5 hashes can be created and stored during')
+    log_message('that process on demand.')
+    log_message('')
 
-    # assume the card is copied to a travel drive.
+    log_message('Assume the source card /A002R2EC is copied to a travel drive /travel_01.')
     shutil.copytree('/A002R2EC', '/travel_01/A002R2EC')
 
-    # create original mhl generation of first copy
-    runner = CliRunner()
-    result = runner.invoke(mhl.commands.seal, ['/travel_01/A002R2EC'])
+    log_message('')
+    log_message('Seal the copy on the travel drive /travel_01 to create the original mhl generation.')
+    result = execute_command(mhl.commands.seal, ['-v', '/travel_01/A002R2EC'])
     assert result.exit_code == 0
 
     with freeze_time("2020-01-17 14:30:00"):
-        # assume the card is copied from the travel drive to a file server
+        log_message('')
+        log_message('Assume the travel drive arrives at a facility on the next day.')
+        log_message('And the folder A002R2EC is copied there from the travel drive to a file server at /file_server.')
         shutil.copytree('/travel_01/A002R2EC', '/file_server/A002R2EC')
 
-        # The files are verified on the file server, and additional ("secondary") MD5 hashes are created.
-        result = runner.invoke(mhl.commands.seal, ['-h', 'MD5', '/file_server/A002R2EC'])
+        log_message('')
+        log_message('Sealing the folder A002R2EC again on the file server using MD5 hash format')
+        log_message('this will verify all existing xxHashes, check for completeness')
+        log_message('and create a second generation and additional (new) MD5 hashes are created.')
+        result = execute_command(mhl.commands.seal, ['-v', '-h', 'MD5', '/file_server/A002R2EC'])
         assert result.exit_code == 0
         assert compare_files_against_reference('scenario_03', ['/travel_01', '/file_server'], fs)
-
-        # the second generation will include both the generated secondary hashes and the original hash verified
 
 
 @freeze_time("2020-01-16 09:15:00")
 def test_scenario_04(fs, reference, A002R2EC):
-    """
-    Copying a folder to a travel drive and from there to a file server with a hash mismatch in
-    one file.
-    """
+    log_message('Scenario 04:')
+    log_message('Copying a folder to a travel drive and from there to a file server with a hash mismatch in')
+    log_message('one file.')
+    log_message('')
 
-    # assume the card is copied to a travel drive.
+    log_message('Assume the source card /A002R2EC is copied to a travel drive /travel_01.')
     shutil.copytree('/A002R2EC', '/travel_01/A002R2EC')
 
-    # create original mhl generation of first copy
-    runner = CliRunner()
-    result = runner.invoke(mhl.commands.seal, ['/travel_01/A002R2EC'])
+    log_message('')
+    log_message('Seal the copy on the travel drive /travel_01 to create the original mhl generation.')
+    result = execute_command(mhl.commands.seal, ['-v', '/travel_01/A002R2EC'])
     assert result.exit_code == 0
 
     with freeze_time("2020-01-17 14:30:00"):
-        # assume the card is copied from the travel drive to a file server
+        log_message('')
+        log_message('Assume the travel drive arrives at a facility on the next day.')
+        log_message('And the folder A002R2EC is copied there from the travel drive to a file server at /file_server.')
         shutil.copytree('/travel_01/A002R2EC', '/file_server/A002R2EC')
 
-        # simulate that during the copy the `Sidecar.txt` got corrupt (altered)
+        log_message('')
+        log_message('afterwards we simulate that during the copy the Sidecar.txt got corrupt (altered')
+        log_message('by modifying the file content')
         with open('/file_server/A002R2EC/Sidecar.txt', "a") as file:
             file.write('!!')
 
-        # The files are verified on the file server, the altered file will cause the verification to fail.
-        result = runner.invoke(mhl.commands.seal, ['/file_server/A002R2EC'])
+        log_message('')
+        log_message('Sealing the folder A002R2EC again on the file server.')
+        log_message('This will verify all existing hashes and fail because Sidecar.txt was altered.')
+        log_message('An error is shown and create a new generation that documents the failed verification')
+        result = execute_command(mhl.commands.seal, ['-v', '/file_server/A002R2EC'])
         assert result.exit_code == 12
         assert compare_files_against_reference('scenario_04', ['/travel_01', '/file_server'], fs)
 
@@ -257,43 +308,49 @@ def test_scenario_04(fs, reference, A002R2EC):
 
 @freeze_time("2020-01-16 09:15:00")
 def test_scenario_05(fs, reference, A002R2EC, A003R2EC):
-    """
-    Copying two camera mags to a `Reels` folder on a travel drive, and the entire `Reels` folder
-    folder to a server.
-    """
+    log_message('Scenario 05:')
+    log_message('Copying two camera mags to a `Reels` folder on a travel drive, and the entire `Reels` folder')
+    log_message('folder to a server.')
+    log_message('')
 
     os.makedirs('/travel_01/Reels')
     os.makedirs('/file_server')
 
-    # the card A002R2EC is copied in the Reels folder on a travel drive.
+    log_message('Assume the source card /A002R2EC is copied to a Reels folder on travel drive /travel_01.')
     shutil.copytree('/A002R2EC', '/travel_01/Reels/A002R2EC')
-    # create first mhl generation of A002R2EC
-    runner = CliRunner()
-    result = runner.invoke(mhl.commands.seal, ['/travel_01/Reels/A002R2EC'])
+
+    log_message('')
+    log_message('Seal the copy of A002R2EC on the travel drive /travel_01 to create the original mhl generation.')
+    result = execute_command(mhl.commands.seal, ['-v', '/travel_01/Reels/A002R2EC'])
     assert result.exit_code == 0
 
-    # the card A003R2EC is copied in the same Reels folder on the same travel drive.
+    log_message('Assume a second card /A003R2EC is copied to the same Reels folder on travel drive /travel_01.')
     shutil.copytree('/A003R2EC', '/travel_01/Reels/A003R2EC')
 
-    # create first mhl generation of A003R2EC
-    runner = CliRunner()
-    result = runner.invoke(mhl.commands.seal, ['/travel_01/Reels/A003R2EC'])
+    log_message('')
+    log_message('Seal the copy of A003R2EC on the travel drive /travel_01 to create the original mhl generation.')
+    result = execute_command(mhl.commands.seal, ['-v', '/travel_01/Reels/A003R2EC'])
     assert result.exit_code == 0
 
     with freeze_time("2020-01-17 14:30:00"):
-        # the common Reels folder is copied to a file server.
+        log_message('')
+        log_message('Assume the travel drive arrives at a facility on the next day.')
+        log_message('And the common Reels folder is copied from the travel drive to a file server at /file_server.')
         shutil.copytree('/travel_01/Reels', '/file_server/Reels')
 
+        log_message('')
+        log_message('Afterwards an arbitrary file Summary.txt is added to the Reels folder.')
         # An arbitrary file `Summary.txt` is added to the `Reels` folder.
         fs.create_file('/file_server/Reels/Summary.txt',
                        contents='This is a random summary\n\n* A002R2EC\n* A003R2EC\n')
 
+        log_message('')
+        log_message('Sealing the Reels folder on the file server.')
+        log_message('This will verify all hashes, check for completeness and create two second generations')
+        log_message('in the card sub folders A002R2EC and A003R2EC and an initial one for the Reels folder')
+        log_message('with the original hash of the Summary.txt and references to the child histories')
+        log_message('of the card sub folders.')
         # The `Reels` folder is verified on the file server.
-        runner = CliRunner()
-        result = runner.invoke(mhl.commands.seal, ['/file_server/Reels'])
+        result = execute_command(mhl.commands.seal, ['-v', '/file_server/Reels'])
         assert result.exit_code == 0
         assert compare_files_against_reference('scenario_05', ['/travel_01', '/file_server'], fs)
-
-        # check generations on the travel drive, they only exist inside the individual cards
-        # check generations on the file server, a second generation exists for each card
-        # and a initial one for the Reels folder that references the child histories

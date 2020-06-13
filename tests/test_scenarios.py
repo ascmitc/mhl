@@ -43,55 +43,96 @@ def A003R2EC(fs):
     fs.create_file('/A003R2EC/Clips/A003C011_141024_R2EC.mov', contents='vbgh\n')
     fs.create_file('/A003R2EC/Clips/A003C012_141024_R2EC.mov', contents='zhgdr\n')
 
+
 def load_real_reference(fake_fs):
     fake_fs.add_real_directory(scenario_output_path, target_path=fake_ref_root_path)
 
 
-def compare_file_content(reference, path, fake_fs=None, overwrite_ref=False):
-    if os.path.isabs(path):
-        relative_path = path.lstrip(os.sep)
+# custom dircmp to compare file contents as suggested in https://stackoverflow.com/a/24860799
+class content_dircmp(filecmp.dircmp):
+    """
+    Compare the content of dir1 and dir2. In contrast with filecmp.dircmp, this
+    subclass compares the content of files with the same path.
+    """
+    def phase3(self):
+        """
+        Find out differences between common files.
+        Ensure we are using content comparison with shallow=False.
+        """
+        fcomp = filecmp.cmpfiles(self.left, self.right, self.common_files,
+                                 shallow=False)
+        self.same_files, self.diff_files, self.funny_files = fcomp
+
+
+def dirs_are_equal(dir1, dir2):
+    """
+    Compare two directory trees content.
+    Return False if they differ, True is they are the same.
+    """
+    result = True
+    compared = content_dircmp(dir1, dir2, ignore=['.DS_Store'])
+    if compared.left_only or compared.right_only or compared.diff_files or compared.funny_files:
+        compared.report_partial_closure()
+        for file in compared.diff_files:
+            print_diff_of_files(os.path.join(dir1, file), os.path.join(dir2, file))
+        result = False
+    for subdir in compared.common_dirs:
+        if not dirs_are_equal(os.path.join(dir1, subdir), os.path.join(dir2, subdir)):
+            result = False
+    return result
+
+
+def compare_dir_content(reference, dir_path):
+    if os.path.isabs(dir_path):
+        relative_path = dir_path.lstrip(os.sep)
     else:
-        relative_path = path
+        relative_path = dir_path
     ref_path = os.path.join(fake_ref_root_path, reference, relative_path)
 
-    if os.path.isfile(path) is True and os.path.isfile(ref_path) is True:
-        result = filecmp.cmp(ref_path, path, shallow=False)
-        if result is not True:
-            print('\ngot different files:\n')
-            for line in calculate_diff_of_files(ref_path, path):
-                print(line.rstrip())
+    if os.path.isdir(dir_path) is True and os.path.isdir(ref_path) is True:
+        result = dirs_are_equal(ref_path, dir_path)
     else:
         result = False
 
     return result
 
 
-def calculate_diff_of_files(path_a: str, path_b: str):
+def print_diff_of_files(path_a: str, path_b: str):
     with open(path_a, 'r') as file:
         data_a = file.readlines()
     with open(path_b, 'r') as file:
         data_b = file.readlines()
-    return difflib.unified_diff(data_a, data_b, fromfile=path_a, tofile=path_b, n=2, lineterm='')
+    diff = difflib.unified_diff(data_a, data_b, fromfile=path_a, tofile=path_b, n=2, lineterm='')
+    for line in diff:
+        print(line.rstrip())
 
 
-def replace_reference_files_if_needed(scenario_reference: str, folder_paths: List[str], fake_fs) -> None:
+def compare_files_against_reference(scenario_reference: str, folder_paths: List[str], fake_fs) -> bool:
     """
     checks if the scenario reference folder exists in the output folder if it doesn't we copy the folders there and
     consider it as reference. This way we can easily recreate the reference files of a scenario by deleting it on disk
     and running the tests
     """
     real_ref_path = os.path.join(scenario_output_path, scenario_reference)
+
     with Pause(fake_fs):
         if os.path.isdir(real_ref_path):
-            return
+            # in case the reference path exists we compare the content
+            compare_mode = True
+        else:
+            # otherwise we just write the result to the output folder
+            # to be used as new reference for the next run
+            compare_mode = False
 
+    result = True
     for folder_path in folder_paths:
         assert os.path.isabs(folder_path)
-        copy_fake_directory_to_real_fs(folder_path, real_ref_path, fake_fs)
+        if compare_mode:
+            result &= compare_dir_content(scenario_reference, folder_path)
+        else:
+            copy_fake_directory_to_real_fs(folder_path, real_ref_path, fake_fs)
 
-    # reload the fake fs so it reflects the updated reference
-    shutil.rmtree(fake_ref_root_path)
-    load_real_reference(fake_fs)
+    return result
 
 
 def copy_fake_directory_to_real_fs(fake_dir: str, real_dir: str, fake_fs):
@@ -123,8 +164,7 @@ def test_scenario_01(fs, reference, A002R2EC):
     runner = CliRunner()
     result = runner.invoke(mhl.commands.seal, ['/travel_01/A002R2EC'])
     assert result.exit_code == 0
-    replace_reference_files_if_needed('scenario_01', ['/travel_01/A002R2EC'], fs)
-    assert compare_file_content('scenario_01', '/travel_01/A002R2EC/asc-mhl/A002R2EC_2020-01-16_091500_0001.ascmhl')
+    assert compare_files_against_reference('scenario_01', ['/travel_01'], fs)
 
 
 @freeze_time("2020-01-16 09:15:00")
@@ -149,18 +189,10 @@ def test_scenario_02(fs, reference, A002R2EC):
         # create second mhl generation by verifying hashes on the file server
         result = runner.invoke(mhl.commands.seal, ['/file_server/A002R2EC'])
         assert result.exit_code == 0
-        replace_reference_files_if_needed('scenario_02', ['/travel_01', '/file_server'], fs)
+        assert compare_files_against_reference('scenario_02', ['/travel_01', '/file_server'], fs)
 
         # verify there is only first generation on the travel drive, no second generation
-        assert compare_file_content('scenario_02',
-                                    '/travel_01/A002R2EC/asc-mhl/A002R2EC_2020-01-16_091500_0001.ascmhl')
-        assert not os.path.isfile('/travel_01/A002R2EC/asc-mhl/A002R2EC_2020-01-17_143000_0002.ascmhl')
-
         # but a second generation on the file server
-        assert compare_file_content('scenario_02',
-                                    '/file_server/A002R2EC/asc-mhl/A002R2EC_2020-01-16_091500_0001.ascmhl')
-        assert compare_file_content('scenario_02',
-                                    '/file_server/A002R2EC/asc-mhl/A002R2EC_2020-01-17_143000_0002.ascmhl')
 
 
 @freeze_time("2020-01-16 09:15:00")
@@ -187,11 +219,9 @@ def test_scenario_03(fs, reference, A002R2EC):
         # The files are verified on the file server, and additional ("secondary") MD5 hashes are created.
         result = runner.invoke(mhl.commands.seal, ['-h', 'MD5', '/file_server/A002R2EC'])
         assert result.exit_code == 0
-        replace_reference_files_if_needed('scenario_03', ['/travel_01', '/file_server'], fs)
+        assert compare_files_against_reference('scenario_03', ['/travel_01', '/file_server'], fs)
 
         # the second generation will include both the generated secondary hashes and the original hash verified
-        assert compare_file_content('scenario_03',
-                                    '/file_server/A002R2EC/asc-mhl/A002R2EC_2020-01-17_143000_0002.ascmhl')
 
 
 @freeze_time("2020-01-16 09:15:00")
@@ -220,11 +250,9 @@ def test_scenario_04(fs, reference, A002R2EC):
         # The files are verified on the file server, the altered file will cause the verification to fail.
         result = runner.invoke(mhl.commands.seal, ['/file_server/A002R2EC'])
         assert result.exit_code == 12
-        replace_reference_files_if_needed('scenario_04', ['/travel_01', '/file_server'], fs)
+        assert compare_files_against_reference('scenario_04', ['/travel_01', '/file_server'], fs)
 
         # the second generation will include the failed verification result
-        assert compare_file_content('scenario_04',
-                                    '/file_server/A002R2EC/asc-mhl/A002R2EC_2020-01-17_143000_0002.ascmhl')
 
 
 @freeze_time("2020-01-16 09:15:00")
@@ -264,19 +292,8 @@ def test_scenario_05(fs, reference, A002R2EC, A003R2EC):
         runner = CliRunner()
         result = runner.invoke(mhl.commands.seal, ['/file_server/Reels'])
         assert result.exit_code == 0
-        replace_reference_files_if_needed('scenario_05', ['/travel_01', '/file_server'], fs)
+        assert compare_files_against_reference('scenario_05', ['/travel_01', '/file_server'], fs)
 
         # check generations on the travel drive, they only exist inside the individual cards
-        assert compare_file_content('scenario_05',
-                                    '/travel_01/Reels/A002R2EC/asc-mhl/A002R2EC_2020-01-16_091500_0001.ascmhl')
-        assert compare_file_content('scenario_05',
-                                    '/travel_01/Reels/A003R2EC/asc-mhl/A003R2EC_2020-01-16_091500_0001.ascmhl')
-
         # check generations on the file server, a second generation exists for each card
         # and a initial one for the Reels folder that references the child histories
-        assert compare_file_content('scenario_05',
-                                    '/file_server/Reels/A002R2EC/asc-mhl/A002R2EC_2020-01-17_143000_0002.ascmhl')
-        assert compare_file_content('scenario_05',
-                                    '/file_server/Reels/A003R2EC/asc-mhl/A003R2EC_2020-01-17_143000_0002.ascmhl')
-        assert compare_file_content('scenario_05',
-                                    '/file_server/Reels/asc-mhl/Reels_2020-01-17_143000_0001.ascmhl')

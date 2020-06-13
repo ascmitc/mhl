@@ -21,6 +21,7 @@ scenario_output_path = 'examples/scenarios/Output'
 fake_ref_path = '/ref'
 
 
+@freeze_time("2020-01-16 09:15:00")
 def test_seal_succeed(fs):
     fs.create_file('/root/Stuff.txt', contents='stuff\n')
     fs.create_file('/root/A/A1.txt', contents='A1\n')
@@ -28,6 +29,8 @@ def test_seal_succeed(fs):
     runner = CliRunner()
     result = runner.invoke(mhl.commands.seal, ['/root'])
     assert result.exit_code == 0
+    assert os.path.exists('/root/asc-mhl/root_2020-01-16_091500_0001.ascmhl')
+    assert os.path.exists('/root/asc-mhl/chain.txt')
 
 
 def test_seal_directory_hashes(fs):

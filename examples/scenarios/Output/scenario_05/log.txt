@@ -14,6 +14,7 @@ created original hash for /travel_01/Reels/A002R2EC/Sidecar.txt xxhash: 3ab5a416
 writing "A002R2EC_2020-01-16_091500_0001.ascmhl"...
 
 
+
 Assume a second card /A003R2EC is copied to the same Reels folder on travel drive /travel_01.
 
 Seal the copy of A003R2EC on the travel drive /travel_01 to create the original mhl generation.

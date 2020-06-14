@@ -261,8 +261,8 @@ def test_scenario_03(fs, reference, A002R2EC):
 
         log_message('')
         log_message('Sealing the folder A002R2EC again on the file server using MD5 hash format')
-        log_message('this will verify all existing xxHashes, check for completeness')
-        log_message('and create a second generation and additional (new) MD5 hashes are created.')
+        log_message('this will verify all existing xxHashes, check for completeness,')
+        log_message('and create a second generation with additional (new) MD5 hashes.')
         result = execute_command(mhl.commands.seal, ['-v', '-h', 'MD5', '/file_server/A002R2EC'])
         assert result.exit_code == 0
         assert compare_files_against_reference('scenario_03', ['/travel_01', '/file_server'], fs)
@@ -324,6 +324,7 @@ def test_scenario_05(fs, reference, A002R2EC, A003R2EC):
     result = execute_command(mhl.commands.seal, ['-v', '/travel_01/Reels/A002R2EC'])
     assert result.exit_code == 0
 
+    log_message('')
     log_message('Assume a second card /A003R2EC is copied to the same Reels folder on travel drive /travel_01.')
     shutil.copytree('/A003R2EC', '/travel_01/Reels/A003R2EC')
 

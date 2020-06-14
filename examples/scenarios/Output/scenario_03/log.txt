@@ -21,8 +21,8 @@ Assume the travel drive arrives at a facility on the next day.
 And the folder A002R2EC is copied there from the travel drive to a file server at /file_server.
 
 Sealing the folder A002R2EC again on the file server using MD5 hash format
-this will verify all existing xxHashes, check for completeness
-and create a second generation and additional (new) MD5 hashes are created.
+this will verify all existing xxHashes, check for completeness,
+and create a second generation with additional (new) MD5 hashes.
 
 $ ascmhl.py seal ['-v', '-h', 'MD5', '/file_server/A002R2EC']
 seal folder at path: /file_server/A002R2EC

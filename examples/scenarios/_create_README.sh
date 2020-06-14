@@ -1,91 +1,27 @@
 #!/bin/bash
 
+# re run the scenario tests creating new output
+rm -rf Output
+mkdir Output
+pushd ../..
+pytest tests/test_scenarios.py
+popd
+
+# collect all log outputs into one README.md file
 rm -rf README.md
-
-echo "### Sample output of all scenario scipts" >> README.md
+echo "### Sample output of all test scenarios " >> README.md
 echo >> README.md
 
-echo "## scenario_01.sh" >> README.md
-echo "\`\`\`" >> README.md
-./scenario_01.sh >> README.md
-echo "\`\`\`" >> README.md
-
-echo "## scenario_01A.sh" >> README.md
-echo "\`\`\`" >> README.md
-./scenario_01A.sh >> README.md
-echo "\`\`\`" >> README.md
-
-echo "## scenario_02.sh" >> README.md
-echo "\`\`\`" >> README.md
-./scenario_02.sh >> README.md
-echo "\`\`\`" >> README.md
-
-echo "## scenario_03.sh" >> README.md
-echo "\`\`\`" >> README.md
-./scenario_03.sh >> README.md
-echo "\`\`\`" >> README.md
-
-echo "## scenario_04.sh" >> README.md
-echo "\`\`\`" >> README.md
-./scenario_04.sh >> README.md
-echo "\`\`\`" >> README.md
-
-echo "## scenario_05.sh" >> README.md
-echo "\`\`\`" >> README.md
-./scenario_05.sh >> README.md
-echo "\`\`\`" >> README.md
-
-echo "## scenario_06.sh" >> README.md
-echo "\`\`\`" >> README.md
-./scenario_06.sh >> README.md
-echo "\`\`\`" >> README.md
-
-echo "## scenario_07.sh" >> README.md
-echo "\`\`\`" >> README.md
-./scenario_07.sh >> README.md
-echo "\`\`\`" >> README.md
-
-echo "## scenario_08.sh" >> README.md
-echo "\`\`\`" >> README.md
-./scenario_08.sh >> README.md
-echo "\`\`\`" >> README.md
-
-echo "## scenario_09.sh" >> README.md
-echo "\`\`\`" >> README.md
-./scenario_09.sh >> README.md
-echo "\`\`\`" >> README.md
-
-PATHPREFIX="Writing \""$(PWD)
-PATHPREFIX=$PATHPREFIX"/"
-PATHPREFIX=$(echo $PATHPREFIX | sed 's/\//\\\//g')
-sed -i -e 's/'"$PATHPREFIX"'/Writing \"[…]/g' README.md
-
-PATHPREFIX="Traversing \""$(PWD)
-PATHPREFIX=$PATHPREFIX"/"
-PATHPREFIX=$(echo $PATHPREFIX | sed 's/\//\\\//g')
-sed -i -e 's/'"$PATHPREFIX"'/Traversing \"[…]/g' README.md
-
-PATHPREFIX=" "$(PWD)
-PATHPREFIX=$PATHPREFIX"/"
-PATHPREFIX=$(echo $PATHPREFIX | sed 's/\//\\\//g')
-sed -i -e 's/'"$PATHPREFIX"'/[…]/g' README.md
-
+for FOLDER in `ls Output`; do
+  if [ -d "Output/$FOLDER" ]; then
+    echo >> README.md
+    echo "## $FOLDER" >> README.md
+    echo "\`\`\`" >> README.md
+    cat "Output/$FOLDER/log.txt" >> README.md
+    echo "\`\`\`" >> README.md
+  fi
+done
 
 echo >> README.md
-echo "The ASC-MHL files can be found in the \`\`asc-mhl\`\` folders amongst the scenario output files in the [Output/](Output/) folder." >> README.md
+echo "The ASC MHL files can be found in the \`\`ascmhl\`\` folders amongst the scenario output files in the [Output/](Output/) folder." >> README.md
 echo >> README.md
-
-rm -rf README.md-e
-
-# update hive material:
-#
-# $ cd hive-master/cli
-# $ python3 -m venv env
-# $ env/bin/activate
-# $ hive seal [....]/asc-mhl-tools/scenarios/Output/scenario_06/A002R2EC
-# 
-# copy and paste output into scenarios/Template/Material/Scenario06/hive-output.rtf
-# move "scenarios/Output/scenario_06/A002R2EC/hive" to "scenarios/Template/Material/Scenario06"
-
-
-

@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<schema 
-    targetNamespace="http://theasc.com/ASCMHL" 
-    elementFormDefault="qualified"
-    xmlns="http://www.w3.org/2001/XMLSchema" 
-    xmlns:ascmhl="http://theasc.com/ASCMHL">
-    
+<schema targetNamespace="http://theasc.com/ASCMHL" elementFormDefault="qualified"
+    xmlns="http://www.w3.org/2001/XMLSchema" xmlns:ascmhl="http://theasc.com/ASCMHL">
+
     <simpleType name="EmailAddressAttributeType">
         <restriction base="string">
             <pattern value="[^@]+@[^\.]+\..+"/>
@@ -18,20 +15,15 @@
             <enumeration value="failed"/>
         </restriction>
     </simpleType>
-    <simpleType name="DirectoryAttributeType">
-        <restriction base="string">
-            <enumeration value="true"/>
-            <enumeration value="false"/>
-        </restriction>
-    </simpleType>
-    
+
     <complexType name="HashListType">
-        <sequence>
+        <all maxOccurs="1">
             <element name="creatorinfo" type="ascmhl:CreatorInfoType"/>
             <element name="metadata" type="ascmhl:MetadataType" minOccurs="0"/>
             <element name="hashes" type="ascmhl:HashesType" minOccurs="1"/>
-        </sequence>
-        <attribute fixed="2" name="version" use="required"/>
+            <element maxOccurs="1" minOccurs="0" name="references" type="ascmhl:ReferencesType"/>
+        </all>
+        <attribute fixed="2.0" name="version" use="required"/>
     </complexType>
     <complexType name="CreatorInfoType">
         <sequence>
@@ -60,25 +52,27 @@
             </extension>
         </simpleContent>
     </complexType>
+    <simpleType name="ProcessTypeType">
+        <restriction base="string">
+            <enumeration value="in-place"/>
+            <enumeration value="transfer"/>
+        </restriction>
+    </simpleType>
     <complexType block="" name="ProcessType">
-        <attribute name="type" use="required">
-            <simpleType>
-                <restriction base="string">
-                    <enumeration value="in-place"/>
-                    <enumeration value="transfer"/>
-                </restriction>
-            </simpleType>
-        </attribute>
-        <attribute name="hashsource" use="optional">
-            <simpleType>
-                <restriction base="string">
-                    <enumeration value="file"/>
-                    <enumeration value="source"/>
-                    <enumeration value="source+file"/>
-                    <enumeration value="other"/>
-                </restriction>
-            </simpleType>
-        </attribute>
+        <simpleContent>
+            <extension base="ascmhl:ProcessTypeType">
+                <attribute name="hashsource" use="optional">
+                    <simpleType>
+                        <restriction base="string">
+                            <enumeration value="file"/>
+                            <enumeration value="source"/>
+                            <enumeration value="source+file"/>
+                            <enumeration value="other"/>
+                        </restriction>
+                    </simpleType>
+                </attribute>
+            </extension>
+        </simpleContent>
     </complexType>
     <complexType name="IgnoreType">
         <sequence>
@@ -106,7 +100,7 @@
             </sequence>
             <element minOccurs="0" name="metadata" type="ascmhl:MetadataType"/>
         </sequence>
-        <attribute name="directory" type="ascmhl:DirectoryAttributeType"/>
+        <attribute name="directory" type="boolean"/>
     </complexType>
     <complexType name="HashFormatType">
         <simpleContent>
@@ -114,6 +108,18 @@
                 <attribute name="action" type="ascmhl:ActionAttributeType"/>
             </extension>
         </simpleContent>
+    </complexType>
+    <complexType name="ReferencesType">
+        <sequence>
+            <element maxOccurs="unbounded" name="hashlistreference"
+                type="ascmhl:HashListReferenceType"/>
+        </sequence>
+    </complexType>
+    <complexType name="HashListReferenceType">
+        <sequence>
+            <element name="path" type="string"/>
+            <element name="c4" type="ascmhl:HashFormatType"/>
+        </sequence>
     </complexType>
     <complexType name="MetadataType">
         <complexContent>

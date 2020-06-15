@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<hashlist version="2"
+<hashlist version="2.0"
 xmlns="http://theasc.com/ASCMHL" 
 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
 xsi:schemaLocation="http://theasc.com/ASCMHL/ASCMHL ASCMHL.xsd">
@@ -10,7 +10,7 @@ xsi:schemaLocation="http://theasc.com/ASCMHL/ASCMHL ASCMHL.xsd">
     <author email="foo@bar.foo.foo.com" phone="+1 234 567 890 88">Liz Foo</author>
     <author email="zed@bar.foo.foo.com" phone="+1 234 567 890 99">Ben Zed</author>
     <location>Munich, Germany</location>
-    <process type="in-place" />
+    <process hashsource="other">in-place</process>
     <ignore>
       <pattern>*.DS_Store</pattern>      
       <pattern>/tmp</pattern>      
@@ -48,4 +48,14 @@ xsi:schemaLocation="http://theasc.com/ASCMHL/ASCMHL ASCMHL.xsd">
       <metadata bar="Foo" />
     </hash>
   </hashes>
+  <references>
+    <hashlistreference>
+      <path>A002R2EC/asc-mhl/A002R2EC_2020-01-17_143000_0002.mhl</path>
+      <c4>87210d6e0589c31c</c4>
+    </hashlistreference>
+    <hashlistreference>
+      <path>A003R2EC/asc-mhl/A003R2EC_2020-01-17_143000_0002.mhl</path>
+      <c4>40116e7da1ca1487</c4>
+    </hashlistreference>
+  </references>
 </hashlist>

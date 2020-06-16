@@ -52,7 +52,7 @@ def context_type_for_hash_format(hash_format):
         return hashlib.md5
     elif hash_format == 'SHA1':
         return hashlib.sha1
-    elif hash_format == 'xxhash':
+    elif hash_format == 'xxh64':
         return xxhash.xxh64
     elif hash_format == 'C4':
         return C4HashContext

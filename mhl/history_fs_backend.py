@@ -15,7 +15,7 @@ from .__version__ import ascmhl_folder_name, ascmhl_file_extension
 from .hashlist import MHLHashList
 from .history import MHLHistory
 from .chain_txt_backend import MHLChainTXTBackend
-from .hashlist_xml_backend import MHLHashListXMLBackend
+from . import hashlist_xml_backend
 from .utils import datetime_now_filename_string
 
 
@@ -48,7 +48,7 @@ class MHLHistoryFSBackend:
 					parts = re.findall(r'(.*)_(.+)_(.+)_(\d+)\.ascmhl', filename)
 					if parts.__len__() == 1 and parts[0].__len__() == 4:
 						file_path = os.path.join(asc_mhl_folder_path, filename)
-						hash_list = MHLHashListXMLBackend.parse(file_path)
+						hash_list = hashlist_xml_backend.parse(file_path)
 
 						generation_number = int(parts[0][3])
 						hash_list.generation_number = generation_number
@@ -87,7 +87,7 @@ class MHLHistoryFSBackend:
 		file_name, generation_number = MHLHistoryFSBackend._new_generation_filename(history)
 		file_path = os.path.join(history.asc_mhl_path, file_name)
 		new_hash_list.generation_number = generation_number
-		MHLHashListXMLBackend.write_hash_list(new_hash_list, file_path)
+		hashlist_xml_backend.write_hash_list(new_hash_list, file_path)
 		history.append_hash_list(new_hash_list)
 
 	@staticmethod
@@ -110,7 +110,7 @@ class MHLHistoryFSBackend:
 			for hash_entry in media_hash.hash_entries:
 				if hash_entry.action == 'new' and hash_entry.secondary is True:
 					# TODO: do need to use the original hash here or can we also use another secondary hash
-					original_hash_entry = history.find_original_hash_entry_for_path(media_hash.relative_filepath)
+					original_hash_entry = history.find_original_hash_entry_for_path(media_hash.path)
 					required_hash_entry = media_hash.find_hash_entry_for_format(original_hash_entry.hash_format)
 					if required_hash_entry is None:
 						raise AssertionError('no hash entry found for new secondary hash', hash_entry)

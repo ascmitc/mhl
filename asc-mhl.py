@@ -19,6 +19,7 @@ def mhltool_cli():
 
 mhltool_cli.add_command(commands.seal)
 mhltool_cli.add_command(commands.check)
+mhltool_cli.add_command(commands.validate)
 
 
 if __name__ == '__main__':

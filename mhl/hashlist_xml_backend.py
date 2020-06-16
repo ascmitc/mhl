@@ -7,162 +7,180 @@ __maintainer__ = "Patrick Renner, Alexander Sahm"
 __email__ = "opensource@pomfort.com"
 """
 
-import os
-from lxml import objectify, etree, sax
+import textwrap
+from timeit import default_timer as timer
+from lxml import etree
+from lxml.builder import E
+from xml.sax.saxutils import quoteattr
 
-from . import logger
 from .utils import datetime_isostring
-from .__version__ import ascmhl_supported_hashformats
-from .hashlist import MHLHashList, MHLMediaHash, MHLHashEntry, MHLHashListReference
-from .context import MHLCreatorInfo
+from .hashlist import *
 
 
-class MHLHashListXMLBackend:
-	"""class to read an MHL file into a MHLHashList object
+def parse(file_path):
+	"""parsing the MHL XML file and building the MHLHashList for the hash_list member variable"""
+	logger.debug(f'parsing {file_path}...')
+
+	start = timer()
+
+	hash_list = MHLHashList()
+	hash_list.file_path = file_path
+	current_object = None
+	supported_hashformats = {'{urn:ASC:MHL:v2.0}md5',
+							 '{urn:ASC:MHL:v2.0}sha1',
+							 '{urn:ASC:MHL:v2.0}c4',
+							 '{urn:ASC:MHL:v2.0}xxh32',
+							 '{urn:ASC:MHL:v2.0}xxh64',
+							 '{urn:ASC:MHL:v2.0}xxh3'}
+	# use iterparse to prevent large memory usage when parsing large files
+	for event, element in etree.iterparse(_read_file_handle(file_path), events=('start', 'end')):
+		if current_object and event == 'end':
+			if type(current_object) is MHLCreatorInfo:
+				if element.tag == '{urn:ASC:MHL:v2.0}creationdate':
+					current_object.creation_date = element.text
+				elif element.tag == '{urn:ASC:MHL:v2.0}tool':
+					current_object.tool = MHLTool(element.text, element.attrib['version'])
+				elif element.tag == '{urn:ASC:MHL:v2.0}creatorinfo':
+					hash_list.append_creator_info(current_object)
+					current_object = None
+			elif type(current_object) is MHLMediaHash:
+				if element.tag == '{urn:ASC:MHL:v2.0}path':
+					current_object.path = element.text
+				elif element.tag == '{urn:ASC:MHL:v2.0}filesize':
+					current_object.filesize = element.text
+				# TODO: parse date
+				# elif element.tag == '{urn:ASC:MHL:v2.0}lastmodificationdate':
+				# 	current_object.filesize = element.text
+				elif element.tag in supported_hashformats:
+					entry = MHLHashEntry(etree.QName(element).localname, element.text, element.attrib['action'])
+					current_object.append_hash_entry(entry)
+				elif element.tag == '{urn:ASC:MHL:v2.0}hash':
+					hash_list.append_hash(current_object)
+					current_object = None
+			elif type(current_object) is MHLHashListReference:
+				if element.tag == '{urn:ASC:MHL:v2.0}path':
+					current_object.path = element.text
+				elif element.tag == '{urn:ASC:MHL:v2.0}c4':
+					current_object.c4hash = element.text
+				elif element.tag == '{urn:ASC:MHL:v2.0}hashlistreference':
+					hash_list.append_hash_list_reference(current_object)
+					current_object = None
+
+			# in order to keep memory usage low while parsing, we clear the finished element
+			# and remove it from the parent element as well but since this is clearing the children anyways
+			# we only need to do it if we are not currently parsing a container object
+			if not current_object:
+				element.clear()
+				while element.getprevious() is not None:
+					del element.getparent()[0]
+
+		# check if we need to create a new container
+		elif not current_object and event == 'start':
+			if element.tag == '{urn:ASC:MHL:v2.0}hash':
+				current_object = MHLMediaHash()
+			elif element.tag == '{urn:ASC:MHL:v2.0}creatorinfo':
+				current_object = MHLCreatorInfo()
+			elif element.tag == '{urn:ASC:MHL:v2.0}hashlistreference':
+				current_object = MHLHashListReference()
+
+	logger.debug(f'parsing took: {timer() - start}')
+
+	return hash_list
+
+
+def _read_file_handle(file_path):
+	"""returns the file handle used for reading
+
+	this is a separate method so we can stub it during testing to read from the fake file system instead
 	"""
+	return open(file_path, "rb")
 
-	@staticmethod
-	def parse(filepath):
-		"""parsing the MHL XML file and building the MHLHashList for the hash_list member variable"""
-		logger.debug(f'parsing \"{os.path.basename(filepath)}\"...')
 
-		# for the fake file system in the tests to work we don't use the etree.parse since it uses a native
-		# c reading method that is not compatible with pyfakefs we instead read the content first and parse it directly
-		with open(filepath, 'rb') as file:
-			data = file.read()
-			hash_list_element = etree.fromstring(data)
-		hash_list = MHLHashList()
-		hash_list.file_path = filepath
+def write_hash_list(hash_list: MHLHashList, file_path: str):
+	"""creates a new mhl file and writes the xml to disk
 
-		for section in hash_list_element.getchildren():
-			if section.tag == 'creatorinfo':
-				creator_info = MHLCreatorInfo()
-				creator_info.host_name = section.xpath('hostname')[0].text
-				creator_info.tool_name = section.xpath('toolname')[0].text
-				creator_info.tool_version = section.xpath('toolversion')[0].text
-				creator_info.creation_date = section.xpath('creationdate')[0].text
-				creator_info.process = section.xpath('process')[0].text
-				hash_list.append_creator_info(creator_info)
+	we write the file step by step to reduce memory load while writing large files
+	e.g. we create xml objects only for single elemnts like one media hash element and write it to disk
+	before creating the next one"""
 
-			if section.tag == 'hashes':
-				hashes = section.getchildren()
-				for hash_element in hashes:
-					media_hash = MHLMediaHash()
-					media_hash.relative_filepath = hash_element.xpath('filename')[0].text
+	logger.verbose(f'writing \"{os.path.basename(file_path)}\"...')
 
-					for hash_format in ascmhl_supported_hashformats:
-						hash_entry_elements = hash_element.xpath(hash_format)
-						if hash_entry_elements:
-							hash_entry_element = hash_entry_elements[0]
-							hash_entry = MHLHashEntry()
-							hash_entry.hash_format = hash_format
-							hash_entry.hash_string = hash_entry_element.text
-							hash_entry.action = hash_entry_element.get('action')
-							hash_entry.secondary = (hash_entry_element.get('secondary') is True)
-							media_hash.append_hash_entry(hash_entry)
-							
-					hash_list.append_hash(media_hash)
-			if section.tag == 'ascmhlreference':
-				hash_list_reference = MHLHashListReference()
-				hash_list_reference.path = section.xpath('path')[0].text
-				hash_list_reference.xxhash = section.xpath('xxhash')[0].text
-				hash_list.append_hash_list_reference(hash_list_reference)
+	if not os.path.isdir(os.path.dirname(file_path)):
+		os.mkdir(os.path.dirname(file_path))
 
-		return hash_list
+	file = open(file_path, 'wb')
+	file.write(b'<?xml version="1.0" encoding="UTF-8"?>\n<hashlist version="2.0" xmlns="urn:ASC:MHL:v2.0">\n')
+	current_indent = '  '
 
-	@staticmethod
-	def write_hash_list(hash_list: MHLHashList, file_path: str):
+	# write creator info
+	_write_xml_string_to_file(file, _creator_info_xml_string(hash_list.creator_info), '  ')
 
-		logger.verbose(f'writing \"{os.path.basename(file_path)}\"...')
+	# write hashes
+	hashes_tag = f'<hashes rootpath={quoteattr(os.path.dirname(os.path.dirname(file_path)))}>\n'
+	_write_xml_string_to_file(file, hashes_tag, current_indent)
+	current_indent += '  '
 
-		xml_context = sax.ElementTreeContentHandler()
-		xml_context.startDocument()
-		xml_context.startElementNS((None, 'hashlist'), 'hashlist', {(None, 'version'): "2.0"})
-		hashlist_element = xml_context._element_stack[-1]
+	for media_hash in hash_list.media_hashes:
+		_write_xml_string_to_file(file, _media_hash_xml_string(media_hash), current_indent)
 
-		creatorinfo_element = MHLHashListXMLBackend._creator_info_xml_element(hash_list.creator_info)
-		hashlist_element.append(creatorinfo_element)
+	current_indent = current_indent[:-2]
+	_write_xml_string_to_file(file, '</hashes>\n', current_indent)
 
-		# if media_hash_list is not None:
-		# 	genreference_element = self.element_genreference(media_hash_list)
-		# 	hashlist_element.append(genreference_element)
 
-		xml_context.startElementNS((None, 'hashes'), 'hashes', {(None, 'rootPath'): os.path.dirname(os.path.dirname(file_path))})
-		hashes_element = xml_context._element_stack[-1]
-
-		for media_hash in hash_list.media_hashes:
-			hash_element = MHLHashListXMLBackend._media_hash_xml_element(media_hash)
-			hashes_element.append(hash_element)
-
+	# only write the optional references section if there are actually some references
+	if len(hash_list.hash_list_references) > 0:
+		_write_xml_string_to_file(file, '<references>\n', current_indent)
+		current_indent += '  '
 		for ref_hash_list in hash_list.referenced_hash_lists:
-			reference_element = MHLHashListXMLBackend._ascmhlreference_xml_element(ref_hash_list, file_path)
-			hashlist_element.append(reference_element)
+			_write_xml_string_to_file(file, _ascmhlreference_xml_string(ref_hash_list, file_path), current_indent)
+		current_indent = current_indent[:-2]
+		_write_xml_string_to_file(file, '</references>\n', current_indent)
 
-		xml_string: bytes = etree.tostring(xml_context.etree.getroot(), pretty_print=True, xml_declaration=True,
-												encoding="utf-8")
+	current_indent = current_indent[:-2]
+	_write_xml_string_to_file(file, '</hashlist>\n', current_indent)
+	file.flush()
 
-		if not os.path.isdir(os.path.dirname(file_path)):
-			os.mkdir(os.path.dirname(file_path))
-
-		with open(file_path, 'wb') as file:
-			# FIXME: check if file could be created
-			file.write(xml_string)
-
-		hash_list.file_path = file_path
+	hash_list.file_path = file_path
 
 
-	@staticmethod
-	def _media_hash_xml_element(media_hash):
-		"""builds and returns one <hash> element for a given MediaHash object"""
+def _write_xml_string_to_file(file, xml_string: str, indent: str):
+	result = textwrap.indent(xml_string, indent)
+	file.write(result.encode('utf-8'))
 
-		hash_element = etree.Element('hash')
 
-		filename_element = etree.SubElement(hash_element, 'filename')
-		filename_element.text = media_hash.relative_filepath
-		filesize_element = etree.SubElement(hash_element, 'filesize')
-		filesize_element.text = media_hash.filesize.__str__()
-		lastmodificationdate_element = etree.SubElement(hash_element, 'lastmodificationdate')
-		lastmodificationdate_element.text = datetime_isostring(media_hash.last_modification_date)
+def _media_hash_xml_string(media_hash) -> str:
+	"""builds and returns one <hash> element for a given MediaHash object"""
 
-		for hash_entry in media_hash.hash_entries:
-			hashformat_element_attributes = {}
-			if hash_entry.action is not None:
-				if hash_entry.action != 'copy-only':
-					hashformat_element_attributes['action'] = hash_entry.action
-			if hash_entry.secondary is not None and hash_entry.secondary is not False:
-				hashformat_element_attributes['secondary'] = "true" if hash_entry.secondary else None
-			hashformat_element = etree.SubElement(hash_element, hash_entry.hash_format,
-												  attrib=hashformat_element_attributes)
-			hashformat_element.text = hash_entry.hash_string
+	hash_element = E.hash(
+		E.path(media_hash.path),
+		E.filesize(str(media_hash.filesize)),
+		E.lastmodificationdate(datetime_isostring(media_hash.last_modification_date)))
 
-		objectify.deannotate(hash_element, cleanup_namespaces=True, xsi_nil=True)
-		return hash_element
+	for hash_entry in media_hash.hash_entries:
+		entry_element = E(hash_entry.hash_format, hash_entry.hash_string, action=hash_entry.action)
+		hash_element.append(entry_element)
 
-	@staticmethod
-	def _ascmhlreference_xml_element(hash_list: MHLHashList, file_path: str):
-		"""builds and returns one <ascmhlreference> element for a given HashList object"""
+	return etree.tostring(hash_element, pretty_print=True, encoding="unicode")
 
-		hash_element = etree.Element('ascmhlreference')
 
-		path_element = etree.SubElement(hash_element, 'path')
-		root_path = os.path.dirname(os.path.dirname(file_path))
-		relative_path = os.path.relpath(hash_list.file_path, root_path)
-		path_element.text = relative_path
-		xxhash_element = etree.SubElement(hash_element, 'xxhash')
-		xxhash_element.text = hash_list.get_xxhash64()
+def _ascmhlreference_xml_string(hash_list: MHLHashList, file_path: str) -> str:
+	"""builds and returns one <hashlistreference> element for a given HashList object"""
 
-		objectify.deannotate(hash_element, cleanup_namespaces=True, xsi_nil=True)
-		return hash_element
+	root_path = os.path.dirname(os.path.dirname(file_path))
+	hash_element = E.hashlistreference(
+		E.path(os.path.relpath(hash_list.file_path, root_path)),
+		E.c4(hash_list.get_xxhash64()))
 
-	@staticmethod
-	def _creator_info_xml_element(creator_info):
-		"""builds and returns one <creatorinfo> element for a given creator info instance"""
+	return etree.tostring(hash_element, pretty_print=True, encoding="unicode")
 
-		info_element = objectify.Element('creatorinfo')
-		info_element.hostname = creator_info.host_name
-		info_element.toolname = creator_info.tool_name
-		info_element.toolversion = creator_info.tool_version
-		info_element.creationdate = creator_info.creation_date
-		info_element.process = 'verify'
-		objectify.deannotate(info_element, cleanup_namespaces=True, xsi_nil=True)
-		return info_element
+
+def _creator_info_xml_string(creator_info) -> str:
+	"""builds and returns one <creatorinfo> element for a given creator info instance"""
+
+	info_element = E.creatorinfo(
+		E.creationdate(creator_info.creation_date),
+		E.tool(creator_info.tool.name, version=creator_info.tool.version),
+		E.hostname(creator_info.host_name),
+		E.process(creator_info.process.process_type)
+	)
+	return etree.tostring(info_element, pretty_print=True, encoding="unicode")

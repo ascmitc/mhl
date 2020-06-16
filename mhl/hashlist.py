@@ -14,7 +14,6 @@ import os
 
 from . import logger
 from .hasher import create_filehash
-from .context import MHLCreatorInfo
 from .utils import datetime_now_isostring_with_microseconds
 
 
@@ -67,14 +66,14 @@ class MHLHashList:
     def set_of_file_paths(self, root_path) -> set[str]:
         all_paths = set()
         for media_hash in self.media_hashes:
-            all_paths.add(os.path.join(root_path, media_hash.relative_filepath))
+            all_paths.add(os.path.join(root_path, media_hash.path))
         return all_paths
 
     def get_file_name(self):
         return os.path.basename(self.file_path)
 
     def get_xxhash64(self):
-        return create_filehash('xxhash', self.file_path)
+        return create_filehash('xxh64', self.file_path)
 
     # build
 
@@ -85,7 +84,7 @@ class MHLHashList:
     def append_hash(self, media_hash: MHLMediaHash):
         media_hash.hash_list = self
         self.media_hashes.append(media_hash)
-        self.media_hashes_path_map[media_hash.relative_filepath] = media_hash
+        self.media_hashes_path_map[media_hash.path] = media_hash
 
     def append_creator_info(self, creator_info):
         creator_info.hash_list = self
@@ -131,7 +130,7 @@ class MHLMediaHash:
     """
     hash_list: MHLHashList
     hash_entries: List[MHLHashEntry]
-    relative_filepath: str
+    path: str
     filesize: int
     last_modification_date: datetime
 
@@ -139,7 +138,7 @@ class MHLMediaHash:
     def __init__(self):
         self.hash_list = None
         self.hash_entries = list()
-        self.relative_filepath = None
+        self.path = None
         self.filesize = None
         self.last_modification_date = None
 
@@ -175,7 +174,7 @@ class MHLMediaHash:
                                                            hash_entry.hash_format.rjust(6),
                                                            hash_entry.hash_string.ljust(32),
                                                            (hash_entry.action if hash_entry.action is not None else "").ljust(10),
-                                                           self.relative_filepath))
+                                                           self.path))
 
 
 class MHLHashEntry:
@@ -189,7 +188,6 @@ class MHLHashEntry:
     attribute member variables:
     hash_string -- string representation (hex) of the hash value
     hash_format -- string value, hash format, e.g. 'MD5', 'xxhash'
-    hash_date -- date of creation of the hash value
     action -- action/result of verification, e.g. 'verified', 'failed', 'new', 'original'
     secondary -- bool value, indicates if created after the original hash (TBD)
 
@@ -199,16 +197,14 @@ class MHLHashEntry:
     media_hash: MHLMediaHash
     hash_string: str
     hash_format: str
-    hash_date: datetime
     action: str
     secondary: bool
 
-    def __init__(self):
+    def __init__(self, hash_format: str = None, hash_string: str = None, action: str = None):
         self.media_hash = None
-        self.hash_string = None
-        self.hash_format = None
-        self.hash_date = datetime_now_isostring_with_microseconds()
-        self.action = None
+        self.hash_string = hash_string
+        self.hash_format = hash_format
+        self.action = action
         self.secondary = False
 
 
@@ -218,8 +214,66 @@ class MHLHashListReference:
     """
     hash_list: MHLHashList
     path: str
-    xxhash: str
+    c4hash: str
 
     def __init__(self):
         self.path = None
-        self.xxhash = None
+        self.c4hash = None
+
+
+class MHLCreatorInfo:
+    """
+    Stores the creator info that is part of the header of each hash list file
+    """
+    host_name: str
+    tool: MHLTool
+    creation_date: datetime
+    process: MHLProcess
+    authors: List[MHLAuthor]
+
+    def __init__(self):
+        self.hash_list = None
+        self.host_name = None
+        self.tool = None
+        self.creation_date = None
+        self.process = None
+        self.authors = None
+
+    def log(self):
+        logger.info("     host_name: {0}".format(self.host_name))
+        logger.info("          tool: {0} {1}".format(self.tool.name, self.tool.version))
+        logger.info(" creation_date: {0}".format(self.creation_date))
+        logger.info("       process: {0}".format(self.process))
+
+
+class MHLTool:
+    name: str
+    version: str
+
+    def __init__(self, name: str, version: str):
+        self.name = name
+        self.version = version
+
+
+class MHLProcess:
+    process_type: str
+    name: str
+    hash_source: str
+
+    def __init__(self, process_type: str, name: str = None):
+        self.process_type = process_type
+        self.name = name
+        self.hash_source = None
+
+
+class MHLAuthor:
+    name: str
+    email: str
+    phone: str
+
+    def __init__(self):
+        self.name = None
+        self.email = None
+        self.phone = None
+
+

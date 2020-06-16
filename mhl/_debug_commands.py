@@ -12,10 +12,10 @@ import shutil
 import click
 from .commands import seal_file_path, commit_session
 from .generator import MHLGenerationCreationSession
-from. import logger
+from . import logger
 from .history_fs_backend import MHLHistoryFSBackend
 from .chain_txt_backend import MHLChainTXTBackend
-from .hashlist_xml_backend import MHLHashListXMLBackend
+from . import hashlist_xml_backend
 from .traverse import post_order_lexicographic
 
 
@@ -41,7 +41,7 @@ def readmhlfile(filepath, verbose):
     read an ASC-MHL file
     """
 
-    hashlist = MHLHashListXMLBackend.parse(filepath)
+    hashlist = hashlist_xml_backend.parse(filepath)
 
     if verbose:
         hashlist.log()

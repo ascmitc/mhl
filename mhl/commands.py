@@ -13,7 +13,7 @@ import os
 import platform
 import click
 
-from .context import MHLCreatorInfo
+from .hashlist import MHLCreatorInfo, MHLTool, MHLProcess
 from .hasher import create_filehash, context_type_for_hash_format
 from . import logger
 from .history_fs_backend import MHLHistoryFSBackend
@@ -21,13 +21,14 @@ from .generator import MHLGenerationCreationSession
 from .traverse import post_order_lexicographic
 from . import utils
 import binascii
+from lxml import etree
 
 
 @click.command()
 @click.argument('root_path', type=click.Path(exists=True))
 @click.option('--verbose', '-v', default=False, is_flag=True, help="Verbose output")
 @click.option('--directory_hashes', '-d', default=False, is_flag=True, help="Create directory hashes")
-@click.option('--hash_format', '-h', type=click.Choice(['xxhash', 'MD5', 'SHA1', 'C4']), multiple=False, default='xxhash', help="Algorithm")
+@click.option('--hash_format', '-h', type=click.Choice(['xxh64', 'MD5', 'SHA1', 'C4']), multiple=False, default='xxh64', help="Algorithm")
 def seal(root_path, verbose, hash_format, directory_hashes):
     """
     Creates a new generation from the content of a folder hierarchy.
@@ -154,6 +155,23 @@ def check(root_path, verbose):
         raise logger.NewFilesFoundException()
 
 
+@click.command()
+@click.argument('file_path', type=click.Path(exists=True))
+def validate(file_path):
+    """Validates a mhl file against the xsd schema definition"""
+
+    xsd_path = 'xsd/ASCMHL.xsd'
+    xsd = etree.XMLSchema(etree.parse(xsd_path))
+    result = xsd.validate(etree.parse(file_path))
+
+    if result:
+        logger.info(f'validated: {file_path}')
+    else:
+        logger.error(f'ERROR: {file_path} didn\'t validate against XSD!')
+        logger.info(f'Issues:\n{xsd.error_log}')
+        raise logger.VerificationFailedException
+
+
 def test_for_missing_files(not_found_paths):
     if len(not_found_paths) > 0:
         logger.error(f"{len(not_found_paths)} missing files: ")
@@ -164,11 +182,10 @@ def test_for_missing_files(not_found_paths):
 
 def commit_session(session):
     creator_info = MHLCreatorInfo()
-    creator_info.tool_version = "0.0.1"
-    creator_info.tool_name = "verify"
+    creator_info.tool = MHLTool('seal', '0.0.1')
     creator_info.creation_date = utils.datetime_now_isostring()
     creator_info.host_name = platform.node()
-    creator_info.process = "verify"
+    creator_info.process = MHLProcess('in-place')
     session.commit(creator_info)
 
 

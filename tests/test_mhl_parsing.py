@@ -15,7 +15,17 @@ from click.testing import CliRunner
 
 import mhl._debug_commands
 from mhl.history_fs_backend import MHLHistoryFSBackend
+from mhl import hashlist_xml_backend, logger
 import mhl.commands
+
+
+def test_simple_parsing():
+    logger.verbose_logging = True
+    logger.debug_logging = True
+    # path = "examples/scenarios/Output/scenario_01/travel_01/A002R2EC/asc-mhl/A002R2EC_2020-01-16_091500_0001.ascmhl"
+    path = "/Users/sahm/temp/dummy_fs_2020-06-10_094406_0001.ascmhl"
+    hash_list = hashlist_xml_backend.parse(path)
+    assert len(hash_list.media_hashes) > 0
 
 
 @freeze_time("2020-01-16 09:15:00")
@@ -79,9 +89,9 @@ def test_child_history_verify(fs, nested_mhl_histories):
     root_history = MHLHistoryFSBackend.parse('/root')
     assert len(root_history.hash_lists) == 2
 
-    assert root_history.hash_lists[1].media_hashes[0].relative_filepath == 'A/AB/AB1.txt'
+    assert root_history.hash_lists[1].media_hashes[0].path == 'A/AB/AB1.txt'
     assert root_history.hash_lists[1].media_hashes[0].hash_entries[0].action == 'original'
-    assert root_history.hash_lists[1].media_hashes[1].relative_filepath == 'Stuff.txt'
+    assert root_history.hash_lists[1].media_hashes[1].path == 'Stuff.txt'
     assert root_history.hash_lists[1].media_hashes[1].hash_entries[0].action == 'verified'
 
     aa_history = root_history.child_histories[0]
@@ -89,8 +99,8 @@ def test_child_history_verify(fs, nested_mhl_histories):
     bb_history = root_history.child_histories[1].child_histories[0]
 
     assert aa_history.latest_generation_number() == 2
-    assert b_history.hash_lists[1].media_hashes[0].relative_filepath == 'BA/BA1.txt'
-    assert b_history.hash_lists[1].media_hashes[1].relative_filepath == 'B1.txt'
+    assert b_history.hash_lists[1].media_hashes[0].path == 'BA/BA1.txt'
+    assert b_history.hash_lists[1].media_hashes[1].path == 'B1.txt'
     assert b_history.hash_lists[1].media_hashes[0].hash_entries[0].action == 'original'
     assert b_history.hash_lists[1].media_hashes[1].hash_entries[0].action == 'verified'
 
@@ -128,7 +138,7 @@ def test_child_history_partial_verification_ba_1_file(fs, nested_mhl_histories):
     assert len(root_history.hash_lists[1].media_hashes) == 0
     assert root_history.hash_lists[1].referenced_hash_lists[0] == b_history.hash_lists[1]
     # the B hash list contains the media hash of the verified file
-    assert b_history.hash_lists[1].media_hashes[0].relative_filepath == 'B1.txt'
+    assert b_history.hash_lists[1].media_hashes[0].path == 'B1.txt'
     assert b_history.hash_lists[1].media_hashes[0].hash_entries[0].action == 'verified'
     # the created B2 file is not referenced in the B history, only B1
     assert len(b_history.hash_lists[1].media_hashes) == 1
@@ -171,9 +181,9 @@ def test_child_history_partial_verification_bb_folder(fs, nested_mhl_histories):
     assert b_history.hash_lists[1].referenced_hash_lists[0] == bb_history.hash_lists[1]
 
     # the BB hash list contains the media hash of the verified files in BB
-    assert bb_history.hash_lists[1].media_hashes[0].relative_filepath == 'BB1.txt'
+    assert bb_history.hash_lists[1].media_hashes[0].path == 'BB1.txt'
     assert bb_history.hash_lists[1].media_hashes[0].hash_entries[0].action == 'verified'
-    assert bb_history.hash_lists[1].media_hashes[1].relative_filepath == 'BB2.txt'
+    assert bb_history.hash_lists[1].media_hashes[1].path == 'BB2.txt'
     assert bb_history.hash_lists[1].media_hashes[1].hash_entries[0].action == 'original'
 
     # the other histories don't have a new generation

@@ -11,8 +11,7 @@ from collections import defaultdict
 from typing import Dict, List
 from . import logger
 from .history import MHLHistory
-from .hashlist import MHLHashList, MHLMediaHash, MHLHashEntry
-from .context import MHLCreatorInfo
+from .hashlist import MHLHashList, MHLMediaHash, MHLHashEntry, MHLCreatorInfo
 from .history_fs_backend import MHLHistoryFSBackend
 from .chain_txt_backend import MHLChainTXTBackend
 
@@ -80,7 +79,7 @@ class MHLGenerationCreationSession:
 			media_hash = existing_media_hash
 		else:
 			media_hash = MHLMediaHash()
-			media_hash.relative_filepath = history_relative_path
+			media_hash.path = history_relative_path
 			media_hash.filesize = file_size
 			media_hash.last_modification_date = file_modification_date
 

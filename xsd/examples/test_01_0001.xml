@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hashlist version="2.0"
+  xmlns="urn:ASC:MHL:v2.0" 
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+  xsi:schemaLocation="urn:ASC:MHL:v2.0 ASCMHL.xsd">
+    <creatorinfo>
+    <creationdate>2019-10-11T15:56:03+02:00</creationdate>
+    <tool version="0.0.3">ascmhl-tool</tool>
+    <hostname>donkey.local</hostname>
+    <author email="foo@bar.foo.foo.com" phone="+1 234 567 890 88">Liz Foo</author>
+    <author email="zed@bar.foo.foo.com" phone="+1 234 567 890 99">Ben Zed</author>
+    <location>Munich, Germany</location>
+    <process hashsource="other">in-place</process>
+    <ignore>
+      <pattern>*.DS_Store</pattern>      
+      <pattern>/tmp</pattern>      
+    </ignore>
+  </creatorinfo>
+  <metadata>
+    test
+    <foo bar="1">lorem</foo>
+  </metadata>
+  <hashes rootpath="/Users/ptr/Development/MediaHashList/mhl/Scenarios/Output/scenario_01/A002R2EC/">
+    <hash>
+      <path>Clips/A002C006_141024_R2EC.mov</path>
+      <filesize>5</filesize>
+      <lastmodificationdate>2019-10-11T15:56:03+02:00</lastmodificationdate>
+      <xxh64 action="original">0ea03b369a463d9d</xxh64>
+    </hash>
+    <hash>
+      <path>Clips/A002C007_141024_R2EC.mov</path>
+      <filesize>4</filesize>
+      <lastmodificationdate>2019-10-11T15:56:03+02:00</lastmodificationdate>
+      <xxh64 action="original">7680e5f98f4a80fd</xxh64>
+    </hash>
+    <hash directory="true">
+      <path>Clips/</path>
+      <lastmodificationdate>2019-10-11T15:56:05+02:00</lastmodificationdate>
+      <xxh64>7680e5f98f4a80fd</xxh64>
+      <metadata>test2</metadata>
+    </hash>
+    <hash>
+      <path>Sidecar.txt</path>
+      <filesize>58</filesize>
+      <lastmodificationdate>2019-10-11T15:56:03+02:00</lastmodificationdate>
+      <xxh64 action="failed">3ab5a4166b9bde44</xxh64>
+      <xxh64 action="new">b9bde443ab5a4166</xxh64>
+      <metadata bar="Foo" />
+    </hash>
+  </hashes>
+  <references>
+    <hashlistreference>
+      <path>A002R2EC/asc-mhl/A002R2EC_2020-01-17_143000_0002.mhl</path>
+      <c4>87210d6e0589c31c</c4>
+    </hashlistreference>
+    <hashlistreference>
+      <path>A003R2EC/asc-mhl/A003R2EC_2020-01-17_143000_0002.mhl</path>
+      <c4>40116e7da1ca1487</c4>
+    </hashlistreference>
+  </references>
+</hashlist>

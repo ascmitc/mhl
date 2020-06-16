@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<schema targetNamespace="http://theasc.com/ASCMHL" elementFormDefault="qualified"
-    xmlns="http://www.w3.org/2001/XMLSchema" xmlns:ascmhl="http://theasc.com/ASCMHL">
-
+<schema targetNamespace="urn:ASC:MHL:v2.0" elementFormDefault="qualified"
+    xmlns="http://www.w3.org/2001/XMLSchema" xmlns:ascmhl="urn:ASC:MHL:v2.0">
     <simpleType name="EmailAddressAttributeType">
         <restriction base="string">
             <pattern value="[^@]+@[^\.]+\..+"/>

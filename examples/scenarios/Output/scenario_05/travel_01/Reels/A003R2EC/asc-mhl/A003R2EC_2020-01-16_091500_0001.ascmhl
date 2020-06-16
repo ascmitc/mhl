@@ -1,30 +1,29 @@
-<?xml version='1.0' encoding='utf-8'?>
-<hashlist version="2.0">
+<?xml version="1.0" encoding="UTF-8"?>
+<hashlist version="2.0" xmlns="urn:ASC:MHL:v2.0">
   <creatorinfo>
-    <hostname>myHost.local</hostname>
-    <toolname>verify</toolname>
-    <toolversion>0.0.1</toolversion>
     <creationdate>2020-01-16T09:15:00+00:00</creationdate>
-    <process>verify</process>
+    <tool version="0.0.1">seal</tool>
+    <hostname>myHost.local</hostname>
+    <process>in-place</process>
   </creatorinfo>
-  <hashes rootPath="/travel_01/Reels/A003R2EC">
+  <hashes rootpath="/travel_01/Reels/A003R2EC">
     <hash>
-      <filename>Clips/A003C011_141024_R2EC.mov</filename>
+      <path>Clips/A003C011_141024_R2EC.mov</path>
       <filesize>5</filesize>
       <lastmodificationdate>2020-01-15T13:30:00+00:00</lastmodificationdate>
-      <xxhash action="original">52392f79a36d6571</xxhash>
+      <xxh64 action="original">52392f79a36d6571</xxh64>
     </hash>
     <hash>
-      <filename>Clips/A003C012_141024_R2EC.mov</filename>
+      <path>Clips/A003C012_141024_R2EC.mov</path>
       <filesize>6</filesize>
       <lastmodificationdate>2020-01-15T13:30:00+00:00</lastmodificationdate>
-      <xxhash action="original">5dbca064ddddd6fc</xxhash>
+      <xxh64 action="original">5dbca064ddddd6fc</xxh64>
     </hash>
     <hash>
-      <filename>Sidecar.txt</filename>
+      <path>Sidecar.txt</path>
       <filesize>45</filesize>
       <lastmodificationdate>2020-01-15T13:30:00+00:00</lastmodificationdate>
-      <xxhash action="original">e5dda75a353d8b34</xxhash>
+      <xxh64 action="original">e5dda75a353d8b34</xxh64>
     </hash>
   </hashes>
 </hashlist>

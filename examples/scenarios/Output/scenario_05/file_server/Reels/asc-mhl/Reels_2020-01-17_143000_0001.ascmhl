@@ -1,26 +1,27 @@
-<?xml version='1.0' encoding='utf-8'?>
-<hashlist version="2.0">
+<?xml version="1.0" encoding="UTF-8"?>
+<hashlist version="2.0" xmlns="urn:ASC:MHL:v2.0">
   <creatorinfo>
-    <hostname>myHost.local</hostname>
-    <toolname>verify</toolname>
-    <toolversion>0.0.1</toolversion>
     <creationdate>2020-01-17T14:30:00+00:00</creationdate>
-    <process>verify</process>
+    <tool version="0.0.1">seal</tool>
+    <hostname>myHost.local</hostname>
+    <process>in-place</process>
   </creatorinfo>
-  <hashes rootPath="/file_server/Reels">
+  <hashes rootpath="/file_server/Reels">
     <hash>
-      <filename>Summary.txt</filename>
+      <path>Summary.txt</path>
       <filesize>48</filesize>
       <lastmodificationdate>2020-01-17T14:30:00+00:00</lastmodificationdate>
-      <xxhash action="original">0ac48e431d4538ba</xxhash>
+      <xxh64 action="original">0ac48e431d4538ba</xxh64>
     </hash>
   </hashes>
-  <ascmhlreference>
-    <path>A002R2EC/asc-mhl/A002R2EC_2020-01-17_143000_0002.ascmhl</path>
-    <xxhash>87210d6e0589c31c</xxhash>
-  </ascmhlreference>
-  <ascmhlreference>
-    <path>A003R2EC/asc-mhl/A003R2EC_2020-01-17_143000_0002.ascmhl</path>
-    <xxhash>40116e7da1ca1487</xxhash>
-  </ascmhlreference>
+  <references>
+    <hashlistreference>
+      <path>A002R2EC/asc-mhl/A002R2EC_2020-01-17_143000_0002.ascmhl</path>
+      <c4>c3b1d0dad425175c</c4>
+    </hashlistreference>
+    <hashlistreference>
+      <path>A003R2EC/asc-mhl/A003R2EC_2020-01-17_143000_0002.ascmhl</path>
+      <c4>1db01165d24c9ac4</c4>
+    </hashlistreference>
+  </references>
 </hashlist>

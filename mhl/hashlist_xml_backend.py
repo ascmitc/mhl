@@ -126,9 +126,8 @@ def write_hash_list(hash_list: MHLHashList, file_path: str):
 	current_indent = current_indent[:-2]
 	_write_xml_string_to_file(file, '</hashes>\n', current_indent)
 
-
 	# only write the optional references section if there are actually some references
-	if len(hash_list.hash_list_references) > 0:
+	if len(hash_list.referenced_hash_lists) > 0:
 		_write_xml_string_to_file(file, '<references>\n', current_indent)
 		current_indent += '  '
 		for ref_hash_list in hash_list.referenced_hash_lists:

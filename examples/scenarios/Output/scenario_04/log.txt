@@ -8,9 +8,9 @@ Seal the copy on the travel drive /travel_01 to create the original mhl generati
 
 $ ascmhl.py seal ['-v', '/travel_01/A002R2EC']
 seal folder at path: /travel_01/A002R2EC
-created original hash for /travel_01/A002R2EC/Clips/A002C006_141024_R2EC.mov xxhash: 0ea03b369a463d9d
-created original hash for /travel_01/A002R2EC/Clips/A002C007_141024_R2EC.mov xxhash: 7680e5f98f4a80fd
-created original hash for /travel_01/A002R2EC/Sidecar.txt xxhash: 3ab5a4166b9bde44
+created original hash for /travel_01/A002R2EC/Clips/A002C006_141024_R2EC.mov xxh64: 0ea03b369a463d9d
+created original hash for /travel_01/A002R2EC/Clips/A002C007_141024_R2EC.mov xxh64: 7680e5f98f4a80fd
+created original hash for /travel_01/A002R2EC/Sidecar.txt xxh64: 3ab5a4166b9bde44
 writing "A002R2EC_2020-01-16_091500_0001.ascmhl"...
 
 
@@ -29,7 +29,7 @@ $ ascmhl.py seal ['-v', '/file_server/A002R2EC']
 seal folder at path: /file_server/A002R2EC
 verification of file /file_server/A002R2EC/Clips/A002C006_141024_R2EC.mov: OK
 verification of file /file_server/A002R2EC/Clips/A002C007_141024_R2EC.mov: OK
-hash mismatch for /file_server/A002R2EC/Sidecar.txt old xxhash: 3ab5a4166b9bde44, new xxhash: 70d2cf31aaa3eac4
+hash mismatch for /file_server/A002R2EC/Sidecar.txt old xxh64: 3ab5a4166b9bde44, new xxh64: 70d2cf31aaa3eac4
 writing "A002R2EC_2020-01-17_143000_0002.ascmhl"...
 Error: Verification of files referenced in the mhl history failed
 

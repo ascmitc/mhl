@@ -43,7 +43,9 @@ class MHLHashList:
     creator_info: MHLCreatorInfo
     media_hashes: List[MHLMediaHash]
     media_hashes_path_map: Dict[str, MHLMediaHash]
+    # referenced_hash_lists are the loaded hash list object
     referenced_hash_lists = List['MHLHashList']
+    # while hash_list_references store the reference objects found in the mhl files
     hash_list_references = List['MHLHashListReference']
     file_path: str
     generation_number: int

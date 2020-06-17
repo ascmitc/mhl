@@ -12,14 +12,13 @@ from freezegun import freeze_time
 from click.testing import CliRunner
 
 import mhl._debug_commands
-from mhl.history_fs_backend import MHLHistoryFSBackend
-from mhl import hashlist_xml_backend
+from mhl import hashlist_xml_parser, history_fs_backend
 import mhl.commands
 
 
 def test_simple_parsing():
     path = "examples/scenarios/Output/scenario_01/travel_01/A002R2EC/ascmhl/A002R2EC_2020-01-16_091500_0001.mhl"
-    hash_list = hashlist_xml_backend.parse(path)
+    hash_list = hashlist_xml_parser.parse(path)
     assert len(hash_list.media_hashes) > 0
 
 
@@ -29,7 +28,7 @@ def test_child_history_parsing(fs, nested_mhl_histories):
 
     """
 
-    root_history = MHLHistoryFSBackend.parse('/root')
+    root_history = history_fs_backend.parse_history('/root')
     assert len(root_history.child_histories) == 2
 
     aa_history = root_history.child_histories[0]
@@ -81,7 +80,7 @@ def test_child_history_verify(fs, nested_mhl_histories):
     assert os.path.isfile('/root/B/ascmhl/B_2020-01-16_091500_0002.mhl')
     assert os.path.isfile('/root/B/BB/ascmhl/BB_2020-01-16_091500_0002.mhl')
 
-    root_history = MHLHistoryFSBackend.parse('/root')
+    root_history = history_fs_backend.parse_history('/root')
     assert len(root_history.hash_lists) == 2
 
     assert root_history.hash_lists[1].media_hashes[0].path == 'A/AB/AB1.txt'
@@ -122,7 +121,7 @@ def test_child_history_partial_verification_ba_1_file(fs, nested_mhl_histories):
     assert os.path.isfile('/root/ascmhl/root_2020-01-16_091500_0002.mhl')
     assert os.path.isfile('/root/B/ascmhl/B_2020-01-16_091500_0002.mhl')
 
-    root_history = MHLHistoryFSBackend.parse('/root')
+    root_history = history_fs_backend.parse_history('/root')
     assert len(root_history.hash_lists) == 2
 
     aa_history = root_history.child_histories[0]
@@ -161,7 +160,7 @@ def test_child_history_partial_verification_bb_folder(fs, nested_mhl_histories):
     assert os.path.isfile('/root/B/ascmhl/B_2020-01-16_091500_0002.mhl')
     assert os.path.isfile('/root/B/BB/ascmhl/BB_2020-01-16_091500_0002.mhl')
 
-    root_history = MHLHistoryFSBackend.parse('/root')
+    root_history = history_fs_backend.parse_history('/root')
     assert len(root_history.hash_lists) == 2
 
     aa_history = root_history.child_histories[0]

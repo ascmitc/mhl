@@ -33,7 +33,9 @@ def parse(file_path):
                              '{urn:ASC:MHL:v2.0}xxh64',
                              '{urn:ASC:MHL:v2.0}xxh3'}
     # use iterparse to prevent large memory usage when parsing large files
-    for event, element in etree.iterparse(_read_file_handle(file_path), events=('start', 'end')):
+    # pass a file handle to iterparse instead of the path directly to support the fake filesystem used in the tests
+    file = open(file_path, "rb")
+    for event, element in etree.iterparse(file, events=('start', 'end')):
         if current_object and event == 'end':
             if type(current_object) is MHLCreatorInfo:
                 if element.tag == '{urn:ASC:MHL:v2.0}creationdate':
@@ -86,14 +88,6 @@ def parse(file_path):
     logger.debug(f'parsing took: {timer() - start}')
 
     return hash_list
-
-
-def _read_file_handle(file_path):
-    """returns the file handle used for reading
-
-    this is a separate method so we can stub it during testing to read from the fake file system instead
-    """
-    return open(file_path, "rb")
 
 
 def write_hash_list(hash_list: MHLHashList, file_path: str):

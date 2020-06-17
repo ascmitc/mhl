@@ -13,9 +13,9 @@ import click
 from .commands import seal_file_path, commit_session
 from .generator import MHLGenerationCreationSession
 from . import logger
-from .history_fs_backend import MHLHistoryFSBackend
+from . import history_fs_backend
 from .chain_txt_backend import MHLChainTXTBackend
-from . import hashlist_xml_backend
+from . import hashlist_xml_parser
 from .traverse import post_order_lexicographic
 from .__version__ import ascmhl_supported_hashformats, ascmhl_folder_name
 
@@ -42,7 +42,7 @@ def readmhlfile(filepath, verbose):
     read an ASC-MHL file
     """
 
-    hashlist = hashlist_xml_backend.parse(filepath)
+    hashlist = hashlist_xml_parser.parse(filepath)
 
     if verbose:
         hashlist.log()
@@ -56,7 +56,7 @@ def readmhlhistory(root_path, verbose):
     read an ASC-MHL file
     """
 
-    history = MHLHistoryFSBackend.parse(root_path)
+    history = history_fs_backend.parse_history(root_path)
 
     if verbose:
         history.log()
@@ -117,7 +117,7 @@ def verify_paths(root_path, paths, verbose, hash_format):
     if not os.path.isabs(root_path):
         root_path = os.path.join(os.getcwd(), root_path)
 
-    existing_history = MHLHistoryFSBackend.parse(root_path)
+    existing_history = history_fs_backend.parse_history(root_path)
     # start a verification session on the existing history
     session = MHLGenerationCreationSession(existing_history)
 

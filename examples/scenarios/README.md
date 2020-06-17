@@ -13,10 +13,10 @@ Seal the copy on the travel drive /travel_01 to create the original mhl generati
 
 $ ascmhl.py seal ['-v', '/travel_01/A002R2EC']
 seal folder at path: /travel_01/A002R2EC
-created original hash for /travel_01/A002R2EC/Clips/A002C006_141024_R2EC.mov xxhash: 0ea03b369a463d9d
-created original hash for /travel_01/A002R2EC/Clips/A002C007_141024_R2EC.mov xxhash: 7680e5f98f4a80fd
-created original hash for /travel_01/A002R2EC/Sidecar.txt xxhash: 3ab5a4166b9bde44
-writing "A002R2EC_2020-01-16_091500_0001.ascmhl"...
+created original hash for /travel_01/A002R2EC/Clips/A002C006_141024_R2EC.mov xxh64: 0ea03b369a463d9d
+created original hash for /travel_01/A002R2EC/Clips/A002C007_141024_R2EC.mov xxh64: 7680e5f98f4a80fd
+created original hash for /travel_01/A002R2EC/Sidecar.txt xxh64: 3ab5a4166b9bde44
+writing "A002R2EC_2020-01-16_091500_0001.mhl"...
 
 
 ```
@@ -33,10 +33,10 @@ Seal the copy on the travel drive /travel_01 to create the original mhl generati
 
 $ ascmhl.py seal ['-v', '/travel_01/A002R2EC']
 seal folder at path: /travel_01/A002R2EC
-created original hash for /travel_01/A002R2EC/Clips/A002C006_141024_R2EC.mov xxhash: 0ea03b369a463d9d
-created original hash for /travel_01/A002R2EC/Clips/A002C007_141024_R2EC.mov xxhash: 7680e5f98f4a80fd
-created original hash for /travel_01/A002R2EC/Sidecar.txt xxhash: 3ab5a4166b9bde44
-writing "A002R2EC_2020-01-16_091500_0001.ascmhl"...
+created original hash for /travel_01/A002R2EC/Clips/A002C006_141024_R2EC.mov xxh64: 0ea03b369a463d9d
+created original hash for /travel_01/A002R2EC/Clips/A002C007_141024_R2EC.mov xxh64: 7680e5f98f4a80fd
+created original hash for /travel_01/A002R2EC/Sidecar.txt xxh64: 3ab5a4166b9bde44
+writing "A002R2EC_2020-01-16_091500_0001.mhl"...
 
 
 
@@ -51,7 +51,7 @@ seal folder at path: /file_server/A002R2EC
 verification of file /file_server/A002R2EC/Clips/A002C006_141024_R2EC.mov: OK
 verification of file /file_server/A002R2EC/Clips/A002C007_141024_R2EC.mov: OK
 verification of file /file_server/A002R2EC/Sidecar.txt: OK
-writing "A002R2EC_2020-01-17_143000_0002.ascmhl"...
+writing "A002R2EC_2020-01-17_143000_0002.mhl"...
 
 
 ```
@@ -70,10 +70,10 @@ Seal the copy on the travel drive /travel_01 to create the original mhl generati
 
 $ ascmhl.py seal ['-v', '/travel_01/A002R2EC']
 seal folder at path: /travel_01/A002R2EC
-created original hash for /travel_01/A002R2EC/Clips/A002C006_141024_R2EC.mov xxhash: 0ea03b369a463d9d
-created original hash for /travel_01/A002R2EC/Clips/A002C007_141024_R2EC.mov xxhash: 7680e5f98f4a80fd
-created original hash for /travel_01/A002R2EC/Sidecar.txt xxhash: 3ab5a4166b9bde44
-writing "A002R2EC_2020-01-16_091500_0001.ascmhl"...
+created original hash for /travel_01/A002R2EC/Clips/A002C006_141024_R2EC.mov xxh64: 0ea03b369a463d9d
+created original hash for /travel_01/A002R2EC/Clips/A002C007_141024_R2EC.mov xxh64: 7680e5f98f4a80fd
+created original hash for /travel_01/A002R2EC/Sidecar.txt xxh64: 3ab5a4166b9bde44
+writing "A002R2EC_2020-01-16_091500_0001.mhl"...
 
 
 
@@ -84,15 +84,15 @@ Sealing the folder A002R2EC again on the file server using MD5 hash format
 this will verify all existing xxHashes, check for completeness,
 and create a second generation with additional (new) MD5 hashes.
 
-$ ascmhl.py seal ['-v', '-h', 'MD5', '/file_server/A002R2EC']
+$ ascmhl.py seal ['-v', '-h', 'md5', '/file_server/A002R2EC']
 seal folder at path: /file_server/A002R2EC
 verification of file /file_server/A002R2EC/Clips/A002C006_141024_R2EC.mov: OK
-created new hash for /file_server/A002R2EC/Clips/A002C006_141024_R2EC.mov MD5: f5ac8127b3b6b85cdc13f237c6005d80
+created new hash for /file_server/A002R2EC/Clips/A002C006_141024_R2EC.mov md5: f5ac8127b3b6b85cdc13f237c6005d80
 verification of file /file_server/A002R2EC/Clips/A002C007_141024_R2EC.mov: OK
-created new hash for /file_server/A002R2EC/Clips/A002C007_141024_R2EC.mov MD5: 614dd0e977becb4c6f7fa99e64549b12
+created new hash for /file_server/A002R2EC/Clips/A002C007_141024_R2EC.mov md5: 614dd0e977becb4c6f7fa99e64549b12
 verification of file /file_server/A002R2EC/Sidecar.txt: OK
-created new hash for /file_server/A002R2EC/Sidecar.txt MD5: 6425c5a180ca0f420dd2b25be4536a91
-writing "A002R2EC_2020-01-17_143000_0002.ascmhl"...
+created new hash for /file_server/A002R2EC/Sidecar.txt md5: 6425c5a180ca0f420dd2b25be4536a91
+writing "A002R2EC_2020-01-17_143000_0002.mhl"...
 
 
 ```
@@ -109,10 +109,10 @@ Seal the copy on the travel drive /travel_01 to create the original mhl generati
 
 $ ascmhl.py seal ['-v', '/travel_01/A002R2EC']
 seal folder at path: /travel_01/A002R2EC
-created original hash for /travel_01/A002R2EC/Clips/A002C006_141024_R2EC.mov xxhash: 0ea03b369a463d9d
-created original hash for /travel_01/A002R2EC/Clips/A002C007_141024_R2EC.mov xxhash: 7680e5f98f4a80fd
-created original hash for /travel_01/A002R2EC/Sidecar.txt xxhash: 3ab5a4166b9bde44
-writing "A002R2EC_2020-01-16_091500_0001.ascmhl"...
+created original hash for /travel_01/A002R2EC/Clips/A002C006_141024_R2EC.mov xxh64: 0ea03b369a463d9d
+created original hash for /travel_01/A002R2EC/Clips/A002C007_141024_R2EC.mov xxh64: 7680e5f98f4a80fd
+created original hash for /travel_01/A002R2EC/Sidecar.txt xxh64: 3ab5a4166b9bde44
+writing "A002R2EC_2020-01-16_091500_0001.mhl"...
 
 
 
@@ -130,8 +130,8 @@ $ ascmhl.py seal ['-v', '/file_server/A002R2EC']
 seal folder at path: /file_server/A002R2EC
 verification of file /file_server/A002R2EC/Clips/A002C006_141024_R2EC.mov: OK
 verification of file /file_server/A002R2EC/Clips/A002C007_141024_R2EC.mov: OK
-hash mismatch for /file_server/A002R2EC/Sidecar.txt old xxhash: 3ab5a4166b9bde44, new xxhash: 70d2cf31aaa3eac4
-writing "A002R2EC_2020-01-17_143000_0002.ascmhl"...
+hash mismatch for /file_server/A002R2EC/Sidecar.txt old xxh64: 3ab5a4166b9bde44, new xxh64: 70d2cf31aaa3eac4
+writing "A002R2EC_2020-01-17_143000_0002.mhl"...
 Error: Verification of files referenced in the mhl history failed
 
 
@@ -149,10 +149,10 @@ Seal the copy of A002R2EC on the travel drive /travel_01 to create the original 
 
 $ ascmhl.py seal ['-v', '/travel_01/Reels/A002R2EC']
 seal folder at path: /travel_01/Reels/A002R2EC
-created original hash for /travel_01/Reels/A002R2EC/Clips/A002C006_141024_R2EC.mov xxhash: 0ea03b369a463d9d
-created original hash for /travel_01/Reels/A002R2EC/Clips/A002C007_141024_R2EC.mov xxhash: 7680e5f98f4a80fd
-created original hash for /travel_01/Reels/A002R2EC/Sidecar.txt xxhash: 3ab5a4166b9bde44
-writing "A002R2EC_2020-01-16_091500_0001.ascmhl"...
+created original hash for /travel_01/Reels/A002R2EC/Clips/A002C006_141024_R2EC.mov xxh64: 0ea03b369a463d9d
+created original hash for /travel_01/Reels/A002R2EC/Clips/A002C007_141024_R2EC.mov xxh64: 7680e5f98f4a80fd
+created original hash for /travel_01/Reels/A002R2EC/Sidecar.txt xxh64: 3ab5a4166b9bde44
+writing "A002R2EC_2020-01-16_091500_0001.mhl"...
 
 
 
@@ -162,10 +162,10 @@ Seal the copy of A003R2EC on the travel drive /travel_01 to create the original 
 
 $ ascmhl.py seal ['-v', '/travel_01/Reels/A003R2EC']
 seal folder at path: /travel_01/Reels/A003R2EC
-created original hash for /travel_01/Reels/A003R2EC/Clips/A003C011_141024_R2EC.mov xxhash: 52392f79a36d6571
-created original hash for /travel_01/Reels/A003R2EC/Clips/A003C012_141024_R2EC.mov xxhash: 5dbca064ddddd6fc
-created original hash for /travel_01/Reels/A003R2EC/Sidecar.txt xxhash: e5dda75a353d8b34
-writing "A003R2EC_2020-01-16_091500_0001.ascmhl"...
+created original hash for /travel_01/Reels/A003R2EC/Clips/A003C011_141024_R2EC.mov xxh64: 52392f79a36d6571
+created original hash for /travel_01/Reels/A003R2EC/Clips/A003C012_141024_R2EC.mov xxh64: 5dbca064ddddd6fc
+created original hash for /travel_01/Reels/A003R2EC/Sidecar.txt xxh64: e5dda75a353d8b34
+writing "A003R2EC_2020-01-16_091500_0001.mhl"...
 
 
 
@@ -188,10 +188,10 @@ verification of file /file_server/Reels/A002R2EC/Sidecar.txt: OK
 verification of file /file_server/Reels/A003R2EC/Clips/A003C011_141024_R2EC.mov: OK
 verification of file /file_server/Reels/A003R2EC/Clips/A003C012_141024_R2EC.mov: OK
 verification of file /file_server/Reels/A003R2EC/Sidecar.txt: OK
-created original hash for /file_server/Reels/Summary.txt xxhash: 0ac48e431d4538ba
-writing "A002R2EC_2020-01-17_143000_0002.ascmhl"...
-writing "A003R2EC_2020-01-17_143000_0002.ascmhl"...
-writing "Reels_2020-01-17_143000_0001.ascmhl"...
+created original hash for /file_server/Reels/Summary.txt xxh64: 0ac48e431d4538ba
+writing "A002R2EC_2020-01-17_143000_0002.mhl"...
+writing "A003R2EC_2020-01-17_143000_0002.mhl"...
+writing "Reels_2020-01-17_143000_0001.mhl"...
 
 
 ```

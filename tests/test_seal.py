@@ -29,10 +29,10 @@ def test_seal_succeed(fs):
     runner = CliRunner()
     result = runner.invoke(mhl.commands.seal, ['/root'])
     assert not result.exception
-    assert os.path.exists('/root/asc-mhl/root_2020-01-16_091500_0001.ascmhl')
-    with open('/root/asc-mhl/root_2020-01-16_091500_0001.ascmhl', 'r') as fin:
+    assert os.path.exists('/root/ascmhl/root_2020-01-16_091500_0001.mhl')
+    with open('/root/ascmhl/root_2020-01-16_091500_0001.mhl', 'r') as fin:
         print(fin.read())
-    assert os.path.exists('/root/asc-mhl/chain.txt')
+    assert os.path.exists('/root/ascmhl/chain.txt')
 
 
 def test_seal_directory_hashes(fs):

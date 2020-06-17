@@ -20,7 +20,7 @@ import mhl.commands
 
 
 def test_simple_parsing():
-    path = "examples/scenarios/Output/scenario_01/travel_01/A002R2EC/asc-mhl/A002R2EC_2020-01-16_091500_0001.ascmhl"
+    path = "examples/scenarios/Output/scenario_01/travel_01/A002R2EC/ascmhl/A002R2EC_2020-01-16_091500_0001.mhl"
     hash_list = hashlist_xml_backend.parse(path)
     assert len(hash_list.media_hashes) > 0
 
@@ -38,13 +38,13 @@ def test_child_history_parsing(fs, nested_mhl_histories):
     b_history = root_history.child_histories[1]
     bb_history = root_history.child_histories[1].child_histories[0]
 
-    assert aa_history.asc_mhl_path == '/root/A/AA/asc-mhl'
+    assert aa_history.asc_mhl_path == '/root/A/AA/ascmhl'
     assert aa_history.parent_history == root_history
-    assert b_history.asc_mhl_path == '/root/B/asc-mhl'
+    assert b_history.asc_mhl_path == '/root/B/ascmhl'
     assert b_history.parent_history == root_history
 
     assert len(b_history.child_histories) == 1
-    assert bb_history.asc_mhl_path == '/root/B/BB/asc-mhl'
+    assert bb_history.asc_mhl_path == '/root/B/BB/ascmhl'
     assert bb_history.parent_history == b_history
 
     # check sub children mappings that map all transitive children and their relative path
@@ -78,10 +78,10 @@ def test_child_history_verify(fs, nested_mhl_histories):
     result = runner.invoke(mhl.commands.seal, ['/root'])
     assert result.exit_code == 0
 
-    assert os.path.isfile('/root/asc-mhl/root_2020-01-16_091500_0002.ascmhl')
-    assert os.path.isfile('/root/A/AA/asc-mhl/AA_2020-01-16_091500_0002.ascmhl')
-    assert os.path.isfile('/root/B/asc-mhl/B_2020-01-16_091500_0002.ascmhl')
-    assert os.path.isfile('/root/B/BB/asc-mhl/BB_2020-01-16_091500_0002.ascmhl')
+    assert os.path.isfile('/root/ascmhl/root_2020-01-16_091500_0002.mhl')
+    assert os.path.isfile('/root/A/AA/ascmhl/AA_2020-01-16_091500_0002.mhl')
+    assert os.path.isfile('/root/B/ascmhl/B_2020-01-16_091500_0002.mhl')
+    assert os.path.isfile('/root/B/BB/ascmhl/BB_2020-01-16_091500_0002.mhl')
 
     root_history = MHLHistoryFSBackend.parse('/root')
     assert len(root_history.hash_lists) == 2
@@ -121,8 +121,8 @@ def test_child_history_partial_verification_ba_1_file(fs, nested_mhl_histories):
     assert result.exit_code == 0
 
     # two new generations have been written
-    assert os.path.isfile('/root/asc-mhl/root_2020-01-16_091500_0002.ascmhl')
-    assert os.path.isfile('/root/B/asc-mhl/B_2020-01-16_091500_0002.ascmhl')
+    assert os.path.isfile('/root/ascmhl/root_2020-01-16_091500_0002.mhl')
+    assert os.path.isfile('/root/B/ascmhl/B_2020-01-16_091500_0002.mhl')
 
     root_history = MHLHistoryFSBackend.parse('/root')
     assert len(root_history.hash_lists) == 2
@@ -141,8 +141,8 @@ def test_child_history_partial_verification_ba_1_file(fs, nested_mhl_histories):
     assert len(b_history.hash_lists[1].media_hashes) == 1
 
     # the other histories don't have a new generation
-    assert not os.path.isfile('/root/A/AA/asc-mhl/AA_2020-01-16_091500_0002.ascmhl')
-    assert not os.path.isfile('/root/B/BB/asc-mhl/BB_2020-01-16_091500_0002.ascmhl')
+    assert not os.path.isfile('/root/A/AA/ascmhl/AA_2020-01-16_091500_0002.mhl')
+    assert not os.path.isfile('/root/B/BB/ascmhl/BB_2020-01-16_091500_0002.mhl')
     assert aa_history.latest_generation_number() == 1
     assert bb_history.latest_generation_number() == 1
 
@@ -159,9 +159,9 @@ def test_child_history_partial_verification_bb_folder(fs, nested_mhl_histories):
     result = runner.invoke(mhl._debug_commands.verify_paths, ['/root', '/root/B/BB'])
     assert result.exit_code == 0
 
-    assert os.path.isfile('/root/asc-mhl/root_2020-01-16_091500_0002.ascmhl')
-    assert os.path.isfile('/root/B/asc-mhl/B_2020-01-16_091500_0002.ascmhl')
-    assert os.path.isfile('/root/B/BB/asc-mhl/BB_2020-01-16_091500_0002.ascmhl')
+    assert os.path.isfile('/root/ascmhl/root_2020-01-16_091500_0002.mhl')
+    assert os.path.isfile('/root/B/ascmhl/B_2020-01-16_091500_0002.mhl')
+    assert os.path.isfile('/root/B/BB/ascmhl/BB_2020-01-16_091500_0002.mhl')
 
     root_history = MHLHistoryFSBackend.parse('/root')
     assert len(root_history.hash_lists) == 2
@@ -184,5 +184,5 @@ def test_child_history_partial_verification_bb_folder(fs, nested_mhl_histories):
     assert bb_history.hash_lists[1].media_hashes[1].hash_entries[0].action == 'original'
 
     # the other histories don't have a new generation
-    assert not os.path.isfile('/root/A/AA/asc-mhl/AA_2020-01-16_091500_0002.ascmhl')
+    assert not os.path.isfile('/root/A/AA/ascmhl/AA_2020-01-16_091500_0002.mhl')
     assert aa_history.latest_generation_number() == 1

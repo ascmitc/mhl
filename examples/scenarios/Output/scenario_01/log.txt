@@ -11,6 +11,6 @@ seal folder at path: /travel_01/A002R2EC
 created original hash for /travel_01/A002R2EC/Clips/A002C006_141024_R2EC.mov xxh64: 0ea03b369a463d9d
 created original hash for /travel_01/A002R2EC/Clips/A002C007_141024_R2EC.mov xxh64: 7680e5f98f4a80fd
 created original hash for /travel_01/A002R2EC/Sidecar.txt xxh64: 3ab5a4166b9bde44
-writing "A002R2EC_2020-01-16_091500_0001.ascmhl"...
+writing "A002R2EC_2020-01-16_091500_0001.mhl"...
 
 

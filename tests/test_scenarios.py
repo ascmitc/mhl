@@ -173,7 +173,8 @@ def copy_fake_directory_to_real_fs(fake_dir: str, real_dir: str, fake_fs):
                 with open(os.path.join(current_real_dir, file_name), 'w+b') as dst_file:
                     dst_file.write(data)
 
-def log_message( message: str):
+
+def log_message(message: str):
     log_path = '/log.txt'
     with open(log_path, "a") as file:
         file.write(message)

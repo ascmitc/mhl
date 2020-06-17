@@ -19,7 +19,7 @@ from . import logger
 from .history_fs_backend import MHLHistoryFSBackend
 from .generator import MHLGenerationCreationSession
 from .traverse import post_order_lexicographic
-from .__version__ import ascmhl_supported_hashformats
+from .__version__ import ascmhl_supported_hashformats, ascmhl_folder_name
 from . import utils
 import binascii
 from lxml import etree
@@ -55,7 +55,7 @@ def seal(root_path, verbose, hash_format, directory_hashes):
     num_failed_verifications = 0
     # store the directory hashes of sub folders so we can use it when calculating the hash of the parent folder
     dir_hash_mappings = {}
-    for folder_path, children in post_order_lexicographic(root_path, ['.DS_Store', 'asc-mhl']):
+    for folder_path, children in post_order_lexicographic(root_path, ['.DS_Store', ascmhl_folder_name]):
         # generate directory hashes
         dir_hash_context = None
         if directory_hashes:
@@ -118,7 +118,7 @@ def check(root_path, verbose):
 
     num_failed_verifications = 0
     num_new_files = 0
-    for folder_path, children in post_order_lexicographic(root_path, ['.DS_Store', 'asc-mhl']):
+    for folder_path, children in post_order_lexicographic(root_path, ['.DS_Store', ascmhl_folder_name]):
         for item_name, is_dir in children:
             file_path = os.path.join(folder_path, item_name)
             if is_dir:

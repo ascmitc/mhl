@@ -17,7 +17,7 @@ from .history_fs_backend import MHLHistoryFSBackend
 from .chain_txt_backend import MHLChainTXTBackend
 from . import hashlist_xml_backend
 from .traverse import post_order_lexicographic
-from .__version__ import ascmhl_supported_hashformats
+from .__version__ import ascmhl_supported_hashformats, ascmhl_folder_name
 
 
 @click.command()
@@ -124,7 +124,7 @@ def verify_paths(root_path, paths, verbose, hash_format):
         if not os.path.isabs(path):
             path = os.path.join(os.getcwd(), path)
         if os.path.isdir(path):
-            for folder_path, children in post_order_lexicographic(path, ['.DS_Store', 'asc-mhl']):
+            for folder_path, children in post_order_lexicographic(path, ['.DS_Store', ascmhl_folder_name]):
                 for item_name, is_dir in children:
                     file_path = os.path.join(folder_path, item_name)
                     if is_dir:

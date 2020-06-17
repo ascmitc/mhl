@@ -44,8 +44,9 @@ class MHLHistoryFSBackend:
 		for root, directories, filenames in os.walk(asc_mhl_folder_path):
 			for filename in filenames:
 				if filename.endswith(ascmhl_file_extension):
-					# A002R2EC_2019-06-21_082301_0005.ascmhl
-					parts = re.findall(r'(.*)_(.+)_(.+)_(\d+)\.ascmhl', filename)
+					# A002R2EC_2019-06-21_082301_0005.mhl
+					filename_no_extension, _ = os.path.splitext(filename)
+					parts = re.findall(r'(.*)_(.+)_(.+)_(\d+)', filename_no_extension)
 					if parts.__len__() == 1 and parts[0].__len__() == 4:
 						file_path = os.path.join(asc_mhl_folder_path, filename)
 						hash_list = hashlist_xml_backend.parse(file_path)
@@ -54,7 +55,7 @@ class MHLHistoryFSBackend:
 						hash_list.generation_number = generation_number
 						hash_lists.append(hash_list)
 					else:
-						logger.error(f'name of ascmhl file {filename} doesnt conform to naming convention')
+						logger.error(f'name of ascmhl file {filename} does not conform to naming convention')
 		# sort all found hash lists by generation number first to make sure we add them to the history in order
 		hash_lists.sort(key=lambda x: x.generation_number)
 		for hash_list in hash_lists:
@@ -69,7 +70,7 @@ class MHLHistoryFSBackend:
 		"""traverses the whole file system tree inside the history to find all sub histories"""
 		history_root = history.get_root_path()
 		for root, directories, filenames in os.walk(history_root):
-			if root != history_root and 'asc-mhl' in directories:
+			if root != history_root and ascmhl_folder_name in directories:
 				# we parse the mhl folder and clear the directories so we are not going deeper
 				# everything beneath is handled by the child history
 				child_history = MHLHistoryFSBackend.parse(root)
@@ -95,7 +96,7 @@ class MHLHistoryFSBackend:
 		date_string = datetime_now_filename_string()
 		index = history.latest_generation_number() + 1
 		file_name = os.path.basename(os.path.normpath(history.get_root_path())) + "_" + date_string + "_" + str(index).zfill(
-			4) + ".ascmhl"
+			4) + ascmhl_file_extension
 		return file_name, index
 
 	@staticmethod

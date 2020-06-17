@@ -108,5 +108,4 @@ class MHLChainTXTBackend:
 
         # …and store here
         # FIXME: only if successfully written to file
-        generation.chain = chain
         chain.generations.append(generation)

@@ -164,7 +164,10 @@ def validate(file_path):
 
     xsd_path = 'xsd/ASCMHL.xsd'
     xsd = etree.XMLSchema(etree.parse(xsd_path))
-    result = xsd.validate(etree.parse(file_path))
+
+    # pass a file handle to support the fake file system used in the tests
+    file = open(file_path, 'rb')
+    result = xsd.validate(etree.parse(file))
 
     if result:
         logger.info(f'validated: {file_path}')

@@ -26,45 +26,43 @@ def parse(file_path):
     hash_list = MHLHashList()
     hash_list.file_path = file_path
     current_object = None
-    supported_hashformats = {'{urn:ASC:MHL:v2.0}md5',
-                             '{urn:ASC:MHL:v2.0}sha1',
-                             '{urn:ASC:MHL:v2.0}c4',
-                             '{urn:ASC:MHL:v2.0}xxh32',
-                             '{urn:ASC:MHL:v2.0}xxh64',
-                             '{urn:ASC:MHL:v2.0}xxh3'}
+    supported_hash_formats = {'md5', 'sha1', 'c4', 'xxh32', 'xxh64', 'xxh3'}
     # use iterparse to prevent large memory usage when parsing large files
     # pass a file handle to iterparse instead of the path directly to support the fake filesystem used in the tests
     file = open(file_path, "rb")
     for event, element in etree.iterparse(file, events=('start', 'end')):
         if current_object and event == 'end':
+            # the tag might contain the namespace like {urn:ASC:MHL:v2.0}hash, so we need to strip the namespace part
+            # doing it with split is faster than using the lxml QName method
+            tag = element.tag.split('}', 1)[-1]
             if type(current_object) is MHLCreatorInfo:
-                if element.tag == '{urn:ASC:MHL:v2.0}creationdate':
+                if tag == 'creationdate':
                     current_object.creation_date = element.text
-                elif element.tag == '{urn:ASC:MHL:v2.0}tool':
+                elif tag == 'tool':
                     current_object.tool = MHLTool(element.text, element.attrib['version'])
-                elif element.tag == '{urn:ASC:MHL:v2.0}creatorinfo':
+                elif tag == 'creatorinfo':
                     hash_list.creator_info = current_object
                     current_object = None
             elif type(current_object) is MHLMediaHash:
-                if element.tag == '{urn:ASC:MHL:v2.0}path':
+                if tag == 'path':
                     current_object.path = element.text
-                elif element.tag == '{urn:ASC:MHL:v2.0}filesize':
+                elif tag == 'filesize':
                     current_object.filesize = element.text
                 # TODO: parse date
-                # elif element.tag == '{urn:ASC:MHL:v2.0}lastmodificationdate':
+                # elif tag == 'lastmodificationdate':
                 # 	current_object.filesize = element.text
-                elif element.tag in supported_hashformats:
-                    entry = MHLHashEntry(etree.QName(element).localname, element.text, element.attrib['action'])
+                elif tag in supported_hash_formats:
+                    entry = MHLHashEntry(tag, element.text, element.attrib['action'])
                     current_object.append_hash_entry(entry)
-                elif element.tag == '{urn:ASC:MHL:v2.0}hash':
+                elif tag == 'hash':
                     hash_list.append_hash(current_object)
                     current_object = None
             elif type(current_object) is MHLHashListReference:
-                if element.tag == '{urn:ASC:MHL:v2.0}path':
+                if tag == 'path':
                     current_object.path = element.text
-                elif element.tag == '{urn:ASC:MHL:v2.0}c4':
+                elif tag == 'c4':
                     current_object.reference_hash = element.text
-                elif element.tag == '{urn:ASC:MHL:v2.0}hashlistreference':
+                elif tag == 'hashlistreference':
                     hash_list.append_hash_list_reference(current_object)
                     current_object = None
 
@@ -78,11 +76,14 @@ def parse(file_path):
 
         # check if we need to create a new container
         elif not current_object and event == 'start':
-            if element.tag == '{urn:ASC:MHL:v2.0}hash':
+            # remove namespace here again instead of outside of the if
+            # since we don't want to do it for tags we don't compare at all
+            tag = element.tag.split('}', 1)[-1]
+            if tag == 'hash':
                 current_object = MHLMediaHash()
-            elif element.tag == '{urn:ASC:MHL:v2.0}creatorinfo':
+            elif tag == 'creatorinfo':
                 current_object = MHLCreatorInfo()
-            elif element.tag == '{urn:ASC:MHL:v2.0}hashlistreference':
+            elif tag == 'hashlistreference':
                 current_object = MHLHashListReference()
 
     logger.debug(f'parsing took: {timer() - start}')

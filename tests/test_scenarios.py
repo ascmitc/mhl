@@ -6,6 +6,7 @@ __license__ = "MIT"
 __maintainer__ = "Patrick Renner, Alexander Sahm"
 __email__ = "opensource@pomfort.com"
 """
+import glob
 
 import pytest
 import os
@@ -141,6 +142,7 @@ def compare_files_against_reference(scenario_reference: str, folder_paths: List[
 
     result = True
     for folder_path in folder_paths:
+        validate_all_mhl_files_against_xml_schema(folder_path)
         assert os.path.isabs(folder_path)
         if compare_mode:
             result &= compare_dir_content(scenario_reference, folder_path)
@@ -158,6 +160,14 @@ def compare_files_against_reference(scenario_reference: str, folder_paths: List[
         result &= compare_file_content(scenario_reference, '/log.txt')
     return result
 
+
+def validate_all_mhl_files_against_xml_schema(folder_path: str):
+    """ Find all mhl files created and validate them against the xsd"""
+    mhl_files = glob.glob(folder_path + r'/**/*.mhl', recursive=True)
+    runner = CliRunner()
+    for file in mhl_files:
+        result = runner.invoke(mhl.commands.validate, file)
+        assert result.exit_code == 0
 
 def copy_fake_directory_to_real_fs(fake_dir: str, real_dir: str, fake_fs):
     """ Utility function to copy a directory in the fake file system recursively to the real file system """

@@ -17,6 +17,7 @@ from .history_fs_backend import MHLHistoryFSBackend
 from .chain_txt_backend import MHLChainTXTBackend
 from . import hashlist_xml_backend
 from .traverse import post_order_lexicographic
+from .__version__ import ascmhl_supported_hashformats
 
 
 @click.command()
@@ -104,8 +105,8 @@ def create_dummy_folder(root_path, prefix, depth):
 @click.argument('root_path', type=click.Path(exists=True))
 @click.argument('paths', type=click.Path(exists=True), nargs=-1)
 @click.option('--verbose', '-v', default=False, is_flag=True, help="Verbose output")
-@click.option('--hash_format', '-h', type=click.Choice(['xxhash', 'MD5', 'SHA1', 'C4']), multiple=False,
-              default='xxhash', help="Algorithm")
+@click.option('--hash_format', '-h', type=click.Choice(ascmhl_supported_hashformats), multiple=False,
+              default='xxh64', help="Algorithm")
 def verify_paths(root_path, paths, verbose, hash_format):
     """
     read an ASC-MHL file

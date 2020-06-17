@@ -91,7 +91,7 @@ class MHLChainTXTBackend:
 		""" appends an externally created Generation object to the chain file
 		"""
 
-		hash_format = "C4"
+		hash_format = 'c4'
 
 		# get a new generation for a hashlist
 		generation = MHLChainGeneration()

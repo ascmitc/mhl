@@ -38,7 +38,7 @@ def create_filehash(hash_format, filepath):
 
     arguments:
     filepath -- string value, the path to the file
-    hashformat -- string value, one of the supported hash formats, e.g. 'MD5', 'xxhash'
+    hashformat -- string value, one of the supported hash formats, e.g. 'md5', 'xxh64'
     """
     csum_type = context_type_for_hash_format(hash_format)
     if csum_type:
@@ -48,15 +48,15 @@ def create_filehash(hash_format, filepath):
 
 
 def context_type_for_hash_format(hash_format):
-    if hash_format == 'MD5':
+    if hash_format == 'md5':
         return hashlib.md5
-    elif hash_format == 'SHA1':
+    elif hash_format == 'sha1':
         return hashlib.sha1
     elif hash_format == 'xxh64':
         return xxhash.xxh64
-    elif hash_format == 'C4':
+    elif hash_format == 'c4':
         return C4HashContext
-    return None
+    assert False, 'unsupported hash format'
 
 
 class C4HashContext:

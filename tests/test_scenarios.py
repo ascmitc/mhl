@@ -263,7 +263,7 @@ def test_scenario_03(fs, reference, A002R2EC):
         log_message('Sealing the folder A002R2EC again on the file server using MD5 hash format')
         log_message('this will verify all existing xxHashes, check for completeness,')
         log_message('and create a second generation with additional (new) MD5 hashes.')
-        result = execute_command(mhl.commands.seal, ['-v', '-h', 'MD5', '/file_server/A002R2EC'])
+        result = execute_command(mhl.commands.seal, ['-v', '-h', 'md5', '/file_server/A002R2EC'])
         assert result.exit_code == 0
         assert compare_files_against_reference('scenario_03', ['/travel_01', '/file_server'], fs)
 

@@ -168,7 +168,7 @@ def _ascmhlreference_xml_string(hash_list: MHLHashList, file_path: str) -> str:
 	root_path = os.path.dirname(os.path.dirname(file_path))
 	hash_element = E.hashlistreference(
 		E.path(os.path.relpath(hash_list.file_path, root_path)),
-		E.c4(hash_list.get_xxhash64()))
+		E.c4(hash_list.generate_c4hash()))
 
 	return etree.tostring(hash_element, pretty_print=True, encoding="unicode")
 

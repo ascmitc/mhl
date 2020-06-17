@@ -20,10 +20,7 @@ import mhl.commands
 
 
 def test_simple_parsing():
-    logger.verbose_logging = True
-    logger.debug_logging = True
-    # path = "examples/scenarios/Output/scenario_01/travel_01/A002R2EC/asc-mhl/A002R2EC_2020-01-16_091500_0001.ascmhl"
-    path = "/Users/sahm/temp/dummy_fs_2020-06-10_094406_0001.ascmhl"
+    path = "examples/scenarios/Output/scenario_01/travel_01/A002R2EC/asc-mhl/A002R2EC_2020-01-16_091500_0001.ascmhl"
     hash_list = hashlist_xml_backend.parse(path)
     assert len(hash_list.media_hashes) > 0
 

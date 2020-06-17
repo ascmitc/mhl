@@ -74,8 +74,8 @@ class MHLHashList:
     def get_file_name(self):
         return os.path.basename(self.file_path)
 
-    def get_xxhash64(self):
-        return create_filehash('xxh64', self.file_path)
+    def generate_c4hash(self):
+        return create_filehash('c4', self.file_path)
 
     # build
 
@@ -189,7 +189,7 @@ class MHLHashEntry:
 
     attribute member variables:
     hash_string -- string representation (hex) of the hash value
-    hash_format -- string value, hash format, e.g. 'MD5', 'xxhash'
+    hash_format -- string value, hash format, e.g. 'md5', 'xxh64'
     action -- action/result of verification, e.g. 'verified', 'failed', 'new', 'original'
     secondary -- bool value, indicates if created after the original hash (TBD)
 

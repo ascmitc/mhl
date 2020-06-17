@@ -19,6 +19,7 @@ from . import logger
 from .history_fs_backend import MHLHistoryFSBackend
 from .generator import MHLGenerationCreationSession
 from .traverse import post_order_lexicographic
+from .__version__ import ascmhl_supported_hashformats
 from . import utils
 import binascii
 from lxml import etree
@@ -28,7 +29,8 @@ from lxml import etree
 @click.argument('root_path', type=click.Path(exists=True))
 @click.option('--verbose', '-v', default=False, is_flag=True, help="Verbose output")
 @click.option('--directory_hashes', '-d', default=False, is_flag=True, help="Create directory hashes")
-@click.option('--hash_format', '-h', type=click.Choice(['xxh64', 'MD5', 'SHA1', 'C4']), multiple=False, default='xxh64', help="Algorithm")
+@click.option('--hash_format', '-h', type=click.Choice(ascmhl_supported_hashformats), multiple=False,
+              default='xxh64', help="Algorithm")
 def seal(root_path, verbose, hash_format, directory_hashes):
     """
     Creates a new generation from the content of a folder hierarchy.
@@ -71,7 +73,7 @@ def seal(root_path, verbose, hash_format, directory_hashes):
                 not_found_paths.discard(file_path)
             if dir_hash_context:
                 # in case of C4 we can't easily use the binary value so we encode the hash string instead
-                if hash_format == 'C4':
+                if hash_format == 'c4':
                     hash_binary = hash_string.encode('utf-8')
                 else:
                     hash_binary = binascii.unhexlify(hash_string)

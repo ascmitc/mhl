@@ -191,7 +191,7 @@ class MHLHistory:
 				history = self.child_history_mappings[reference_path]
 				referenced_hash_list = history.hash_list_with_file_name(os.path.basename(reference.path))
 				assert referenced_hash_list is not None
-				assert referenced_hash_list.get_xxhash64() == reference.xxhash
+				assert referenced_hash_list.generate_c4hash() == reference.c4hash
 				hash_list.referenced_hash_lists.append(referenced_hash_list)
 
 

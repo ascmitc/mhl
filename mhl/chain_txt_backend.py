@@ -8,6 +8,7 @@ __email__ = "opensource@pomfort.com"
 """
 
 from . import logger
+from .__version__ import ascmhl_reference_hash_format
 from .chain import MHLChain, MHLChainGeneration
 from .hashlist import MHLHashList
 from .hasher import create_filehash
@@ -18,20 +19,17 @@ class MHLChainTXTBackend:
     """class to read a chain.txt file into a MHLChain object
     """
 
-    chain_filename = "chain.txt"
-
     @staticmethod
-    def parse(filepath):
+    def parse(file_path):
         """parsing the chain.txt file and building the MHLChain for the chain member variable"""
-        logger.debug(f'parsing \"{os.path.basename(filepath)}\"...')
+        logger.debug(f'parsing \"{os.path.basename(file_path)}\"...')
 
-        chain = MHLChain()
-        chain.file_path = filepath
+        chain = MHLChain(file_path)
 
-        if not os.path.exists(filepath):
+        if not os.path.exists(file_path):
             return chain
 
-        lines = [line.rstrip('\n') for line in open(filepath)]
+        lines = [line.rstrip('\n') for line in open(file_path)]
 
         for line in lines:
             line = line.rstrip().lstrip()
@@ -56,11 +54,10 @@ class MHLChainTXTBackend:
             logger.error("cannot read line \"{line}\"")
             return None
 
-        generation = MHLChainGeneration()
-        generation.generation_number = int(parts[0])
-        generation.ascmhl_filename = parts[1]
-        generation.hashformat = (parts[2])[:-1]
-        generation.hash_string = parts[3]
+        generation = MHLChainGeneration(int(parts[0]),
+                                        parts[1],
+                                        (parts[2])[:-1],
+                                        parts[3])
 
         if parts.__len__() == 6:
             generation.signature_identifier = parts[4]
@@ -81,7 +78,7 @@ class MHLChainTXTBackend:
         result_string = \
             str(chain_generation.generation_number).zfill(4) + " " + \
             chain_generation.ascmhl_filename + " " + \
-            chain_generation.hashformat + ": " + \
+            chain_generation.hash_format + ": " + \
             chain_generation.hash_string
 
         return result_string
@@ -91,14 +88,11 @@ class MHLChainTXTBackend:
         """ appends an externally created Generation object to the chain file
         """
 
-        hash_format = 'c4'
-
         # get a new generation for a hashlist
-        generation = MHLChainGeneration()
-        generation.generation_number = hash_list.generation_number
-        generation.hashformat = hash_format
-        generation.hash_string = create_filehash(hash_format, hash_list.file_path)
-        generation.ascmhl_filename = hash_list.get_file_name()
+        generation = MHLChainGeneration(hash_list.generation_number,
+                                        hash_list.get_file_name(),
+                                        ascmhl_reference_hash_format,
+                                        create_filehash(ascmhl_reference_hash_format, hash_list.file_path))
 
         # TODO sanity checks
         # - if generation is already part of self.generations
@@ -106,9 +100,8 @@ class MHLChainTXTBackend:
 
         # immediately write to file
         logger.debug(f'   appending chain generation for \"{generation.ascmhl_filename}\" to chain file')
-        file_path = os.path.join(chain.history.asc_mhl_path, MHLChainTXTBackend.chain_filename)
 
-        with open(file_path, 'a') as file:
+        with open(chain.file_path, 'a') as file:
             file.write(MHLChainTXTBackend._line_for_chainfile(generation) + "\n")
 
         # FIXME: check if file could be created

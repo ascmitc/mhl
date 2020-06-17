@@ -13,7 +13,7 @@ import os
 from typing import Tuple, List, Dict, Optional, Set
 from . import logger
 from .chain import MHLChain
-from .hashlist import MHLHashList, MHLHashEntry, MHLMediaHash
+from .hashlist import MHLHashList, MHLHashEntry
 
 
 class MHLHistory:
@@ -55,12 +55,7 @@ class MHLHistory:
         self.parent_history = None
         self.asc_mhl_path = None
 
-    def set_chain(self, chain):
-        chain.history = self
-        self.chain = chain
-
     def append_hash_list(self, hash_list):
-        hash_list.history = self
         self.hash_lists.append(hash_list)
 
     def get_root_path(self):
@@ -96,12 +91,6 @@ class MHLHistory:
             for hash_entry in media_hash.hash_entries:
                 if hash_entry.action == 'original':
                     return hash_entry
-        return None
-
-    def find_original_media_hash_for_path(self, relative_path: str) -> Optional[MHLMediaHash]:
-        hash_entry = self.find_original_hash_entry_for_path(relative_path)
-        if hash_entry is not None:
-            return hash_entry.media_hash
         return None
 
     def find_first_hash_entry_for_path(self, relative_path, hash_format=None) -> Optional[MHLHashEntry]:
@@ -192,7 +181,7 @@ class MHLHistory:
                 history = self.child_history_mappings[reference_path]
                 referenced_hash_list = history.hash_list_with_file_name(os.path.basename(reference.path))
                 assert referenced_hash_list is not None
-                assert referenced_hash_list.generate_c4hash() == reference.c4hash
+                assert referenced_hash_list.generate_reference_hash() == reference.reference_hash
                 hash_list.referenced_hash_lists.append(referenced_hash_list)
 
     # accessors

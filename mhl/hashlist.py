@@ -13,6 +13,7 @@ from datetime import datetime
 import os
 
 from . import logger
+from .__version__ import ascmhl_reference_hash_format
 from .hasher import create_filehash
 
 
@@ -49,9 +50,7 @@ class MHLHashList:
     file_path: Optional[str]
     generation_number: Optional[int]
 
-    # init
     def __init__(self):
-        # self.history = None # TODO: note for review, I removed this due to cyclic dependency
         self.creator_info = None
         self.media_hashes = []
         self.file_path = None
@@ -73,25 +72,18 @@ class MHLHashList:
     def get_file_name(self):
         return os.path.basename(self.file_path)
 
-    def generate_c4hash(self):
-        return create_filehash('c4', self.file_path)
+    def generate_reference_hash(self):
+        return create_filehash(ascmhl_reference_hash_format, self.file_path)
 
     # build
     def append_hash(self, media_hash: MHLMediaHash):
-        media_hash.hash_list = self
         self.media_hashes.append(media_hash)
         self.media_hashes_path_map[media_hash.path] = media_hash
 
-    def append_creator_info(self, creator_info):
-        creator_info.hash_list = self
-        self.creator_info = creator_info
-
     def append_hash_list_reference(self, reference: MHLHashListReference):
-        reference.hash_list = self
         self.hash_list_references.append(reference)
 
     # log
-
     def log(self):
         logger.info("      filename: {0}".format(self.get_file_name()))
         logger.info("    generation: {0}".format(self.generation_number))
@@ -114,7 +106,6 @@ class MHLMediaHash:
         * initialize new, empty MHLHashEntry for adding one hash value
 
     model member variables:
-    hash_list -- MHLHashList object for context
     hash_entries -- list of HashEntry objects to manage hash values (e.g. for different formats)
 
     attribute member variables:
@@ -124,7 +115,6 @@ class MHLMediaHash:
 
     other member variables:
     """
-    hash_list: Optional[MHLHashList]
     hash_entries: List[MHLHashEntry]
     path: Optional[str]
     filesize: Optional[int]
@@ -132,7 +122,6 @@ class MHLMediaHash:
 
     # init
     def __init__(self):
-        self.hash_list = None
         self.hash_entries = list()
         self.path = None
         self.filesize = None
@@ -180,9 +169,6 @@ class MHLHashEntry:
     class to store one hash value
     managed by a MHLMediaHash object
 
-    model member variables:
-    media_hash -- MHLMediaHash object for context
-
     attribute member variables:
     hash_string -- string representation (hex) of the hash value
     hash_format -- string value, hash format, e.g. 'md5', 'xxh64'
@@ -191,13 +177,11 @@ class MHLHashEntry:
     other member variables:
     """
 
-    media_hash: Optional[MHLMediaHash]
     hash_string: str
     hash_format: str
     action: Optional[str]
 
     def __init__(self, hash_format: str, hash_string: str, action: str = None):
-        self.media_hash = None
         self.hash_string = hash_string
         self.hash_format = hash_format
         self.action = action
@@ -207,13 +191,12 @@ class MHLHashListReference:
     """
     class to store the ascmhlreference to a child history mhl file
     """
-    hash_list: MHLHashList
     path: Optional[str]
-    c4hash: Optional[str]
+    reference_hash: Optional[str]
 
     def __init__(self):
         self.path = None
-        self.c4hash = None
+        self.reference_hash = None
 
 
 class MHLCreatorInfo:
@@ -227,7 +210,6 @@ class MHLCreatorInfo:
     authors: List[MHLAuthor]
 
     def __init__(self):
-        self.hash_list = None
         self.host_name = None
         self.tool = None
         self.creation_date = None

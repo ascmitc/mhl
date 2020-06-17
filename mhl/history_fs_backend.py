@@ -11,7 +11,7 @@ import os
 import re
 
 from . import logger
-from .__version__ import ascmhl_folder_name, ascmhl_file_extension
+from .__version__ import ascmhl_folder_name, ascmhl_file_extension, ascmhl_chainfile_name
 from .hashlist import MHLHashList
 from .history import MHLHistory
 from .chain_txt_backend import MHLChainTXTBackend
@@ -36,9 +36,8 @@ class MHLHistoryFSBackend:
         history = MHLHistory()
         history.asc_mhl_path = asc_mhl_folder_path
 
-        file_path = os.path.join(asc_mhl_folder_path, MHLChainTXTBackend.chain_filename)
-        chain = MHLChainTXTBackend.parse(file_path)
-        history.set_chain(chain)
+        file_path = os.path.join(asc_mhl_folder_path, ascmhl_chainfile_name)
+        history.chain = MHLChainTXTBackend.parse(file_path)
 
         hash_lists = []
         for root, directories, filenames in os.walk(asc_mhl_folder_path):

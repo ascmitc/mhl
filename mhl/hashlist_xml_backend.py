@@ -41,7 +41,7 @@ def parse(file_path):
                 elif element.tag == '{urn:ASC:MHL:v2.0}tool':
                     current_object.tool = MHLTool(element.text, element.attrib['version'])
                 elif element.tag == '{urn:ASC:MHL:v2.0}creatorinfo':
-                    hash_list.append_creator_info(current_object)
+                    hash_list.creator_info = current_object
                     current_object = None
             elif type(current_object) is MHLMediaHash:
                 if element.tag == '{urn:ASC:MHL:v2.0}path':
@@ -61,7 +61,7 @@ def parse(file_path):
                 if element.tag == '{urn:ASC:MHL:v2.0}path':
                     current_object.path = element.text
                 elif element.tag == '{urn:ASC:MHL:v2.0}c4':
-                    current_object.c4hash = element.text
+                    current_object.reference_hash = element.text
                 elif element.tag == '{urn:ASC:MHL:v2.0}hashlistreference':
                     hash_list.append_hash_list_reference(current_object)
                     current_object = None
@@ -170,7 +170,7 @@ def _ascmhlreference_xml_string(hash_list: MHLHashList, file_path: str) -> str:
     root_path = os.path.dirname(os.path.dirname(file_path))
     hash_element = E.hashlistreference(
         E.path(os.path.relpath(hash_list.file_path, root_path)),
-        E.c4(hash_list.generate_c4hash()))
+        E.c4(hash_list.generate_reference_hash()))
 
     return etree.tostring(hash_element, pretty_print=True, encoding="unicode")
 

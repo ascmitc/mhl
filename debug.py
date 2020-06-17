@@ -9,7 +9,8 @@ __email__ = "opensource@pomfort.com"
 """
 
 import click
-from mhl import _debug_commands, commands
+
+from mhl import _debug_commands
 
 
 @click.group()

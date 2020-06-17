@@ -101,6 +101,7 @@ def create_dummy_folder(root_path, prefix, depth):
         folder_name = prefix + chr(ord('A') + folder)
         create_dummy_folder(folder_path, folder_name, depth-1)
 
+
 @click.command()
 @click.argument('root_path', type=click.Path(exists=True))
 @click.argument('paths', type=click.Path(exists=True), nargs=-1)

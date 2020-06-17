@@ -74,4 +74,3 @@ class NewFilesFoundException(click.ClickException):
 
     def __init__(self):
         super().__init__('New files not referenced in the mhl history have been found')
-

@@ -8,13 +8,12 @@ __email__ = "opensource@pomfort.com"
 """
 
 from __future__ import annotations
-from typing import List, Dict
+from typing import List, Dict, Optional, Set
 from datetime import datetime
 import os
 
 from . import logger
 from .hasher import create_filehash
-from .utils import datetime_now_isostring_with_microseconds
 
 
 class MHLHashList:
@@ -40,15 +39,15 @@ class MHLHashList:
     file path -- file path of the represented MHL file
     """
 
-    creator_info: MHLCreatorInfo
+    creator_info: Optional[MHLCreatorInfo]
     media_hashes: List[MHLMediaHash]
     media_hashes_path_map: Dict[str, MHLMediaHash]
     # referenced_hash_lists are the loaded hash list object
     referenced_hash_lists = List['MHLHashList']
     # while hash_list_references store the reference objects found in the mhl files
     hash_list_references = List['MHLHashListReference']
-    file_path: str
-    generation_number: int
+    file_path: Optional[str]
+    generation_number: Optional[int]
 
     # init
     def __init__(self):
@@ -65,7 +64,7 @@ class MHLHashList:
     def find_media_hash_for_path(self, relative_path):
         return self.media_hashes_path_map.get(relative_path)
 
-    def set_of_file_paths(self, root_path) -> set[str]:
+    def set_of_file_paths(self, root_path) -> Set[str]:
         all_paths = set()
         for media_hash in self.media_hashes:
             all_paths.add(os.path.join(root_path, media_hash.path))
@@ -78,11 +77,6 @@ class MHLHashList:
         return create_filehash('c4', self.file_path)
 
     # build
-
-    def empty_hash(self):
-        hash = MHLMediaHash(self)
-        return hash
-
     def append_hash(self, media_hash: MHLMediaHash):
         media_hash.hash_list = self
         self.media_hashes.append(media_hash)
@@ -130,11 +124,11 @@ class MHLMediaHash:
 
     other member variables:
     """
-    hash_list: MHLHashList
+    hash_list: Optional[MHLHashList]
     hash_entries: List[MHLHashEntry]
-    path: str
-    filesize: int
-    last_modification_date: datetime
+    path: Optional[str]
+    filesize: Optional[int]
+    last_modification_date: Optional[datetime]
 
     # init
     def __init__(self):
@@ -166,17 +160,19 @@ class MHLMediaHash:
     def log_hash_entry(self, hash_format):
         """find HashEntry object of a given format and print it"""
         for hash_entry in self.hash_entries:
-            if hash_entry.hash_format == hash_format:
-                indicator = " "
-                if hash_entry.action == 'failed':
-                    indicator = "!"
-                elif hash_entry.action == 'directory':
-                    indicator = "d"
-                logger.info("{0} {1}: {2} {3}: {4}".format(indicator,
-                                                           hash_entry.hash_format.rjust(6),
-                                                           hash_entry.hash_string.ljust(32),
-                                                           (hash_entry.action if hash_entry.action is not None else "").ljust(10),
-                                                           self.path))
+            if hash_entry.hash_format != hash_format:
+                continue
+            indicator = " "
+            if hash_entry.action == 'failed':
+                indicator = "!"
+            elif hash_entry.action == 'directory':
+                indicator = "d"
+            hash_action = (hash_entry.action if hash_entry.action is not None else "").ljust(10)
+            logger.info("{0} {1}: {2} {3}: {4}".format(indicator,
+                                                       hash_entry.hash_format.rjust(6),
+                                                       hash_entry.hash_string.ljust(32),
+                                                       hash_action,
+                                                       self.path))
 
 
 class MHLHashEntry:
@@ -191,23 +187,20 @@ class MHLHashEntry:
     hash_string -- string representation (hex) of the hash value
     hash_format -- string value, hash format, e.g. 'md5', 'xxh64'
     action -- action/result of verification, e.g. 'verified', 'failed', 'new', 'original'
-    secondary -- bool value, indicates if created after the original hash (TBD)
 
     other member variables:
     """
 
-    media_hash: MHLMediaHash
+    media_hash: Optional[MHLMediaHash]
     hash_string: str
     hash_format: str
-    action: str
-    secondary: bool
+    action: Optional[str]
 
-    def __init__(self, hash_format: str = None, hash_string: str = None, action: str = None):
+    def __init__(self, hash_format: str, hash_string: str, action: str = None):
         self.media_hash = None
         self.hash_string = hash_string
         self.hash_format = hash_format
         self.action = action
-        self.secondary = False
 
 
 class MHLHashListReference:
@@ -215,8 +208,8 @@ class MHLHashListReference:
     class to store the ascmhlreference to a child history mhl file
     """
     hash_list: MHLHashList
-    path: str
-    c4hash: str
+    path: Optional[str]
+    c4hash: Optional[str]
 
     def __init__(self):
         self.path = None
@@ -227,10 +220,10 @@ class MHLCreatorInfo:
     """
     Stores the creator info that is part of the header of each hash list file
     """
-    host_name: str
-    tool: MHLTool
-    creation_date: datetime
-    process: MHLProcess
+    host_name: Optional[str]
+    tool: Optional[MHLTool]
+    creation_date: Optional[datetime]
+    process: Optional[MHLProcess]
     authors: List[MHLAuthor]
 
     def __init__(self):
@@ -239,7 +232,7 @@ class MHLCreatorInfo:
         self.tool = None
         self.creation_date = None
         self.process = None
-        self.authors = None
+        self.authors = []
 
     def log(self):
         logger.info("     host_name: {0}".format(self.host_name))
@@ -260,7 +253,7 @@ class MHLTool:
 class MHLProcess:
     process_type: str
     name: str
-    hash_source: str
+    hash_source: Optional[str]
 
     def __init__(self, process_type: str, name: str = None):
         self.process_type = process_type
@@ -270,12 +263,10 @@ class MHLProcess:
 
 class MHLAuthor:
     name: str
-    email: str
-    phone: str
+    email: Optional[str]
+    phone: Optional[str]
 
-    def __init__(self):
-        self.name = None
-        self.email = None
-        self.phone = None
-
-
+    def __init__(self, name: str, email: str = None, phone: str = None):
+        self.name = name
+        self.email = email
+        self.phone = phone

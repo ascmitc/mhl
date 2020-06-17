@@ -7,9 +7,7 @@ __maintainer__ = "Patrick Renner, Alexander Sahm"
 __email__ = "opensource@pomfort.com"
 """
 
-import pytest
 import os
-import time
 from freezegun import freeze_time
 from click.testing import CliRunner
 

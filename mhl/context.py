@@ -9,6 +9,3 @@ __email__ = "opensource@pomfort.com"
 """
 
 
-from . import logger
-
-

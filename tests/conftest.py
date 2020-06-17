@@ -60,5 +60,3 @@ def simple_mhl_history(fs):
     runner = CliRunner()
     result = runner.invoke(mhl.commands.seal, ['/root'])
     assert result.exit_code == 0
-
-

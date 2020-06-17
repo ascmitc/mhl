@@ -30,7 +30,7 @@ def reference(fs):
 
 @pytest.fixture
 @freeze_time("2020-01-15 13:00:00")
-def A002R2EC(fs):
+def card_a002(fs):
     fs.create_file('/A002R2EC/Sidecar.txt', contents='BLOREM ipsum dolor sit amet, consetetur sadipscing elitr.\n')
     fs.create_file('/A002R2EC/Clips/A002C006_141024_R2EC.mov', contents='abcd\n')
     fs.create_file('/A002R2EC/Clips/A002C007_141024_R2EC.mov', contents='def\n')
@@ -38,7 +38,7 @@ def A002R2EC(fs):
 
 @pytest.fixture
 @freeze_time("2020-01-15 13:30:00")
-def A003R2EC(fs):
+def card_a003(fs):
     fs.create_file('/A003R2EC/Sidecar.txt', contents='Dolor sit amet, consetetur sadipscing elitr.\n')
     fs.create_file('/A003R2EC/Clips/A003C011_141024_R2EC.mov', contents='vbgh\n')
     fs.create_file('/A003R2EC/Clips/A003C012_141024_R2EC.mov', contents='zhgdr\n')
@@ -49,7 +49,7 @@ def load_real_reference(fake_fs):
 
 
 # custom dircmp to compare file contents as suggested in https://stackoverflow.com/a/24860799
-class content_dircmp(filecmp.dircmp):
+class ContentDircmp(filecmp.dircmp):
     """
     Compare the content of dir1 and dir2. In contrast with filecmp.dircmp, this
     subclass compares the content of files with the same path.
@@ -70,7 +70,7 @@ def dirs_are_equal(dir1, dir2):
     Return False if they differ, True is they are the same.
     """
     result = True
-    compared = content_dircmp(dir1, dir2, ignore=['.DS_Store'])
+    compared = ContentDircmp(dir1, dir2, ignore=['.DS_Store'])
     if compared.left_only or compared.right_only or compared.diff_files or compared.funny_files:
         compared.report_partial_closure()
         for file in compared.diff_files:
@@ -192,7 +192,7 @@ def execute_command(click_cmd, args):
 
 
 @freeze_time("2020-01-16 09:15:00")
-def test_scenario_01(fs, reference, A002R2EC):
+def test_scenario_01(fs, reference, card_a002):
     log_message('Scenario 01:')
     log_message('This is the most basic example. A camera card is copied to a travel drive and an ASC-MHL file is')
     log_message('created with hashes of all files on the card.')
@@ -209,7 +209,7 @@ def test_scenario_01(fs, reference, A002R2EC):
 
 
 @freeze_time("2020-01-16 09:15:00")
-def test_scenario_02(fs, reference, A002R2EC):
+def test_scenario_02(fs, reference, card_a002):
     log_message('Scenario 02:')
     log_message('In this scenario a copy is made, and then a copy of the copy. Two ASC-MHL are created during')
     log_message('this process, documenting the history of both copy processes.')
@@ -238,7 +238,7 @@ def test_scenario_02(fs, reference, A002R2EC):
 
 
 @freeze_time("2020-01-16 09:15:00")
-def test_scenario_03(fs, reference, A002R2EC):
+def test_scenario_03(fs, reference, card_a002):
     log_message('Scenario 03:')
     log_message('In this scenario the first hashes are created using the xxhash format. Different hash formats')
     log_message('might be required by systems used further down the workflow, so the second copy is verified')
@@ -270,7 +270,7 @@ def test_scenario_03(fs, reference, A002R2EC):
 
 
 @freeze_time("2020-01-16 09:15:00")
-def test_scenario_04(fs, reference, A002R2EC):
+def test_scenario_04(fs, reference, card_a002):
     log_message('Scenario 04:')
     log_message('Copying a folder to a travel drive and from there to a file server with a hash mismatch in')
     log_message('one file.')
@@ -308,7 +308,7 @@ def test_scenario_04(fs, reference, A002R2EC):
 
 
 @freeze_time("2020-01-16 09:15:00")
-def test_scenario_05(fs, reference, A002R2EC, A003R2EC):
+def test_scenario_05(fs, reference, card_a002, card_a003):
     log_message('Scenario 05:')
     log_message('Copying two camera mags to a `Reels` folder on a travel drive, and the entire `Reels` folder')
     log_message('folder to a server.')

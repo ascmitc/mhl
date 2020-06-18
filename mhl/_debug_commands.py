@@ -10,14 +10,9 @@ import os
 import shutil
 
 import click
-from .commands import seal_file_path, commit_session
-from .generator import MHLGenerationCreationSession
-from . import logger
 from .history import MHLHistory
 from . import chain_txt_parser
 from . import hashlist_xml_parser
-from .traverse import post_order_lexicographic
-from .__version__ import ascmhl_supported_hashformats, ascmhl_folder_name
 
 
 @click.command()
@@ -100,41 +95,3 @@ def create_dummy_folder(root_path, prefix, depth):
     for folder in range(0, num_folders):
         folder_name = prefix + chr(ord('A') + folder)
         create_dummy_folder(folder_path, folder_name, depth-1)
-
-
-@click.command()
-@click.argument('root_path', type=click.Path(exists=True))
-@click.argument('paths', type=click.Path(exists=True), nargs=-1)
-@click.option('--verbose', '-v', default=False, is_flag=True, help="Verbose output")
-@click.option('--hash_format', '-h', type=click.Choice(ascmhl_supported_hashformats), multiple=False,
-              default='xxh64', help="Algorithm")
-def verify_paths(root_path, paths, verbose, hash_format):
-    """
-    read an ASC-MHL file
-    """
-    logger.verbose_logging = verbose
-
-    if not os.path.isabs(root_path):
-        root_path = os.path.join(os.getcwd(), root_path)
-
-    existing_history = MHLHistory.load_from_path(root_path)
-    # start a verification session on the existing history
-    session = MHLGenerationCreationSession(existing_history)
-
-    for path in paths:
-        if not os.path.isabs(path):
-            path = os.path.join(os.getcwd(), path)
-        if os.path.isdir(path):
-            for folder_path, children in post_order_lexicographic(path, ['.DS_Store', ascmhl_folder_name]):
-                for item_name, is_dir in children:
-                    file_path = os.path.join(folder_path, item_name)
-                    if is_dir:
-                        continue
-                    seal_file_path(existing_history, file_path, hash_format, session)
-        else:
-            seal_file_path(existing_history, path, hash_format, session)
-
-    commit_session(session)
-
-    if verbose:
-        existing_history.log()

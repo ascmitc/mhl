@@ -21,7 +21,6 @@ def debug_cli():
 debug_cli.add_command(_debug_commands.readmhlfile)
 debug_cli.add_command(_debug_commands.readchainfile)
 debug_cli.add_command(_debug_commands.readmhlhistory)
-debug_cli.add_command(_debug_commands.verify_paths)
 debug_cli.add_command(_debug_commands.create_dummy_file_structure, 'create_dummy_file_structure')
 
 

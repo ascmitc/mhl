@@ -112,10 +112,10 @@ def test_child_history_partial_verification_ba_1_file(fs, nested_mhl_histories):
 
     """
 
-    # create an additional file the verify_paths command will not add since we only pass it a single file
+    # create an additional file the record command will not add since we only pass it B1 as single file
     fs.create_file('/root/B/B2.txt', contents='B2\n')
     runner = CliRunner()
-    result = runner.invoke(mhl._debug_commands.verify_paths, ['/root', '/root/B/B1.txt'])
+    result = runner.invoke(mhl.commands.record, ['/root', '/root/B/B1.txt'], catch_exceptions=False)
     assert result.exit_code == 0
 
     # two new generations have been written
@@ -151,10 +151,10 @@ def test_child_history_partial_verification_bb_folder(fs, nested_mhl_histories):
 
     """
 
-    # create an additional file the verify_paths command will find because we pass it a folder
+    # create an additional file the record command will find because we pass it a folder
     fs.create_file('/root/B/BB/BB2.txt', contents='BB2\n')
     runner = CliRunner()
-    result = runner.invoke(mhl._debug_commands.verify_paths, ['/root', '/root/B/BB'])
+    result = runner.invoke(mhl.commands.record, ['/root', '/root/B/BB'])
     assert result.exit_code == 0
 
     assert os.path.isfile('/root/ascmhl/root_2020-01-16_091500_0002.mhl')

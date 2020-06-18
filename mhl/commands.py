@@ -19,7 +19,7 @@ from .history import MHLHistory
 from . import logger
 from .generator import MHLGenerationCreationSession
 from .traverse import post_order_lexicographic
-from .__version__ import ascmhl_supported_hashformats, ascmhl_folder_name
+from .__version__ import ascmhl_supported_hashformats
 from . import utils
 import binascii
 from lxml import etree
@@ -55,7 +55,7 @@ def seal(root_path, verbose, hash_format, directory_hashes):
     num_failed_verifications = 0
     # store the directory hashes of sub folders so we can use it when calculating the hash of the parent folder
     dir_hash_mappings = {}
-    for folder_path, children in post_order_lexicographic(root_path, ['.DS_Store', ascmhl_folder_name]):
+    for folder_path, children in post_order_lexicographic(root_path):
         # generate directory hashes
         dir_hash_context = None
         if directory_hashes:
@@ -118,7 +118,7 @@ def check(root_path, verbose):
 
     num_failed_verifications = 0
     num_new_files = 0
-    for folder_path, children in post_order_lexicographic(root_path, ['.DS_Store', ascmhl_folder_name]):
+    for folder_path, children in post_order_lexicographic(root_path):
         for item_name, is_dir in children:
             file_path = os.path.join(folder_path, item_name)
             if is_dir:
@@ -155,6 +155,65 @@ def check(root_path, verbose):
 
     if num_new_files > 0:
         raise logger.NewFilesFoundException()
+
+
+@click.command()
+@click.argument('root_path', type=click.Path(exists=True))
+@click.argument('paths', type=click.Path(exists=True), nargs=-1)
+@click.option('--verbose', '-v', default=False, is_flag=True, help="enable verbose output")
+@click.option('--hash_format', '-h', type=click.Choice(ascmhl_supported_hashformats), multiple=False,
+              default='xxh64', help="hash algorithm to use")
+def record(root_path, paths, verbose, hash_format):
+    """
+    Creates a new generation from the file or folder paths specified.
+
+    \b
+    ROOT_PATH: the root path to use for the asc mhl history
+    PATHS: the file or folder paths to add to the asc mhl history
+
+    This can be used for instance when adding single files to an already mhl-managed file hierarchy.
+    All files that are specified or inside a specified folder are hashed and will be compared
+    to previous records in the `asc-mhl` folder if they are recorded in the history already.
+    The following files will not be handled by this command:
+
+    \b
+    * files that are referenced in the existing ascmhl history but not specified as input
+    * files that are neither referenced in the history nor specified as input
+    """
+    logger.verbose_logging = verbose
+
+    if not os.path.isabs(root_path):
+        root_path = os.path.join(os.getcwd(), root_path)
+
+    if len(paths) == 0:
+        raise click.BadParameter('no file paths gives', param_hint='PATHS')
+
+    existing_history = MHLHistory.load_from_path(root_path)
+    # start a creation session on the existing history
+    session = MHLGenerationCreationSession(existing_history)
+
+    num_failed_verifications = 0
+    for path in paths:
+        if not os.path.isabs(path):
+            path = os.path.join(os.getcwd(), path)
+        if os.path.isdir(path):
+            for folder_path, children in post_order_lexicographic(path):
+                for item_name, is_dir in children:
+                    file_path = os.path.join(folder_path, item_name)
+                    if is_dir:
+                        continue
+                    _, success = seal_file_path(existing_history, file_path, hash_format, session)
+                    if not success:
+                        num_failed_verifications += 1
+        else:
+            _, success = seal_file_path(existing_history, path, hash_format, session)
+            if not success:
+                num_failed_verifications += 1
+
+    commit_session(session)
+
+    if num_failed_verifications > 0:
+        raise logger.VerificationFailedException()
 
 
 @click.command()

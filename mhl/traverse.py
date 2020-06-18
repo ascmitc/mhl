@@ -1,11 +1,12 @@
 from os.path import join, isdir
 import os
+from .__version__ import ascmhl_default_ignore_patterns
 
 
 # TODO: implement this on next refactor. this is not yet integrated into mhl script.
 #  iteration logic should not be in the same place as the thing using the iterator when it is this complicated.
 #  therefor we should use this generator to easily separate the traversal from the hash computation and xml building
-def post_order_lexicographic(top, ignore_file_names):
+def post_order_lexicographic(top, ignore_file_names=ascmhl_default_ignore_patterns):
     """
     iterates a file system in the order necessary to generate composite tree hashes.
 

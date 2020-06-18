@@ -14,7 +14,7 @@ from .commands import seal_file_path, commit_session
 from .generator import MHLGenerationCreationSession
 from . import logger
 from .history import MHLHistory
-from .chain_txt_backend import MHLChainTXTBackend
+from . import chain_txt_parser
 from . import hashlist_xml_parser
 from .traverse import post_order_lexicographic
 from .__version__ import ascmhl_supported_hashformats, ascmhl_folder_name
@@ -28,7 +28,7 @@ def readchainfile(filepath, verbose):
     read an ASC-MHL file
     """
 
-    chain = MHLChainTXTBackend.parse(filepath)
+    chain = chain_txt_parser.parse(filepath)
 
     if verbose:
         chain.log()

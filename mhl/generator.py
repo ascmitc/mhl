@@ -12,7 +12,7 @@ from typing import Dict, List
 from . import logger
 from .history import MHLHistory
 from .hashlist import MHLHashList, MHLMediaHash, MHLHashEntry, MHLCreatorInfo
-from .chain_txt_backend import MHLChainTXTBackend
+from . import chain_txt_parser
 
 
 class MHLGenerationCreationSession:
@@ -106,4 +106,4 @@ class MHLGenerationCreationSession:
             if history.parent_history is not None:
                 referenced_hash_lists[history.parent_history].append(new_hash_list)
 
-            MHLChainTXTBackend.write_chain(history.chain, new_hash_list)
+            chain_txt_parser.write_chain(history.chain, new_hash_list)

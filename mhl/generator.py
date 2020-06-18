@@ -9,7 +9,7 @@ __email__ = "opensource@pomfort.com"
 
 from collections import defaultdict
 from typing import Dict, List
-from . import logger, history_fs_backend
+from . import logger
 from .history import MHLHistory
 from .hashlist import MHLHashList, MHLMediaHash, MHLHashEntry, MHLCreatorInfo
 from .chain_txt_backend import MHLChainTXTBackend
@@ -102,7 +102,7 @@ class MHLGenerationCreationSession:
                 new_hash_list = self.new_hash_lists[history]
             new_hash_list.referenced_hash_lists = referenced_hash_lists[history]
             new_hash_list.creator_info = creator_info
-            history_fs_backend.write_new_generation(history, new_hash_list)
+            history.write_new_generation(new_hash_list)
             if history.parent_history is not None:
                 referenced_hash_lists[history.parent_history].append(new_hash_list)
 

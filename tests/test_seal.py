@@ -12,7 +12,7 @@ from freezegun import freeze_time
 from click.testing import CliRunner
 
 import mhl._debug_commands
-from mhl import history_fs_backend
+from mhl.history import MHLHistory
 import mhl.commands
 
 scenario_output_path = 'examples/scenarios/Output'
@@ -86,7 +86,7 @@ def test_seal_fail_missing_file(fs, nested_mhl_histories):
     test that sealing fails if there is a file missing on the file system that is referenced by one of the histories
     """
 
-    root_history = history_fs_backend.parse_history('/root')
+    root_history = MHLHistory.load_from_path('/root')
     paths = root_history.set_of_file_paths()
 
     assert paths == {'/root/B/B1.txt', '/root/B/BB/BB1.txt', '/root/Stuff.txt', '/root/A/AA/AA1.txt'}
@@ -99,7 +99,7 @@ def test_seal_fail_missing_file(fs, nested_mhl_histories):
 
     # the actual seal has been written to disk anyways we expect the history to contain
     # the new not yet referenced files (/root/B/BA/BA1.txt and /root/A/AB/AB1.txt) as well now
-    root_history = history_fs_backend.parse_history('/root')
+    root_history = MHLHistory.load_from_path('/root')
     paths = root_history.set_of_file_paths()
 
     # since we scan all generations for file paths we now get old files, missing files and new files here

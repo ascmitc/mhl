@@ -15,8 +15,8 @@ import click
 
 from .hashlist import MHLCreatorInfo, MHLTool, MHLProcess
 from .hasher import create_filehash, context_type_for_hash_format
+from .history import MHLHistory
 from . import logger
-from . import history_fs_backend
 from .generator import MHLGenerationCreationSession
 from .traverse import post_order_lexicographic
 from .__version__ import ascmhl_supported_hashformats, ascmhl_folder_name
@@ -43,7 +43,7 @@ def seal(root_path, verbose, hash_format, directory_hashes):
 
     logger.verbose(f'seal folder at path: {root_path}')
 
-    existing_history = history_fs_backend.parse_history(root_path)
+    existing_history = MHLHistory.load_from_path(root_path)
 
     # we collect all paths we expect to find first and remove every path that we actually found while
     # traversing the file system, so this set will at the end contain the file paths not found in the file system
@@ -107,7 +107,7 @@ def check(root_path, verbose):
 
     logger.verbose(f'check folder at path: {root_path}')
 
-    existing_history = history_fs_backend.parse_history(root_path)
+    existing_history = MHLHistory.load_from_path(root_path)
 
     if len(existing_history.hash_lists) == 0:
         raise logger.NoMHLHistoryException(root_path)

@@ -3,10 +3,11 @@
   xmlns="urn:ASC:MHL:v2.0" 
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
   xsi:schemaLocation="urn:ASC:MHL:v2.0 ASCMHL.xsd">
-    <creatorinfo>
+  <creatorinfo>
     <creationdate>2019-10-11T15:56:03+02:00</creationdate>
-    <tool version="0.0.3">ascmhl-tool</tool>
     <hostname>donkey.local</hostname>
+    <rootpath>/Users/ptr/Development/MediaHashList/mhl/Scenarios/Output/scenario_01/A002R2EC/</rootpath>
+    <tool version="0.0.3">ascmhl-tool</tool>
     <author email="foo@bar.foo.foo.com" phone="+1 234 567 890 88">Liz Foo</author>
     <author email="zed@bar.foo.foo.com" phone="+1 234 567 890 99">Ben Zed</author>
     <location>Munich, Germany</location>
@@ -20,29 +21,22 @@
     test
     <foo bar="1">lorem</foo>
   </metadata>
-  <hashes rootpath="/Users/ptr/Development/MediaHashList/mhl/Scenarios/Output/scenario_01/A002R2EC/">
+  <hashes >
     <hash>
-      <path>Clips/A002C006_141024_R2EC.mov</path>
-      <filesize>5</filesize>
-      <lastmodificationdate>2019-10-11T15:56:03+02:00</lastmodificationdate>
+      <path size="5" lastmodificationdate="2019-10-11T15:56:03+02:00">Clips/A002C006_141024_R2EC.mov</path>
       <xxh64 action="original">0ea03b369a463d9d</xxh64>
     </hash>
     <hash>
-      <path>Clips/A002C007_141024_R2EC.mov</path>
-      <filesize>4</filesize>
-      <lastmodificationdate>2019-10-11T15:56:03+02:00</lastmodificationdate>
+      <path size="5" lastmodificationdate="2019-10-11T15:56:03+02:00">Clips/A002C007_141024_R2EC.mov</path>
       <xxh64 action="original">7680e5f98f4a80fd</xxh64>
     </hash>
     <hash directory="true">
-      <path>Clips/</path>
-      <lastmodificationdate>2019-10-11T15:56:05+02:00</lastmodificationdate>
+      <path lastmodificationdate="2019-10-11T15:56:01+02:00">Clips/</path>
       <xxh64>7680e5f98f4a80fd</xxh64>
       <metadata>test2</metadata>
     </hash>
     <hash>
-      <path>Sidecar.txt</path>
-      <filesize>58</filesize>
-      <lastmodificationdate>2019-10-11T15:56:03+02:00</lastmodificationdate>
+      <path size="58" lastmodificationdate="2019-10-11T15:56:03+02:00">Sidecar.txt</path>
       <xxh64 action="failed">3ab5a4166b9bde44</xxh64>
       <xxh64 action="new">b9bde443ab5a4166</xxh64>
       <metadata bar="Foo" />

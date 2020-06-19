@@ -40,14 +40,15 @@ def parse(file_path):
                     current_object.creation_date = element.text
                 elif tag == 'tool':
                     current_object.tool = MHLTool(element.text, element.attrib['version'])
+                elif tag == 'rootpath':
+                    current_object.root_path = element.text
                 elif tag == 'creatorinfo':
                     hash_list.creator_info = current_object
                     current_object = None
             elif type(current_object) is MHLMediaHash:
                 if tag == 'path':
                     current_object.path = element.text
-                elif tag == 'filesize':
-                    current_object.filesize = element.text
+                    current_object.filesize = int(element.attrib['size'])
                 # TODO: parse date
                 # elif tag == 'lastmodificationdate':
                 # 	current_object.filesize = element.text
@@ -111,7 +112,7 @@ def write_hash_list(hash_list: MHLHashList, file_path: str):
     _write_xml_string_to_file(file, _creator_info_xml_string(hash_list.creator_info), '  ')
 
     # write hashes
-    hashes_tag = f'<hashes rootpath={quoteattr(os.path.dirname(os.path.dirname(file_path)))}>\n'
+    hashes_tag = '<hashes>\n'
     _write_xml_string_to_file(file, hashes_tag, current_indent)
     current_indent += '  '
 
@@ -146,9 +147,9 @@ def _media_hash_xml_string(media_hash) -> str:
     """builds and returns one <hash> element for a given MediaHash object"""
 
     hash_element = E.hash(
-        E.path(media_hash.path),
-        E.filesize(str(media_hash.filesize)),
-        E.lastmodificationdate(datetime_isostring(media_hash.last_modification_date)))
+        E.path(media_hash.path,
+               {'size': str(media_hash.filesize),
+                'lastmodificationdate': datetime_isostring(media_hash.last_modification_date)}))
 
     for hash_entry in media_hash.hash_entries:
         entry_element = E(hash_entry.hash_format)
@@ -175,8 +176,9 @@ def _creator_info_xml_string(creator_info) -> str:
 
     info_element = E.creatorinfo(
         E.creationdate(creator_info.creation_date),
-        E.tool(creator_info.tool.name, version=creator_info.tool.version),
         E.hostname(creator_info.host_name),
+        E.rootpath(creator_info.root_path),
+        E.tool(creator_info.tool.name, version=creator_info.tool.version),
         E.process(creator_info.process.process_type)
     )
     return etree.tostring(info_element, pretty_print=True, encoding="unicode")

@@ -2,26 +2,25 @@
 <hashlist version="2.0" xmlns="urn:ASC:MHL:v2.0">
   <creatorinfo>
     <creationdate>2020-01-17T14:30:00+00:00</creationdate>
-    <tool version="0.0.1">seal</tool>
     <hostname>myHost.local</hostname>
+    <rootpath>/file_server/Reels</rootpath>
+    <tool version="0.0.1">seal</tool>
     <process>in-place</process>
   </creatorinfo>
-  <hashes rootpath="/file_server/Reels">
+  <hashes>
     <hash>
-      <path>Summary.txt</path>
-      <filesize>48</filesize>
-      <lastmodificationdate>2020-01-17T14:30:00+00:00</lastmodificationdate>
+      <path size="48" lastmodificationdate="2020-01-17T14:30:00+00:00">Summary.txt</path>
       <xxh64 action="original">0ac48e431d4538ba</xxh64>
     </hash>
   </hashes>
   <references>
     <hashlistreference>
       <path>A002R2EC/ascmhl/A002R2EC_2020-01-17_143000_0002.mhl</path>
-      <c4>c4sP6XDeHPcfaEU11eLrY21gdSp49ujn3AYAeEZDSypkU3Lzj76Aa4zDpdiguaGLXjvZwa35DLeyhF6f6zhoZ5en81</c4>
+      <c4>c467JMtiYe164a5JAeXTXMTyNXGg93exVvvFMzsLonhWQUkGW8c3yuVKbfzeKWSYXhicHnhuR7ErooaEQ9qXKM6rHC</c4>
     </hashlistreference>
     <hashlistreference>
       <path>A003R2EC/ascmhl/A003R2EC_2020-01-17_143000_0002.mhl</path>
-      <c4>c45JZnRjAk1qrq3ACbJKdR6Cq1P1RgfcnT5DFNYpTEUdsCE8RLhAnuM315Ve5zZxFXvcjWucj19pyGFoiXUoWAzYnk</c4>
+      <c4>c42tsFPJxAxDn2m6MT62axhwLEcEujrPT7a6wXGRr3iqxaLfocpbpsNPLzxP8sDdavsGmSYMxF9zRJJypwrpXeFX6B</c4>
     </hashlistreference>
   </references>
 </hashlist>

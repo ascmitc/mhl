@@ -2,27 +2,22 @@
 <hashlist version="2.0" xmlns="urn:ASC:MHL:v2.0">
   <creatorinfo>
     <creationdate>2020-01-17T14:30:00+00:00</creationdate>
-    <tool version="0.0.1">seal</tool>
     <hostname>myHost.local</hostname>
+    <rootpath>/file_server/A002R2EC</rootpath>
+    <tool version="0.0.1">seal</tool>
     <process>in-place</process>
   </creatorinfo>
-  <hashes rootpath="/file_server/A002R2EC">
+  <hashes>
     <hash>
-      <path>Clips/A002C006_141024_R2EC.mov</path>
-      <filesize>5</filesize>
-      <lastmodificationdate>2020-01-15T13:00:00+00:00</lastmodificationdate>
+      <path size="5" lastmodificationdate="2020-01-15T13:00:00+00:00">Clips/A002C006_141024_R2EC.mov</path>
       <xxh64 action="verified">0ea03b369a463d9d</xxh64>
     </hash>
     <hash>
-      <path>Clips/A002C007_141024_R2EC.mov</path>
-      <filesize>4</filesize>
-      <lastmodificationdate>2020-01-15T13:00:00+00:00</lastmodificationdate>
+      <path size="4" lastmodificationdate="2020-01-15T13:00:00+00:00">Clips/A002C007_141024_R2EC.mov</path>
       <xxh64 action="verified">7680e5f98f4a80fd</xxh64>
     </hash>
     <hash>
-      <path>Sidecar.txt</path>
-      <filesize>60</filesize>
-      <lastmodificationdate>2020-01-17T14:30:00+00:00</lastmodificationdate>
+      <path size="60" lastmodificationdate="2020-01-17T14:30:00+00:00">Sidecar.txt</path>
       <xxh64 action="failed">70d2cf31aaa3eac4</xxh64>
     </hash>
   </hashes>

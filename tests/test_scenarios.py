@@ -167,7 +167,8 @@ def validate_all_mhl_files_against_xml_schema(folder_path: str):
     runner = CliRunner()
     for file in mhl_files:
         result = runner.invoke(mhl.commands.validate, file)
-        assert result.exit_code == 0
+        assert result.exit_code == 0, result.output
+
 
 def copy_fake_directory_to_real_fs(fake_dir: str, real_dir: str, fake_fs):
     """ Utility function to copy a directory in the fake file system recursively to the real file system """

@@ -27,11 +27,13 @@
     <complexType name="CreatorInfoType">
         <sequence>
             <element name="creationdate" type="dateTime" maxOccurs="1" minOccurs="1"/>
-            <element name="tool" type="ascmhl:ToolType" maxOccurs="1" minOccurs="1"/>
             <element name="hostname" type="string" maxOccurs="1" minOccurs="1"/>
+            <element name="rootpath" type="string"/>
+            <element name="tool" type="ascmhl:ToolType" maxOccurs="1" minOccurs="1"/>
             <element maxOccurs="unbounded" minOccurs="0" name="author" type="ascmhl:AuthorType"/>
-            <element minOccurs="0" name="location"/>
+            <element minOccurs="0" name="location" type="string"/>
             <element name="process" type="ascmhl:ProcessType" maxOccurs="1" minOccurs="1"/>
+            <element minOccurs="0" name="comment" type="string"/>
             <element name="ignore" type="ascmhl:IgnoreType" minOccurs="0"/>
         </sequence>
     </complexType>
@@ -82,13 +84,20 @@
         <sequence>
             <element name="hash" type="ascmhl:HashType" maxOccurs="unbounded" minOccurs="1"/>
         </sequence>
-        <attribute name="rootpath" type="string" use="required"/>
     </complexType>
     <complexType name="HashType">
         <sequence>
-            <element name="path" type="string"/>
-            <element name="filesize" type="int" minOccurs="0" nillable="false"/>
-            <element name="lastmodificationdate" type="dateTime"/>
+            <element name="path">
+                <complexType>
+                    <simpleContent>
+                        <extension base="string">
+                            <attribute name="size" type="integer"/>
+                            <attribute name="creationdate" type="dateTime"/>
+                            <attribute name="lastmodificationdate" type="dateTime"/>
+                        </extension>
+                    </simpleContent>
+                </complexType>
+            </element>
             <sequence maxOccurs="unbounded">
                 <element name="md5" type="ascmhl:HashFormatType" minOccurs="0"/>
                 <element name="sha1" type="ascmhl:HashFormatType" minOccurs="0"/>
@@ -105,6 +114,7 @@
         <simpleContent>
             <extension base="string">
                 <attribute name="action" type="ascmhl:ActionAttributeType"/>
+                <attribute name="hashdate" type="dateTime"/>
             </extension>
         </simpleContent>
     </complexType>

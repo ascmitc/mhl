@@ -28,7 +28,7 @@
         <sequence>
             <element name="creationdate" type="dateTime" maxOccurs="1" minOccurs="1"/>
             <element name="hostname" type="string" maxOccurs="1" minOccurs="1"/>
-            <element name="rootpath" type="string"/>
+            <element name="root" type="ascmhl:HashType"/>
             <element name="tool" type="ascmhl:ToolType" maxOccurs="1" minOccurs="1"/>
             <element maxOccurs="unbounded" minOccurs="0" name="author" type="ascmhl:AuthorType"/>
             <element minOccurs="0" name="location" type="string"/>
@@ -98,14 +98,14 @@
                     </simpleContent>
                 </complexType>
             </element>
-            <sequence maxOccurs="unbounded">
+            <choice maxOccurs="unbounded">
                 <element name="md5" type="ascmhl:HashFormatType" minOccurs="0"/>
                 <element name="sha1" type="ascmhl:HashFormatType" minOccurs="0"/>
                 <element name="c4" type="ascmhl:HashFormatType" minOccurs="0"/>
                 <element name="xxh32" type="ascmhl:HashFormatType" maxOccurs="1" minOccurs="0"/>
                 <element name="xxh64" type="ascmhl:HashFormatType" maxOccurs="1" minOccurs="0"/>
                 <element name="xxh3" type="ascmhl:HashFormatType" maxOccurs="1" minOccurs="0"/>
-            </sequence>
+            </choice>
             <element minOccurs="0" name="metadata" type="ascmhl:MetadataType"/>
         </sequence>
         <attribute name="directory" type="boolean"/>

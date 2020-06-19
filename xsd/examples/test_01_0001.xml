@@ -6,7 +6,10 @@
   <creatorinfo>
     <creationdate>2019-10-11T15:56:03+02:00</creationdate>
     <hostname>donkey.local</hostname>
-    <rootpath>/Users/ptr/Development/MediaHashList/mhl/Scenarios/Output/scenario_01/A002R2EC/</rootpath>
+    <root directory="true">
+      <path lastmodificationdate="2019-10-11T15:56:03+02:00">/Users/ptr/Development/MediaHashList/mhl/Scenarios/Output/scenario_01/A002R2EC/</path>
+      <c4>c44pdRyHLMvHsYbJnRpTrh5ohdWW6uVbm4mZx421aTN7y9MUKk74TqyshmTLgvnq2tcZex6khpxrYUq87Hczcmnyq3</c4>
+    </root>
     <tool version="0.0.3">ascmhl-tool</tool>
     <author email="foo@bar.foo.foo.com" phone="+1 234 567 890 88">Liz Foo</author>
     <author email="zed@bar.foo.foo.com" phone="+1 234 567 890 99">Ben Zed</author>
@@ -21,7 +24,7 @@
     test
     <foo bar="1">lorem</foo>
   </metadata>
-  <hashes >
+  <hashes>
     <hash>
       <path size="5" lastmodificationdate="2019-10-11T15:56:03+02:00">Clips/A002C006_141024_R2EC.mov</path>
       <xxh64 action="original">0ea03b369a463d9d</xxh64>
@@ -38,6 +41,7 @@
     <hash>
       <path size="58" lastmodificationdate="2019-10-11T15:56:03+02:00">Sidecar.txt</path>
       <xxh64 action="failed">3ab5a4166b9bde44</xxh64>
+      <md5 action="new">511229c7e44bdd8bcc06ad843b394374</md5>
       <xxh64 action="new">b9bde443ab5a4166</xxh64>
       <metadata bar="Foo" />
     </hash>

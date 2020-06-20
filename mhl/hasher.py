@@ -6,7 +6,7 @@ __license__ = "MIT"
 __maintainer__ = "Patrick Renner"
 __email__ = "opensource@pomfort.com"
 """
-
+import binascii
 import hashlib
 import xxhash
 
@@ -84,3 +84,25 @@ class C4HashContext:
 
         c4_string = "c4" + c4_string.ljust(c4id_length - 2, zero)
         return c4_string
+
+
+class DirectoryHashContext:
+
+    def __init__(self, hash_format: str):
+        self.hash_context = context_type_for_hash_format(hash_format)()
+        self.hash_format = hash_format
+
+    def append_hash(self, hash_string: str, item_name: str):
+        # print('append hash:', hash_string, 'item name: ', item_name)
+        # first we add the name of the item (file or directory) to the context
+        self.hash_context.update(item_name.encode('utf-8'))
+        # then we add the binary representation of the hash of the file or directory
+        # in case of C4 we can't easily use the binary value so we encode the hash string instead
+        if self.hash_format == 'c4':
+            hash_binary = hash_string.encode('utf-8')
+        else:
+            hash_binary = binascii.unhexlify(hash_string)
+        self.hash_context.update(hash_binary)
+
+    def final_hash_str(self):
+        return self.hash_context.hexdigest()

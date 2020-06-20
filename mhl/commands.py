@@ -14,7 +14,7 @@ import platform
 import click
 
 from .hashlist import MHLCreatorInfo, MHLTool, MHLProcess, MHLMediaHash
-from .hasher import create_filehash, context_type_for_hash_format
+from .hasher import create_filehash, DirectoryHashContext
 from .history import MHLHistory
 from . import logger
 from .generator import MHLGenerationCreationSession
@@ -59,7 +59,7 @@ def seal(root_path, verbose, hash_format, directory_hashes):
         # generate directory hashes
         dir_hash_context = None
         if directory_hashes:
-            dir_hash_context = context_type_for_hash_format(hash_format)()
+            dir_hash_context = DirectoryHashContext(hash_format)
         for item_name, is_dir in children:
             file_path = os.path.join(folder_path, item_name)
             if is_dir:
@@ -72,14 +72,9 @@ def seal(root_path, verbose, hash_format, directory_hashes):
                     num_failed_verifications += 1
                 not_found_paths.discard(file_path)
             if dir_hash_context:
-                # in case of C4 we can't easily use the binary value so we encode the hash string instead
-                if hash_format == 'c4':
-                    hash_binary = hash_string.encode('utf-8')
-                else:
-                    hash_binary = binascii.unhexlify(hash_string)
-                dir_hash_context.update(hash_binary)
+                dir_hash_context.append_hash(hash_string, item_name)
         if dir_hash_context:
-            dir_hash = dir_hash_context.hexdigest()
+            dir_hash = dir_hash_context.final_hash_str()
             dir_hash_mappings[folder_path] = dir_hash
             logger.verbose(f'dir hash of {folder_path}: {dir_hash}')
 
@@ -268,6 +263,8 @@ def seal_file_path(existing_history, file_path, hash_format, session) -> (str, b
     if len(existing_hash_formats) > 0 and hash_format not in existing_hash_formats:
         existing_hash_format = existing_hash_formats[0]
         hash_in_existing_format = create_filehash(existing_hash_format, file_path)
+        # FIXME: test what happens if the existing hash verification fails in other format fails
+        # should we then really create two entries
         success &= session.append_file_hash(file_path, file_size, file_modification_date,
                                             existing_hash_format, hash_in_existing_format)
     current_format_hash = create_filehash(hash_format, file_path)

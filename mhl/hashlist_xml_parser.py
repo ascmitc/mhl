@@ -25,6 +25,7 @@ def parse(file_path):
 
     hash_list = MHLHashList()
     hash_list.file_path = file_path
+    object_stack = []
     current_object = None
     supported_hash_formats = {'md5', 'sha1', 'c4', 'xxh32', 'xxh64', 'xxh3'}
     # use iterparse to prevent large memory usage when parsing large files
@@ -40,15 +41,14 @@ def parse(file_path):
                     current_object.creation_date = element.text
                 elif tag == 'tool':
                     current_object.tool = MHLTool(element.text, element.attrib['version'])
-                elif tag == 'rootpath':
-                    current_object.root_path = element.text
                 elif tag == 'creatorinfo':
                     hash_list.creator_info = current_object
                     current_object = None
             elif type(current_object) is MHLMediaHash:
                 if tag == 'path':
                     current_object.path = element.text
-                    current_object.filesize = int(element.attrib['size'])
+                    file_size = element.attrib.get('size')
+                    current_object.filesize = int(file_size) if file_size else None
                 # TODO: parse date
                 # elif tag == 'lastmodificationdate':
                 # 	current_object.filesize = element.text
@@ -58,6 +58,10 @@ def parse(file_path):
                 elif tag == 'hash':
                     hash_list.append_hash(current_object)
                     current_object = None
+                elif tag == 'root':
+                    root_media_hash = current_object
+                    current_object = object_stack.pop()
+                    current_object.root_media_hash = root_media_hash
             elif type(current_object) is MHLHashListReference:
                 if tag == 'path':
                     current_object.path = element.text
@@ -86,6 +90,13 @@ def parse(file_path):
                 current_object = MHLCreatorInfo()
             elif tag == 'hashlistreference':
                 current_object = MHLHashListReference()
+        elif type(current_object) is MHLCreatorInfo and event == 'start':
+            # remove namespace here again instead of outside of the if
+            # since we don't want to do it for tags we don't compare at all
+            tag = element.tag.split('}', 1)[-1]
+            if tag == 'root':
+                object_stack.append(current_object)
+                current_object = MHLMediaHash()
 
     logger.debug(f'parsing took: {timer() - start}')
 
@@ -109,7 +120,7 @@ def write_hash_list(hash_list: MHLHashList, file_path: str):
     current_indent = '  '
 
     # write creator info
-    _write_xml_string_to_file(file, _creator_info_xml_string(hash_list.creator_info), '  ')
+    _write_xml_element_to_file(file, _creator_info_xml_element(hash_list.creator_info), '  ')
 
     # write hashes
     hashes_tag = '<hashes>\n'
@@ -117,7 +128,7 @@ def write_hash_list(hash_list: MHLHashList, file_path: str):
     current_indent += '  '
 
     for media_hash in hash_list.media_hashes:
-        _write_xml_string_to_file(file, _media_hash_xml_string(media_hash), current_indent)
+        _write_xml_element_to_file(file, _media_hash_xml_element(media_hash), current_indent)
 
     current_indent = current_indent[:-2]
     _write_xml_string_to_file(file, '</hashes>\n', current_indent)
@@ -127,7 +138,7 @@ def write_hash_list(hash_list: MHLHashList, file_path: str):
         _write_xml_string_to_file(file, '<references>\n', current_indent)
         current_indent += '  '
         for ref_hash_list in hash_list.referenced_hash_lists:
-            _write_xml_string_to_file(file, _ascmhlreference_xml_string(ref_hash_list, file_path), current_indent)
+            _write_xml_element_to_file(file, _ascmhlreference_xml_element(ref_hash_list, file_path), current_indent)
         current_indent = current_indent[:-2]
         _write_xml_string_to_file(file, '</references>\n', current_indent)
 
@@ -138,18 +149,26 @@ def write_hash_list(hash_list: MHLHashList, file_path: str):
     hash_list.file_path = file_path
 
 
+def _write_xml_element_to_file(file, xml_element, indent: str):
+    xml_string = etree.tostring(xml_element, pretty_print=True, encoding="unicode")
+    _write_xml_string_to_file(file, xml_string, indent)
+
+
 def _write_xml_string_to_file(file, xml_string: str, indent: str):
     result = textwrap.indent(xml_string, indent)
     file.write(result.encode('utf-8'))
 
 
-def _media_hash_xml_string(media_hash) -> str:
+def _media_hash_xml_element(media_hash):
     """builds and returns one <hash> element for a given MediaHash object"""
 
-    hash_element = E.hash(
-        E.path(media_hash.path,
-               {'size': str(media_hash.filesize),
-                'lastmodificationdate': datetime_isostring(media_hash.last_modification_date)}))
+    path_element = E.path(media_hash.path)
+    if media_hash.filesize:
+        path_element.attrib['size'] = str(media_hash.filesize)
+    if media_hash.last_modification_date:
+        path_element.attrib['lastmodificationdate'] = datetime_isostring(media_hash.last_modification_date)
+
+    hash_element = E.hash(path_element)
 
     for hash_entry in media_hash.hash_entries:
         entry_element = E(hash_entry.hash_format)
@@ -157,10 +176,10 @@ def _media_hash_xml_string(media_hash) -> str:
         entry_element.attrib['action'] = hash_entry.action
         hash_element.append(entry_element)
 
-    return etree.tostring(hash_element, pretty_print=True, encoding="unicode")
+    return hash_element
 
 
-def _ascmhlreference_xml_string(hash_list: MHLHashList, file_path: str) -> str:
+def _ascmhlreference_xml_element(hash_list: MHLHashList, file_path: str):
     """builds and returns one <hashlistreference> element for a given HashList object"""
 
     root_path = os.path.dirname(os.path.dirname(file_path))
@@ -168,17 +187,22 @@ def _ascmhlreference_xml_string(hash_list: MHLHashList, file_path: str) -> str:
         E.path(os.path.relpath(hash_list.file_path, root_path)),
         E.c4(hash_list.generate_reference_hash()))
 
-    return etree.tostring(hash_element, pretty_print=True, encoding="unicode")
+    return hash_element
 
 
-def _creator_info_xml_string(creator_info) -> str:
+def _creator_info_xml_element(creator_info: MHLCreatorInfo):
     """builds and returns one <creatorinfo> element for a given creator info instance"""
 
     info_element = E.creatorinfo(
         E.creationdate(creator_info.creation_date),
         E.hostname(creator_info.host_name),
-        E.rootpath(creator_info.root_path),
+        _root_media_hash_xml_element(creator_info.root_media_hash),
         E.tool(creator_info.tool.name, version=creator_info.tool.version),
         E.process(creator_info.process.process_type)
     )
-    return etree.tostring(info_element, pretty_print=True, encoding="unicode")
+    return info_element
+
+def _root_media_hash_xml_element(root_media_hash: MHLMediaHash):
+    element = _media_hash_xml_element(root_media_hash)
+    element.tag = 'root'
+    return element

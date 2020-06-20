@@ -3,7 +3,9 @@
   <creatorinfo>
     <creationdate>2020-01-17T14:30:00+00:00</creationdate>
     <hostname>myHost.local</hostname>
-    <rootpath>/file_server/Reels</rootpath>
+    <root>
+      <path>/file_server/Reels</path>
+    </root>
     <tool version="0.0.1">seal</tool>
     <process>in-place</process>
   </creatorinfo>
@@ -16,11 +18,11 @@
   <references>
     <hashlistreference>
       <path>A002R2EC/ascmhl/A002R2EC_2020-01-17_143000_0002.mhl</path>
-      <c4>c467JMtiYe164a5JAeXTXMTyNXGg93exVvvFMzsLonhWQUkGW8c3yuVKbfzeKWSYXhicHnhuR7ErooaEQ9qXKM6rHC</c4>
+      <c4>c42ZxYn4YEg4tEoausJoAMnfQZrkL8Y2Ha1Q61yBkMPvCdh14hFtZ61zmzKSi5PyBpVgwdrjE1jCQvL6giFU39LFcf</c4>
     </hashlistreference>
     <hashlistreference>
       <path>A003R2EC/ascmhl/A003R2EC_2020-01-17_143000_0002.mhl</path>
-      <c4>c42tsFPJxAxDn2m6MT62axhwLEcEujrPT7a6wXGRr3iqxaLfocpbpsNPLzxP8sDdavsGmSYMxF9zRJJypwrpXeFX6B</c4>
+      <c4>c43WvuzGXeENhCbnTZtEuD1kJTAoMYYe2aoXXNC4HRWKw9Tet8mejF6exhNgEe5nks4zwz14wymGbyFYQvGJ2CV7Q7</c4>
     </hashlistreference>
   </references>
 </hashlist>

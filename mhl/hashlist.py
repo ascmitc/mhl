@@ -204,7 +204,7 @@ class MHLCreatorInfo:
     Stores the creator info that is part of the header of each hash list file
     """
     host_name: Optional[str]
-    root_path: Optional[str]
+    root_media_hash: Optional[MHLMediaHash]
     tool: Optional[MHLTool]
     creation_date: Optional[datetime]
     process: Optional[MHLProcess]
@@ -215,15 +215,16 @@ class MHLCreatorInfo:
         self.tool = None
         self.creation_date = None
         self.process = None
-        self.root_path = None
+        self.root_media_hash = None
         self.authors = []
 
     def log(self):
-        logger.info("     host_name: {0}".format(self.host_name))
-        logger.info("     root_path: {0}".format(self.root_path))
-        logger.info("          tool: {0} {1}".format(self.tool.name, self.tool.version))
-        logger.info(" creation_date: {0}".format(self.creation_date))
-        logger.info("       process: {0}".format(self.process))
+        logger.info("      host_name: {0}".format(self.host_name))
+        logger.info("           tool: {0} {1}".format(self.tool.name, self.tool.version))
+        logger.info("  creation_date: {0}".format(self.creation_date))
+        logger.info("        process: {0}".format(self.process))
+        logger.info('root_media_hash:')
+        self.root_media_hash.log()
 
 
 class MHLTool:

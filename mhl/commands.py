@@ -13,7 +13,7 @@ import os
 import platform
 import click
 
-from .hashlist import MHLCreatorInfo, MHLTool, MHLProcess
+from .hashlist import MHLCreatorInfo, MHLTool, MHLProcess, MHLMediaHash
 from .hasher import create_filehash, context_type_for_hash_format
 from .history import MHLHistory
 from . import logger
@@ -245,8 +245,10 @@ def test_for_missing_files(not_found_paths):
 
 
 def commit_session(session):
+    root_media_hash = MHLMediaHash()
+    root_media_hash.path = session.root_history.get_root_path()
     creator_info = MHLCreatorInfo()
-    creator_info.root_path = session.root_history.get_root_path()
+    creator_info.root_media_hash = root_media_hash
     creator_info.tool = MHLTool('seal', '0.0.1')
     creator_info.creation_date = utils.datetime_now_isostring()
     creator_info.host_name = platform.node()

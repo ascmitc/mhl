@@ -3,7 +3,9 @@
   <creatorinfo>
     <creationdate>2020-01-17T14:30:00+00:00</creationdate>
     <hostname>myHost.local</hostname>
-    <rootpath>/file_server/Reels</rootpath>
+    <root>
+      <path>/file_server/Reels</path>
+    </root>
     <tool version="0.0.1">seal</tool>
     <process>in-place</process>
   </creatorinfo>

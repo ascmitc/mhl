@@ -3,8 +3,9 @@
   <creatorinfo>
     <creationdate>2020-01-17T14:30:00+00:00</creationdate>
     <hostname>myHost.local</hostname>
-    <root>
-      <path>/file_server/A002R2EC</path>
+    <root directory="true">
+      <path lastmodificationdate="2020-01-15T13:00:00+00:00">/file_server/A002R2EC</path>
+      <xxh64>d22ad81d5ef6dfd5</xxh64>
     </root>
     <tool version="0.0.1">seal</tool>
     <process>in-place</process>
@@ -17,6 +18,10 @@
     <hash>
       <path size="4" lastmodificationdate="2020-01-15T13:00:00+00:00">Clips/A002C007_141024_R2EC.mov</path>
       <xxh64 action="verified">7680e5f98f4a80fd</xxh64>
+    </hash>
+    <hash directory="true">
+      <path lastmodificationdate="2020-01-15T13:00:00+00:00">Clips</path>
+      <xxh64>2d51faa2b1834454</xxh64>
     </hash>
     <hash>
       <path size="58" lastmodificationdate="2020-01-15T13:00:00+00:00">Sidecar.txt</path>

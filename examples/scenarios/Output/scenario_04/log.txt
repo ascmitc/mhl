@@ -10,7 +10,9 @@ $ ascmhl.py seal ['-v', '/travel_01/A002R2EC']
 seal folder at path: /travel_01/A002R2EC
 created original hash for /travel_01/A002R2EC/Clips/A002C006_141024_R2EC.mov xxh64: 0ea03b369a463d9d
 created original hash for /travel_01/A002R2EC/Clips/A002C007_141024_R2EC.mov xxh64: 7680e5f98f4a80fd
+created directory hash for /travel_01/A002R2EC/Clips xxh64: 2d51faa2b1834454
 created original hash for /travel_01/A002R2EC/Sidecar.txt xxh64: 3ab5a4166b9bde44
+created directory hash for /travel_01/A002R2EC xxh64: d22ad81d5ef6dfd5
 writing "A002R2EC_2020-01-16_091500_0001.mhl"...
 
 
@@ -29,7 +31,9 @@ $ ascmhl.py seal ['-v', '/file_server/A002R2EC']
 seal folder at path: /file_server/A002R2EC
 verification of file /file_server/A002R2EC/Clips/A002C006_141024_R2EC.mov: OK
 verification of file /file_server/A002R2EC/Clips/A002C007_141024_R2EC.mov: OK
+created directory hash for /file_server/A002R2EC/Clips xxh64: 2d51faa2b1834454
 hash mismatch for /file_server/A002R2EC/Sidecar.txt old xxh64: 3ab5a4166b9bde44, new xxh64: 70d2cf31aaa3eac4
+created directory hash for /file_server/A002R2EC xxh64: 1a32e7e9a703af52
 writing "A002R2EC_2020-01-17_143000_0002.mhl"...
 Error: Verification of files referenced in the mhl history failed
 

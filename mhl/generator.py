@@ -7,6 +7,7 @@ __maintainer__ = "Patrick Renner, Alexander Sahm"
 __email__ = "opensource@pomfort.com"
 """
 
+import os
 from collections import defaultdict
 from typing import Dict, List
 from . import logger
@@ -69,20 +70,45 @@ class MHLGenerationCreationSession:
 
         # in case the same file is hashes multiple times we want to add all hash entries
         new_hash_list = self.new_hash_lists[history]
-        existing_media_hash = new_hash_list.find_media_hash_for_path(history_relative_path)
-        if existing_media_hash is not None:
-            media_hash = existing_media_hash
-        else:
-            media_hash = MHLMediaHash()
-            media_hash.path = history_relative_path
-            media_hash.filesize = file_size
-            media_hash.last_modification_date = file_modification_date
-
+        media_hash = new_hash_list.find_or_create_media_hash_for_path(history_relative_path,
+                                                                      file_size,
+                                                                      file_modification_date)
         media_hash.append_hash_entry(hash_entry)
-        # only add the media hash if it's not already in the hash_list
-        if existing_media_hash != media_hash:
-            new_hash_list.append_hash(media_hash)
         return hash_entry.action is not 'failed'
+
+    def append_directory_hash(self, path, modification_date, hash_format, hash_string) -> None:
+
+        relative_path = self.root_history.get_relative_file_path(path)
+        # TODO: handle if path is outside of history root path
+
+        history, history_relative_path = self.root_history.find_history_for_path(relative_path)
+
+        # in case the same file is hashes multiple times we want to add all hash entries
+        new_hash_list = self.new_hash_lists[history]
+        media_hash = new_hash_list.find_or_create_media_hash_for_path(history_relative_path,
+                                                                      None,
+                                                                      modification_date)
+        media_hash.is_directory = True
+
+        if hash_string:
+            media_hash.append_hash_entry(MHLHashEntry(hash_format, hash_string))
+            logger.verbose(f'created directory hash for {path} {hash_format}: {hash_string}')
+        else:
+            logger.verbose(f'added directory entry for {path}')
+
+        # in case we just created the root media hash of the current hash list we also add it one history level above
+        if new_hash_list.root_media_hash is media_hash and history.parent_history:
+            parent_history = history.parent_history
+            parent_relative_path = parent_history.get_relative_file_path(path)
+            parent_hash_list = self.new_hash_lists[parent_history]
+            parent_media_hash = parent_hash_list.find_or_create_media_hash_for_path(parent_relative_path,
+                                                                                    None,
+                                                                                    modification_date)
+            parent_media_hash.is_directory = True
+            if hash_string:
+                parent_media_hash.append_hash_entry(MHLHashEntry(hash_format, hash_string))
+
+
 
     def commit(self, creator_info: MHLCreatorInfo):
         """

@@ -132,7 +132,7 @@ class MHLHistory:
     def find_history_for_path(self, relative_path: str) -> Tuple[MHLHistory, str]:
         if len(self.child_histories) == 0:
             return self, relative_path
-        dir_path = os.path.dirname(relative_path)
+        dir_path = relative_path
         # shorten the path until we find a mapping otherwise there is no child history that should handle the path
         while len(dir_path) > 0:
             if dir_path in self.child_history_mappings:

@@ -53,15 +53,18 @@ def parse(file_path):
                 # elif tag == 'lastmodificationdate':
                 # 	current_object.filesize = element.text
                 elif tag in supported_hash_formats:
-                    entry = MHLHashEntry(tag, element.text, element.attrib['action'])
+                    entry = MHLHashEntry(tag, element.text, element.attrib.get('action'))
                     current_object.append_hash_entry(entry)
                 elif tag == 'hash':
+                    if element.attrib.get('directory') == 'true':
+                        current_object.is_directory = True
                     hash_list.append_hash(current_object)
                     current_object = None
                 elif tag == 'root':
                     root_media_hash = current_object
+                    root_media_hash.is_directory = True
                     current_object = object_stack.pop()
-                    current_object.root_media_hash = root_media_hash
+                    hash_list.root_media_hash = root_media_hash
             elif type(current_object) is MHLHashListReference:
                 if tag == 'path':
                     current_object.path = element.text
@@ -119,8 +122,10 @@ def write_hash_list(hash_list: MHLHashList, file_path: str):
     file.write(b'<?xml version="1.0" encoding="UTF-8"?>\n<hashlist version="2.0" xmlns="urn:ASC:MHL:v2.0">\n')
     current_indent = '  '
 
+    # set the file name early so we can use it to e.g. get the root path
+    hash_list.file_path = file_path
     # write creator info
-    _write_xml_element_to_file(file, _creator_info_xml_element(hash_list.creator_info), '  ')
+    _write_xml_element_to_file(file, _creator_info_xml_element(hash_list), '  ')
 
     # write hashes
     hashes_tag = '<hashes>\n'
@@ -146,8 +151,6 @@ def write_hash_list(hash_list: MHLHashList, file_path: str):
     _write_xml_string_to_file(file, '</hashlist>\n', current_indent)
     file.flush()
 
-    hash_list.file_path = file_path
-
 
 def _write_xml_element_to_file(file, xml_element, indent: str):
     xml_string = etree.tostring(xml_element, pretty_print=True, encoding="unicode")
@@ -169,11 +172,14 @@ def _media_hash_xml_element(media_hash):
         path_element.attrib['lastmodificationdate'] = datetime_isostring(media_hash.last_modification_date)
 
     hash_element = E.hash(path_element)
+    if media_hash.is_directory:
+        hash_element.attrib['directory'] = 'true'
 
     for hash_entry in media_hash.hash_entries:
         entry_element = E(hash_entry.hash_format)
         entry_element.text = hash_entry.hash_string
-        entry_element.attrib['action'] = hash_entry.action
+        if hash_entry.action:
+            entry_element.attrib['action'] = hash_entry.action
         hash_element.append(entry_element)
 
     return hash_element
@@ -190,13 +196,19 @@ def _ascmhlreference_xml_element(hash_list: MHLHashList, file_path: str):
     return hash_element
 
 
-def _creator_info_xml_element(creator_info: MHLCreatorInfo):
+def _creator_info_xml_element(hash_list: MHLHashList):
     """builds and returns one <creatorinfo> element for a given creator info instance"""
+    creator_info = hash_list.creator_info
+    # create empty root hash if directory hashes are disabled or use the generated one from the hash list
+    root_hash = hash_list.root_media_hash
+    if not root_hash:
+        root_hash = MHLMediaHash()
+    root_hash.path = hash_list.get_root_path()
 
     info_element = E.creatorinfo(
         E.creationdate(creator_info.creation_date),
         E.hostname(creator_info.host_name),
-        _root_media_hash_xml_element(creator_info.root_media_hash),
+        _root_media_hash_xml_element(root_hash),
         E.tool(creator_info.tool.name, version=creator_info.tool.version),
         E.process(creator_info.process.process_type)
     )

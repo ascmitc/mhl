@@ -49,6 +49,7 @@ class MHLHashList:
     hash_list_references = List['MHLHashListReference']
     file_path: Optional[str]
     generation_number: Optional[int]
+    root_media_hash: Optional[MHLMediaHash]
 
     def __init__(self):
         self.creator_info = None
@@ -58,10 +59,22 @@ class MHLHashList:
         self.referenced_hash_lists = []
         self.hash_list_references = []
         self.media_hashes_path_map = {}
+        self.root_media_hash = None
 
     # methods to query for hashes
     def find_media_hash_for_path(self, relative_path):
         return self.media_hashes_path_map.get(relative_path)
+
+    def find_or_create_media_hash_for_path(self, relative_path, file_size, file_modification_date):
+        media_hash = self.find_media_hash_for_path(relative_path)
+        if not media_hash:
+            media_hash = MHLMediaHash()
+            media_hash.path = relative_path
+            media_hash.filesize = file_size
+            media_hash.last_modification_date = file_modification_date
+            self.append_hash(media_hash)
+        return media_hash
+
 
     def set_of_file_paths(self, root_path) -> Set[str]:
         all_paths = set()
@@ -72,12 +85,18 @@ class MHLHashList:
     def get_file_name(self):
         return os.path.basename(self.file_path)
 
+    def get_root_path(self):
+        return os.path.dirname(os.path.dirname(self.file_path))
+
     def generate_reference_hash(self):
         return create_filehash(ascmhl_reference_hash_format, self.file_path)
 
     # build
     def append_hash(self, media_hash: MHLMediaHash):
-        self.media_hashes.append(media_hash)
+        if media_hash.path == '.':
+            self.root_media_hash = media_hash
+        else:
+            self.media_hashes.append(media_hash)
         self.media_hashes_path_map[media_hash.path] = media_hash
 
     def append_hash_list_reference(self, reference: MHLHashListReference):
@@ -119,6 +138,7 @@ class MHLMediaHash:
     path: Optional[str]
     filesize: Optional[int]
     last_modification_date: Optional[datetime]
+    is_directory: bool
 
     # init
     def __init__(self):
@@ -126,6 +146,7 @@ class MHLMediaHash:
         self.path = None
         self.filesize = None
         self.last_modification_date = None
+        self.is_directory = False
 
     # methods to query for hashes
     def find_hash_entry_for_format(self, hash_format):
@@ -154,7 +175,7 @@ class MHLMediaHash:
             indicator = " "
             if hash_entry.action == 'failed':
                 indicator = "!"
-            elif hash_entry.action == 'directory':
+            elif self.is_directory:
                 indicator = "d"
             hash_action = (hash_entry.action if hash_entry.action is not None else "").ljust(10)
             logger.info("{0} {1}: {2} {3}: {4}".format(indicator,
@@ -204,7 +225,6 @@ class MHLCreatorInfo:
     Stores the creator info that is part of the header of each hash list file
     """
     host_name: Optional[str]
-    root_media_hash: Optional[MHLMediaHash]
     tool: Optional[MHLTool]
     creation_date: Optional[datetime]
     process: Optional[MHLProcess]
@@ -215,7 +235,6 @@ class MHLCreatorInfo:
         self.tool = None
         self.creation_date = None
         self.process = None
-        self.root_media_hash = None
         self.authors = []
 
     def log(self):
@@ -223,8 +242,6 @@ class MHLCreatorInfo:
         logger.info("           tool: {0} {1}".format(self.tool.name, self.tool.version))
         logger.info("  creation_date: {0}".format(self.creation_date))
         logger.info("        process: {0}".format(self.process))
-        logger.info('root_media_hash:')
-        self.root_media_hash.log()
 
 
 class MHLTool:

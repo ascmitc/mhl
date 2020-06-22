@@ -73,7 +73,7 @@ def test_child_history_verify(fs, nested_mhl_histories):
     """
 
     runner = CliRunner()
-    result = runner.invoke(mhl.commands.seal, ['/root'])
+    result = runner.invoke(mhl.commands.seal, ['/root'], catch_exceptions=False)
     assert result.exit_code == 0
 
     assert os.path.isfile('/root/ascmhl/root_2020-01-16_091500_0002.mhl')
@@ -84,26 +84,42 @@ def test_child_history_verify(fs, nested_mhl_histories):
     root_history = MHLHistory.load_from_path('/root')
     assert len(root_history.hash_lists) == 2
 
-    assert root_history.hash_lists[1].media_hashes[0].path == 'A/AB/AB1.txt'
-    assert root_history.hash_lists[1].media_hashes[0].hash_entries[0].action == 'original'
-    assert root_history.hash_lists[1].media_hashes[1].path == 'Stuff.txt'
-    assert root_history.hash_lists[1].media_hashes[1].hash_entries[0].action == 'verified'
+    assert root_history.hash_lists[1].media_hashes[1].path == 'A/AB/AB1.txt'
+    assert root_history.hash_lists[1].media_hashes[1].hash_entries[0].action == 'original'
+    assert root_history.hash_lists[1].media_hashes[5].path == 'Stuff.txt'
+    assert root_history.hash_lists[1].media_hashes[5].hash_entries[0].action == 'verified'
 
     aa_history = root_history.child_histories[0]
     b_history = root_history.child_histories[1]
     bb_history = root_history.child_histories[1].child_histories[0]
+    root_hash_list = root_history.hash_lists[-1]
+    aa_hash_list = aa_history.hash_lists[-1]
+    b_hash_list = b_history.hash_lists[-1]
+    bb_hash_list = bb_history.hash_lists[-1]
 
     assert aa_history.latest_generation_number() == 2
-    assert b_history.hash_lists[1].media_hashes[0].path == 'BA/BA1.txt'
-    assert b_history.hash_lists[1].media_hashes[1].path == 'B1.txt'
-    assert b_history.hash_lists[1].media_hashes[0].hash_entries[0].action == 'original'
-    assert b_history.hash_lists[1].media_hashes[1].hash_entries[0].action == 'verified'
+    assert b_hash_list.media_hashes[0].path == 'BA/BA1.txt'
+    assert b_hash_list.media_hashes[3].path == 'B1.txt'
+    assert b_hash_list.media_hashes[0].hash_entries[0].action == 'original'
+    assert b_hash_list.media_hashes[3].hash_entries[0].action == 'verified'
 
     # check that the mhl references are correct
-    assert root_history.hash_lists[1].referenced_hash_lists[0] == aa_history.hash_lists[1]
-    assert root_history.hash_lists[1].referenced_hash_lists[1] == b_history.hash_lists[1]
-    assert b_history.hash_lists[1].referenced_hash_lists[0] == bb_history.hash_lists[1]
-    assert len(aa_history.hash_lists[1].referenced_hash_lists) == 0
+    assert root_history.hash_lists[1].referenced_hash_lists[0] == aa_hash_list
+    assert root_history.hash_lists[1].referenced_hash_lists[1] == b_hash_list
+    assert b_hash_list.referenced_hash_lists[0] == bb_hash_list
+    assert len(aa_hash_list.referenced_hash_lists) == 0
+
+    # the media hashes of the directories that contain a history themselves should be both in the child history
+    # as root media hash and in the parent history to represent the directory that contains the child history
+    aa_dir_hash = root_hash_list.find_media_hash_for_path('A/AA').hash_entries[0].hash_string
+    assert aa_dir_hash
+    assert aa_hash_list.root_media_hash.hash_entries[0].hash_string == aa_dir_hash
+    # the dir hash of BB is in the history of B not in the root history
+    assert root_hash_list.find_media_hash_for_path('B/BB') is None
+    bb_dir_hash = b_hash_list.find_media_hash_for_path('BB').hash_entries[0].hash_string
+    assert bb_hash_list.root_media_hash.hash_entries[0].hash_string == bb_dir_hash
+    # but the dir hash of B is also in the root history
+    assert root_hash_list.find_media_hash_for_path('B')
 
 
 @freeze_time("2020-01-16 09:15:00")

@@ -28,7 +28,8 @@ from lxml import etree
 @click.command()
 @click.argument('root_path', type=click.Path(exists=True))
 @click.option('--verbose', '-v', default=False, is_flag=True, help="Verbose output")
-@click.option('--directory_hashes', '-d', default=False, is_flag=True, help="Create directory hashes")
+@click.option('--directory_hashes', '-d', default=True, is_flag=True,
+              help="Skip creation of directory hashes, only reference directories without hash")
 @click.option('--hash_format', '-h', type=click.Choice(ascmhl_supported_hashformats), multiple=False,
               default='xxh64', help="Algorithm")
 def seal(root_path, verbose, hash_format, directory_hashes):
@@ -62,6 +63,7 @@ def seal(root_path, verbose, hash_format, directory_hashes):
             dir_hash_context = DirectoryHashContext(hash_format)
         for item_name, is_dir in children:
             file_path = os.path.join(folder_path, item_name)
+            not_found_paths.discard(file_path)
             if is_dir:
                 if not dir_hash_context:
                     continue
@@ -70,20 +72,23 @@ def seal(root_path, verbose, hash_format, directory_hashes):
                 hash_string, success = seal_file_path(existing_history, file_path, hash_format, session)
                 if not success:
                     num_failed_verifications += 1
-                not_found_paths.discard(file_path)
             if dir_hash_context:
                 dir_hash_context.append_hash(hash_string, item_name)
+        dir_hash = None
         if dir_hash_context:
             dir_hash = dir_hash_context.final_hash_str()
             dir_hash_mappings[folder_path] = dir_hash
-            logger.verbose(f'dir hash of {folder_path}: {dir_hash}')
+        modification_date = datetime.datetime.fromtimestamp(os.path.getmtime(folder_path))
+        session.append_directory_hash(folder_path, modification_date, hash_format, dir_hash)
 
     commit_session(session)
 
+    exception = test_for_missing_files(not_found_paths)
     if num_failed_verifications > 0:
-        raise logger.VerificationFailedException()
+        exception = logger.VerificationFailedException()
 
-    test_for_missing_files(not_found_paths)
+    if exception:
+        raise exception
 
 
 @click.command()
@@ -116,11 +121,12 @@ def check(root_path, verbose):
     for folder_path, children in post_order_lexicographic(root_path):
         for item_name, is_dir in children:
             file_path = os.path.join(folder_path, item_name)
-            if is_dir:
-                continue
-
+            not_found_paths.discard(file_path)
             relative_path = existing_history.get_relative_file_path(file_path)
             history, history_relative_path = existing_history.find_history_for_path(relative_path)
+            if is_dir:
+                # TODO: find new directories here
+                continue
 
             # check if there is an existing hash in the other generations and verify
             original_hash_entry = history.find_original_hash_entry_for_path(history_relative_path)
@@ -141,15 +147,14 @@ def check(root_path, verbose):
                              f'new {original_hash_entry.hash_format}: {current_hash}')
                 num_failed_verifications += 1
 
-            not_found_paths.discard(file_path)
-
-    if num_failed_verifications > 0:
-        raise logger.VerificationFailedException()
-
-    test_for_missing_files(not_found_paths)
-
+    exception = test_for_missing_files(not_found_paths)
     if num_new_files > 0:
-        raise logger.NewFilesFoundException()
+        exception = logger.NewFilesFoundException()
+    if num_failed_verifications > 0:
+        exception = logger.VerificationFailedException()
+
+    if exception:
+        raise exception
 
 
 @click.command()
@@ -232,18 +237,16 @@ def validate(file_path):
 
 
 def test_for_missing_files(not_found_paths):
-    if len(not_found_paths) > 0:
-        logger.error(f"{len(not_found_paths)} missing files: ")
-        for path in not_found_paths:
-            logger.error(f"  {path}")
-        raise logger.CompletenessCheckFailedException()
+    if len(not_found_paths) == 0:
+        return None
+    logger.error(f"{len(not_found_paths)} missing files:")
+    for path in not_found_paths:
+        logger.error(f"  {path}")
+    return logger.CompletenessCheckFailedException()
 
 
 def commit_session(session):
-    root_media_hash = MHLMediaHash()
-    root_media_hash.path = session.root_history.get_root_path()
     creator_info = MHLCreatorInfo()
-    creator_info.root_media_hash = root_media_hash
     creator_info.tool = MHLTool('seal', '0.0.1')
     creator_info.creation_date = utils.datetime_now_isostring()
     creator_info.host_name = platform.node()

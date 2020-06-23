@@ -236,6 +236,45 @@ def validate(file_path):
         raise logger.VerificationFailedException
 
 
+@click.command()
+@click.argument('root_path', type=click.Path(exists=True))
+@click.option('--verbose', '-v', default=False, is_flag=True, help="Print all directory hashes of sub directories")
+@click.option('--hash_format', '-h', type=click.Choice(ascmhl_supported_hashformats), multiple=False,
+              default='xxh64', help="Algorithm")
+def directory_hash(root_path, verbose, hash_format):
+    """
+    Creates the root directory hash of a given folder.
+
+    \b
+    ROOT_PATH: the root path to calculate the directory hash for
+
+    Hashes all the files in the given hash format and calculates the according directory hashes
+    """
+
+    if not os.path.isabs(root_path):
+        root_path = os.path.join(os.getcwd(), root_path)
+
+    # store the directory hashes of sub folders so we can use it when calculating the hash of the parent folder
+    dir_hash_mappings = {}
+    for folder_path, children in post_order_lexicographic(root_path):
+        dir_hash_context = DirectoryHashContext(hash_format)
+        for item_name, is_dir in children:
+            item_path = os.path.join(folder_path, item_name)
+            if is_dir:
+                if not dir_hash_context:
+                    continue
+                hash_string = dir_hash_mappings.pop(item_path)
+            else:
+                hash_string = create_filehash(hash_format, item_path)
+            dir_hash_context.append_hash(hash_string, item_name)
+        dir_hash = dir_hash_context.final_hash_str()
+        dir_hash_mappings[folder_path] = dir_hash
+        if folder_path == root_path:
+            logger.info(f'root hash: {hash_format}: {dir_hash}')
+        elif verbose:
+            logger.info(f'directory hash for: {folder_path} {hash_format}: {dir_hash}')
+
+
 def test_for_missing_files(not_found_paths):
     if len(not_found_paths) == 0:
         return None

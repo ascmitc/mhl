@@ -37,8 +37,7 @@ def test_seal_directory_hashes(fs):
     fs.create_file('/root/Stuff.txt', contents='stuff\n')
     fs.create_file('/root/A/A1.txt', contents='A1\n')
 
-    runner = CliRunner()
-    result = runner.invoke(mhl.commands.seal, ['/root', '-v'], catch_exceptions=False)
+    result = CliRunner().invoke(mhl.commands.seal, ['/root', '-v'])
     assert result.exit_code == 0
 
     # a directory hash for the folder A was created
@@ -47,6 +46,12 @@ def test_seal_directory_hashes(fs):
     assert hash_list.find_media_hash_for_path('A').hash_entries[0].hash_string == 'ee2c3b94b6eecb8d'
     # and the directory hash of the root folder is set in the header
     assert hash_list.root_media_hash.hash_entries[0].hash_string == '15ef0ade91fff267'
+
+    # test that the directory-hash command creates the same directory hashes
+    result = CliRunner().invoke(mhl.commands.directory_hash, ['/root', '-v'])
+    assert result.exit_code == 0
+    assert 'directory hash for: /root/A xxh64: ee2c3b94b6eecb8d' in result.output
+    assert 'root hash: xxh64: 15ef0ade91fff267' in result.output
 
     # add some more files and folders
     fs.create_file('/root/B/B1.txt', contents='B1\n')
@@ -73,6 +78,11 @@ def test_seal_directory_hashes(fs):
     # has a different directory hash
     assert hash_list.find_media_hash_for_path('emptyFolderC').hash_entries[0].hash_string == '877071123901a4db'
 
+    # test that the directory-hash command creates the same directory hashes
+    result = CliRunner().invoke(mhl.commands.directory_hash, ['/root'])
+    assert result.exit_code == 0
+    assert 'root hash: xxh64: 5f4af3b3fd736415' in result.output
+
     # altering the content of one file
     with open('/root/A/A2.txt', "a") as file:
         file.write('!!')
@@ -83,6 +93,11 @@ def test_seal_directory_hashes(fs):
     hash_list = MHLHistory.load_from_path('/root').hash_lists[-1]
     # an altered file leads to a different root directory hash
     assert hash_list.root_media_hash.hash_entries[0].hash_string == 'adf18c910489663c'
+
+    # test that the directory-hash command creates the same root hash
+    result = CliRunner().invoke(mhl.commands.directory_hash, ['/root'])
+    assert result.exit_code == 0
+    assert 'root hash: xxh64: adf18c910489663c' in result.output
 
     # rename one file
     os.rename('/root/B/B1.txt', '/root/B/B2.txt')
@@ -97,6 +112,11 @@ def test_seal_directory_hashes(fs):
     assert hash_list.find_media_hash_for_path('B').hash_entries[0].hash_string == '8cdb106e71c4989d'
     # a renamed file also leads to a different root directory hash
     assert hash_list.root_media_hash.hash_entries[0].hash_string == '01441cdf1803e2b8'
+
+    # test that the directory-hash command creates the same root hash
+    result = CliRunner().invoke(mhl.commands.directory_hash, ['/root'])
+    assert result.exit_code == 0
+    assert 'root hash: xxh64: 01441cdf1803e2b8' in result.output
 
 
 @freeze_time("2020-01-16 09:15:00")

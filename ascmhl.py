@@ -21,6 +21,7 @@ mhltool_cli.add_command(commands.seal)
 mhltool_cli.add_command(commands.check)
 mhltool_cli.add_command(commands.record)
 mhltool_cli.add_command(commands.validate)
+mhltool_cli.add_command(commands.directory_hash)
 
 
 if __name__ == '__main__':

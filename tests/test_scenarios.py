@@ -196,7 +196,7 @@ def log_message(message: str):
 def execute_command(click_cmd, args):
     runner = CliRunner()
     log_message('')
-    log_message(f'$ ascmhl.py {click_cmd.name} {args}')
+    log_message(f'$ ascmhl.py {click_cmd.name} {" ".join(args)}')
     result = runner.invoke(click_cmd, args)
     log_message(result.output)
     log_message('')

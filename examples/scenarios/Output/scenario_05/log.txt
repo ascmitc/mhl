@@ -6,14 +6,14 @@ Assume the source card /A002R2EC is copied to a Reels folder on travel drive /tr
 
 Seal the copy of A002R2EC on the travel drive /travel_01 to create the original mhl generation.
 
-$ ascmhl.py seal ['-v', '/travel_01/Reels/A002R2EC']
+$ ascmhl.py seal -v /travel_01/Reels/A002R2EC
 seal folder at path: /travel_01/Reels/A002R2EC
 created original hash for /travel_01/Reels/A002R2EC/Clips/A002C006_141024_R2EC.mov xxh64: 0ea03b369a463d9d
 created original hash for /travel_01/Reels/A002R2EC/Clips/A002C007_141024_R2EC.mov xxh64: 7680e5f98f4a80fd
 created directory hash for /travel_01/Reels/A002R2EC/Clips xxh64: 2d51faa2b1834454
 created original hash for /travel_01/Reels/A002R2EC/Sidecar.txt xxh64: 3ab5a4166b9bde44
 created directory hash for /travel_01/Reels/A002R2EC xxh64: d22ad81d5ef6dfd5
-writing "A002R2EC_2020-01-16_091500_0001.mhl"...
+writing "0001_A002R2EC_2020-01-16_091500.mhl"...
 
 
 
@@ -21,14 +21,14 @@ Assume a second card /A003R2EC is copied to the same Reels folder on travel driv
 
 Seal the copy of A003R2EC on the travel drive /travel_01 to create the original mhl generation.
 
-$ ascmhl.py seal ['-v', '/travel_01/Reels/A003R2EC']
+$ ascmhl.py seal -v /travel_01/Reels/A003R2EC
 seal folder at path: /travel_01/Reels/A003R2EC
 created original hash for /travel_01/Reels/A003R2EC/Clips/A003C011_141024_R2EC.mov xxh64: 52392f79a36d6571
 created original hash for /travel_01/Reels/A003R2EC/Clips/A003C012_141024_R2EC.mov xxh64: 5dbca064ddddd6fc
 created directory hash for /travel_01/Reels/A003R2EC/Clips xxh64: ea9d3add207cb956
 created original hash for /travel_01/Reels/A003R2EC/Sidecar.txt xxh64: e5dda75a353d8b34
 created directory hash for /travel_01/Reels/A003R2EC xxh64: f8fa1de2169f68b8
-writing "A003R2EC_2020-01-16_091500_0001.mhl"...
+writing "0001_A003R2EC_2020-01-16_091500.mhl"...
 
 
 
@@ -43,7 +43,7 @@ in the card sub folders A002R2EC and A003R2EC and an initial one for the Reels f
 with the original hash of the Summary.txt and references to the child histories
 of the card sub folders.
 
-$ ascmhl.py seal ['-v', '/file_server/Reels']
+$ ascmhl.py seal -v /file_server/Reels
 seal folder at path: /file_server/Reels
 verification of file /file_server/Reels/A002R2EC/Clips/A002C006_141024_R2EC.mov: OK
 verification of file /file_server/Reels/A002R2EC/Clips/A002C007_141024_R2EC.mov: OK
@@ -57,8 +57,8 @@ verification of file /file_server/Reels/A003R2EC/Sidecar.txt: OK
 created directory hash for /file_server/Reels/A003R2EC xxh64: f8fa1de2169f68b8
 created original hash for /file_server/Reels/Summary.txt xxh64: 0ac48e431d4538ba
 created directory hash for /file_server/Reels xxh64: ae3a5a8b334bbb40
-writing "A002R2EC_2020-01-17_143000_0002.mhl"...
-writing "A003R2EC_2020-01-17_143000_0002.mhl"...
-writing "Reels_2020-01-17_143000_0001.mhl"...
+writing "0002_A002R2EC_2020-01-17_143000.mhl"...
+writing "0002_A003R2EC_2020-01-17_143000.mhl"...
+writing "0001_Reels_2020-01-17_143000.mhl"...
 
 

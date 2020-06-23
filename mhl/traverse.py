@@ -1,3 +1,12 @@
+"""
+__author__ = "Alexander Sahm"
+__copyright__ = "Copyright 2020, Pomfort GmbH"
+
+__license__ = "MIT"
+__maintainer__ = "Patrick Renner, Alexander Sahm"
+__email__ = "opensource@pomfort.com"
+"""
+
 from os.path import join, isdir
 import os
 from .__version__ import ascmhl_default_ignore_patterns

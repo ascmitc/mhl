@@ -45,6 +45,9 @@ class MHLHistory:
     other member variables:
     root_path -- path where the mhl folder resides
     """
+
+    history_file_name_regex = r'^(\d{4,})(?:_(.+))?$'
+
     chain: Optional[MHLChain]
     hash_lists: List[MHLHashList]
     asc_mhl_path: Optional[str]
@@ -177,14 +180,14 @@ class MHLHistory:
         for root, directories, filenames in os.walk(asc_mhl_folder_path):
             for filename in filenames:
                 if filename.endswith(ascmhl_file_extension):
-                    # A002R2EC_2019-06-21_082301_0005.mhl
+                    # file name example: 0001_root_2020-01-15_130000.mhl
                     filename_no_extension, _ = os.path.splitext(filename)
-                    parts = re.findall(r'(.*)_(.+)_(.+)_(\d+)', filename_no_extension)
-                    if parts.__len__() == 1 and parts[0].__len__() == 4:
+                    parts = re.findall(MHLHistory.history_file_name_regex, filename_no_extension)
+                    if len(parts) == 1 and len(parts[0]) == 2:
                         file_path = os.path.join(asc_mhl_folder_path, filename)
                         hash_list = hashlist_xml_parser.parse(file_path)
 
-                        generation_number = int(parts[0][3])
+                        generation_number = int(parts[0][0])
                         hash_list.generation_number = generation_number
                         hash_lists.append(hash_list)
                     else:
@@ -257,7 +260,7 @@ class MHLHistory:
         date_string = datetime_now_filename_string()
         index = self.latest_generation_number() + 1
         folder_name = os.path.basename(os.path.normpath(self.get_root_path()))
-        file_name = folder_name + "_" + date_string + "_" + str(index).zfill(4) + ascmhl_file_extension
+        file_name = f'{index:04d}_{folder_name}_{date_string}{ascmhl_file_extension}'
         return file_name, index
 
     def _validate_new_hash_list(self, hash_list):

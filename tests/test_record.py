@@ -27,9 +27,7 @@ def test_record_succeed_single_file(fs):
     runner = CliRunner()
     result = runner.invoke(mhl.commands.record, ['/root', '/root/A/A1.txt'])
     assert result.exit_code == 0
-    assert os.path.exists('/root/ascmhl/root_2020-01-16_091500_0001.mhl')
-    with open('/root/ascmhl/root_2020-01-16_091500_0001.mhl', 'r') as fin:
-        print(fin.read())
+    assert os.path.exists('/root/ascmhl/0001_root_2020-01-16_091500.mhl')
     assert os.path.exists('/root/ascmhl/chain.txt')
 
     # make sure that only the specified file was added
@@ -47,9 +45,7 @@ def test_record_succeed_single_directory(fs):
     runner = CliRunner()
     result = runner.invoke(mhl.commands.record, ['/root', '/root/A'])
     assert result.exit_code == 0
-    assert os.path.exists('/root/ascmhl/root_2020-01-16_091500_0001.mhl')
-    with open('/root/ascmhl/root_2020-01-16_091500_0001.mhl', 'r') as fin:
-        print(fin.read())
+    assert os.path.exists('/root/ascmhl/0001_root_2020-01-16_091500.mhl')
     assert os.path.exists('/root/ascmhl/chain.txt')
 
     # make sure that only the specified file was added
@@ -68,9 +64,7 @@ def test_record_succeed_multiple_files(fs):
     runner = CliRunner()
     result = runner.invoke(mhl.commands.record, ['/root', '/root/A/A1.txt', '/root/A/A2.txt'])
     assert result.exit_code == 0
-    assert os.path.exists('/root/ascmhl/root_2020-01-16_091500_0001.mhl')
-    with open('/root/ascmhl/root_2020-01-16_091500_0001.mhl', 'r') as fin:
-        print(fin.read())
+    assert os.path.exists('/root/ascmhl/0001_root_2020-01-16_091500.mhl')
     assert os.path.exists('/root/ascmhl/chain.txt')
 
     # make sure that only the specified file was added

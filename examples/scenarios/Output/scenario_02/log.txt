@@ -6,14 +6,14 @@ Assume the source card /A002R2EC is copied to a travel drive /travel_01.
 
 Seal the copy on the travel drive /travel_01 to create the original mhl generation.
 
-$ ascmhl.py seal ['-v', '/travel_01/A002R2EC']
+$ ascmhl.py seal -v /travel_01/A002R2EC
 seal folder at path: /travel_01/A002R2EC
 created original hash for /travel_01/A002R2EC/Clips/A002C006_141024_R2EC.mov xxh64: 0ea03b369a463d9d
 created original hash for /travel_01/A002R2EC/Clips/A002C007_141024_R2EC.mov xxh64: 7680e5f98f4a80fd
 created directory hash for /travel_01/A002R2EC/Clips xxh64: 2d51faa2b1834454
 created original hash for /travel_01/A002R2EC/Sidecar.txt xxh64: 3ab5a4166b9bde44
 created directory hash for /travel_01/A002R2EC xxh64: d22ad81d5ef6dfd5
-writing "A002R2EC_2020-01-16_091500_0001.mhl"...
+writing "0001_A002R2EC_2020-01-16_091500.mhl"...
 
 
 
@@ -23,13 +23,13 @@ And the folder A002R2EC is copied there from the travel drive to a file server a
 Sealing the folder A002R2EC again on the file server
 this will verify all hashes, check for completeness and create a second generation
 
-$ ascmhl.py seal ['-v', '/file_server/A002R2EC']
+$ ascmhl.py seal -v /file_server/A002R2EC
 seal folder at path: /file_server/A002R2EC
 verification of file /file_server/A002R2EC/Clips/A002C006_141024_R2EC.mov: OK
 verification of file /file_server/A002R2EC/Clips/A002C007_141024_R2EC.mov: OK
 created directory hash for /file_server/A002R2EC/Clips xxh64: 2d51faa2b1834454
 verification of file /file_server/A002R2EC/Sidecar.txt: OK
 created directory hash for /file_server/A002R2EC xxh64: d22ad81d5ef6dfd5
-writing "A002R2EC_2020-01-17_143000_0002.mhl"...
+writing "0002_A002R2EC_2020-01-17_143000.mhl"...
 
 

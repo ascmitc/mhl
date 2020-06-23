@@ -26,8 +26,8 @@ def test_seal_succeed(fs):
     runner = CliRunner()
     result = runner.invoke(mhl.commands.seal, ['/root'])
     assert not result.exception
-    assert os.path.exists('/root/ascmhl/root_2020-01-16_091500_0001.mhl')
-    # with open('/root/ascmhl/root_2020-01-16_091500_0001.mhl', 'r') as fin:
+    assert os.path.exists('/root/ascmhl/0001_root_2020-01-16_091500.mhl')
+    # with open('/root/ascmhl/0001_root_2020-01-16_091500.mhl', 'r') as fin:
     #     print(fin.read())
     assert os.path.exists('/root/ascmhl/chain.txt')
 

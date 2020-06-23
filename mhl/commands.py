@@ -11,18 +11,18 @@ __email__ = "opensource@pomfort.com"
 import datetime
 import os
 import platform
-import click
 
-from .hashlist import MHLCreatorInfo, MHLTool, MHLProcess, MHLMediaHash
-from .hasher import create_filehash, DirectoryHashContext
-from .history import MHLHistory
-from . import logger
-from .generator import MHLGenerationCreationSession
-from .traverse import post_order_lexicographic
-from .__version__ import ascmhl_supported_hashformats
-from . import utils
-import binascii
+import click
 from lxml import etree
+
+from . import logger
+from . import utils
+from .__version__ import ascmhl_supported_hashformats
+from .generator import MHLGenerationCreationSession
+from .hasher import create_filehash, DirectoryHashContext
+from .hashlist import MHLCreatorInfo, MHLTool, MHLProcess
+from .history import MHLHistory
+from .traverse import post_order_lexicographic
 
 
 @click.command()

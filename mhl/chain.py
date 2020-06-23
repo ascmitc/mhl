@@ -6,7 +6,7 @@ __license__ = "MIT"
 __maintainer__ = "Patrick Renner, Alexander Sahm"
 __email__ = "opensource@pomfort.com"
 """
-from typing import List, Optional
+from typing import List
 
 from . import logger
 

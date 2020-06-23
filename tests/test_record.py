@@ -11,7 +11,6 @@ import os
 from freezegun import freeze_time
 from click.testing import CliRunner
 
-import mhl._debug_commands
 from mhl.history import MHLHistory
 import mhl.commands
 

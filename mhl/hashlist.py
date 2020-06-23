@@ -70,11 +70,10 @@ class MHLHashList:
         if not media_hash:
             media_hash = MHLMediaHash()
             media_hash.path = relative_path
-            media_hash.filesize = file_size
+            media_hash.file_size = file_size
             media_hash.last_modification_date = file_modification_date
             self.append_hash(media_hash)
         return media_hash
-
 
     def set_of_file_paths(self, root_path) -> Set[str]:
         all_paths = set()
@@ -128,15 +127,15 @@ class MHLMediaHash:
     hash_entries -- list of HashEntry objects to manage hash values (e.g. for different formats)
 
     attribute member variables:
-    relative_filepath -- relative file path to the file (supplements the root_path from the MHLHashList object)
-    filesize -- size of the file
+    path -- relative file path to the file (supplements the root_path from the MHLHashList object)
+    file_size -- size of the file
     last_modification_date -- last modification date as read from the filesystem
 
     other member variables:
     """
     hash_entries: List[MHLHashEntry]
     path: Optional[str]
-    filesize: Optional[int]
+    file_size: Optional[int]
     last_modification_date: Optional[datetime]
     is_directory: bool
 
@@ -144,7 +143,7 @@ class MHLMediaHash:
     def __init__(self):
         self.hash_entries = list()
         self.path = None
-        self.filesize = None
+        self.file_size = None
         self.last_modification_date = None
         self.is_directory = False
 

@@ -11,7 +11,6 @@ import os
 from freezegun import freeze_time
 from click.testing import CliRunner
 
-import mhl._debug_commands
 from mhl.history import MHLHistory
 import mhl.commands
 
@@ -125,7 +124,6 @@ def test_seal_no_directory_hashes(fs):
     result = runner.invoke(mhl.commands.seal, ['/root', '-v', '-d'])
     assert result.exit_code == 15
     assert '1 missing files:\n  /root/emptyFolder' in result.output
-
 
 
 def test_seal_fail_altered_file(fs, simple_mhl_history):

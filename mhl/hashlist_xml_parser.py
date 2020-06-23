@@ -9,12 +9,12 @@ __email__ = "opensource@pomfort.com"
 
 import textwrap
 from timeit import default_timer as timer
+
 from lxml import etree
 from lxml.builder import E
-from xml.sax.saxutils import quoteattr
 
-from .utils import datetime_isostring
 from .hashlist import *
+from .utils import datetime_isostring
 
 
 def parse(file_path):
@@ -48,10 +48,10 @@ def parse(file_path):
                 if tag == 'path':
                     current_object.path = element.text
                     file_size = element.attrib.get('size')
-                    current_object.filesize = int(file_size) if file_size else None
+                    current_object.file_size = int(file_size) if file_size else None
                 # TODO: parse date
                 # elif tag == 'lastmodificationdate':
-                # 	current_object.filesize = element.text
+                # 	current_object.file_size = element.text
                 elif tag in supported_hash_formats:
                     entry = MHLHashEntry(tag, element.text, element.attrib.get('action'))
                     current_object.append_hash_entry(entry)
@@ -162,12 +162,12 @@ def _write_xml_string_to_file(file, xml_string: str, indent: str):
     file.write(result.encode('utf-8'))
 
 
-def _media_hash_xml_element(media_hash):
+def _media_hash_xml_element(media_hash: MHLMediaHash):
     """builds and returns one <hash> element for a given MediaHash object"""
 
     path_element = E.path(media_hash.path)
-    if media_hash.filesize:
-        path_element.attrib['size'] = str(media_hash.filesize)
+    if media_hash.file_size:
+        path_element.attrib['size'] = str(media_hash.file_size)
     if media_hash.last_modification_date:
         path_element.attrib['lastmodificationdate'] = datetime_isostring(media_hash.last_modification_date)
 
@@ -213,6 +213,7 @@ def _creator_info_xml_element(hash_list: MHLHashList):
         E.process(creator_info.process.process_type)
     )
     return info_element
+
 
 def _root_media_hash_xml_element(root_media_hash: MHLMediaHash):
     element = _media_hash_xml_element(root_media_hash)

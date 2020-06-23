@@ -55,6 +55,7 @@ class ContentDircmp(filecmp.dircmp):
     Compare the content of dir1 and dir2. In contrast with filecmp.dircmp, this
     subclass compares the content of files with the same path.
     """
+    # noinspection PyAttributeOutsideInit
     def phase3(self):
         """
         Find out differences between common files.

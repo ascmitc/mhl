@@ -10,6 +10,7 @@ __email__ = "opensource@pomfort.com"
 
 import click
 
+# noinspection PyProtectedMember
 from mhl import _debug_commands
 
 

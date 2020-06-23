@@ -7,13 +7,13 @@ __maintainer__ = "Patrick Renner, Alexander Sahm"
 __email__ = "opensource@pomfort.com"
 """
 
-import os
 from collections import defaultdict
 from typing import Dict, List
-from . import logger
-from .history import MHLHistory
-from .hashlist import MHLHashList, MHLMediaHash, MHLHashEntry, MHLCreatorInfo
+
 from . import chain_txt_parser
+from . import logger
+from .hashlist import MHLHashList, MHLHashEntry, MHLCreatorInfo
+from .history import MHLHistory
 
 
 class MHLGenerationCreationSession:
@@ -107,8 +107,6 @@ class MHLGenerationCreationSession:
             parent_media_hash.is_directory = True
             if hash_string:
                 parent_media_hash.append_hash_entry(MHLHashEntry(hash_format, hash_string))
-
-
 
     def commit(self, creator_info: MHLCreatorInfo):
         """

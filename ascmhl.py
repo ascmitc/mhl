@@ -11,8 +11,11 @@ __email__ = "opensource@pomfort.com"
 import click
 from mhl import commands
 
+class NaturalOrderGroup(click.Group):
+    def list_commands(self, ctx):
+        return self.commands.keys()
 
-@click.group()
+@click.group(cls=NaturalOrderGroup)
 def mhltool_cli():
     pass
 
@@ -20,8 +23,8 @@ def mhltool_cli():
 mhltool_cli.add_command(commands.seal)
 mhltool_cli.add_command(commands.check)
 mhltool_cli.add_command(commands.record)
+mhltool_cli.add_command(commands.directory_hash, "dirhash")
 mhltool_cli.add_command(commands.validate)
-mhltool_cli.add_command(commands.directory_hash)
 
 
 if __name__ == '__main__':

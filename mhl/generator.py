@@ -51,22 +51,22 @@ class MHLGenerationCreationSession:
         hash_entry = MHLHashEntry(hash_format, hash_string)
         if original_hash_entry is None:
             hash_entry.action = 'original'
-            logger.verbose(f'created original hash for {relative_path} {hash_format}: {hash_string}')
+            logger.verbose(f'  created original hash for     {relative_path}  {hash_format}: {hash_string}')
         else:
             existing_hash_entry = history.find_first_hash_entry_for_path(history_relative_path, hash_format)
             if existing_hash_entry is not None:
                 if existing_hash_entry.hash_string == hash_string:
                     hash_entry.action = 'verified'
-                    logger.verbose(f'verification of file {relative_path}: OK')
+                    logger.verbose(f'  verified                      {relative_path}  OK')
                 else:
                     hash_entry.action = 'failed'
-                    logger.error(f'hash mismatch for {relative_path} '
-                                 f'old {hash_format}: {existing_hash_entry.hash_string}, '
-                                 f'new {hash_format}: {hash_string}')
+                    logger.error(f'ERROR: hash mismatch for        {relative_path}  '
+                                 f'{hash_format} (old): {existing_hash_entry.hash_string}, '
+                                 f'{hash_format} (new): {hash_string}')
             else:
                 # in case there is no hash entry for this hash format yet, we mark this hash as new
                 hash_entry.action = 'new'
-                logger.verbose(f'created new hash for {relative_path} {hash_format}: {hash_string}')
+                logger.verbose(f'  created new hash for          {relative_path}  {hash_format}: {hash_string}')
 
         # in case the same file is hashes multiple times we want to add all hash entries
         new_hash_list = self.new_hash_lists[history]
@@ -93,11 +93,11 @@ class MHLGenerationCreationSession:
         if hash_string:
             media_hash.append_hash_entry(MHLHashEntry(hash_format, hash_string))
             if relative_path == '.':
-                logger.verbose(f'root hash: {hash_format}: {hash_string}')
+                logger.verbose(f'  calculated root hash  {hash_format}: {hash_string}')
             else:
-                logger.verbose(f'directory hash for {relative_path}: {hash_format}: {hash_string}')
+                logger.verbose(f'  calculated directory hash for {relative_path}  {hash_format}: {hash_string}')
         else:
-            logger.verbose(f'added directory entry for: {relative_path}')
+            logger.verbose(f'  added directory entry for     {relative_path}')
 
         # in case we just created the root media hash of the current hash list we also add it one history level above
         if new_hash_list.root_media_hash is media_hash and history.parent_history:
@@ -131,7 +131,7 @@ class MHLGenerationCreationSession:
             new_hash_list.creator_info = creator_info
             history.write_new_generation(new_hash_list)
             relative_generation_path = self.root_history.get_relative_file_path(new_hash_list.file_path)
-            logger.verbose(f'created new generation {relative_generation_path}')
+            logger.verbose(f'Created new generation {relative_generation_path}')
             if history.parent_history is not None:
                 referenced_hash_lists[history.parent_history].append(new_hash_list)
 

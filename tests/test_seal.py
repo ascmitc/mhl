@@ -81,7 +81,7 @@ def test_seal_directory_hashes(fs):
     # test that the directory-hash command creates the same directory hashes
     result = CliRunner().invoke(mhl.commands.directory_hash, ['/root'])
     assert result.exit_code == 0
-    assert 'root hash: xxh64: 5f4af3b3fd736415' in result.output
+    assert '  calculated root hash: xxh64: 5f4af3b3fd736415' in result.output
 
     # altering the content of one file
     with open('/root/A/A2.txt', "a") as file:
@@ -89,7 +89,7 @@ def test_seal_directory_hashes(fs):
 
     runner = CliRunner()
     result = runner.invoke(mhl.commands.seal, ['/root', '-v'])
-    assert 'hash mismatch for A/A2.txt' in result.output
+    assert 'ERROR: hash mismatch for        A/A2.txt' in result.output
     hash_list = MHLHistory.load_from_path('/root').hash_lists[-1]
     # an altered file leads to a different root directory hash
     assert hash_list.root_media_hash.hash_entries[0].hash_string == 'adf18c910489663c'
@@ -104,9 +104,9 @@ def test_seal_directory_hashes(fs):
 
     runner = CliRunner()
     result = runner.invoke(mhl.commands.seal, ['/root', '-v'])
-    assert 'hash mismatch for A/A2.txt' in result.output
+    assert 'ERROR: hash mismatch for        A/A2.txt' in result.output
     # in addition to the failing verification we also have a missing file B1/B1.txt
-    assert 'missing files:\n  B/B1.txt' in result.output
+    assert 'missing file(s):\n  B/B1.txt' in result.output
     hash_list = MHLHistory.load_from_path('/root').hash_lists[-1]
     # the file name is part of the directory hash of the containing directory so it's hash changes
     assert hash_list.find_media_hash_for_path('B').hash_entries[0].hash_string == '8cdb106e71c4989d'
@@ -126,7 +126,7 @@ def test_seal_no_directory_hashes(fs):
     os.mkdir('/root/emptyFolder')
 
     runner = CliRunner()
-    result = runner.invoke(mhl.commands.seal, ['/root', '-v', '-d'])
+    result = runner.invoke(mhl.commands.seal, ['/root', '-v', '-n'])
     assert result.exit_code == 0
 
     # a directory entry without hash was created for the folder A
@@ -141,9 +141,9 @@ def test_seal_no_directory_hashes(fs):
     # removing an empty folder will cause sealing to fail
     os.removedirs('/root/emptyFolder')
     runner = CliRunner()
-    result = runner.invoke(mhl.commands.seal, ['/root', '-v', '-d'])
+    result = runner.invoke(mhl.commands.seal, ['/root', '-v', '-n'])
     assert result.exit_code == 15
-    assert '1 missing files:\n  emptyFolder' in result.output
+    assert '1 missing file(s):\n  emptyFolder' in result.output
 
 
 def test_seal_fail_altered_file(fs, simple_mhl_history):
@@ -193,7 +193,7 @@ def test_seal_fail_missing_file(fs, nested_mhl_histories):
     runner = CliRunner()
     result = runner.invoke(mhl.commands.seal, ['/root'])
     assert result.exit_code == 15
-    assert '1 missing files:\n  A/AA/AA1.txt' in result.output
+    assert '1 missing file(s):\n  A/AA/AA1.txt' in result.output
 
     # the actual seal has been written to disk anyways we expect the history to contain
     # the new not yet referenced files (/root/B/BA/BA1.txt and /root/A/AB/AB1.txt) as well now
@@ -210,4 +210,4 @@ def test_seal_fail_missing_file(fs, nested_mhl_histories):
     runner = CliRunner()
     result = runner.invoke(mhl.commands.seal, ['/root'])
     assert result.exit_code == 15
-    assert '1 missing files:\n  A/AA/AA1.txt' in result.output
+    assert '1 missing file(s):\n  A/AA/AA1.txt' in result.output

@@ -24,25 +24,30 @@ from .hashlist import MHLCreatorInfo, MHLTool, MHLProcess
 from .history import MHLHistory
 from .traverse import post_order_lexicographic
 
-
 @click.command()
 @click.argument('root_path', type=click.Path(exists=True))
 @click.option('--verbose', '-v', default=False, is_flag=True, help="Verbose output")
-@click.option('--directory_hashes', '-d', default=True, is_flag=True,
+@click.option('--no_directory_hashes', '-n', default=True, is_flag=True,
               help="Skip creation of directory hashes, only reference directories without hash")
 @click.option('--hash_format', '-h', type=click.Choice(ascmhl_supported_hashformats), multiple=False,
               default='xxh64', help="Algorithm")
-def seal(root_path, verbose, hash_format, directory_hashes):
+def seal(root_path, verbose, hash_format, no_directory_hashes):
     """
-    Creates a new generation from the content of a folder hierarchy.
+    Creates a new generation with all files in a folder hierarchy.
+
+    ROOT_PATH: the root path to use for the asc mhl history
+
     All files are hashed and will be compared to previous records in the `asc-mhl` folder if they exists.
+    The command finds files that are registered in the `asc-mhl` folder but that are missing in the file system.
+    Files that are existent in the file system but are not registered in the `asc-mhl` folder yet, are registered
+    as new entries in the newly created generation(s).
     """
     logger.verbose_logging = verbose
 
     if not os.path.isabs(root_path):
         root_path = os.path.join(os.getcwd(), root_path)
 
-    logger.verbose(f'seal folder at path: {root_path}')
+    logger.verbose(f'Sealing folder at path: {root_path} ...')
 
     existing_history = MHLHistory.load_from_path(root_path)
 
@@ -59,7 +64,7 @@ def seal(root_path, verbose, hash_format, directory_hashes):
     for folder_path, children in post_order_lexicographic(root_path):
         # generate directory hashes
         dir_hash_context = None
-        if directory_hashes:
+        if no_directory_hashes:
             dir_hash_context = DirectoryHashContext(hash_format)
         for item_name, is_dir in children:
             file_path = os.path.join(folder_path, item_name)
@@ -96,9 +101,14 @@ def seal(root_path, verbose, hash_format, directory_hashes):
 @click.option('--verbose', '-v', default=False, is_flag=True, help="Verbose output")
 def check(root_path, verbose):
     """
-    Checks existing generations against the file system.
+    Checks MHL hashes from all generations against all file hashes.
+
+    ROOT_PATH: the root path to use for the asc mhl history
+
     Traverses through the content of a folder, hashes all found files and compares ("verifies") the hashes
-    against the records in the asc-mhl folder.
+    against the records in the asc-mhl folder. The command finds all files that are existent in the file system
+    but are not registered in the `asc-mhl` folder yet, and all files that are registered in the `asc-mhl` folder
+    but that are missing in the file system.
     """
     logger.verbose_logging = verbose
 
@@ -142,7 +152,7 @@ def check(root_path, verbose):
             if original_hash_entry.hash_string == current_hash:
                 logger.verbose(f'verification of file {relative_path}: OK')
             else:
-                logger.error(f'hash mismatch for {relative_path} '
+                logger.error(f'ERROR: hash mismatch        for {relative_path} '
                              f'old {original_hash_entry.hash_format}: {original_hash_entry.hash_string}, '
                              f'new {original_hash_entry.hash_format}: {current_hash}')
                 num_failed_verifications += 1
@@ -165,15 +175,15 @@ def check(root_path, verbose):
               default='xxh64', help="hash algorithm to use")
 def record(root_path, paths, verbose, hash_format):
     """
-    Creates a new generation from the file or folder paths specified.
+    Creates a new generation with the given file(s) or folder(s).
 
     \b
     ROOT_PATH: the root path to use for the asc mhl history
-    PATHS: the file or folder paths to add to the asc mhl history
+    PATHS: one or multiple paths to files or folders to be recorded
 
-    This can be used for instance when adding single files to an already mhl-managed file hierarchy.
-    All files that are specified or inside a specified folder are hashed and will be compared
+    All files that are specified or the files inside a specified folder are hashed and will be compared
     to previous records in the `asc-mhl` folder if they are recorded in the history already.
+
     The following files will not be handled by this command:
 
     \b
@@ -219,7 +229,7 @@ def record(root_path, paths, verbose, hash_format):
 @click.command()
 @click.argument('file_path', type=click.Path(exists=True))
 def validate(file_path):
-    """Validates a mhl file against the xsd schema definition"""
+    """Validates a mhl file against the xsd schema definition."""
 
     xsd_path = 'xsd/ASCMHL.xsd'
     xsd = etree.XMLSchema(etree.parse(xsd_path))
@@ -243,12 +253,12 @@ def validate(file_path):
               default='xxh64', help="Algorithm")
 def directory_hash(root_path, verbose, hash_format):
     """
-    Creates the root directory hash of a given folder.
+    Creates the directory hash of a given folder by hashing files.
 
     \b
     ROOT_PATH: the root path to calculate the directory hash for
 
-    Hashes all the files in the given hash format and calculates the according directory hashes
+    Hashes all the files in the given hash format and calculates the according directory hash.
     """
 
     if not os.path.isabs(root_path):
@@ -270,7 +280,7 @@ def directory_hash(root_path, verbose, hash_format):
         dir_hash = dir_hash_context.final_hash_str()
         dir_hash_mappings[folder_path] = dir_hash
         if folder_path == root_path:
-            logger.info(f'root hash: {hash_format}: {dir_hash}')
+            logger.info(f'  calculated root hash: {hash_format}: {dir_hash}')
         elif verbose:
             logger.info(f'directory hash for: {folder_path} {hash_format}: {dir_hash}')
 
@@ -278,7 +288,7 @@ def directory_hash(root_path, verbose, hash_format):
 def test_for_missing_files(not_found_paths, root_path):
     if len(not_found_paths) == 0:
         return None
-    logger.error(f"{len(not_found_paths)} missing files:")
+    logger.error(f"ERROR: {len(not_found_paths)} missing file(s):")
     for path in not_found_paths:
         logger.error(f"  {os.path.relpath(path, root_path)}")
     return logger.CompletenessCheckFailedException()

@@ -52,6 +52,8 @@ def context_type_for_hash_format(hash_format):
         return hashlib.md5
     elif hash_format == 'sha1':
         return hashlib.sha1
+    elif hash_format == 'xxh32':
+        return xxhash.xxh32
     elif hash_format == 'xxh64':
         return xxhash.xxh64
     elif hash_format == 'c4':
@@ -82,7 +84,7 @@ class C4HashContext:
             hash_value = hash_value // base58
             c4_string = charset[modulo] + c4_string
 
-        c4_string = "c4" + c4_string.ljust(c4id_length - 2, zero)
+        c4_string = "c4" + c4_string.rjust(c4id_length - 2, zero)
         return c4_string
 
 

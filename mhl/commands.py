@@ -83,7 +83,7 @@ def seal(root_path, verbose, hash_format, directory_hashes):
 
     commit_session(session)
 
-    exception = test_for_missing_files(not_found_paths)
+    exception = test_for_missing_files(not_found_paths, root_path)
     if num_failed_verifications > 0:
         exception = logger.VerificationFailedException()
 
@@ -133,21 +133,21 @@ def check(root_path, verbose):
 
             # in case there is no original hash entry continue
             if original_hash_entry is None:
-                logger.error(f'found new file {file_path}')
+                logger.error(f'found new file {relative_path}')
                 num_new_files += 1
                 continue
 
             # create a new hash and compare it against the original hash entry
             current_hash = create_filehash(original_hash_entry.hash_format, file_path)
             if original_hash_entry.hash_string == current_hash:
-                logger.verbose(f'verification of file {file_path}: OK')
+                logger.verbose(f'verification of file {relative_path}: OK')
             else:
-                logger.error(f'hash mismatch for {file_path} '
+                logger.error(f'hash mismatch for {relative_path} '
                              f'old {original_hash_entry.hash_format}: {original_hash_entry.hash_string}, '
                              f'new {original_hash_entry.hash_format}: {current_hash}')
                 num_failed_verifications += 1
 
-    exception = test_for_missing_files(not_found_paths)
+    exception = test_for_missing_files(not_found_paths, root_path)
     if num_new_files > 0:
         exception = logger.NewFilesFoundException()
     if num_failed_verifications > 0:
@@ -275,12 +275,12 @@ def directory_hash(root_path, verbose, hash_format):
             logger.info(f'directory hash for: {folder_path} {hash_format}: {dir_hash}')
 
 
-def test_for_missing_files(not_found_paths):
+def test_for_missing_files(not_found_paths, root_path):
     if len(not_found_paths) == 0:
         return None
     logger.error(f"{len(not_found_paths)} missing files:")
     for path in not_found_paths:
-        logger.error(f"  {path}")
+        logger.error(f"  {os.path.relpath(path, root_path)}")
     return logger.CompletenessCheckFailedException()
 
 
@@ -310,5 +310,9 @@ def seal_file_path(existing_history, file_path, hash_format, session) -> (str, b
         success &= session.append_file_hash(file_path, file_size, file_modification_date,
                                             existing_hash_format, hash_in_existing_format)
     current_format_hash = create_filehash(hash_format, file_path)
+    # in case the existing hash verification failed we don't want to add the current format hash to the generation
+    # but we need to return it for directory hash creation
+    if not success:
+        return current_format_hash, False
     success &= session.append_file_hash(file_path, file_size, file_modification_date, hash_format, current_format_hash)
     return current_format_hash, success

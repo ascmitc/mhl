@@ -89,7 +89,7 @@ def test_seal_directory_hashes(fs):
 
     runner = CliRunner()
     result = runner.invoke(mhl.commands.seal, ['/root', '-v'])
-    assert 'hash mismatch for /root/A/A2.txt' in result.output
+    assert 'hash mismatch for A/A2.txt' in result.output
     hash_list = MHLHistory.load_from_path('/root').hash_lists[-1]
     # an altered file leads to a different root directory hash
     assert hash_list.root_media_hash.hash_entries[0].hash_string == 'adf18c910489663c'
@@ -104,9 +104,9 @@ def test_seal_directory_hashes(fs):
 
     runner = CliRunner()
     result = runner.invoke(mhl.commands.seal, ['/root', '-v'])
-    assert 'hash mismatch for /root/A/A2.txt' in result.output
+    assert 'hash mismatch for A/A2.txt' in result.output
     # in addition to the failing verification we also have a missing file B1/B1.txt
-    assert 'missing files:\n  /root/B/B1.txt' in result.output
+    assert 'missing files:\n  B/B1.txt' in result.output
     hash_list = MHLHistory.load_from_path('/root').hash_lists[-1]
     # the file name is part of the directory hash of the containing directory so it's hash changes
     assert hash_list.find_media_hash_for_path('B').hash_entries[0].hash_string == '8cdb106e71c4989d'
@@ -143,7 +143,7 @@ def test_seal_no_directory_hashes(fs):
     runner = CliRunner()
     result = runner.invoke(mhl.commands.seal, ['/root', '-v', '-d'])
     assert result.exit_code == 15
-    assert '1 missing files:\n  /root/emptyFolder' in result.output
+    assert '1 missing files:\n  emptyFolder' in result.output
 
 
 def test_seal_fail_altered_file(fs, simple_mhl_history):
@@ -151,10 +151,33 @@ def test_seal_fail_altered_file(fs, simple_mhl_history):
     with open('/root/Stuff.txt', "a") as file:
         file.write('!!')
 
-    runner = CliRunner()
-    result = runner.invoke(mhl.commands.seal, ['/root'])
+    result = CliRunner().invoke(mhl.commands.seal, ['/root'])
     assert result.exit_code == 12
-    assert '/root/Stuff.txt' in result.output
+    assert 'Stuff.txt' in result.output
+
+    # since the file is still altered every other seal will fail as well since we compare to the original hash
+    result = CliRunner().invoke(mhl.commands.seal, ['/root'])
+    assert result.exit_code == 12
+    assert 'Stuff.txt' in result.output
+
+    # when we now choose a new hash format we still fail but will add the new hash in the new format
+    result = CliRunner().invoke(mhl.commands.seal, ['/root', '-h', 'md5'])
+    assert result.exit_code == 12
+    assert 'Stuff.txt' in result.output
+
+    root_history = MHLHistory.load_from_path('/root')
+    stuff_txt_latest_media_hash = root_history.hash_lists[-1].find_media_hash_for_path('Stuff.txt')
+    # the media hash for the Stuff.txt in the latest generation contains the failed xxh64 hash of the altered file
+    assert stuff_txt_latest_media_hash.hash_entries[0].hash_format == 'xxh64'
+    assert stuff_txt_latest_media_hash.hash_entries[0].hash_string == '2346e97eb08788cc'
+    assert stuff_txt_latest_media_hash.hash_entries[0].action == 'failed'
+    # and it contains NO new md5 hash value of the altered file
+    assert len(stuff_txt_latest_media_hash.hash_entries) == 1
+
+    # since we didn't add a new md5 hash for the failing file before sealing will still fail for the altered file
+    result = CliRunner().invoke(mhl.commands.seal, ['/root', '-h', 'md5'])
+    assert result.exit_code == 12
+    assert 'Stuff.txt' in result.output
 
 
 def test_seal_fail_missing_file(fs, nested_mhl_histories):
@@ -170,7 +193,7 @@ def test_seal_fail_missing_file(fs, nested_mhl_histories):
     runner = CliRunner()
     result = runner.invoke(mhl.commands.seal, ['/root'])
     assert result.exit_code == 15
-    assert '1 missing files:\n  /root/A/AA/AA1.txt' in result.output
+    assert '1 missing files:\n  A/AA/AA1.txt' in result.output
 
     # the actual seal has been written to disk anyways we expect the history to contain
     # the new not yet referenced files (/root/B/BA/BA1.txt and /root/A/AB/AB1.txt) as well now
@@ -187,4 +210,4 @@ def test_seal_fail_missing_file(fs, nested_mhl_histories):
     runner = CliRunner()
     result = runner.invoke(mhl.commands.seal, ['/root'])
     assert result.exit_code == 15
-    assert '1 missing files:\n  /root/A/AA/AA1.txt' in result.output
+    assert '1 missing files:\n  A/AA/AA1.txt' in result.output

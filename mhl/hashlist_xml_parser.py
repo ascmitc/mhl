@@ -113,8 +113,6 @@ def write_hash_list(hash_list: MHLHashList, file_path: str):
     e.g. we create xml objects only for single elemnts like one media hash element and write it to disk
     before creating the next one"""
 
-    logger.verbose(f'writing \"{os.path.basename(file_path)}\"...')
-
     if not os.path.isdir(os.path.dirname(file_path)):
         os.mkdir(os.path.dirname(file_path))
 

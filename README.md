@@ -108,7 +108,7 @@ Implementation status 2020-07-03:
 _The commands are also marked below with their current implementation status._
 
 
-### Working with file hierarchies
+## Working with file hierarchies
 
 The most common commands when using the `mhl-too.py` in data management scenarios are the `seal` and the `check` commands. 
 
@@ -119,7 +119,7 @@ Checking a folder / drive with the `check` command traverses through the content
 The `diff` command also traverses through the content of a folder / drive.  The `diff` command thus behaves like the `check` command, but the `diff` command does not hash any files (e.g. doesn't do file verification) and thus is much faster in execution. It can be used to print all files that are existent in the file system and are not registered in the `asc-mhl` folder yet, and all files that are registered in the `asc-mhl` folder but that are missing in the file system.
 
 
-#### The `seal` command
+### The `seal` command
 
 The `seal` command traverses through a folder hierarchy (such as a folder with media files, a camera card, or an entire drive). The command hashes all files and the hashes are compared against records in the `asc-mhl` folder.
 
@@ -151,7 +151,7 @@ Implementation:
 * _create new generation(s) (mhllib)_
 
 
-#### The `check` command
+### The `check` command
 
 The `check` command traverses through the content of a folder, hashes all found files and compares ("verifies") the hashes against the records in the `asc-mhl` folder.
 
@@ -184,7 +184,7 @@ Implementation:
 * _end with exit !=0 if at least one of the files has failed, a file was missing, or new files have been found_
 
 
-#### The `diff` command _[not implemented yet]_
+### The `diff` command _[not implemented yet]_
 
 The `diff` command is very similar to the `check` command, only that it doesn't create hashes and doesn't verify them. It can be used to quickly check if a folder structure has new files that have not been recorded yet, or if files are missing.
 
@@ -216,14 +216,14 @@ Implementation:
 
 
 
-### Working with a `asc-mhl` folder
+## Working with an `asc-mhl` folder
 
 The `asc-mhl` folder contains well readable XML files, but the number of recorded files, generations, hash entries, verification info and so forth adds up to an amount of information that cannot be quickly understood. 
 
 The `info` command helps to get a quick overview of the contents of the stored information in an `asc-mhl` folder. 
 
 
-#### The `info` command _[not implemented yet]_
+### The `info` command _[not implemented yet]_
 
 The `info` command can print
 
@@ -247,7 +247,7 @@ Implementation:
 		* _print file info, hashes, etc._
 
 
-### Working with single files
+## Working with single files
 
 In some scenarios "sealing" and "checking" entire folder structures is not sufficient enough, and finer control of the processes files is needed. 
 
@@ -260,7 +260,7 @@ Hashing and verifying single files against hash information stored in the `asc-m
 The `history` command prints the known history of a single file with details about all generations.
 
 
-#### The `record` command
+### The `record` command
 
 The `record` command creates a new generation in the mhl-history. This can be used for instance when adding single files to an already mhl-managed file hierarchy. It is run with the root path of the file hierarchy as well as one or multiple paths to the individual files and folders to be recorded as the parameters.
 
@@ -285,7 +285,7 @@ Implementation:
 		* _add new generation if necessary in appropriate `asc-mhl` folder (mhllib)_
 
 
-#### The `verify` command _[not implemented yet]_
+### The `verify` command _[not implemented yet]_
 
 The `verify` command can be used to verify a single or multiple files. It is run with either 
 
@@ -319,7 +319,7 @@ Implementation:
 	* _end with exit !=0 if at least one of the files has failed_
 
 
-#### The `dirhash' command
+### The `dirhash` command
 
 The `dirhash` command creates and outputs the directory hash by hashing the contained files of the given directory path.
 
@@ -337,7 +337,7 @@ Implementation:
 * _print directory hash_
 
 
-#### The `history` command _[not implemented yet]_
+### The `history` command _[not implemented yet]_
 
 The `history` command outputs information about the full and detailed history information about one file.
 
@@ -354,9 +354,9 @@ Implementation:
 * _print detailed info for file_ 
 
 
-### Other commands
+## Other commands
 
-#### The `validate` command
+### The `validate` command
 
 The `validate` command validates a given ASC MHL file against the XML XSD. This command can be used to ensure the creation of syntactically valid ASC MHL files, for example during  implementation of tools creating ASC MHL files.
 

@@ -1,0 +1,274 @@
+"""
+__author__ = "Patrick Renner, Alexander Sahm"
+__copyright__ = "Copyright 2020, Pomfort GmbH"
+
+__license__ = "MIT"
+__maintainer__ = "Patrick Renner, Alexander Sahm"
+__email__ = "opensource@pomfort.com"
+"""
+
+from __future__ import annotations
+from typing import List, Dict, Optional, Set
+from datetime import datetime
+import os
+
+from . import logger
+from .__version__ import ascmhl_reference_hash_format
+from .hasher import create_filehash
+
+
+class MHLHashList:
+    """
+    class for representing one MHL generation
+    managed by a MHLHistory object
+    uses MHLMediaHash class for storing information about one file
+
+    - public interface
+        * accessing derived information (e.g. summaries)
+
+    - private interface
+        * initialize new, empty MHLHash for adding one files with hash(es)
+
+    model member variables:
+    history -- MHLHistory object for context
+    media_hashes -- list of MHLMediaHash objects
+
+    attribute member variables:
+    generation_number -- generation number of the represented MHL file
+
+    other member variables:
+    file path -- file path of the represented MHL file
+    """
+
+    creator_info: Optional[MHLCreatorInfo]
+    media_hashes: List[MHLMediaHash]
+    media_hashes_path_map: Dict[str, MHLMediaHash]
+    # referenced_hash_lists are the loaded hash list object
+    referenced_hash_lists = List['MHLHashList']
+    # while hash_list_references store the reference objects found in the mhl files
+    hash_list_references = List['MHLHashListReference']
+    file_path: Optional[str]
+    generation_number: Optional[int]
+    root_media_hash: Optional[MHLMediaHash]
+
+    def __init__(self):
+        self.creator_info = None
+        self.media_hashes = []
+        self.file_path = None
+        self.generation_number = None
+        self.referenced_hash_lists = []
+        self.hash_list_references = []
+        self.media_hashes_path_map = {}
+        self.root_media_hash = None
+
+    # methods to query for hashes
+    def find_media_hash_for_path(self, relative_path):
+        return self.media_hashes_path_map.get(relative_path)
+
+    def find_or_create_media_hash_for_path(self, relative_path, file_size, file_modification_date):
+        media_hash = self.find_media_hash_for_path(relative_path)
+        if not media_hash:
+            media_hash = MHLMediaHash()
+            media_hash.path = relative_path
+            media_hash.file_size = file_size
+            media_hash.last_modification_date = file_modification_date
+            self.append_hash(media_hash)
+        return media_hash
+
+    def set_of_file_paths(self, root_path) -> Set[str]:
+        all_paths = set()
+        for media_hash in self.media_hashes:
+            all_paths.add(os.path.join(root_path, media_hash.path))
+        return all_paths
+
+    def get_file_name(self):
+        return os.path.basename(self.file_path)
+
+    def get_root_path(self):
+        return os.path.dirname(os.path.dirname(self.file_path))
+
+    def generate_reference_hash(self):
+        return create_filehash(ascmhl_reference_hash_format, self.file_path)
+
+    # build
+    def append_hash(self, media_hash: MHLMediaHash):
+        if media_hash.path == '.':
+            self.root_media_hash = media_hash
+        else:
+            self.media_hashes.append(media_hash)
+        self.media_hashes_path_map[media_hash.path] = media_hash
+
+    def append_hash_list_reference(self, reference: MHLHashListReference):
+        self.hash_list_references.append(reference)
+
+    # log
+    def log(self):
+        logger.info("      filename: {0}".format(self.get_file_name()))
+        logger.info("    generation: {0}".format(self.generation_number))
+
+        self.creator_info.log()
+        for media_hash in self.media_hashes:
+            media_hash.log()
+
+
+class MHLMediaHash:
+    """
+    class for representing one media hash for a (media) file
+    managed by a MHLHashList object
+    uses MHLHashEntry class for storing information about one hash value
+
+    - public interface
+        * accessing derived information
+
+    - private interface
+        * initialize new, empty MHLHashEntry for adding one hash value
+
+    model member variables:
+    hash_entries -- list of HashEntry objects to manage hash values (e.g. for different formats)
+
+    attribute member variables:
+    path -- relative file path to the file (supplements the root_path from the MHLHashList object)
+    file_size -- size of the file
+    last_modification_date -- last modification date as read from the filesystem
+
+    other member variables:
+    """
+    hash_entries: List[MHLHashEntry]
+    path: Optional[str]
+    file_size: Optional[int]
+    last_modification_date: Optional[datetime]
+    is_directory: bool
+
+    # init
+    def __init__(self):
+        self.hash_entries = list()
+        self.path = None
+        self.file_size = None
+        self.last_modification_date = None
+        self.is_directory = False
+
+    # methods to query for hashes
+    def find_hash_entry_for_format(self, hash_format):
+        for hash_entry in self.hash_entries:
+            if hash_entry.hash_format == hash_format:
+                return hash_entry
+        return None
+
+    # methods to build a media hash
+
+    def append_hash_entry(self, hash_entry):
+        hash_entry.media_hash = self
+        self.hash_entries.append(hash_entry)
+
+    # log
+
+    def log(self):
+        for hash_entry in self.hash_entries:
+            self.log_hash_entry(hash_entry.hash_format)
+
+    def log_hash_entry(self, hash_format):
+        """find HashEntry object of a given format and print it"""
+        for hash_entry in self.hash_entries:
+            if hash_entry.hash_format != hash_format:
+                continue
+            indicator = " "
+            if hash_entry.action == 'failed':
+                indicator = "!"
+            elif self.is_directory:
+                indicator = "d"
+            hash_action = (hash_entry.action if hash_entry.action is not None else "").ljust(10)
+            logger.info("{0} {1}: {2} {3}: {4}".format(indicator,
+                                                       hash_entry.hash_format.rjust(6),
+                                                       hash_entry.hash_string.ljust(32),
+                                                       hash_action,
+                                                       self.path))
+
+
+class MHLHashEntry:
+    """
+    class to store one hash value
+    managed by a MHLMediaHash object
+
+    attribute member variables:
+    hash_string -- string representation (hex) of the hash value
+    hash_format -- string value, hash format, e.g. 'md5', 'xxh64'
+    action -- action/result of verification, e.g. 'verified', 'failed', 'new', 'original'
+
+    other member variables:
+    """
+
+    hash_string: str
+    hash_format: str
+    action: Optional[str]
+
+    def __init__(self, hash_format: str, hash_string: str, action: str = None):
+        self.hash_string = hash_string
+        self.hash_format = hash_format
+        self.action = action
+
+
+class MHLHashListReference:
+    """
+    class to store the ascmhlreference to a child history mhl file
+    """
+    path: Optional[str]
+    reference_hash: Optional[str]
+
+    def __init__(self):
+        self.path = None
+        self.reference_hash = None
+
+
+class MHLCreatorInfo:
+    """
+    Stores the creator info that is part of the header of each hash list file
+    """
+    host_name: Optional[str]
+    tool: Optional[MHLTool]
+    creation_date: Optional[datetime]
+    process: Optional[MHLProcess]
+    authors: List[MHLAuthor]
+
+    def __init__(self):
+        self.host_name = None
+        self.tool = None
+        self.creation_date = None
+        self.process = None
+        self.authors = []
+
+    def log(self):
+        logger.info("      host_name: {0}".format(self.host_name))
+        logger.info("           tool: {0} {1}".format(self.tool.name, self.tool.version))
+        logger.info("  creation_date: {0}".format(self.creation_date))
+        logger.info("        process: {0}".format(self.process))
+
+
+class MHLTool:
+    name: str
+    version: str
+
+    def __init__(self, name: str, version: str):
+        self.name = name
+        self.version = version
+
+
+class MHLProcess:
+    process_type: str
+    name: str
+    hash_source: Optional[str]
+
+    def __init__(self, process_type: str, name: str = None):
+        self.process_type = process_type
+        self.name = name
+        self.hash_source = None
+
+
+class MHLAuthor:
+    name: str
+    email: Optional[str]
+    phone: Optional[str]
+
+    def __init__(self, name: str, email: str = None, phone: str = None):
+        self.name = name
+        self.email = email
+        self.phone = phone

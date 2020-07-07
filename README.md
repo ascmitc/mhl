@@ -53,7 +53,7 @@ The ASC MHL tool implementation can
 * output information about recorded history (summary of history or detailed information about single files), and
 * verify files and entire file hierarchies.
 
-Typical scenarios, sample CLI output, and generated ASC MHL files can be found in the ``examples/scenarios`` folder.
+Typical scenarios, sample CLI output, and generated ASC MHL files can be found in the [README.md](examples/scenarios/README.md) file in the ``examples/scenarios`` folder.
 
 ## Getting started
 

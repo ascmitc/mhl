@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema targetNamespace="urn:ASC:MHL:v2.0" elementFormDefault="qualified"
+    xmlns="http://www.w3.org/2001/XMLSchema" xmlns:ascmhl="urn:ASC:MHL:v2.0">
+    <simpleType name="EmailAddressAttributeType">
+        <restriction base="string">
+            <pattern value="[^@]+@[^\.]+\..+"/>
+        </restriction>
+    </simpleType>
+    <simpleType name="ActionAttributeType">
+        <restriction base="string">
+            <enumeration value="original"/>
+            <enumeration value="new"/>
+            <enumeration value="verified"/>
+            <enumeration value="failed"/>
+        </restriction>
+    </simpleType>
+
+    <complexType name="HashListType">
+        <all maxOccurs="1">
+            <element name="creatorinfo" type="ascmhl:CreatorInfoType"/>
+            <element name="metadata" type="ascmhl:MetadataType" minOccurs="0"/>
+            <element name="hashes" type="ascmhl:HashesType" minOccurs="1"/>
+            <element maxOccurs="1" minOccurs="0" name="references" type="ascmhl:ReferencesType"/>
+        </all>
+        <attribute fixed="2.0" name="version" use="required"/>
+    </complexType>
+    <complexType name="CreatorInfoType">
+        <sequence>
+            <element name="creationdate" type="dateTime" maxOccurs="1" minOccurs="1"/>
+            <element name="hostname" type="string" maxOccurs="1" minOccurs="1"/>
+            <element name="root" type="ascmhl:HashType"/>
+            <element name="tool" type="ascmhl:ToolType" maxOccurs="1" minOccurs="1"/>
+            <element maxOccurs="unbounded" minOccurs="0" name="author" type="ascmhl:AuthorType"/>
+            <element minOccurs="0" name="location" type="string"/>
+            <element name="process" type="ascmhl:ProcessType" maxOccurs="1" minOccurs="1"/>
+            <element minOccurs="0" name="comment" type="string"/>
+            <element name="ignore" type="ascmhl:IgnoreType" minOccurs="0"/>
+        </sequence>
+    </complexType>
+    <complexType name="AuthorType">
+        <simpleContent>
+            <extension base="string">
+                <attribute name="email" type="ascmhl:EmailAddressAttributeType"/>
+                <attribute name="phone" type="string"/>
+                <attribute name="role" type="string"/>
+            </extension>
+        </simpleContent>
+    </complexType>
+    <complexType name="ToolType">
+        <simpleContent>
+            <extension base="string">
+                <attribute name="version" type="string"/>
+            </extension>
+        </simpleContent>
+    </complexType>
+    <simpleType name="ProcessTypeType">
+        <restriction base="string">
+            <enumeration value="in-place"/>
+            <enumeration value="transfer"/>
+        </restriction>
+    </simpleType>
+    <complexType block="" name="ProcessType">
+        <simpleContent>
+            <extension base="ascmhl:ProcessTypeType">
+                <attribute name="hashsource" use="optional">
+                    <simpleType>
+                        <restriction base="string">
+                            <enumeration value="file"/>
+                            <enumeration value="source"/>
+                            <enumeration value="source+file"/>
+                            <enumeration value="other"/>
+                        </restriction>
+                    </simpleType>
+                </attribute>
+            </extension>
+        </simpleContent>
+    </complexType>
+    <complexType name="IgnoreType">
+        <sequence>
+            <element maxOccurs="unbounded" name="pattern" type="string"/>
+        </sequence>
+    </complexType>
+    <complexType name="HashesType">
+        <sequence>
+            <element name="hash" type="ascmhl:HashType" maxOccurs="unbounded" minOccurs="1"/>
+        </sequence>
+    </complexType>
+    <complexType name="HashType">
+        <sequence>
+            <element name="path">
+                <complexType>
+                    <simpleContent>
+                        <extension base="string">
+                            <attribute name="size" type="integer"/>
+                            <attribute name="creationdate" type="dateTime"/>
+                            <attribute name="lastmodificationdate" type="dateTime"/>
+                        </extension>
+                    </simpleContent>
+                </complexType>
+            </element>
+            <choice maxOccurs="unbounded">
+                <element name="md5" type="ascmhl:HashFormatType" minOccurs="0"/>
+                <element name="sha1" type="ascmhl:HashFormatType" minOccurs="0"/>
+                <element name="c4" type="ascmhl:HashFormatType" minOccurs="0"/>
+                <element name="xxh32" type="ascmhl:HashFormatType" maxOccurs="1" minOccurs="0"/>
+                <element name="xxh64" type="ascmhl:HashFormatType" maxOccurs="1" minOccurs="0"/>
+                <element name="xxh3" type="ascmhl:HashFormatType" maxOccurs="1" minOccurs="0"/>
+            </choice>
+            <element minOccurs="0" name="metadata" type="ascmhl:MetadataType"/>
+        </sequence>
+        <attribute name="directory" type="boolean"/>
+    </complexType>
+    <complexType name="HashFormatType">
+        <simpleContent>
+            <extension base="string">
+                <attribute name="action" type="ascmhl:ActionAttributeType"/>
+                <attribute name="hashdate" type="dateTime"/>
+            </extension>
+        </simpleContent>
+    </complexType>
+    <complexType name="ReferencesType">
+        <sequence>
+            <element maxOccurs="unbounded" name="hashlistreference"
+                type="ascmhl:HashListReferenceType"/>
+        </sequence>
+    </complexType>
+    <complexType name="HashListReferenceType">
+        <sequence>
+            <element name="path" type="string"/>
+            <element name="c4" type="ascmhl:HashFormatType"/>
+        </sequence>
+    </complexType>
+    <complexType name="MetadataType">
+        <complexContent>
+            <extension base="anyType"/>
+        </complexContent>
+    </complexType>
+    <element name="hashlist" type="ascmhl:HashListType"/>
+</schema>

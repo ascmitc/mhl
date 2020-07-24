@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hashlist version="2.0" xmlns="urn:ASC:MHL:v2.0">
+  <creatorinfo>
+    <creationdate>2020-01-17T14:30:00+00:00</creationdate>
+    <hostname>myHost.local</hostname>
+    <root directory="true">
+      <path lastmodificationdate="2020-01-15T13:00:00+00:00">/file_server/A002R2EC</path>
+      <md5>2c32f5fbcd0ffa1ddb36f71f77d8d7d7</md5>
+    </root>
+    <tool version="0.0.1">seal</tool>
+    <process>in-place</process>
+  </creatorinfo>
+  <hashes>
+    <hash>
+      <path size="5" lastmodificationdate="2020-01-15T13:00:00+00:00">Clips/A002C006_141024_R2EC.mov</path>
+      <xxh64 action="verified">0ea03b369a463d9d</xxh64>
+      <md5 action="new">f5ac8127b3b6b85cdc13f237c6005d80</md5>
+    </hash>
+    <hash>
+      <path size="4" lastmodificationdate="2020-01-15T13:00:00+00:00">Clips/A002C007_141024_R2EC.mov</path>
+      <xxh64 action="verified">7680e5f98f4a80fd</xxh64>
+      <md5 action="new">614dd0e977becb4c6f7fa99e64549b12</md5>
+    </hash>
+    <hash directory="true">
+      <path lastmodificationdate="2020-01-15T13:00:00+00:00">Clips</path>
+      <md5>f5c3ace05a05992f8fd338eb2be34341</md5>
+    </hash>
+    <hash>
+      <path size="58" lastmodificationdate="2020-01-15T13:00:00+00:00">Sidecar.txt</path>
+      <xxh64 action="verified">3ab5a4166b9bde44</xxh64>
+      <md5 action="new">6425c5a180ca0f420dd2b25be4536a91</md5>
+    </hash>
+  </hashes>
+</hashlist>

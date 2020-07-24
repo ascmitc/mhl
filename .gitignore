@@ -1,8 +1,7 @@
 *.DS_Store
-/scenarios/Temp
 /TODOs.md
 /venv
 /env
 /.idea
-/asc-mhl
 __pycache__
+xsd/xsdvi.log

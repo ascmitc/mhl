@@ -5,3 +5,5 @@
 /.idea
 __pycache__
 xsd/xsdvi.log
+
+docs/build

@@ -7,3 +7,4 @@ __pycache__
 xsd/xsdvi.log
 
 docs/build
+docs/docenv

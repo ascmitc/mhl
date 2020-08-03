@@ -7,14 +7,13 @@ Welcome to ascmhl's documentation!
 ==================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: Contents:
 
    installation
+   commands
 
-.. click:: ascmhl:mhltool_cli
-  :prog: ascmhl
-  :show-nested:
+
 
 Indices and tables
 ==================

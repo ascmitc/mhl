@@ -21,6 +21,7 @@ project = 'ascmhl'
 copyright = '2020, American Society of Cinematographers (ASC)'
 author = 'American Society of Cinematographers (ASC)'
 
+master_doc = 'index'
 
 # -- General configuration ---------------------------------------------------
 

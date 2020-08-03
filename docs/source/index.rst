@@ -12,6 +12,9 @@ Welcome to ascmhl's documentation!
 
    installation
 
+.. click:: ascmhl:mhltool_cli
+  :prog: ascmhl
+  :show-nested:
 
 Indices and tables
 ==================

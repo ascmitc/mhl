@@ -1,0 +1,5 @@
+# use our project root requirements
+# add doc gen requirements to base requirements.
+-r ../../requirements.txt
+Sphinx==3.1.2
+sphinx-click==2.5.0

@@ -7,7 +7,6 @@ __maintainer__ = "Patrick Renner, Alexander Sahm"
 __email__ = "opensource@pomfort.com"
 """
 
-
 import datetime
 import os
 import platform
@@ -16,6 +15,7 @@ import click
 from lxml import etree
 
 from . import logger
+from . import ignore
 from . import utils
 from .__version__ import ascmhl_supported_hashformats
 from .generator import MHLGenerationCreationSession
@@ -24,14 +24,18 @@ from .hashlist import MHLCreatorInfo, MHLTool, MHLProcess
 from .history import MHLHistory
 from .traverse import post_order_lexicographic
 
+
 @click.command()
 @click.argument('root_path', type=click.Path(exists=True))
 @click.option('--verbose', '-v', default=False, is_flag=True, help="Verbose output")
+@click.option('ignore_list', '--ignore', '-i', multiple=True, help="A single file pattern to ignore.")
+@click.option('--ignore_file', type=click.Path(exists=True),
+              help="A file containing multiple file patterns to ignore.")
 @click.option('--no_directory_hashes', '-n', default=True, is_flag=True,
               help="Skip creation of directory hashes, only reference directories without hash")
 @click.option('--hash_format', '-h', type=click.Choice(ascmhl_supported_hashformats), multiple=False,
               default='xxh64', help="Algorithm")
-def seal(root_path, verbose, hash_format, no_directory_hashes):
+def seal(root_path, verbose, ignore_list, ignore_file, hash_format, no_directory_hashes):
     """
     Creates a new generation with all files in a folder hierarchy.
 
@@ -61,7 +65,9 @@ def seal(root_path, verbose, hash_format, no_directory_hashes):
     num_failed_verifications = 0
     # store the directory hashes of sub folders so we can use it when calculating the hash of the parent folder
     dir_hash_mappings = {}
-    for folder_path, children in post_order_lexicographic(root_path):
+
+    ignore_spec = ignore.spec_from(ignore_file, ignore_list)
+    for folder_path, children in post_order_lexicographic(root_path, ignore_spec):
         # generate directory hashes
         dir_hash_context = None
         if no_directory_hashes:

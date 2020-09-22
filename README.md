@@ -132,17 +132,19 @@ The `info -sf` ("single file") command prints the known history of a single file
 
 _Implementation status 2020-09-08:_
 
-* __Implemented__: `create`, `verify` (partially), `_validatexml`
-* __Not implemented yet__: `diff`, `info`
+* __Implemented__: `create`, `verify` (partially), `diff`, `_validatexml`
+* __Not implemented yet__: `info`
 
 _The commands are also marked below with their current implementation status._
 
 
 ### The `create` command
 
+The `create` command hashes all files given with the different options and creates a new generation in the mhl-history with records for all hashed files. The command compares the hashes against the hashes stored in previous generations if available.
+
 #### `create` default behavior (for file hierarchy, with completeness check)
 
-The `create` command without subcommand option creates a new generation in the mhl-history. It traverses through a folder hierarchy (such as a folder with media files, a camera card, or an entire drive). The command hashes all files (not ignored by the given ignore patterns given with the `-i` or `-if` options) and the hashes are compared against records in the `ascmhl` folder. It records all hashed files in the new generation. Directory hashes are computed and also recorded in the new generation.
+The `create` command traverses through a folder hierarchy (such as a folder with media files, a camera card, or an entire drive). The command hashes all files (not ignored by the given ignore patterns given with the `-i` or `-if` options) and the hashes are compared against records in the `ascmhl` folder. It records all hashed files in the new generation. Directory hashes are computed and also recorded in the new generation.
 
 The command detects, prints error, and exits with a non-0 exit code if it finds files that are registered in the `ascmhl` folder but that are missing in the file system. 
 
@@ -174,22 +176,19 @@ compare found files in file system with records in ascmhl folder and \
 create new generation(s) (mhllib)
 ```
 
-#### `create` with `-sf` subcommand option (for single files, no completeness check)
+#### `create` with `-sf` option(s) (for single file(s), no completeness check)
 
-The `create` command with `-sf` subcommand option creates a new generation in the mhl-history. It is run with the root path of the file hierarchy as well as one or multiple paths to the individual files and folders to be recorded as the parameters.
+The `create` command with `-sf` option is run with the root path of the file hierarchy as well as one or multiple paths to the individual files to be recorded as the parameters.
 
 This command can be used for instance when adding single files to an already mhl-managed file hierarchy.
 
 ```
-$ ./ascmhl.py create -sf /path /path/to/single/file
+$ ./ascmhl.py create /path/to/root/folder -sf /path/to/single/file1 [-sf /path/to/single/file2 ..]
 ```
 
 A new generation is created in all `ascmhl` folders below the given root path (e.g. in a nested mhl-history). If no mhl-history is present yet, an error is thrown.
 
-The following files will not be handled by this command:
-
-* that are referenced in the existing ascmhl history but not specified as input, and
-* files that are neither referenced in the history nor specified as input.
+No other files than the ones specified as `-sf` options are handled by this command.
 
 Implementation:
 
@@ -241,7 +240,7 @@ end with exit !=0 if at least one of the files has failed, a file was \
 ```
 
 
-#### `verify` with `-sf` subcommand option (for single files, no completeness check) _[not implemented yet]_
+#### `verify` with `-sf` option (for single files, no completeness check) _[not implemented yet]_
 
 The `verify` command can be used to verify a single or multiple files. It is run with either 
 
@@ -302,7 +301,7 @@ on error (including mismatching hash):
 	end with exit !=0
 ```
 
-### The `diff` command _[not implemented yet]_
+### The `diff` command
 
 The `diff` command is very similar to the `verify` command in the default behavior, only that it doesn't create hashes and doesn't verify them. It can be used to quickly check if a folder structure has new files that have not been recorded yet, or if files are missing.
 
@@ -335,6 +334,7 @@ compare found files in file system with records in ascmhl folder \
 end with exit !=0 if at least one of the files has failed, a file was \
   missing, or new files have been found
 ```
+
 
 ### The `info` command _[not implemented yet]_
 
@@ -407,13 +407,13 @@ print directory hash
 ```
 
 
-### The `_validatexml` command
+### The `validatexml` command
 
-The `_validatexml` command validates a given ASC MHL file against the XML XSD. This command can be used to ensure the creation of syntactically valid ASC MHL files, for example during  implementation of tools creating ASC MHL files.
+The `validatexml` command validates a given ASC MHL file against the XML XSD. This command can be used to ensure the creation of syntactically valid ASC MHL files, for example during  implementation of tools creating ASC MHL files.
 
 
 ```
-$ ./ascmhl.py _validatexml /path/to/ascmhl/XXXXX.mhl
+$ ./ascmhl.py validatexml /path/to/ascmhl/XXXXX.mhl
 ```
 
 

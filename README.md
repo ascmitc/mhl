@@ -103,7 +103,7 @@ The ascmhl tool can be used to
 * print information about an MHL history (command `info`).
 
 Additional utility commands:
-* for validating MHL (command `_validatexml`)
+* for validating MHL (command `validatexml`)
 
 
 ### Working with file hierarchies (with completeness check)
@@ -132,8 +132,8 @@ The `info -sf` ("single file") command prints the known history of a single file
 
 _Implementation status 2020-09-08:_
 
-* __Implemented__: `create`, `verify` (partially), `diff`, `_validatexml`
-* __Not implemented yet__: `info`
+* __Implemented__: `create`, `verify` (partially), `diff`, `validatexml`
+* __Not implemented yet__: _`info`
 
 _The commands are also marked below with their current implementation status._
 

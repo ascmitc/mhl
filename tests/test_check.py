@@ -15,7 +15,7 @@ import mhl.commands
 
 def test_check_succeed(fs, simple_mhl_history):
     runner = CliRunner()
-    result = runner.invoke(mhl.commands.check, ['/root'])
+    result = runner.invoke(mhl.commands.verify, ['/root'])
     assert result.exit_code == 0
 
 
@@ -23,7 +23,7 @@ def test_check_fail_missing_history(fs):
     fs.create_file('/root/Stuff.txt', contents='stuff\n')
 
     runner = CliRunner()
-    result = runner.invoke(mhl.commands.check, ['/root'])
+    result = runner.invoke(mhl.commands.verify, ['/root'])
     assert result.exit_code == 11
     assert '/root' in result.output
 
@@ -34,7 +34,7 @@ def test_check_fail_altered_file(fs, simple_mhl_history):
         file.write('!!')
 
     runner = CliRunner()
-    result = runner.invoke(mhl.commands.check, ['/root'])
+    result = runner.invoke(mhl.commands.verify, ['/root'])
     assert result.exit_code == 12
     assert 'Stuff.txt' in result.output
 
@@ -43,7 +43,7 @@ def test_check_fail_new_file(fs, simple_mhl_history):
     # create a file not referenced in the history
     fs.create_file('/root/other.txt', contents='other\n')
     runner = CliRunner()
-    result = runner.invoke(mhl.commands.check, ['/root'])
+    result = runner.invoke(mhl.commands.verify, ['/root'])
     assert result.exit_code == 13
     assert 'other.txt' in result.output
 
@@ -53,6 +53,6 @@ def test_check_fail_missing_file(fs, simple_mhl_history):
     os.remove('/root/Stuff.txt')
 
     runner = CliRunner()
-    result = runner.invoke(mhl.commands.check, ['/root'])
+    result = runner.invoke(mhl.commands.verify, ['/root'])
     assert result.exit_code == 15
     assert 'Stuff.txt' in result.output

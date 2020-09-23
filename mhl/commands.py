@@ -49,7 +49,6 @@ def create(root_path, verbose, hash_format, no_directory_hashes, single_file):
     create_for_folder_subcommand(root_path, verbose, hash_format, no_directory_hashes, single_file)
     exit(0)
 
-
 def create_for_folder_subcommand(root_path, verbose, hash_format, no_directory_hashes, single_file):
     # command formerly known as "seal"
     """
@@ -114,12 +113,6 @@ def create_for_folder_subcommand(root_path, verbose, hash_format, no_directory_h
 
     if exception:
         raise exception
-
-    logger.verbose_logging = verbose
-    logger.verbose(f'Do nothing on: {root_path} ...')
-    for path in single_file:
-        logger.verbose(f'  sf: : {path} ...')
-
 
 def create_for_single_files_subcommand(root_path, verbose, hash_format, no_directory_hashes, single_file):
     # command formerly known as "record"
@@ -322,7 +315,6 @@ def diff_entire_folder_against_full_history_subcommand(root_path, verbose):
 
     if exception:
         raise exception
-
 
 
 @click.command()

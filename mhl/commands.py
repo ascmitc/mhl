@@ -46,9 +46,9 @@ def create(root_path, verbose, hash_format, no_directory_hashes, single_file):
     # distinguish different behavior for entire folder vs single files
     if single_file is not None and len(single_file) > 0:
         create_for_single_files_subcommand(root_path, verbose, hash_format, no_directory_hashes, single_file)
-        exit(0)
+        return
     create_for_folder_subcommand(root_path, verbose, hash_format, no_directory_hashes, single_file)
-    exit(0)
+    return
 
 def create_for_folder_subcommand(root_path, verbose, hash_format, no_directory_hashes, single_file):
     # command formerly known as "seal"
@@ -177,7 +177,7 @@ def verify(root_path, verbose):
     """
     #TODO distinguish different behavior
     verify_entire_folder_against_full_history_subcommand(root_path, verbose)
-    exit(0)
+    return
 
 def verify_entire_folder_against_full_history_subcommand(root_path, verbose):
     # command formerly known as "check"
@@ -259,7 +259,7 @@ def diff(root_path, verbose):
     Diff an entire folder structure
     """
     diff_entire_folder_against_full_history_subcommand(root_path, verbose)
-    exit(0)
+    return
 
 def diff_entire_folder_against_full_history_subcommand(root_path, verbose):
     """

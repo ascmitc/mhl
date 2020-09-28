@@ -1,6 +1,5 @@
 
 # ASC Media Hash List (ASC MHL)
-
 > The software in this repository aids the ongoing specification process of the ASC MHL format by the Advanced Data Management Subcommittee of the ASC Motion Imaging Technology Council at the [American Society of Cinematographers](https://theasc.com) (ASC). 
 > 
 > This software is work in progress and is not intended to be used in production (yet).

@@ -16,6 +16,7 @@ import click
 from lxml import etree
 
 from . import logger
+from . import errors
 from . import utils
 from .__version__ import ascmhl_supported_hashformats
 from .generator import MHLGenerationCreationSession
@@ -109,7 +110,7 @@ def create_for_folder_subcommand(root_path, verbose, hash_format, no_directory_h
 
     exception = test_for_missing_files(not_found_paths, root_path)
     if num_failed_verifications > 0:
-        exception = logger.VerificationFailedException()
+        exception = errors.VerificationFailedException()
 
     if exception:
         raise exception
@@ -164,7 +165,7 @@ def create_for_single_files_subcommand(root_path, verbose, hash_format, no_direc
     commit_session(session)
 
     if num_failed_verifications > 0:
-        raise logger.VerificationFailedException()
+        raise errors.VerificationFailedException()
 
 
 @click.command()
@@ -200,7 +201,7 @@ def verify_entire_folder_against_full_history_subcommand(root_path, verbose):
     existing_history = MHLHistory.load_from_path(root_path)
 
     if len(existing_history.hash_lists) == 0:
-        raise logger.NoMHLHistoryException(root_path)
+        raise errors.NoMHLHistoryException(root_path)
 
     # we collect all paths we expect to find first and remove every path that we actually found while
     # traversing the file system, so this set will at the end contain the file paths not found in the file system
@@ -239,9 +240,9 @@ def verify_entire_folder_against_full_history_subcommand(root_path, verbose):
 
     exception = test_for_missing_files(not_found_paths, root_path)
     if num_new_files > 0:
-        exception = logger.NewFilesFoundException()
+        exception = errors.NewFilesFoundException()
     if num_failed_verifications > 0:
-        exception = logger.VerificationFailedException()
+        exception = errors.VerificationFailedException()
 
     if exception:
         raise exception
@@ -280,7 +281,7 @@ def diff_entire_folder_against_full_history_subcommand(root_path, verbose):
     existing_history = MHLHistory.load_from_path(root_path)
 
     if len(existing_history.hash_lists) == 0:
-        raise logger.NoMHLHistoryException(root_path)
+        raise errors.NoMHLHistoryException(root_path)
 
     # we collect all paths we expect to find first and remove every path that we actually found while
     # traversing the file system, so this set will at the end contain the file paths not found in the file system
@@ -309,9 +310,9 @@ def diff_entire_folder_against_full_history_subcommand(root_path, verbose):
 
     exception = test_for_missing_files(not_found_paths, root_path)
     if num_new_files > 0:
-        exception = logger.NewFilesFoundException()
+        exception = errors.NewFilesFoundException()
     if num_failed_verifications > 0:
-        exception = logger.VerificationFailedException()
+        exception = errors.VerificationFailedException()
 
     if exception:
         raise exception
@@ -334,7 +335,7 @@ def validatexml(file_path):
     else:
         logger.error(f'ERROR: {file_path} didn\'t validate against XSD!')
         logger.info(f'Issues:\n{xsd.error_log}')
-        raise logger.VerificationFailedException
+        raise errors.VerificationFailedException
 
 
 
@@ -384,7 +385,7 @@ def test_for_missing_files(not_found_paths, root_path):
     logger.error(f"ERROR: {len(not_found_paths)} missing file(s):")
     for path in not_found_paths:
         logger.error(f"  {os.path.relpath(path, root_path)}")
-    return logger.CompletenessCheckFailedException()
+    return errors.CompletenessCheckFailedException()
 
 
 def commit_session(session):

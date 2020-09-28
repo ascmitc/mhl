@@ -7,6 +7,7 @@ __maintainer__ = "Patrick Renner"
 __email__ = "opensource@pomfort.com"
 """
 
+import click
 
 class CompletenessCheckFailedException(click.ClickException):
     exit_code = 15

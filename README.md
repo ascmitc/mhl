@@ -54,6 +54,9 @@ The ASC MHL tool implementation can
 
 Typical scenarios, sample CLI output, and generated ASC MHL files can be found in the [README.md](examples/scenarios/README.md) file in the ``examples/scenarios`` folder.
 
+The documentation can also be found at [https://ascmhl.readthedocs.io/](https://ascmhl.readthedocs.io/)
+
+
 ## Getting started
 
 The `mhllib` as well as the `ascmhl` tool require a few dependencies that need to be installed first. 

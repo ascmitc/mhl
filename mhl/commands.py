@@ -320,8 +320,8 @@ def diff_entire_folder_against_full_history_subcommand(root_path, verbose):
 
 @click.command()
 @click.argument('file_path', type=click.Path(exists=True))
-def validatexml(file_path):
-    """Validates a mhl file against the xsd schema definition."""
+def xsd_schema_check(file_path):
+    """checks a mhl file against the xsd schema definition."""
 
     xsd_path = 'xsd/ASCMHL.xsd'
     xsd = etree.XMLSchema(etree.parse(xsd_path))

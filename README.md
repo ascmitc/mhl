@@ -103,7 +103,7 @@ The ascmhl tool can be used to
 * print information about an MHL history (command `info`).
 
 Additional utility commands:
-* for validating MHL (command `validatexml`)
+* for validating MHL (command `xsd-schema-check`)
 
 
 ### Working with file hierarchies (with completeness check)
@@ -132,7 +132,7 @@ The `info -sf` ("single file") command prints the known history of a single file
 
 _Implementation status 2020-09-08:_
 
-* __Implemented__: `create`, `verify` (partially), `diff`, `validatexml`
+* __Implemented__: `create`, `verify` (partially), `diff`, `xsd-schema-check`
 * __Not implemented yet__: _`info`
 
 _The commands are also marked below with their current implementation status._
@@ -407,13 +407,13 @@ print directory hash
 ```
 
 
-### The `validatexml` command
+### The `xsd-schema-check` command
 
-The `validatexml` command validates a given ASC MHL file against the XML XSD. This command can be used to ensure the creation of syntactically valid ASC MHL files, for example during  implementation of tools creating ASC MHL files.
+The `xsd-schema-check` command validates a given ASC MHL file against the XML XSD. This command can be used to ensure the creation of syntactically valid ASC MHL files, for example during  implementation of tools creating ASC MHL files.
 
 
 ```
-$ ./ascmhl.py validatexml /path/to/ascmhl/XXXXX.mhl
+$ ./ascmhl.py xsd-schema-check /path/to/ascmhl/XXXXX.mhl
 ```
 
 

@@ -23,7 +23,7 @@ def mhltool_cli():
 mhltool_cli.add_command(commands.create)
 mhltool_cli.add_command(commands.verify)
 mhltool_cli.add_command(commands.diff)
-mhltool_cli.add_command(commands.validatexml)
+mhltool_cli.add_command(commands.xsd_schema_check)
 
 # old
 mhltool_cli.add_command(commands.directory_hash, "dirhash")

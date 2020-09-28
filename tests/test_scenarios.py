@@ -167,7 +167,7 @@ def validate_all_mhl_files_against_xml_schema(folder_path: str):
     mhl_files = glob.glob(folder_path + r'/**/*.mhl', recursive=True)
     runner = CliRunner()
     for file in mhl_files:
-        result = runner.invoke(mhl.commands.validatexml, file)
+        result = runner.invoke(mhl.commands.xsd_schema_check, file)
         assert result.exit_code == 0, result.output
 
 

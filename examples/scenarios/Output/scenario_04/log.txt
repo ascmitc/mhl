@@ -6,7 +6,7 @@ Assume the source card /A002R2EC is copied to a travel drive /travel_01.
 
 Seal the copy on the travel drive /travel_01 to create the original mhl generation.
 
-$ ascmhl.py seal -v /travel_01/A002R2EC
+$ ascmhl.py create -v /travel_01/A002R2EC
 Sealing folder at path: /travel_01/A002R2EC ...
   created original hash for     Clips/A002C006_141024_R2EC.mov  xxh64: 0ea03b369a463d9d
   created original hash for     Clips/A002C007_141024_R2EC.mov  xxh64: 7680e5f98f4a80fd
@@ -27,7 +27,7 @@ Sealing the folder A002R2EC again on the file server.
 This will verify all existing hashes and fail because Sidecar.txt was altered.
 An error is shown and create a new generation that documents the failed verification
 
-$ ascmhl.py seal -v /file_server/A002R2EC
+$ ascmhl.py create -v /file_server/A002R2EC
 Sealing folder at path: /file_server/A002R2EC ...
   verified                      Clips/A002C006_141024_R2EC.mov  OK
   verified                      Clips/A002C007_141024_R2EC.mov  OK

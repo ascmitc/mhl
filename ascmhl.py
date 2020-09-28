@@ -19,12 +19,14 @@ class NaturalOrderGroup(click.Group):
 def mhltool_cli():
     pass
 
+# new
+mhltool_cli.add_command(commands.create)
+mhltool_cli.add_command(commands.verify)
+mhltool_cli.add_command(commands.diff)
+mhltool_cli.add_command(commands.xsd_schema_check)
 
-mhltool_cli.add_command(commands.seal)
-mhltool_cli.add_command(commands.check)
-mhltool_cli.add_command(commands.record)
+# old
 mhltool_cli.add_command(commands.directory_hash, "dirhash")
-mhltool_cli.add_command(commands.validate)
 
 
 if __name__ == '__main__':

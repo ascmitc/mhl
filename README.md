@@ -68,6 +68,7 @@ For installing system dependencies on macOS [Homebrew](https://brew.sh) is recom
 ```shell
 $ ./ascmhl.py --help
 $ ./ascmhl.py verify --help
+```
 
 Make sure you have Python 3 installed:
 
@@ -88,54 +89,73 @@ $ pip3 install -r requirements.txt
 
 > As of now, this process has only been tested on macOS 10.13.
 
+
 ## Installing `ascmhl`
 
 > TBD
 
 
+## Common Scenarios for `ascmhl.py`
 
-## Running `ascmhl.py`
+The ascmhl tool can be used to 
 
-The ascmhl toll can be used to work with 
-
-* entire file hierarchies (commands `seal`, `check`, and `diff`), 
-* ascmhl history folders (command `info`), and 
-* on single files or lists of files (commands `record`, `verify`, `dirhash`, and `history`).
+* create new MHL generations for given files and folders (command `create`), 
+* verify the state of files and folders against the MHL history (command `verify`),
+* print differences between the records in the MHL history and given files and folders (command `diff`), and
+* print information about an MHL history (command `info`).
 
 Additional utility commands:
-* for validating MHL (command `validate`)
+* for validating MHL (command `xsd-schema-check`)
 
-Implementation status 2020-07-03:
 
-* __Implemented__: `seal`, `check`, `record`, `dirhash`, `validate`
-* __Not implemented yet__: `diff`, `info`, `verify`, `history`
+### Working with file hierarchies (with completeness check)
+
+The most common commands when using the `mhl-tool.py` in data management scenarios are the `create` and the `check` commands in their default behavior (without subcommand options). 
+
+Sealing a folder / drive with the `create` command traverses through a folder hierarchy, hashes all found files and compares the hashes against the records in the `ascmhl` folder (if present). The command creates a new generation (or an initial one) for the content of an entire folder at the given folder level. It can be used to document all files in a folder or drive with all verified or newly created file hashes of the moment the `create` command ran.
+
+Checking a folder / drive with the `verify` command traverses through the content of a folder, hashes all found files and compares the hashes against the records in the `ascmhl` folder. The `verify` command behaves like a `create` command (both without additional options), but doesn't write new generations. It can be used to verify the content of a received drive with existing ascmhl information.
+
+The `diff` command also traverses through the content of a folder / drive.  The `diff` command thus behaves like the `verify` command, but the `diff` command does not hash any files (e.g. doesn't do file verification) and thus is much faster in execution. It can be used to print all files that are existent in the file system and are not registered in the `ascmhl` folder yet, and all files that are registered in the `ascmhl` folder but that are missing in the file system.
+
+
+### Working with single files (without completeness check)
+
+In some scenarios working with an entire folder structure is not adequate, and finer control of the processes files is needed. For those scenarios the `create` and `verify` commands are used with additional subcommand options.
+
+Adding single files in a new generation with the `create -sf` ("single files, no completeness check") command allows to add single files to an existing folder structure and create new generations only with records of these files.
+
+Hashing and verifying single files against hash information stored in the `ascmhl` folder with the `verify -sf` ("single files") command allows to "check" single files without the need for a (probably much longer running) check of the integrity of the entire folder structure. 
+
+The `info -sf` ("single file") command prints the known history of a single file with details about all generations.
+
+
+## Commands of `ascmhl.py`
+
+_Implementation status 2020-09-08:_
+
+* __Implemented__: `create`, `verify` (partially), `diff`, `xsd-schema-check`
+* __Not implemented yet__: _`info`
 
 _The commands are also marked below with their current implementation status._
 
 
-## Working with file hierarchies
+### The `create` command
 
-The most common commands when using the `mhl-too.py` in data management scenarios are the `seal` and the `check` commands. 
+The `create` command hashes all files given with the different options and creates a new generation in the mhl-history with records for all hashed files. The command compares the hashes against the hashes stored in previous generations if available.
 
-Sealing a folder / drive with the `seal` command traverses through a folder hierarchy, hashes all found files and compares ("verifies") the hashes against the records in the `ascmhl` folder (if present). The command creates a new generation (or an initial one) for the content of an entire folder at the given folder level. It can be used to document all files in a folder or drive with all verified or newly created file hashes of the moment the `seal` command ran.
+#### `create` default behavior (for file hierarchy, with completeness check)
 
-Checking a folder / drive with the `check` command traverses through the content of a folder, hashes all found files and compares ("verifies") the hashes against the records in the `ascmhl` folder. The `check` command behaves like a `seal` command, but doesn't write new generations. It can be used to verify the content of a received drive with existing ascmhl information.
-
-The `diff` command also traverses through the content of a folder / drive.  The `diff` command thus behaves like the `check` command, but the `diff` command does not hash any files (e.g. doesn't do file verification) and thus is much faster in execution. It can be used to print all files that are existent in the file system and are not registered in the `ascmhl` folder yet, and all files that are registered in the `ascmhl` folder but that are missing in the file system.
-
-
-### The `seal` command
-
-The `seal` command traverses through a folder hierarchy (such as a folder with media files, a camera card, or an entire drive). The command hashes all files and the hashes are compared against records in the `ascmhl` folder.
+The `create` command traverses through a folder hierarchy (such as a folder with media files, a camera card, or an entire drive). The command hashes all files (not ignored by the given ignore patterns given with the `-i` or `-if` options) and the hashes are compared against records in the `ascmhl` folder. It records all hashed files in the new generation. Directory hashes are computed and also recorded in the new generation.
 
 The command detects, prints error, and exits with a non-0 exit code if it finds files that are registered in the `ascmhl` folder but that are missing in the file system. 
 
 Files that are existent in the file system but are not registered in the `ascmhl` folder yet, are registered as new entries in the newly created generation(s).
 
-The `seal` command takes the root path of the file hierarchy as the parameter:
+The `create` command takes the root path of the file hierarchy as the parameter:
 
 ```
-$ ./ascmhl.py seal /path/to/folder/
+$ ./ascmhl.py create [-i ignore pattern|-if /path/to/ignore-file.txt] /path/to/folder/
 ```
 
 It works on folders with or without an `ascmhl` folder within the given folder hierarchy, and creates a new `ascmhl` folder at the given folder level if none is present before.
@@ -144,21 +164,50 @@ It works on folders with or without an `ascmhl` folder within the given folder h
 
 Implementation:
 
-* _read (recursive) mhl history (mhllib)_
-* _traverse folder_
- 	* _hash each file_
-	* _if `ascmhl` folder exists, compare ("verify") hash (mhllib)_
-	* _on error (including mismatching hashes):_
-		* _print error_
-	 	* _continue_
- 	* _add files to new generation if not present yet_
-* _compare found files in file system with records in ascmhl folder and warn if files are missing that are recorded in the ascmhl folder_
-* _create new generation(s) (mhllib)_
+```
+read (recursive) mhl history (mhllib)
+traverse folder
+ 	hash each file
+	if `ascmhl` folder exists, compare hash (mhllib)
+	on error (including mismatching hashes):
+		print error
+	 	continue
+ 	add files to new generation if not present yet
+compare found files in file system with records in ascmhl folder and \
+   warn if files are missing that are recorded in the ascmhl folder
+create new generation(s) (mhllib)
+```
 
+#### `create` with `-sf` option(s) (for single file(s), no completeness check)
 
-### The `check` command
+The `create` command with `-sf` option is run with the root path of the file hierarchy as well as one or multiple paths to the individual files to be recorded as the parameters.
 
-The `check` command traverses through the content of a folder, hashes all found files and compares ("verifies") the hashes against the records in the `ascmhl` folder.
+This command can be used for instance when adding single files to an already mhl-managed file hierarchy.
+
+```
+$ ./ascmhl.py create /path/to/root/folder -sf /path/to/single/file1 [-sf /path/to/single/file2 ..]
+```
+
+A new generation is created in all `ascmhl` folders below the given root path (e.g. in a nested mhl-history). If no mhl-history is present yet, an error is thrown.
+
+No other files than the ones specified as `-sf` options are handled by this command.
+
+Implementation:
+
+```
+read (recursive) mhl-history (mhllib) starting from root path
+for each file from input
+	check if file is not recorded in `ascmhl` folder yet
+	hash file
+	add record for file to new generation (mhllib)
+		add a new generation if necessary in appropriate `ascmhl` folder (mhllib)
+```
+
+### The `verify` command
+
+#### `verify` default behavior (for file hierarchy, with completeness check)
+
+The `verify` command traverses through the content of a folder, hashes all found files  (filtered by the ignore patterns from the `ascmhl` folder) and compares the hashes against the records in the `ascmhl` folder.
 
 The command detects, prints errors, and exits with a non-0 exit code for
 
@@ -168,7 +217,7 @@ The command detects, prints errors, and exits with a non-0 exit code for
 It is run with the root path of the file hierarchy as the parameter.
 
 ```
-$ ./ascmhl.py check /path/to/folder/
+$ ./ascmhl.py verify /path/to/folder/
 ```
 
 If no `ascmhl` folder is found on the root level, an error is thrown.
@@ -177,21 +226,86 @@ If no `ascmhl` folder is found on the root level, an error is thrown.
 
 Implementation:
 
-* _error if no mhl folder found on root level_
-* _read (recursive) mhl history (mhllib)_
-* _traverse folder_
-	* _hash each file_
-	* _compare ("verify") hash (mhllib)_
-	* _on error (including mismatching hashes):_
-		* _print error_
-	 	* _continue_
-* _compare found files in file system with records in ascmhl folder and warn if files are missing that are recorded in the ascmhl folder_
-* _end with exit !=0 if at least one of the files has failed, a file was missing, or new files have been found_
+```
+error if no mhl folder found on root level
+read (recursive) mhl history (mhllib)
+traverse folder
+	hash each file (filtered by ignore patterns from mhl folder)
+	compare hash (mhllib)
+	on error (including mismatching hashes):
+		print error
+	 	continue
+compare found files in file system with records in ascmhl folder and \
+  warn if files are missing that are recorded in the ascmhl folder
+end with exit !=0 if at least one of the files has failed, a file was \
+  missing, or new files have been found
+```
 
 
-### The `diff` command _[not implemented yet]_
+#### `verify` with `-sf` option (for single files, no completeness check) _[not implemented yet]_
 
-The `diff` command is very similar to the `check` command, only that it doesn't create hashes and doesn't verify them. It can be used to quickly check if a folder structure has new files that have not been recorded yet, or if files are missing.
+The `verify` command can be used to verify a single or multiple files. It is run with either 
+
+* the path to a single file, or
+* a text file with paths to multiple files
+
+as the parameter.
+
+```
+$ ./ascmhl.py verify -sf /path/to/single/file
+$ ./ascmhl.py verify -sf -l list/of/files.txt
+```
+
+The command looks for an `ascmhl` folder in the folders above the given files. If no mhl-history is present yet, an error is thrown.
+
+If used with the `-l` option, all files in the list must be contained in the same (recursive) mhl-history. 
+
+Implementation:
+
+```
+if input is `-l`: create a list of files from input
+find mhl-history information in the path above (mhllib)
+	error of no `ascmhl` folder is found
+read (recursive) mhl-history (mhllib)
+for each file from input
+	hash each file
+	compare hashes (mhllib)
+if file is not found in mhl-history, throw error
+on error (including mismatching hashes):
+	don't break
+	print error
+	end with exit !=0 if at least one of the files has failed
+```
+
+
+#### `verify` with `-dh` subcommand option (for directory hash) _[not implemented yet]_
+
+The `verify` command with the `-dh` subcommand option creates the directory hash by hashing the contained files of the given directory path (filtered by the ignore patterns from the `ascmhl` folder) and compares it with the to-be-expected directory hash calculated from the file hashes (same calculation as the `info` command with the `-dh` subcommand option).
+
+
+```
+$ ./ascmhl.py verify -dh /path/to/folder
+```
+
+Implementation:
+
+```
+find mhl-history information in the path above (mhllib)
+	error of no `ascmhl` folder is found
+read (recursive) mhl history (mhllib)
+calculate to-be-expected directory hash from file hashes
+traverse folder
+ 	hash each file
+calculate actual directory hash
+compare to-be-expected directory hash with actual directory hash
+on error (including mismatching hash):
+	print error
+	end with exit !=0
+```
+
+### The `diff` command
+
+The `diff` command is very similar to the `verify` command in the default behavior, only that it doesn't create hashes and doesn't verify them. It can be used to quickly check if a folder structure has new files that have not been recorded yet, or if files are missing.
 
 The command detects, prints errors, and exits with a non-0 exit code for
 
@@ -210,29 +324,28 @@ If no `ascmhl` folder is found on the root level, an error is thrown.
 
 Implementation:
 
-* _error if no mhl folder found on root level_
-* _read (recursive) mhl history (mhllib)_
-* _traverse folder_
-	* _on missing file:_
-		* _print error_
-	 	* _continue_
-* _compare found files in file system with records in ascmhl folder and warn if files are missing that are recorded in the ascmhl folder_
-* _end with exit !=0 if at least one of the files has failed, a file was missing, or new files have been found_
-
-
-
-## Working with an `ascmhl` folder
-
-The `ascmhl` folder contains well readable XML files, but the number of recorded files, generations, hash entries, verification info and so forth adds up to an amount of information that cannot be quickly understood. 
-
-The `info` command helps to get a quick overview of the contents of the stored information in an `ascmhl` folder. 
+```
+error if no mhl folder found on root level
+read (recursive) mhl history (mhllib)
+traverse folder
+	on missing file:
+		print error
+	 	continue
+compare found files in file system with records in ascmhl folder \
+  and warn if files are missing that are recorded in the ascmhl folder
+end with exit !=0 if at least one of the files has failed, a file was \
+  missing, or new files have been found
+```
 
 
 ### The `info` command _[not implemented yet]_
 
-The `info` command can print
+#### `info` default behavior _[not implemented yet]_
 
-* a summary (with the `-s` option) of the information in an ascmhl folder, such as number of recorded files, and a list of the generations with their creator info, and/or
+The `ascmhl` folder contains well readable XML files, but the number of recorded files, generations, hash entries, verification info and so forth adds up to an amount of information that cannot be quickly understood. The `info` command helps to get a quick overview of the contents of the stored information in an `ascmhl` folder. 
+
+The `info` command prints
+* a summary (with the `-s` subcommand option) of the information in an ascmhl folder, such as number of recorded files, and a list of the generations with their creator info, and/or
 * a list (with the `-l` option) of all file (and folder) records stored in an ascmhl folder, together with relative file paths, file size, and known file hashes.
 
 It is run with the path to a specific `ascmhl`folder.
@@ -243,128 +356,66 @@ $ ./ascmhl.py info [-s|-l] /path/to/ascmhl/
 
 Implementation:
 
-* _error if no mhl folder found on root level_
-* _read (recursive) mhl history (mhllib)_
-* _if summary option:_
-	* _print summary_
-* _if list option:_
-	* _for each file record_
-		* _print file info, hashes, etc._
-
-
-## Working with single files
-
-In some scenarios "sealing" and "checking" entire folder structures is not sufficient enough, and finer control of the processes files is needed. 
-
-For that the `record`, `verify`, and `history` commands are used.
-
-Recording single files in a new generation with the `record` command allows to add single files to an existing folder structure and create new generations only with records of these files.
-
-Hashing and verifying single files against hash information stored in the `ascmhl` folder  allows to "check" single files without the need for a (probably much longer running) check of the integrity of the entire folder structure. 
-
-The `history` command prints the known history of a single file with details about all generations.
-
-
-### The `record` command
-
-The `record` command creates a new generation in the mhl-history. This can be used for instance when adding single files to an already mhl-managed file hierarchy. It is run with the root path of the file hierarchy as well as one or multiple paths to the individual files and folders to be recorded as the parameters.
-
 ```
-$ ./ascmhl.py record /path /path/to/single/file
+error if no mhl folder found on root level
+read (recursive) mhl history (mhllib)
+if summary option:
+	print summary
+if list option:
+	for each file record
+		print file info, hashes, etc.
 ```
 
-A new generation is created in all `ascmhl` folders below the given root path (e.g. in a nested mhl-history). If no mhl-history is present yet, an error is thrown.
 
-The following files will not be handled by this command:
+#### `info` with the `-sf` subcommand option _[not implemented yet]_
 
-* that are referenced in the existing ascmhl history but not specified as input, and
-* files that are neither referenced in the history nor specified as input.
-
-Implementation:
-
-* _read (recursive) mhl-history (mhllib) starting from root path_
-* _for each file from input_
-	* _check if file is not recorded in `ascmhl` folder yet_
-	* _hash file_
-	* _add record for file to new generation (mhllib)_
-		* _add new generation if necessary in appropriate `ascmhl` folder (mhllib)_
-
-
-### The `verify` command _[not implemented yet]_
-
-The `verify` command can be used to verify a single or multiple files. It is run with either 
-
-* the path to a single file, or
-* a text file with paths to multiple files
-
-as the parameter.
+The `info` command with the `-sf` subcommand option outputs information about the full and detailed history information about one file.
 
 ```
-$ ./ascmhl.py verify /path/to/single/file
-$ ./ascmhl.py verify -l list/of/files.txt
-```
-
-The command looks for an `ascmhl` folder in the folders above the given files. If no mhl-history is present yet, an error is thrown.
-
-If used with the `-l` option, all files in the list must be contained in the same (recursive) mhl-history. 
-
-Implementation:
-
-* _if input is `-f`: create a list of files from input_
-* _find mhl-history information in the path above (mhllib)_
-	* _error of no `ascmhl` folder is found_
-* _read (recursive) mhl-history (mhllib)_
-* _for each file from input_
-	* _hash each file_
-	* _compare hashes (mhllib)_ 
-* _if file is not found in mhl-history, throw error_
-* _on error (including mismatching hashes):_
-	* _don't break_
-	* _print error_
-	* _end with exit !=0 if at least one of the files has failed_
-
-
-### The `dirhash` command
-
-The `dirhash` command creates and outputs the directory hash by hashing the contained files of the given directory path.
-
-The directory hash can be used to quickly verify if the state of a folder structure is still the same compared to the last generation created with a `seal` command (manually comapre with the hash in the `<root>` tag in the ASC MHL file).
-
-
-```
-$ ./ascmhl.py dirhash /path/to/folder
-```
-
-Implementation:
-
-* _traverse folder_
- 	* _hash each file_
-* _print directory hash_
-
-
-### The `history` command _[not implemented yet]_
-
-The `history` command outputs information about the full and detailed history information about one file.
-
-```
-$ ./ascmhl.py history /path/to/file
+$ ./ascmhl.py info -sf /path/to/file
 ```
 
 The command outputs each generation where the file has been handled, including date, creator info, activity, hash, and absolute path.
 
 Implementation:
 
-* _find mhl-history information in the path above (mhllib)_
-	* _error of no `ascmhl` folder is found_
-* _print detailed info for file_ 
+```
+find mhl-history information in the path above (mhllib)
+	error of no `ascmhl` folder is found
+print detailed info for file
+```
 
 
-## Other commands
+#### `info` with the `-dh` subcommand option _[not implemented yet]_
 
-### The `validate` command
+The `info` command with the `-dh` subcommand option prints
+* the directory hash of a folder computed from stored file hashes of an `ascmhl` folder (with the `-dh` option).
 
-The `validate` command validates a given ASC MHL file against the XML XSD. This command can be used to ensure the creation of syntactically valid ASC MHL files, for example during  implementation of tools creating ASC MHL files.
+The directory hash can be used to quickly verify if the state of a folder structure is still the same compared to the last generation created with a `create` command (manually compare with the hash in the `<root>` tag in the ASC MHL file).
+
+It is run with the path to a specific `ascmhl`folder and the path to the desired folder for the computed directory hash.
+
+```
+$ ./ascmhl.py info -dh /path/to/ascmhl/ /path/to/sub/folder 
+```
+
+Implementation:
+
+```
+error if no mhl folder found on root level
+read (recursive) mhl history (mhllib)
+calculate directory hash from file hashes
+print directory hash
+```
 
 
+### The `xsd-schema-check` command
+
+The `xsd-schema-check` command validates a given ASC MHL file against the XML XSD. This command can be used to ensure the creation of syntactically valid ASC MHL files, for example during  implementation of tools creating ASC MHL files.
+
+
+```
+$ ./ascmhl.py xsd-schema-check /path/to/ascmhl/XXXXX.mhl
+```
 
 

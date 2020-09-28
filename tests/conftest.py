@@ -40,21 +40,21 @@ def nested_mhl_histories(fs):
     # create mhl histories on different directly levels
     fs.create_file('/root/Stuff.txt', contents='stuff\n')
     runner = CliRunner()
-    result = runner.invoke(mhl.commands.seal, ['/root'])
+    result = runner.invoke(mhl.commands.create, ['/root'])
     assert result.exit_code == 0
 
     fs.create_file('/root/A/AA/AA1.txt', contents='AA1\n')
     fs.create_file('/root/A/AB/AB1.txt', contents='AB1\n')
-    result = runner.invoke(mhl.commands.seal, ['/root/A/AA'])
+    result = runner.invoke(mhl.commands.create, ['/root/A/AA'])
     assert result.exit_code == 0
 
     fs.create_file('/root/B/B1.txt', contents='B1\n')
-    result = runner.invoke(mhl.commands.seal, ['/root/B'])
+    result = runner.invoke(mhl.commands.create, ['/root/B'])
     assert result.exit_code == 0
 
     fs.create_file('/root/B/BA/BA1.txt', contents='BA1\n')
     fs.create_file('/root/B/BB/BB1.txt', contents='BB1\n')
-    result = runner.invoke(mhl.commands.seal, ['/root/B/BB'])
+    result = runner.invoke(mhl.commands.create, ['/root/B/BB'])
     assert result.exit_code == 0
 
 
@@ -67,5 +67,5 @@ def simple_mhl_history(fs):
     fs.create_file('/root/A/A1.txt', contents='A1\n')
 
     runner = CliRunner()
-    result = runner.invoke(mhl.commands.seal, ['/root'])
+    result = runner.invoke(mhl.commands.create, ['/root'])
     assert result.exit_code == 0

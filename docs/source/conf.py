@@ -32,6 +32,7 @@ master_doc = 'index'
 extensions = [
     'sphinx_click',
     'sphinx_rtd_theme',
+    'recommonmark',
 ]
 
 # Add any paths that contain templates here, relative to this directory.

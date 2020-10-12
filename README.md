@@ -8,7 +8,7 @@
 
 Ensuring file integrity when backing up and verifying files during production and post production is of utmost importance. The ASC MHL is used to create a chain of custody by tracking each and every copy made between the media’s initial download on set, all the way through to final archival.
 
-The ASC MHL uses common checksum methods for hashing files and folders, but standardizes what information is gathered, where the checksum is placed, and documents these hashes together with essential file metadata in an XML format that is human readable.
+The ASC MHL uses common checksum methods for hashing files and folders, specifies what information is gathered, where the checksum is placed, and documents these hashes together with essential file metadata in an XML format that is human readable.
 
 This repository holds all information about the document format,  a reference implementation, and tools.
 
@@ -52,7 +52,7 @@ The ASC MHL tool implementation can
 * output information about recorded history (summary of history or detailed information about single files), and
 * verify files and entire file hierarchies.
 
-Typical scenarios, sample CLI output, and generated ASC MHL files can be found in the [README.md](examples/scenarios/README.md) file in the ``examples/scenarios`` folder.
+Typical scenarios, sample CLI output, and generated ASC MHL files can be found in the [README.md](https://github.com/ascmitc/mhl/blob/master/examples/scenarios/) file in the ``examples/scenarios`` folder of the git repository.
 
 The documentation can also be found at [https://ascmhl.readthedocs.io/](https://ascmhl.readthedocs.io/)
 
@@ -65,17 +65,14 @@ For installing system dependencies on macOS [Homebrew](https://brew.sh) is recom
 
 ### System requirements
 
-```shell
-$ ./ascmhl.py --help
-$ ./ascmhl.py verify --help
-```
-
 Make sure you have Python 3 installed:
 
 ```shell
 $ brew install python3
 $ brew postinstall python3
 ```
+
+### Installing `ascmhl` manually
 
 Download the source code and install dependencies using a [Virtual Environment](https://docs.python.org/3/tutorial/venv.html):
 
@@ -87,10 +84,10 @@ $ source env/bin/activate
 $ pip3 install -r requirements.txt
 ```
 
-> As of now, this process has only been tested on macOS 10.13.
+> As of now, this process has only been tested on macOS 10.13 and 10.14.
 
 
-## Installing `ascmhl`
+### Installing `ascmhl` via package manager
 
 > TBD
 

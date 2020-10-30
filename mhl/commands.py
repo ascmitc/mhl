@@ -317,6 +317,45 @@ def diff_entire_folder_against_full_history_subcommand(root_path, verbose):
     if exception:
         raise exception
 
+@click.command()
+@click.argument('root_path', type=click.Path(exists=True))
+@click.option('--verbose', '-v', default=False, is_flag=True, help="Verbose output")
+# subcommands
+@click.option('--single_file', '-sf', default=False, multiple=True,
+              type=click.Path(exists=True),
+              help="Info for single file")
+def info(root_path, verbose, single_file):
+    """
+    Info
+    """
+    if single_file is not None and len(single_file) > 0:
+        info_for_single_file(root_path, verbose, single_file)
+        return
+    return
+
+def info_for_single_file(root_path, verbose, single_file):
+    logger.verbose_logging = verbose
+
+    if not os.path.isabs(root_path):
+        root_path = os.path.join(os.getcwd(), root_path)
+
+    logger.verbose(f'Info with history at path: {root_path}')
+
+    existing_history = MHLHistory.load_from_path(root_path)
+
+    if len(existing_history.hash_lists) == 0:
+        raise errors.NoMHLHistoryException(root_path)
+
+    for path in single_file:
+        relative_path = existing_history.get_relative_file_path(path)
+        logger.info(f'{relative_path}:')
+        for hash_list in existing_history.hash_lists:
+            media_hash = hash_list.find_media_hash_for_path(relative_path)
+            if media_hash is None:
+                continue
+            for hash_entry in media_hash.hash_entries:
+                logger.info(f'  Generation {hash_list.generation_number} ({hash_list.creator_info.creation_date}) {hash_entry.hash_format}: {hash_entry.hash_string} ({hash_entry.action})')
+
 
 @click.command()
 @click.argument('file_path', type=click.Path(exists=True))

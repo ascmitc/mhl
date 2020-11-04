@@ -74,7 +74,7 @@ class MHLGenerationCreationSession:
                                                                       file_size,
                                                                       file_modification_date)
         media_hash.append_hash_entry(hash_entry)
-        return hash_entry.action is not 'failed'
+        return hash_entry.action != 'failed'
 
     def append_directory_hash(self, path, modification_date, hash_format, hash_string) -> None:
 

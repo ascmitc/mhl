@@ -79,7 +79,7 @@ class C4HashContext:
 
         hash_value = int(sha512_string, 16)
         c4_string = ""
-        while hash_value is not 0:
+        while hash_value != 0:
             modulo = hash_value % base58
             hash_value = hash_value // base58
             c4_string = charset[modulo] + c4_string

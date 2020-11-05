@@ -18,7 +18,7 @@ from lxml import etree
 from . import logger
 from . import errors
 from . import utils
-from .__version__ import ascmhl_supported_hashformats
+from .__version__ import ascmhl_supported_hashformats, ascmhl_folder_name, ascmhl_tool_name, ascmhl_tool_version
 from .generator import MHLGenerationCreationSession
 from .hasher import create_filehash, DirectoryHashContext
 from .hashlist import MHLCreatorInfo, MHLTool, MHLProcess
@@ -318,17 +318,27 @@ def diff_entire_folder_against_full_history_subcommand(root_path, verbose):
         raise exception
 
 @click.command()
-@click.argument('root_path', type=click.Path(exists=True))
 @click.option('--verbose', '-v', default=False, is_flag=True, help="Verbose output")
 # subcommands
 @click.option('--single_file', '-sf', default=False, multiple=True,
               type=click.Path(exists=True),
               help="Info for single file")
-def info(root_path, verbose, single_file):
+# options
+@click.option('--root_path', '-rp', default="", type=click.STRING,
+              help="Root path for history")
+
+def info(verbose, single_file, root_path):
     """
     Info
     """
     if single_file is not None and len(single_file) > 0:
+        if root_path == "":
+            current_dir = os.path.dirname(single_file[0])
+            while current_dir != "/" and current_dir != "":
+                asc_mhl_folder_path = os.path.join(current_dir, ascmhl_folder_name)
+                if os.path.exists(asc_mhl_folder_path):
+                    root_path = current_dir
+                current_dir = os.path.dirname(current_dir)
         info_for_single_file(root_path, verbose, single_file)
         return
     return
@@ -339,7 +349,7 @@ def info_for_single_file(root_path, verbose, single_file):
     if not os.path.isabs(root_path):
         root_path = os.path.join(os.getcwd(), root_path)
 
-    logger.verbose(f'Info with history at path: {root_path}')
+    logger.info(f'Info with history at path: {root_path}')
 
     existing_history = MHLHistory.load_from_path(root_path)
 
@@ -354,7 +364,15 @@ def info_for_single_file(root_path, verbose, single_file):
             if media_hash is None:
                 continue
             for hash_entry in media_hash.hash_entries:
-                logger.info(f'  Generation {hash_list.generation_number} ({hash_list.creator_info.creation_date}) {hash_entry.hash_format}: {hash_entry.hash_string} ({hash_entry.action})')
+                if logger.verbose_logging == True:
+                    absolutePath = os.path.join(hash_list.get_root_path(), media_hash.path)
+                    creatorInfo = hash_list.creator_info.summary()
+                    logger.info(
+                        f'  Generation {hash_list.generation_number} ({hash_list.creator_info.creation_date}) {hash_entry.hash_format}: {hash_entry.hash_string} ({hash_entry.action}) \n'
+                        f'    {absolutePath}\n'
+                        f'    {creatorInfo}')
+                else:
+                    logger.info(f'  Generation {hash_list.generation_number} ({hash_list.creator_info.creation_date}) {hash_entry.hash_format}: {hash_entry.hash_string} ({hash_entry.action})')
 
 
 @click.command()
@@ -429,7 +447,7 @@ def test_for_missing_files(not_found_paths, root_path):
 
 def commit_session(session):
     creator_info = MHLCreatorInfo()
-    creator_info.tool = MHLTool('seal', '0.0.1')
+    creator_info.tool = MHLTool(ascmhl_tool_name, ascmhl_tool_version)
     creator_info.creation_date = utils.datetime_now_isostring()
     creator_info.host_name = platform.node()
     creator_info.process = MHLProcess('in-place')

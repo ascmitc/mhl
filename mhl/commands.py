@@ -7,7 +7,6 @@ __maintainer__ = "Patrick Renner, Alexander Sahm"
 __email__ = "opensource@pomfort.com"
 """
 
-
 import datetime
 import os
 import platform
@@ -17,6 +16,7 @@ from lxml import etree
 
 from . import logger
 from . import errors
+from . import ignore
 from . import utils
 from .__version__ import ascmhl_supported_hashformats
 from .generator import MHLGenerationCreationSession
@@ -24,6 +24,7 @@ from .hasher import create_filehash, DirectoryHashContext
 from .hashlist import MHLCreatorInfo, MHLTool, MHLProcess
 from .history import MHLHistory
 from .traverse import post_order_lexicographic
+
 
 @click.command()
 @click.argument('root_path', type=click.Path(exists=True))
@@ -39,7 +40,9 @@ from .traverse import post_order_lexicographic
 @click.option('--single_file', '-sf', default=False, multiple=True,
               type=click.Path(exists=True),
               help="Record single file, no completeness check (multiple occurrences possible for adding multiple files")
-def create(root_path, verbose, hash_format, no_directory_hashes, single_file):
+@click.option('ignore_list', '--ignore', '-i', multiple=True, help="A single file pattern to ignore.")
+@click.option('--ignore_spec', type=click.Path(exists=True), help="A file containing multiple file patterns to ignore.")
+def create(root_path, verbose, hash_format, no_directory_hashes, single_file, ignore_list, ignore_spec):
     """
     Create a new generation, either for an entire folder structure or for single files
     """
@@ -47,10 +50,10 @@ def create(root_path, verbose, hash_format, no_directory_hashes, single_file):
     if single_file is not None and len(single_file) > 0:
         create_for_single_files_subcommand(root_path, verbose, hash_format, no_directory_hashes, single_file)
         return
-    create_for_folder_subcommand(root_path, verbose, hash_format, no_directory_hashes, single_file)
+    create_for_folder_subcommand(root_path, verbose, hash_format, no_directory_hashes, single_file, ignore_list, ignore_spec)
     return
 
-def create_for_folder_subcommand(root_path, verbose, hash_format, no_directory_hashes, single_file):
+def create_for_folder_subcommand(root_path, verbose, hash_format, no_directory_hashes, single_file, ignore_list, ignore_spec):
     # command formerly known as "seal"
     """
       Creates a new generation with all files in a folder hierarchy.
@@ -81,7 +84,9 @@ def create_for_folder_subcommand(root_path, verbose, hash_format, no_directory_h
     num_failed_verifications = 0
     # store the directory hashes of sub folders so we can use it when calculating the hash of the parent folder
     dir_hash_mappings = {}
-    for folder_path, children in post_order_lexicographic(root_path):
+
+    ignore_spec = ignore.spec_from(ignore_spec, ignore_list)
+    for folder_path, children in post_order_lexicographic(root_path, ignore_spec):
         # generate directory hashes
         dir_hash_context = None
         if not no_directory_hashes:

@@ -9,18 +9,17 @@ __email__ = "opensource@pomfort.com"
 
 from os.path import join, isdir
 import os
+
 from .__version__ import ascmhl_default_ignore_patterns
+from . import logger
 
 
-# TODO: implement this on next refactor. this is not yet integrated into mhl script.
-#  iteration logic should not be in the same place as the thing using the iterator when it is this complicated.
-#  therefor we should use this generator to easily separate the traversal from the hash computation and xml building
-def post_order_lexicographic(top, ignore_file_names=ascmhl_default_ignore_patterns):
+def post_order_lexicographic(top, ignore_spec):
     """
-    iterates a file system in the order necessary to generate composite tree hashes.
+    iterates a file system in the order necessary to generate composite tree hashes, bypassing ignored paths.
 
     :param top: the directory being iterated
-    :param ignore_file_names: file names included in ignore_file_names will not be yielded to the caller
+    :param ignore_spec: the pathspec of ignore patterns to match file exclusions against
     :return: yields results in folder chunks, in the order necessary for composite directory hashes
     """
     # create a sorted list of our immediate children
@@ -30,7 +29,9 @@ def post_order_lexicographic(top, ignore_file_names=ascmhl_default_ignore_patter
     # list of tuples. each tuple contains the child name and whether the child is a directory.
     children = []
     for name in names:
-        if name in ignore_file_names:
+        file_path = os.path.join(top, name)
+        if ignore_spec and ignore_spec.match_file(file_path):
+            logger.verbose(f'ignoring filepath {file_path}')
             continue
         path = join(top, name)
         children.append((name, isdir(path)))
@@ -40,7 +41,7 @@ def post_order_lexicographic(top, ignore_file_names=ascmhl_default_ignore_patter
         if is_dir:
             path = join(top, name)
             if not os.path.islink(path):
-                for x in post_order_lexicographic(path, ignore_file_names):
+                for x in post_order_lexicographic(path, ignore_spec):
                     yield x
 
     # now that all children have been traversed, yield the top (current) directory and all of it's sorted children.

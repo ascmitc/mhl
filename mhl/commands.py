@@ -53,7 +53,7 @@ def create(root_path, verbose, hash_format, no_directory_hashes, single_file, ig
     create_for_folder_subcommand(root_path, verbose, hash_format, no_directory_hashes, single_file, ignore_list, ignore_spec)
     return
 
-def create_for_folder_subcommand(root_path, verbose, hash_format, no_directory_hashes, single_file, ignore_list, ignore_spec):
+def create_for_folder_subcommand(root_path, verbose, hash_format, no_directory_hashes, single_file, ignore_list=None, ignore_spec=None):
     # command formerly known as "seal"
     """
       Creates a new generation with all files in a folder hierarchy.
@@ -149,12 +149,15 @@ def create_for_single_files_subcommand(root_path, verbose, hash_format, no_direc
     # start a creation session on the existing history
     session = MHLGenerationCreationSession(existing_history)
 
+    # im under the impression ignoring doesn't make sense for single file mode.
+    ignore_spec = ignore.spec_from(None, None)
+
     num_failed_verifications = 0
     for path in single_file:
         if not os.path.isabs(path):
             path = os.path.join(os.getcwd(), path)
         if os.path.isdir(path):
-            for folder_path, children in post_order_lexicographic(path):
+            for folder_path, children in post_order_lexicographic(path, ignore_spec):
                 for item_name, is_dir in children:
                     file_path = os.path.join(folder_path, item_name)
                     if is_dir:
@@ -176,15 +179,17 @@ def create_for_single_files_subcommand(root_path, verbose, hash_format, no_direc
 @click.command()
 @click.argument('root_path', type=click.Path(exists=True))
 @click.option('--verbose', '-v', default=False, is_flag=True, help="Verbose output")
-def verify(root_path, verbose):
+@click.option('ignore_list', '--ignore', '-i', multiple=True, help="A single file pattern to ignore.")
+@click.option('--ignore_spec', type=click.Path(exists=True), help="A file containing multiple file patterns to ignore.")
+def verify(root_path, verbose, ignore_list, ignore_spec):
     """
     Verify an entire folder structure or for single files or a directory hash
     """
     #TODO distinguish different behavior
-    verify_entire_folder_against_full_history_subcommand(root_path, verbose)
+    verify_entire_folder_against_full_history_subcommand(root_path, verbose, ignore_list, ignore_spec)
     return
 
-def verify_entire_folder_against_full_history_subcommand(root_path, verbose):
+def verify_entire_folder_against_full_history_subcommand(root_path, verbose, ignore_spec=None, ignore_list=None):
     # command formerly known as "check"
     """
     Checks MHL hashes from all generations against all file hashes.
@@ -214,7 +219,8 @@ def verify_entire_folder_against_full_history_subcommand(root_path, verbose):
 
     num_failed_verifications = 0
     num_new_files = 0
-    for folder_path, children in post_order_lexicographic(root_path):
+    ignore_spec = ignore.spec_from(ignore_spec, ignore_list)
+    for folder_path, children in post_order_lexicographic(root_path, ignore_spec):
         for item_name, is_dir in children:
             file_path = os.path.join(folder_path, item_name)
             not_found_paths.discard(file_path)
@@ -259,14 +265,16 @@ def verify_entire_folder_against_full_history_subcommand(root_path, verbose):
 @click.command()
 @click.argument('root_path', type=click.Path(exists=True))
 @click.option('--verbose', '-v', default=False, is_flag=True, help="Verbose output")
-def diff(root_path, verbose):
+@click.option('ignore_list', '--ignore', '-i', multiple=True, help="A single file pattern to ignore.")
+@click.option('--ignore_spec', type=click.Path(exists=True), help="A file containing multiple file patterns to ignore.")
+def diff(root_path, verbose, ignore_list, ignore_spec):
     """
     Diff an entire folder structure
     """
-    diff_entire_folder_against_full_history_subcommand(root_path, verbose)
+    diff_entire_folder_against_full_history_subcommand(root_path, verbose, ignore_list, ignore_spec)
     return
 
-def diff_entire_folder_against_full_history_subcommand(root_path, verbose):
+def diff_entire_folder_against_full_history_subcommand(root_path, verbose, ignore_list=None, ignore_spec=None):
     """
     Checks MHL hashes from all generations against all file hash entries.
 
@@ -294,7 +302,8 @@ def diff_entire_folder_against_full_history_subcommand(root_path, verbose):
 
     num_failed_verifications = 0
     num_new_files = 0
-    for folder_path, children in post_order_lexicographic(root_path):
+    ignore_spec = ignore.spec_from(ignore_spec, ignore_list)
+    for folder_path, children in post_order_lexicographic(root_path, ignore_spec):
         for item_name, is_dir in children:
             file_path = os.path.join(folder_path, item_name)
             not_found_paths.discard(file_path)
@@ -350,7 +359,9 @@ def xsd_schema_check(file_path):
 @click.option('--verbose', '-v', default=False, is_flag=True, help="Print all directory hashes of sub directories")
 @click.option('--hash_format', '-h', type=click.Choice(ascmhl_supported_hashformats), multiple=False,
               default='xxh64', help="Algorithm")
-def directory_hash(root_path, verbose, hash_format):
+@click.option('ignore_list', '--ignore', '-i', multiple=True, help="A single file pattern to ignore.")
+@click.option('--ignore_spec', type=click.Path(exists=True), help="A file containing multiple file patterns to ignore.")
+def directory_hash(root_path, verbose, hash_format, ignore_list, ignore_spec):
     """
     Creates the directory hash of a given folder by hashing files.
 
@@ -365,7 +376,8 @@ def directory_hash(root_path, verbose, hash_format):
 
     # store the directory hashes of sub folders so we can use it when calculating the hash of the parent folder
     dir_hash_mappings = {}
-    for folder_path, children in post_order_lexicographic(root_path):
+    ignore_spec = ignore.spec_from(ignore_spec, ignore_list)
+    for folder_path, children in post_order_lexicographic(root_path, ignore_spec):
         dir_hash_context = DirectoryHashContext(hash_format)
         for item_name, is_dir in children:
             item_path = os.path.join(folder_path, item_name)

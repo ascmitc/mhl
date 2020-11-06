@@ -4,7 +4,7 @@ from . import logger
 default_ignore_list = ['.DS_Store', 'ascmhl']
 
 
-def spec_from(ignore_filepath, ignore_patterns):
+def spec_from(ignore_filepath=None, ignore_patterns=None):
     """
     combines and de-duplicates entries from an ignore file and an ingore list.
     the ignore file and ignore list will be appended to the default ascmhl ignore patterns.

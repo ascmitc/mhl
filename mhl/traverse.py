@@ -10,7 +10,6 @@ __email__ = "opensource@pomfort.com"
 from os.path import join, isdir
 import os
 
-from .__version__ import ascmhl_default_ignore_patterns
 from . import logger
 
 

@@ -326,7 +326,6 @@ def diff_entire_folder_against_full_history_subcommand(root_path, verbose):
 # options
 @click.option('--root_path', '-rp', default="", type=click.STRING,
               help="Root path for history")
-
 def info(verbose, single_file, root_path):
     """
     Info
@@ -393,8 +392,6 @@ def xsd_schema_check(file_path):
         logger.error(f'ERROR: {file_path} didn\'t validate against XSD!')
         logger.info(f'Issues:\n{xsd.error_log}')
         raise errors.VerificationFailedException
-
-
 
 #TODO should be part of the `verify -dh` subcommand
 @click.command()

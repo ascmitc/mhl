@@ -25,13 +25,12 @@ def set_timezone():
     os.environ['TZ'] = 'UTZ'
     time.tzset()
 
-
 @pytest.fixture(autouse=True)
-def set_hostname(monkeypatch):
+def setup_environment(monkeypatch):
     def fake_hostname():
         return 'myHost.local'
     monkeypatch.setattr(platform, 'node', fake_hostname)
-
+    # TODO: also patch ascmhl_tool_version ?
 
 @pytest.fixture
 @freeze_time("2020-01-15 13:00:00")

@@ -353,13 +353,17 @@ def info(verbose, single_file, root_path):
     """
     if single_file is not None and len(single_file) > 0:
         if root_path == "":
-            current_dir = os.path.dirname(single_file[0])
+            current_dir = os.path.dirname(os.path.abspath(single_file[0]))
             while current_dir != "/" and current_dir != "":
                 asc_mhl_folder_path = os.path.join(current_dir, ascmhl_folder_name)
                 if os.path.exists(asc_mhl_folder_path):
                     root_path = current_dir
+                    break
                 current_dir = os.path.dirname(current_dir)
-        info_for_single_file(root_path, verbose, single_file)
+        if root_path is "":
+            raise errors.NoMHLHistoryExceptionForPath(single_file[0])
+        else:
+            info_for_single_file(root_path, verbose, single_file)
         return
     return
 
@@ -381,7 +385,7 @@ def info_for_single_file(root_path, verbose, single_file):
         raise errors.NoMHLHistoryException(root_path)
 
     for path in single_file:
-        relative_path = existing_history.get_relative_file_path(path)
+        relative_path = existing_history.get_relative_file_path(os.path.abspath(path))
         logger.info(f'{relative_path}:')
         for hash_list in existing_history.hash_lists:
             media_hash = hash_list.find_media_hash_for_path(relative_path)

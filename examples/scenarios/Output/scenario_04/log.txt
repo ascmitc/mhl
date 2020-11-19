@@ -35,6 +35,6 @@ Sealing folder at path: /file_server/A002R2EC ...
 ERROR: hash mismatch for        Sidecar.txt  xxh64 (old): 3ab5a4166b9bde44, xxh64 (new): 70d2cf31aaa3eac4
   calculated root hash  xxh64: 1a32e7e9a703af52
 Created new generation ascmhl/0002_A002R2EC_2020-01-17_143000.mhl
-Error: Verification of files referenced in the mhl history failed
+Error: Verification of files referenced in the ASC MHL history failed
 
 

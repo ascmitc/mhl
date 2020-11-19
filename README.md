@@ -369,7 +369,7 @@ if list option:
 The `info` command with the `-sf` subcommand option outputs information about the full and detailed history information about one file.
 
 ```
-$ ./ascmhl.py info -sf [-rp /root/path] /path/to/file
+$ ./ascmhl.py info -sf /path/to/file [-sf /path/to/other/file] [-rp /root/path]
 ```
 
 The command outputs each generation where the file has been handled, including date, hash, and activity (and creator info and absolute path with the `-v` option). The history information is read from the "next" ASC MHL history found in the path, of at the fiven root path (`-rp` option).

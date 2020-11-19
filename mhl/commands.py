@@ -41,7 +41,12 @@ from .traverse import post_order_lexicographic
               help="Record single file, no completeness check (multiple occurrences possible for adding multiple files")
 def create(root_path, verbose, hash_format, no_directory_hashes, single_file):
     """
-    Create a new generation, either for an entire folder structure or for single files
+    Create a new generation for a folder or file(s)
+
+    \b
+    The create command hashes all files given and creates a new generation in the
+    mhl-history with records for all hashed files. The command compares the hashes
+    against the hashes stored in previous generations if available.
     """
     # distinguish different behavior for entire folder vs single files
     if single_file is not None and len(single_file) > 0:
@@ -173,7 +178,14 @@ def create_for_single_files_subcommand(root_path, verbose, hash_format, no_direc
 @click.option('--verbose', '-v', default=False, is_flag=True, help="Verbose output")
 def verify(root_path, verbose):
     """
-    Verify an entire folder structure or for single files or a directory hash
+    Verify a folder, single file(s), or a directory hash
+
+    \b
+    The verify command is used to check files in the file system with records in
+    the ASC MHL history. All given files are hashed and hash values are compared
+    against hash values stored in the ASC MHL history. Missing files or additional
+    files in the file system are reported as errors. No new ASC MHL file /
+    generation is created.
     """
     #TODO distinguish different behavior
     verify_entire_folder_against_full_history_subcommand(root_path, verbose)
@@ -257,6 +269,13 @@ def verify_entire_folder_against_full_history_subcommand(root_path, verbose):
 def diff(root_path, verbose):
     """
     Diff an entire folder structure
+
+    \b
+    The diff command is used to quickly compare files in the file system with
+    records in the ASC MHL history. In comparison to the verify command, no
+    hash values are created and compared. Missing files or additional files
+    in the file system are reported as errors. No new ASC MHL file / generation
+    is created.
     """
     diff_entire_folder_against_full_history_subcommand(root_path, verbose)
     return
@@ -328,7 +347,9 @@ def diff_entire_folder_against_full_history_subcommand(root_path, verbose):
               help="Root path for history")
 def info(verbose, single_file, root_path):
     """
-    Info
+    Prints information from the ASC MHL history
+
+    \b
     """
     if single_file is not None and len(single_file) > 0:
         if root_path == "":
@@ -343,6 +364,10 @@ def info(verbose, single_file, root_path):
     return
 
 def info_for_single_file(root_path, verbose, single_file):
+    """
+    ROOT_PATH: the root path to use for the asc mhl history (optional)
+    """
+
     logger.verbose_logging = verbose
 
     if not os.path.isabs(root_path):
@@ -377,7 +402,15 @@ def info_for_single_file(root_path, verbose, single_file):
 @click.command()
 @click.argument('file_path', type=click.Path(exists=True))
 def xsd_schema_check(file_path):
-    """checks a mhl file against the xsd schema definition."""
+    """
+    Checks a .mhl file against the xsd schema definition
+
+    \b
+    The xsd-schema-check command validates a given ASC MHL file against the XML
+    XSD. This command can be used to ensure the creation of syntactically valid
+    ASC MHL files, for example during implementation of tools creating ASC MHL
+    files.
+    """
 
     xsd_path = 'xsd/ASCMHL.xsd'
     xsd = etree.XMLSchema(etree.parse(xsd_path))
@@ -401,14 +434,8 @@ def xsd_schema_check(file_path):
               default='xxh64', help="Algorithm")
 def directory_hash(root_path, verbose, hash_format):
     """
-    Creates the directory hash of a given folder by hashing files.
-
-    \b
-    ROOT_PATH: the root path to calculate the directory hash for
-
-    Hashes all the files in the given hash format and calculates the according directory hash.
+    [TMP] Creates the directory hash of a given folder
     """
-
     if not os.path.isabs(root_path):
         root_path = os.path.join(os.getcwd(), root_path)
 

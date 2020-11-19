@@ -41,9 +41,14 @@ def parse(file_path):
                     current_object.creation_date = element.text
                 elif tag == 'tool':
                     current_object.tool = MHLTool(element.text, element.attrib['version'])
+                elif tag == 'hostname':
+                    current_object.host_name = element.text
+                elif tag == 'process':
+                    current_object.process = element.text
                 elif tag == 'creatorinfo':
                     hash_list.creator_info = current_object
                     current_object = None
+                # TODO: missing location, comment, ignore
             elif type(current_object) is MHLMediaHash:
                 if tag == 'path':
                     current_object.path = element.text
@@ -210,6 +215,7 @@ def _creator_info_xml_element(hash_list: MHLHashList):
         E.tool(creator_info.tool.name, version=creator_info.tool.version),
         E.process(creator_info.process.process_type)
     )
+    # TODO: missing location, comment, ignore
     return info_element
 
 

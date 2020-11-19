@@ -18,7 +18,7 @@ from lxml import etree
 from . import logger
 from . import errors
 from . import utils
-from .__version__ import ascmhl_supported_hashformats
+from .__version__ import ascmhl_supported_hashformats, ascmhl_folder_name, ascmhl_tool_name, ascmhl_tool_version
 from .generator import MHLGenerationCreationSession
 from .hasher import create_filehash, DirectoryHashContext
 from .hashlist import MHLCreatorInfo, MHLTool, MHLProcess
@@ -41,7 +41,12 @@ from .traverse import post_order_lexicographic
               help="Record single file, no completeness check (multiple occurrences possible for adding multiple files")
 def create(root_path, verbose, hash_format, no_directory_hashes, single_file):
     """
-    Create a new generation, either for an entire folder structure or for single files
+    Create a new generation for a folder or file(s)
+
+    \b
+    The create command hashes all files given and creates a new generation in the
+    mhl-history with records for all hashed files. The command compares the hashes
+    against the hashes stored in previous generations if available.
     """
     # distinguish different behavior for entire folder vs single files
     if single_file is not None and len(single_file) > 0:
@@ -173,7 +178,14 @@ def create_for_single_files_subcommand(root_path, verbose, hash_format, no_direc
 @click.option('--verbose', '-v', default=False, is_flag=True, help="Verbose output")
 def verify(root_path, verbose):
     """
-    Verify an entire folder structure or for single files or a directory hash
+    Verify a folder, single file(s), or a directory hash
+
+    \b
+    The verify command is used to check files in the file system with records in
+    the ASC MHL history. All given files are hashed and hash values are compared
+    against hash values stored in the ASC MHL history. Missing files or additional
+    files in the file system are reported as errors. No new ASC MHL file /
+    generation is created.
     """
     #TODO distinguish different behavior
     verify_entire_folder_against_full_history_subcommand(root_path, verbose)
@@ -257,6 +269,13 @@ def verify_entire_folder_against_full_history_subcommand(root_path, verbose):
 def diff(root_path, verbose):
     """
     Diff an entire folder structure
+
+    \b
+    The diff command is used to quickly compare files in the file system with
+    records in the ASC MHL history. In comparison to the verify command, no
+    hash values are created and compared. Missing files or additional files
+    in the file system are reported as errors. No new ASC MHL file / generation
+    is created.
     """
     diff_entire_folder_against_full_history_subcommand(root_path, verbose)
     return
@@ -317,11 +336,85 @@ def diff_entire_folder_against_full_history_subcommand(root_path, verbose):
     if exception:
         raise exception
 
+@click.command()
+@click.option('--verbose', '-v', default=False, is_flag=True, help="Verbose output")
+# subcommands
+@click.option('--single_file', '-sf', default=False, multiple=True,
+              type=click.Path(exists=True),
+              help="Info for single file")
+# options
+@click.option('--root_path', '-rp', default="", type=click.STRING,
+              help="Root path for history")
+def info(verbose, single_file, root_path):
+    """
+    Prints information from the ASC MHL history
+
+    \b
+    """
+    if single_file is not None and len(single_file) > 0:
+        if root_path == "":
+            current_dir = os.path.dirname(os.path.abspath(single_file[0]))
+            while current_dir != "/" and current_dir != "":
+                asc_mhl_folder_path = os.path.join(current_dir, ascmhl_folder_name)
+                if os.path.exists(asc_mhl_folder_path):
+                    root_path = current_dir
+                    break
+                current_dir = os.path.dirname(current_dir)
+        if root_path is "":
+            raise errors.NoMHLHistoryExceptionForPath(single_file[0])
+        else:
+            info_for_single_file(root_path, verbose, single_file)
+        return
+    return
+
+def info_for_single_file(root_path, verbose, single_file):
+    """
+    ROOT_PATH: the root path to use for the asc mhl history (optional)
+    """
+
+    logger.verbose_logging = verbose
+
+    if not os.path.isabs(root_path):
+        root_path = os.path.join(os.getcwd(), root_path)
+
+    logger.info(f'Info with history at path: {root_path}')
+
+    existing_history = MHLHistory.load_from_path(root_path)
+
+    if len(existing_history.hash_lists) == 0:
+        raise errors.NoMHLHistoryException(root_path)
+
+    for path in single_file:
+        relative_path = existing_history.get_relative_file_path(os.path.abspath(path))
+        logger.info(f'{relative_path}:')
+        for hash_list in existing_history.hash_lists:
+            media_hash = hash_list.find_media_hash_for_path(relative_path)
+            if media_hash is None:
+                continue
+            for hash_entry in media_hash.hash_entries:
+                if logger.verbose_logging == True:
+                    absolutePath = os.path.join(hash_list.get_root_path(), media_hash.path)
+                    creatorInfo = hash_list.creator_info.summary()
+                    logger.info(
+                        f'  Generation {hash_list.generation_number} ({hash_list.creator_info.creation_date}) {hash_entry.hash_format}: {hash_entry.hash_string} ({hash_entry.action}) \n'
+                        f'    {absolutePath}\n'
+                        f'    {creatorInfo}')
+                else:
+                    logger.info(f'  Generation {hash_list.generation_number} ({hash_list.creator_info.creation_date}) {hash_entry.hash_format}: {hash_entry.hash_string} ({hash_entry.action})')
+
 
 @click.command()
 @click.argument('file_path', type=click.Path(exists=True))
 def xsd_schema_check(file_path):
-    """checks a mhl file against the xsd schema definition."""
+    """
+    Checks a .mhl file against the xsd schema definition
+
+    \b
+    The xsd-schema-check command validates a given ASC MHL file against the XML
+    XSD. This command can be used to ensure the creation of syntactically valid
+    ASC MHL files, for example during implementation of tools creating ASC MHL
+    files.
+    """
 
     xsd_path = 'xsd/ASCMHL.xsd'
     xsd = etree.XMLSchema(etree.parse(xsd_path))
@@ -337,8 +430,6 @@ def xsd_schema_check(file_path):
         logger.info(f'Issues:\n{xsd.error_log}')
         raise errors.VerificationFailedException
 
-
-
 #TODO should be part of the `verify -dh` subcommand
 @click.command()
 @click.argument('root_path', type=click.Path(exists=True))
@@ -347,14 +438,8 @@ def xsd_schema_check(file_path):
               default='xxh64', help="Algorithm")
 def directory_hash(root_path, verbose, hash_format):
     """
-    Creates the directory hash of a given folder by hashing files.
-
-    \b
-    ROOT_PATH: the root path to calculate the directory hash for
-
-    Hashes all the files in the given hash format and calculates the according directory hash.
+    [TMP] Creates the directory hash of a given folder
     """
-
     if not os.path.isabs(root_path):
         root_path = os.path.join(os.getcwd(), root_path)
 
@@ -390,7 +475,7 @@ def test_for_missing_files(not_found_paths, root_path):
 
 def commit_session(session):
     creator_info = MHLCreatorInfo()
-    creator_info.tool = MHLTool('seal', '0.0.1')
+    creator_info.tool = MHLTool(ascmhl_tool_name, ascmhl_tool_version)
     creator_info.creation_date = utils.datetime_now_isostring()
     creator_info.host_name = platform.node()
     creator_info.process = MHLProcess('in-place')

@@ -235,6 +235,7 @@ class MHLCreatorInfo:
         self.creation_date = None
         self.process = None
         self.authors = []
+        # TODO: missing location, comment, ignore
 
     def log(self):
         logger.info("      host_name: {0}".format(self.host_name))
@@ -242,6 +243,25 @@ class MHLCreatorInfo:
         logger.info("  creation_date: {0}".format(self.creation_date))
         logger.info("        process: {0}".format(self.process))
 
+    def summary(self):
+        summary = ""
+        if self.host_name is not None:
+            summary += str(self.host_name)
+        else:
+            summary += "[unknown host]";
+        if self.tool.name is not None:
+            summary += ", " + str(self.tool.name)
+            if self.tool.version is not None:
+                summary += " " + str(self.tool.version)
+        if self.process is not None:
+            summary += ", " + str(self.process)
+        for author in self.authors:
+            summary += ", " + str(author.name)
+            summary += " (" + str(author.email)
+            summary += " " + str(author.phone)
+            summary += ")"
+        # TODO: missing location, comment, ignore
+        return summary
 
 class MHLTool:
     name: str

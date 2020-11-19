@@ -10,19 +10,23 @@ __email__ = "opensource@pomfort.com"
 
 import click
 from mhl import commands
+from mhl.__version__ import ascmhl_tool_version
 
 class NaturalOrderGroup(click.Group):
     def list_commands(self, ctx):
         return self.commands.keys()
 
 @click.group(cls=NaturalOrderGroup)
+@click.version_option(version=ascmhl_tool_version)
 def mhltool_cli():
     pass
+
 
 # new
 mhltool_cli.add_command(commands.create)
 mhltool_cli.add_command(commands.verify)
 mhltool_cli.add_command(commands.diff)
+mhltool_cli.add_command(commands.info)
 mhltool_cli.add_command(commands.xsd_schema_check)
 
 # old

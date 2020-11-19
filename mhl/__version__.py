@@ -7,6 +7,9 @@ __maintainer__ = "Patrick Renner, Alexander Sahm"
 __email__ = "opensource@pomfort.com"
 """
 
+ascmhl_tool_name = "ascmhl.py"
+ascmhl_tool_version = "0.2 alpha"
+
 ascmhl_folder_name = "ascmhl"
 ascmhl_file_extension = ".mhl"
 ascmhl_chainfile_name = "chain.txt"

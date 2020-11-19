@@ -131,8 +131,8 @@ The `info -sf` ("single file") command prints the known history of a single file
 
 _Implementation status 2020-09-08:_
 
-* __Implemented__: `create`, `verify` (partially), `diff`, `xsd-schema-check`
-* __Not implemented yet__: _`info`
+* __Implemented__: `create`, `verify` (partially), `diff`, `info` (partially), `xsd-schema-check`
+* __Not implemented yet__: some subcommands for `verify`, `info`
 
 _The commands are also marked below with their current implementation status._
 
@@ -335,7 +335,7 @@ end with exit !=0 if at least one of the files has failed, a file was \
 ```
 
 
-### The `info` command _[not implemented yet]_
+### The `info` command 
 
 #### `info` default behavior _[not implemented yet]_
 
@@ -364,15 +364,15 @@ if list option:
 ```
 
 
-#### `info` with the `-sf` subcommand option _[not implemented yet]_
+#### `info` with the `-sf` subcommand option 
 
 The `info` command with the `-sf` subcommand option outputs information about the full and detailed history information about one file.
 
 ```
-$ ./ascmhl.py info -sf /path/to/file
+$ ./ascmhl.py info -sf /path/to/file [-sf /path/to/other/file] [-rp /root/path]
 ```
 
-The command outputs each generation where the file has been handled, including date, creator info, activity, hash, and absolute path.
+The command outputs each generation where the file has been handled, including date, hash, and activity (and creator info and absolute path with the `-v` option). The history information is read from the "next" ASC MHL history found in the path, of at the fiven root path (`-rp` option).
 
 Implementation:
 

@@ -7,7 +7,7 @@
       <path lastmodificationdate="2020-01-15T13:00:00+00:00">/file_server/A002R2EC</path>
       <md5>2c32f5fbcd0ffa1ddb36f71f77d8d7d7</md5>
     </root>
-    <tool version="0.0.1">seal</tool>
+    <tool version="0.2 alpha">ascmhl.py</tool>
     <process>in-place</process>
   </creatorinfo>
   <hashes>

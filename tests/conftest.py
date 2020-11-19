@@ -69,3 +69,11 @@ def simple_mhl_history(fs):
     runner = CliRunner()
     result = runner.invoke(mhl.commands.create, ['/root'])
     assert result.exit_code == 0
+
+@pytest.fixture
+@freeze_time("2020-01-15 13:00:00")
+def simple_mhl_folder(fs):
+
+    # create a simple folder structure with two files
+    fs.create_file('/root/Stuff.txt', contents='stuff\n')
+    fs.create_file('/root/A/A1.txt', contents='A1\n')

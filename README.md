@@ -107,7 +107,7 @@ Additional utility commands:
 
 ### Working with file hierarchies (with completeness check)
 
-The most common commands when using the `mhl-tool.py` in data management scenarios are the `create` and the `check` commands in their default behavior (without subcommand options). 
+The most common commands when using the `ascmhl.py ` in data management scenarios are the `create` and the `check` commands in their default behavior (without subcommand options). 
 
 Sealing a folder / drive with the `create` command traverses through a folder hierarchy, hashes all found files and compares the hashes against the records in the `ascmhl` folder (if present). The command creates a new generation (or an initial one) for the content of an entire folder at the given folder level. It can be used to document all files in a folder or drive with all verified or newly created file hashes of the moment the `create` command ran.
 

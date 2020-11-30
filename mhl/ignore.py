@@ -1,7 +1,18 @@
 import pathspec
 from . import logger
 
-default_ignore_list = ['.DS_Store', 'ascmhl']
+
+def default_ignore_list():
+    return ['.DS_Store', 'ascmhl']
+
+
+#
+# def patterns_from_file(ignore_filepath=None):
+#     if not ignore_filepath:
+#         raise Exception('null ignore_filepath')
+#     ignore_list = []
+#     with open(ignore_filepath, 'r') as fh:
+#         ignore_list.extend(line.rstrip('\n') for line in fh if line is not '\n')
 
 
 def spec_from(ignore_filepath=None, ignore_patterns=None):
@@ -14,7 +25,7 @@ def spec_from(ignore_filepath=None, ignore_patterns=None):
     :param ignore_patterns: an optional list of
     :return: returns the compiled pathspec to be used in ignore path pattern matching
     """
-    ignore_list = default_ignore_list
+    ignore_list = default_ignore_list()
 
     if ignore_filepath:
         with open(ignore_filepath, 'r') as fh:

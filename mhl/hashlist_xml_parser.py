@@ -125,6 +125,15 @@ def write_hash_list(hash_list: MHLHashList, file_path: str):
     # write creator info
     _write_xml_element_to_file(file, _creator_info_xml_element(hash_list), '  ')
 
+    # ignore_spec section.
+    # for each ignore pattern, write ignore tag to file.
+    _write_xml_string_to_file(file, '<ignorespec>\n', current_indent)
+    current_indent += '  '
+    for ignore_pattern in hash_list.ignore_patterns:
+        _write_xml_element_to_file(file, _ignore_xml_element(ignore_pattern), current_indent)
+    current_indent = current_indent[:-2]
+    _write_xml_string_to_file(file, '</ignorespec>\n', current_indent)
+
     # write hashes
     hashes_tag = '<hashes>\n'
     _write_xml_string_to_file(file, hashes_tag, current_indent)
@@ -211,6 +220,12 @@ def _creator_info_xml_element(hash_list: MHLHashList):
         E.process(creator_info.process.process_type)
     )
     return info_element
+
+
+def _ignore_xml_element(ignore_pattern: str):
+    """builds and returns one <ignore> element for a given ignore_spec pattern entry"""
+    return E.ignore(ignore_pattern)
+
 
 
 def _root_media_hash_xml_element(root_media_hash: MHLMediaHash):

@@ -13,8 +13,10 @@ from datetime import datetime
 import os
 
 from . import logger
+from . import ignore
 from .__version__ import ascmhl_reference_hash_format
 from .hasher import create_filehash
+
 
 
 class MHLHashList:
@@ -51,6 +53,8 @@ class MHLHashList:
     generation_number: Optional[int]
     root_media_hash: Optional[MHLMediaHash]
 
+    ignore_patterns: List[str]
+
     def __init__(self):
         self.creator_info = None
         self.media_hashes = []
@@ -60,6 +64,7 @@ class MHLHashList:
         self.hash_list_references = []
         self.media_hashes_path_map = {}
         self.root_media_hash = None
+        self.ignore_patterns = ignore.default_ignore_list()
 
     # methods to query for hashes
     def find_media_hash_for_path(self, relative_path):

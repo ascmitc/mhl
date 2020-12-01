@@ -220,7 +220,7 @@ def verify_entire_folder_against_full_history_subcommand(root_path, verbose, ign
     num_failed_verifications = 0
     num_new_files = 0
 
-    ignorespec = ignore.MHLIgnoreSpec(None, ignore_list, ignore_spec)
+    ignorespec = ignore.MHLIgnoreSpec(existing_history.latest_ignore_patterns(), ignore_list, ignore_spec)
 
     for folder_path, children in post_order_lexicographic(root_path, ignorespec.get_path_spec()):
         for item_name, is_dir in children:
@@ -304,7 +304,7 @@ def diff_entire_folder_against_full_history_subcommand(root_path, verbose, ignor
     num_failed_verifications = 0
     num_new_files = 0
 
-    ignorespec = ignore.MHLIgnoreSpec(None, ignore_list, ignore_spec)
+    ignorespec = ignore.MHLIgnoreSpec(existing_history.latest_ignore_patterns(), ignore_list, ignore_spec)
 
     for folder_path, children in post_order_lexicographic(root_path, ignorespec.get_path_spec()):
         for item_name, is_dir in children:

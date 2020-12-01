@@ -1,19 +1,20 @@
 """
-__author__ = "Alexander Sahm"
+__author__ = "Jon Waggoner"
 __copyright__ = "Copyright 2020, Pomfort GmbH"
 
 __license__ = "MIT"
-__maintainer__ = "Patrick Renner, Alexander Sahm"
-__email__ = "opensource@pomfort.com"
+__maintainer__ = "Jon Waggoner"
+__email__ = "opensource@jonwaggoner.com"
 """
 
 from os.path import join, isdir
 import os
 
 from . import logger
+import pathspec
 
 
-def post_order_lexicographic(top, ignore_spec):
+def post_order_lexicographic(top: str, ignore_spec: pathspec.PathSpec):
     """
     iterates a file system in the order necessary to generate composite tree hashes, bypassing ignored paths.
 

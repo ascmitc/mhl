@@ -116,7 +116,7 @@ def create_for_folder_subcommand(root_path, verbose, hash_format, no_directory_h
 
     commit_session(session)
 
-    exception = test_for_missing_files(not_found_paths, root_path)
+    exception = test_for_missing_files(not_found_paths, root_path, ignorespec)
     if num_failed_verifications > 0:
         exception = errors.VerificationFailedException()
 
@@ -189,7 +189,7 @@ def verify(root_path, verbose, ignore_list, ignore_spec):
     verify_entire_folder_against_full_history_subcommand(root_path, verbose, ignore_list, ignore_spec)
     return
 
-def verify_entire_folder_against_full_history_subcommand(root_path, verbose, ignore_spec=None, ignore_list=None):
+def verify_entire_folder_against_full_history_subcommand(root_path, verbose, ignore_list=None, ignore_spec=None):
     # command formerly known as "check"
     """
     Checks MHL hashes from all generations against all file hashes.
@@ -251,7 +251,7 @@ def verify_entire_folder_against_full_history_subcommand(root_path, verbose, ign
                              f'new {original_hash_entry.hash_format}: {current_hash}')
                 num_failed_verifications += 1
 
-    exception = test_for_missing_files(not_found_paths, root_path)
+    exception = test_for_missing_files(not_found_paths, root_path, ignorespec)
     if num_new_files > 0:
         exception = errors.NewFilesFoundException()
     if num_failed_verifications > 0:
@@ -325,7 +325,7 @@ def diff_entire_folder_against_full_history_subcommand(root_path, verbose, ignor
                 num_new_files += 1
                 continue
 
-    exception = test_for_missing_files(not_found_paths, root_path)
+    exception = test_for_missing_files(not_found_paths, root_path, ignorespec)
     if num_new_files > 0:
         exception = errors.NewFilesFoundException()
     if num_failed_verifications > 0:
@@ -401,9 +401,13 @@ def directory_hash(root_path, verbose, hash_format, ignore_list, ignore_spec):
             logger.info(f'directory hash for: {folder_path} {hash_format}: {dir_hash}')
 
 
-def test_for_missing_files(not_found_paths, root_path):
+def test_for_missing_files(not_found_paths, root_path, ignore_spec: MHLIgnoreSpec = MHLIgnoreSpec()):
+    ignore_path_spec = ignore_spec.get_path_spec()
+    # update to exclude our ignored files
+    not_found_paths = [x for x in not_found_paths if not ignore_path_spec.match_file(x)]
     if len(not_found_paths) == 0:
         return None
+    # test our not_found_paths against our ignore spec to ensure these weren't explicitly ignored.
     logger.error(f"ERROR: {len(not_found_paths)} missing file(s):")
     for path in not_found_paths:
         logger.error(f"  {os.path.relpath(path, root_path)}")

@@ -150,14 +150,14 @@ def create_for_single_files_subcommand(root_path, verbose, hash_format, no_direc
 
     existing_history = MHLHistory.load_from_path(root_path)
     # start a creation session on the existing history
-    session = MHLGenerationCreationSession(existing_history, None)
+    session = MHLGenerationCreationSession(existing_history)
 
     num_failed_verifications = 0
     for path in single_file:
         if not os.path.isabs(path):
             path = os.path.join(os.getcwd(), path)
         if os.path.isdir(path):
-            for folder_path, children in post_order_lexicographic(path, session.ignore_spec.get_path_spec()):
+            for folder_path, children in post_order_lexicographic(path, None):
                 for item_name, is_dir in children:
                     file_path = os.path.join(folder_path, item_name)
                     if is_dir:

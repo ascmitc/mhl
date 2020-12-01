@@ -95,8 +95,7 @@ class MHLHistory:
         hash_list = self.hash_lists[-1]
         if not hash_list or not hash_list.ignore_spec:
             return None
-        latest = hash_list.ignore_spec.get_pattern_list()
-        return latest
+        return hash_list.ignore_spec.get_pattern_list()
 
     # methods to query and compare hashes
     def find_original_hash_entry_for_path(self, relative_path: str) -> Optional[MHLHashEntry]:

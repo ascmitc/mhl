@@ -14,7 +14,7 @@ from . import logger
 import pathspec
 
 
-def post_order_lexicographic(top: str, ignore_spec: pathspec.PathSpec):
+def post_order_lexicographic(top: str, ignore_spec: pathspec.PathSpec = None):
     """
     iterates a file system in the order necessary to generate composite tree hashes, bypassing ignored paths.
 

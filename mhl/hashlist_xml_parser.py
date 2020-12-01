@@ -31,6 +31,7 @@ def parse(file_path):
     # use iterparse to prevent large memory usage when parsing large files
     # pass a file handle to iterparse instead of the path directly to support the fake filesystem used in the tests
     file = open(file_path, "rb")
+    existing_ignore_patterns = []
     for event, element in etree.iterparse(file, events=('start', 'end')):
         if current_object and event == 'end':
             # the tag might contain the namespace like {urn:ASC:MHL:v2.0}hash, so we need to strip the namespace part
@@ -43,6 +44,11 @@ def parse(file_path):
                     current_object.tool = MHLTool(element.text, element.attrib['version'])
                 elif tag == 'creatorinfo':
                     hash_list.creator_info = current_object
+                    current_object = None
+            elif type(current_object) is MHLIgnoreSpec:
+                if tag == 'ignore':
+                    existing_ignore_patterns.append(element.text)
+                else:
                     current_object = None
             elif type(current_object) is MHLMediaHash:
                 if tag == 'path':
@@ -91,6 +97,8 @@ def parse(file_path):
                 current_object = MHLMediaHash()
             elif tag == 'creatorinfo':
                 current_object = MHLCreatorInfo()
+            elif tag == 'ignorespec':
+                current_object = MHLIgnoreSpec()
             elif tag == 'hashlistreference':
                 current_object = MHLHashListReference()
         elif type(current_object) is MHLCreatorInfo and event == 'start':
@@ -101,6 +109,7 @@ def parse(file_path):
                 object_stack.append(current_object)
                 current_object = MHLMediaHash()
 
+    hash_list.ignore_spec = MHLIgnoreSpec(existing_ignore_patterns)
     logger.debug(f'parsing took: {timer() - start}')
 
     return hash_list

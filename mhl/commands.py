@@ -80,7 +80,7 @@ def create_for_folder_subcommand(root_path, verbose, hash_format, no_directory_h
     not_found_paths = existing_history.set_of_file_paths()
 
     # create the ignore specification
-    ignorespec = ignore.MHLIgnoreSpec(None, ignore_list, ignore_spec)
+    ignorespec = ignore.MHLIgnoreSpec(existing_history.latest_ignore_patterns(), ignore_list, ignore_spec)
 
     # start a verification session on the existing history
     session = MHLGenerationCreationSession(existing_history, ignorespec)

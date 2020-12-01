@@ -80,10 +80,10 @@ def create_for_folder_subcommand(root_path, verbose, hash_format, no_directory_h
     not_found_paths = existing_history.set_of_file_paths()
 
     # create the ignore specification
-    ignorespec = ignore.MHLIgnoreSpec(existing_history.latest_ignore_patterns(), ignore_list, ignore_spec_file)
+    ignore_spec = ignore.MHLIgnoreSpec(existing_history.latest_ignore_patterns(), ignore_list, ignore_spec_file)
 
     # start a verification session on the existing history
-    session = MHLGenerationCreationSession(existing_history, ignorespec)
+    session = MHLGenerationCreationSession(existing_history, ignore_spec)
 
     num_failed_verifications = 0
     # store the directory hashes of sub folders so we can use it when calculating the hash of the parent folder
@@ -116,7 +116,7 @@ def create_for_folder_subcommand(root_path, verbose, hash_format, no_directory_h
 
     commit_session(session)
 
-    exception = test_for_missing_files(not_found_paths, root_path, ignorespec)
+    exception = test_for_missing_files(not_found_paths, root_path, ignore_spec)
     if num_failed_verifications > 0:
         exception = errors.VerificationFailedException()
 
@@ -220,9 +220,9 @@ def verify_entire_folder_against_full_history_subcommand(root_path, verbose, ign
     num_failed_verifications = 0
     num_new_files = 0
 
-    ignorespec = ignore.MHLIgnoreSpec(existing_history.latest_ignore_patterns(), ignore_list, ignore_spec_file)
+    ignore_spec = ignore.MHLIgnoreSpec(existing_history.latest_ignore_patterns(), ignore_list, ignore_spec_file)
 
-    for folder_path, children in post_order_lexicographic(root_path, ignorespec.get_path_spec()):
+    for folder_path, children in post_order_lexicographic(root_path, ignore_spec.get_path_spec()):
         for item_name, is_dir in children:
             file_path = os.path.join(folder_path, item_name)
             not_found_paths.discard(file_path)
@@ -251,7 +251,7 @@ def verify_entire_folder_against_full_history_subcommand(root_path, verbose, ign
                              f'new {original_hash_entry.hash_format}: {current_hash}')
                 num_failed_verifications += 1
 
-    exception = test_for_missing_files(not_found_paths, root_path, ignorespec)
+    exception = test_for_missing_files(not_found_paths, root_path, ignore_spec)
     if num_new_files > 0:
         exception = errors.NewFilesFoundException()
     if num_failed_verifications > 0:
@@ -304,9 +304,9 @@ def diff_entire_folder_against_full_history_subcommand(root_path, verbose, ignor
     num_failed_verifications = 0
     num_new_files = 0
 
-    ignorespec = ignore.MHLIgnoreSpec(existing_history.latest_ignore_patterns(), ignore_list, ignore_spec_file)
+    ignore_spec = ignore.MHLIgnoreSpec(existing_history.latest_ignore_patterns(), ignore_list, ignore_spec_file)
 
-    for folder_path, children in post_order_lexicographic(root_path, ignorespec.get_path_spec()):
+    for folder_path, children in post_order_lexicographic(root_path, ignore_spec.get_path_spec()):
         for item_name, is_dir in children:
             file_path = os.path.join(folder_path, item_name)
             not_found_paths.discard(file_path)
@@ -325,7 +325,7 @@ def diff_entire_folder_against_full_history_subcommand(root_path, verbose, ignor
                 num_new_files += 1
                 continue
 
-    exception = test_for_missing_files(not_found_paths, root_path, ignorespec)
+    exception = test_for_missing_files(not_found_paths, root_path, ignore_spec)
     if num_new_files > 0:
         exception = errors.NewFilesFoundException()
     if num_failed_verifications > 0:
@@ -380,9 +380,9 @@ def directory_hash(root_path, verbose, hash_format, ignore_list, ignore_spec_fil
     # store the directory hashes of sub folders so we can use it when calculating the hash of the parent folder
     dir_hash_mappings = {}
 
-    ignorespec = ignore.MHLIgnoreSpec(None, ignore_list, ignore_spec_file)
+    ignore_spec = ignore.MHLIgnoreSpec(None, ignore_list, ignore_spec_file)
 
-    for folder_path, children in post_order_lexicographic(root_path, ignorespec.get_path_spec()):
+    for folder_path, children in post_order_lexicographic(root_path, ignore_spec.get_path_spec()):
         dir_hash_context = DirectoryHashContext(hash_format)
         for item_name, is_dir in children:
             item_path = os.path.join(folder_path, item_name)

@@ -14,12 +14,12 @@ from . import logger
 import pathspec
 
 
-def post_order_lexicographic(top: str, ignore_spec: pathspec.PathSpec = None):
+def post_order_lexicographic(top: str, ignore_pathspec: pathspec.PathSpec = None):
     """
     iterates a file system in the order necessary to generate composite tree hashes, bypassing ignored paths.
 
     :param top: the directory being iterated
-    :param ignore_spec: the pathspec of ignore patterns to match file exclusions against
+    :param ignore_pathspec: the pathspec of ignore patterns to match file exclusions against
     :return: yields results in folder chunks, in the order necessary for composite directory hashes
     """
     # create a sorted list of our immediate children
@@ -30,7 +30,7 @@ def post_order_lexicographic(top: str, ignore_spec: pathspec.PathSpec = None):
     children = []
     for name in names:
         file_path = os.path.join(top, name)
-        if ignore_spec and ignore_spec.match_file(file_path):
+        if ignore_pathspec and ignore_pathspec.match_file(file_path):
             logger.verbose(f'ignoring filepath {file_path}')
             continue
         path = join(top, name)
@@ -41,7 +41,7 @@ def post_order_lexicographic(top: str, ignore_spec: pathspec.PathSpec = None):
         if is_dir:
             path = join(top, name)
             if not os.path.islink(path):
-                for x in post_order_lexicographic(path, ignore_spec):
+                for x in post_order_lexicographic(path, ignore_pathspec):
                     yield x
 
     # now that all children have been traversed, yield the top (current) directory and all of it's sorted children.

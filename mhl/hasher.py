@@ -9,7 +9,7 @@ __email__ = "opensource@pomfort.com"
 import binascii
 import hashlib
 import xxhash
-
+import math
 
 def generate_checksum(csum_type, file_path):
     """
@@ -65,6 +65,8 @@ class C4HashContext:
 
     def __init__(self):
         self.internal_context = hashlib.sha512()
+        self.charset = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
+
 
     def update(self, input_data):
         self.internal_context.update(input_data)
@@ -72,7 +74,6 @@ class C4HashContext:
     def hexdigest(self):
         sha512_string = self.internal_context.hexdigest()
 
-        charset = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
         base58 = 58  # the encoding basis
         c4id_length = 90  # the guaranteed length
         zero = '1'  # '0' is not in the C4ID alphabet so '1' is zero
@@ -82,19 +83,72 @@ class C4HashContext:
         while hash_value != 0:
             modulo = hash_value % base58
             hash_value = hash_value // base58
-            c4_string = charset[modulo] + c4_string
+            c4_string = self.charset[modulo] + c4_string
 
         c4_string = "c4" + c4_string.rjust(c4id_length - 2, zero)
         return c4_string
+
+    def data_for_C4ID_string(self, c4id_string):
+        base58 = 58  # the encoding basis
+        c4id_length = 90  # the guaranteed length
+        result = 0
+        i = 2
+
+        while i < c4id_length:
+            temp = self.charset.index(c4id_string[i])
+            result = result * base58 + temp
+            i = i+1
+
+        data = result.to_bytes(64, byteorder='big')
+        return data
 
 
 class DirectoryHashContext:
 
     def __init__(self, hash_format: str):
-        self.hash_context = context_type_for_hash_format(hash_format)()
         self.hash_format = hash_format
+        self.content_hash_strings = []
+        self.content_names = []
 
     def append_hash(self, hash_string: str, item_name: str):
+        self.content_hash_strings.append(hash_string)
+        self.content_names.append(item_name)
+
+    def final_hash_str(self):
+        digest_list_names = digest_list_for_list(digest_list_names, 'c4')
+        digest_list_names = sorted_deduplicates(input_list)
+
+
+        # FIXME: cont'd here!
+
+
+        # replace this with digest_for_list()
+
+        while digest_list_names.count() != 1:
+            last_digest = None
+            if (digest_list_names.count()%2) ==1:
+                last_digest = digest_list_names[digest_list_names.count-1]
+
+            num_pairs = digest_list_names.count / 2
+            i = 0
+            new_digest_list_names = []
+            while i < num_pairs:
+                digest_pair = []
+                digest_pair.append(digest_list_names[i*2 + 0])
+                digest_pair.append(digest_list_names[i*2 + 1])
+                pair_digest = digest_for_pair(digest_pair)
+                new_digest_list_names.append(pair_digest)
+
+            if last_digest is not None:
+                new_digest_list_names.append(last_digest)
+
+            digest_list_names = new_digest_list_names
+
+        return digest_list_names[0]
+
+
+        # original code for reference
+
         # print('append hash:', hash_string, 'item name: ', item_name)
         # first we add the name of the item (file or directory) to the context
         self.hash_context.update(item_name.encode('utf-8'))
@@ -106,5 +160,66 @@ class DirectoryHashContext:
             hash_binary = binascii.unhexlify(hash_string)
         self.hash_context.update(hash_binary)
 
-    def final_hash_str(self):
         return self.hash_context.hexdigest()
+
+def digest_for_list(input_list, hash_format: str):
+    input_list = sorted_deduplicates(input_list)
+
+    digest_list_names = digest_list_for_list(input_list, hash_format)
+    digest_list_names = sorted_deduplicates(digest_list_names)
+    while len(digest_list_names) != 1:
+        last_digest = None
+        if (len(digest_list_names) % 2) == 1:
+            last_digest = digest_list_names[len(digest_list_names) - 1]
+
+        num_pairs = math.floor(len(digest_list_names) / 2)
+        i = 0
+        new_digest_list_names = []
+        while i < num_pairs:
+            digest_pair = []
+            digest_pair.append(digest_list_names[i * 2 + 0])
+            digest_pair.append(digest_list_names[i * 2 + 1])
+            pair_digest = digest_for_digest_pair(digest_pair, hash_format)
+            new_digest_list_names.append(pair_digest)
+            i = i+1
+
+        if last_digest is not None:
+            new_digest_list_names.append(last_digest)
+
+        digest_list_names = new_digest_list_names
+
+    return digest_list_names[0]
+
+
+def digest_list_for_list(input_list, hash_format: str):
+    input_list = sorted_deduplicates(input_list)
+    digest_list = []
+    for input_string in input_list:
+        digest_list.append(digest_for_string(input_string, hash_format))
+
+    return digest_list
+
+def digest_for_digest_pair(input_pair, hash_format: str):
+    input_pair.sort()
+    input_data = bytearray(128)
+    # fixme: non C4 !
+    c4context = C4HashContext()
+    input_data0 = c4context.data_for_C4ID_string(input_pair[0])
+    input_data1 = c4context.data_for_C4ID_string(input_pair[1])
+    input_data[0:64] = input_data0[:]
+    input_data[64:128] = input_data1[:]
+    return digest_for_data(input_data, hash_format)
+
+def digest_for_data(input_data, hash_format: str):
+    hash_context = context_type_for_hash_format(hash_format)()
+    hash_context.update(input_data)
+    return hash_context.hexdigest()
+
+def digest_for_string(input_string, hash_format: str):
+    return digest_for_data(input_string.encode('utf-8'), hash_format)
+
+def sorted_deduplicates(input_list):
+    input_list = list(set(input_list))  # remove duplicates
+    input_list.sort()                   # sort
+    return input_list
+

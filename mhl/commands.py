@@ -486,7 +486,11 @@ def seal_file_path(existing_history, file_path, hash_format, session) -> (str, b
     relative_path = existing_history.get_relative_file_path(file_path)
     file_size = os.path.getsize(file_path)
     file_modification_date = datetime.datetime.fromtimestamp(os.path.getmtime(file_path))
-    existing_hash_formats = existing_history.find_existing_hash_formats_for_path(relative_path)
+
+    # find in the according child history the already available hash formats
+    existing_child_history, existing_history_relative_path = existing_history.find_history_for_path(relative_path)
+    existing_hash_formats = existing_child_history.find_existing_hash_formats_for_path(existing_history_relative_path)
+
     # in case there is no hash in the required format to use yet, we need to verify also against
     # one of the existing hash formats, we for simplicity use always the first hash format in this example
     # but one could also use a different one if desired

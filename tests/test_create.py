@@ -211,3 +211,26 @@ def test_create_fail_missing_file(fs, nested_mhl_histories):
     result = runner.invoke(mhl.commands.create, ['/root'])
     assert result.exit_code == 15
     assert '1 missing file(s):\n  A/AA/AA1.txt' in result.output
+
+
+def test_create_nested_new_format(fs, nested_mhl_histories):
+    """
+    test that ensures that hasehs in a new format are also verified in child histories
+    used to verify fix of bug: https://github.com/ascmitc/mhl/issues/48
+    """
+
+    runner = CliRunner()
+    result = runner.invoke(mhl.commands.create, ['/root', '-h', 'md5'])
+    assert result.exit_code == 0
+
+    # load one of the the nested histories and check the first media hash of the last generation
+    nested_history = MHLHistory.load_from_path('/root/A/AA')
+    media_hash = nested_history.hash_lists[-1].media_hashes[0]
+
+    # assure that the first hash entry is the verification of the original hash
+    assert media_hash.hash_entries[0].action == 'verified'
+    assert media_hash.hash_entries[0].hash_format == 'xxh64'
+
+    # assure that the second hash entry is the new md5 hash
+    assert media_hash.hash_entries[1].action == 'new'
+    assert media_hash.hash_entries[1].hash_format == 'md5'

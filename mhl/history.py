@@ -101,6 +101,23 @@ class MHLHistory:
                     return hash_entry
         return None
 
+    # methods to query and compare hashes
+    def find_directory_hash_entries_for_path(self, relative_path: str) -> List[MHLHashEntry]:
+        """Searches the history for directory hash entries of a folder
+
+        starts with the first generation through all other generations
+        and collects all directory hashes found for the given folder.
+        """
+        directory_hash_entries = []
+        for hash_list in self.hash_lists:
+            media_hash = hash_list.find_media_hash_for_path(relative_path)
+            if media_hash is None:
+                continue
+            if media_hash.is_directory:
+                directory_hash_entries = directory_hash_entries + media_hash.hash_entries
+
+        return directory_hash_entries
+
     def find_first_hash_entry_for_path(self, relative_path, hash_format=None) -> Optional[MHLHashEntry]:
         """Searches the history for the first (original) hash entry of a file
         or if an optional hash format is given the first hash in that format

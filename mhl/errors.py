@@ -28,6 +28,12 @@ class VerificationFailedException(click.ClickException):
     def __init__(self):
         super().__init__('Verification of files referenced in the ASC MHL history failed')
 
+class VerificationDirectoriesFailedException(click.ClickException):
+    exit_code = 15
+
+    def __init__(self):
+        super().__init__('Verification of directories referenced in the ASC MHL history failed')
+
 
 class NewFilesFoundException(click.ClickException):
     exit_code = 13

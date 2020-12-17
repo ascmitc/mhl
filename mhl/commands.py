@@ -85,7 +85,8 @@ def create_for_folder_subcommand(root_path, verbose, hash_format, no_directory_h
 
     num_failed_verifications = 0
     # store the directory hashes of sub folders so we can use it when calculating the hash of the parent folder
-    dir_hash_mappings = {}
+    dir_content_hash_mappings = {}
+    dir_structure_hash_mappings = {}
     for folder_path, children in post_order_lexicographic(root_path):
         # generate directory hashes
         dir_hash_context = None
@@ -97,19 +98,25 @@ def create_for_folder_subcommand(root_path, verbose, hash_format, no_directory_h
             if is_dir:
                 if not dir_hash_context:
                     continue
-                hash_string = dir_hash_mappings.pop(file_path)
+                if dir_hash_context:
+                    dir_hash_context.append_directory_hashes(file_path,
+                                                             dir_content_hash_mappings.pop(file_path),
+                                                             dir_structure_hash_mappings.pop(file_path))
             else:
                 hash_string, success = seal_file_path(existing_history, file_path, hash_format, session)
                 if not success:
                     num_failed_verifications += 1
-            if dir_hash_context:
-                dir_hash_context.append_hash(hash_string, item_name)
-        dir_hash = None
+                dir_hash_context.append_file_hash(file_path, hash_string)
+        dir_content_hash = None
+        dir_structure_hash = None
         if dir_hash_context:
-            dir_hash = dir_hash_context.final_hash_str()
-            dir_hash_mappings[folder_path] = dir_hash
+            dir_content_hash = dir_hash_context.final_content_hash_str()
+            dir_structure_hash = dir_hash_context.final_structure_hash_str()
+            dir_content_hash_mappings[folder_path] = dir_content_hash
+            dir_structure_hash_mappings[folder_path] = dir_structure_hash
         modification_date = datetime.datetime.fromtimestamp(os.path.getmtime(folder_path))
-        session.append_directory_hash(folder_path, modification_date, hash_format, dir_hash)
+        session.append_directory_hashes(folder_path, modification_date, hash_format, dir_content_hash, dir_structure_hash)
+
 
     commit_session(session)
 
@@ -360,7 +367,7 @@ def info(verbose, single_file, root_path):
                     root_path = current_dir
                     break
                 current_dir = os.path.dirname(current_dir)
-        if root_path is "":
+        if root_path == "":
             raise errors.NoMHLHistoryExceptionForPath(single_file[0])
         else:
             info_for_single_file(root_path, verbose, single_file)

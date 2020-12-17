@@ -177,12 +177,19 @@ class MHLMediaHash:
             elif self.is_directory:
                 indicator = "d"
             hash_action = (hash_entry.action if hash_entry.action is not None else "").ljust(10)
-            logger.info("{0} {1}: {2} {3}: {4}".format(indicator,
-                                                       hash_entry.hash_format.rjust(6),
-                                                       hash_entry.hash_string.ljust(32),
-                                                       hash_action,
-                                                       self.path))
-
+            if hash_entry.structure_hash_string is not None:
+                logger.info("{0} {1}: {2} {3} (structure {4}): {5}".format(indicator,
+                                                           hash_entry.hash_format.rjust(6),
+                                                           hash_entry.hash_string.ljust(32),
+                                                           hash_entry.structure_hash_string,
+                                                           hash_action,
+                                                           self.path))
+            else:
+                logger.info("{0} {1}: {2} {3}: {4}".format(indicator,
+                                                           hash_entry.hash_format.rjust(6),
+                                                           hash_entry.hash_string.ljust(32),
+                                                           hash_action,
+                                                           self.path))
 
 class MHLHashEntry:
     """
@@ -198,12 +205,15 @@ class MHLHashEntry:
     """
 
     hash_string: str
+    structure_hash_string: str
     hash_format: str
     action: Optional[str]
 
     def __init__(self, hash_format: str, hash_string: str, action: str = None):
-        self.hash_string = hash_string
         self.hash_format = hash_format
+        self.hash_string = hash_string
+        self.structure_hash_string = None
+
         self.action = action
 
 

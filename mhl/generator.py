@@ -76,7 +76,8 @@ class MHLGenerationCreationSession:
         media_hash.append_hash_entry(hash_entry)
         return hash_entry.action != 'failed'
 
-    def append_directory_hash(self, path, modification_date, hash_format, hash_string) -> None:
+    def append_directory_hashes(self, path, modification_date, hash_format,
+                                content_hash_string, structure_hash_string) -> None:
 
         relative_path = self.root_history.get_relative_file_path(path)
         # TODO: handle if path is outside of history root path
@@ -90,12 +91,18 @@ class MHLGenerationCreationSession:
                                                                       modification_date)
         media_hash.is_directory = True
 
-        if hash_string:
-            media_hash.append_hash_entry(MHLHashEntry(hash_format, hash_string))
+        if content_hash_string:
+            hash_entry = MHLHashEntry(hash_format, content_hash_string)
+            hash_entry.structure_hash_string = structure_hash_string
+            media_hash.append_hash_entry(hash_entry)
             if relative_path == '.':
-                logger.verbose(f'  calculated root hash  {hash_format}: {hash_string}')
+                logger.verbose(f'  calculated root hash  {hash_format}: '
+                               f'{content_hash_string} (content), '
+                               f'{structure_hash_string} (structure)')
             else:
-                logger.verbose(f'  calculated directory hash for {relative_path}  {hash_format}: {hash_string}')
+                logger.verbose(f'  calculated directory hash for {relative_path}  {hash_format}: '
+                               f'{content_hash_string} (content), '
+                               f'{structure_hash_string} (structure)')
         else:
             logger.verbose(f'  added directory entry for     {relative_path}')
 
@@ -108,8 +115,10 @@ class MHLGenerationCreationSession:
                                                                                     None,
                                                                                     modification_date)
             parent_media_hash.is_directory = True
-            if hash_string:
-                parent_media_hash.append_hash_entry(MHLHashEntry(hash_format, hash_string))
+            if content_hash_string:
+                hash_entry = MHLHashEntry(hash_format, content_hash_string)
+                hash_entry.structure_hash_string = structure_hash_string
+                parent_media_hash.append_hash_entry(hash_entry)
 
     def commit(self, creator_info: MHLCreatorInfo):
         """

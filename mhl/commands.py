@@ -330,29 +330,39 @@ def verify_directory_hash_subcommand(root_path, verbose, hash_format):
 
                 num_successful_verifications = 0
                 for directory_hash_entry in directory_hash_entries:
+                    found_hash_format = False
                     if directory_hash_entry.hash_format != hash_format:
                         continue
+                    found_hash_format = True
                     if directory_hash_entry.hash_string == content_hash and \
                             directory_hash_entry.structure_hash_string == structure_hash:
-                        logger.verbose(f'  verification of folder        {relative_path}  OK')
-                        num_successful_verifications = num_successful_verifications + 1
+                        logger.verbose(f'  verification of folder        {relative_path} OK (generation {directory_hash_entry.temp_generation_number:04d})')
+                        num_successful_verifications += 1
                     else:
                         if directory_hash_entry.hash_string != content_hash:
                             logger.error(f'ERROR: content hash mismatch   for {relative_path} '
-                                         f'old {directory_hash_entry} {directory_hash_entry.hash_format}: {directory_hash_entry.hash_string}, '
-                                         f'new {hash_format}: {content_hash}')
+                                         f'old {directory_hash_entry.hash_format}: {directory_hash_entry.hash_string}, '
+                                         f'new {hash_format}: {content_hash} '
+                                         f'(generation {directory_hash_entry.temp_generation_number:04d})')
+                        else:
+                            logger.verbose(f'  content hash matches for      {relative_path} '
+                                           f' {directory_hash_entry.hash_format}: {directory_hash_entry.hash_string}'
+                                           f' (generation {directory_hash_entry.temp_generation_number:04d})')
                         if directory_hash_entry.structure_hash_string != structure_hash:
                             logger.error(f'ERROR: structure hash mismatch for {relative_path} '
                                          f'old {directory_hash_entry.hash_format}: {directory_hash_entry.structure_hash_string}, '
-                                         f'new {hash_format}: {structure_hash}')
+                                         f'new {hash_format}: {structure_hash} '
+                                         f'(generation {directory_hash_entry.temp_generation_number:04d})')
+                        else:
+                            logger.verbose(f'  structure hash matches for    {relative_path} '
+                                           f' {directory_hash_entry.hash_format}: {directory_hash_entry.hash_string} '
+                                           f' (generation {directory_hash_entry.temp_generation_number:04d})')
                         num_failed_verifications += 1
-                if num_successful_verifications == 0:
+                if not found_hash_format:
                     logger.error(f'ERROR: verification of folder {relative_path}: No directory hash of type {hash_format} found for folder {relative_path}')
                     num_failed_verifications += 1
             else:
-                hash_string, success = seal_file_path(existing_history, file_path, hash_format, session)
-                if not success:
-                    num_failed_verifications += 1
+                hash_string = hash_file_path(existing_history, file_path, hash_format, session)
                 dir_hash_context.append_file_hash(file_path, hash_string)
         dir_content_hash = None
         dir_structure_hash = None
@@ -620,3 +630,11 @@ def seal_file_path(existing_history, file_path, hash_format, session) -> (str, b
         return current_format_hash, False
     success &= session.append_file_hash(file_path, file_size, file_modification_date, hash_format, current_format_hash)
     return current_format_hash, success
+
+
+def hash_file_path(existing_history, file_path, hash_format, session) -> (str):
+    current_format_hash = create_filehash(hash_format, file_path)
+    relative_path = session.root_history.get_relative_file_path(file_path)
+    logger.verbose(f'  created file hash for         {relative_path}')
+
+    return current_format_hash

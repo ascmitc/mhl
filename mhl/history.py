@@ -114,6 +114,9 @@ class MHLHistory:
             if media_hash is None:
                 continue
             if media_hash.is_directory:
+                for hash_entry in media_hash.hash_entries:
+                    # FIXME is there a way of accessing the generation from a hash entry?
+                    hash_entry.temp_generation_number = hash_list.generation_number
                 directory_hash_entries = directory_hash_entries + media_hash.hash_entries
 
         return directory_hash_entries

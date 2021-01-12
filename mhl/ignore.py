@@ -41,7 +41,6 @@ class MHLIgnoreSpec:
             self._append_patterns_list(new_pattern_list)
         if new_pattern_file:
             self._append_patterns_from_file(new_pattern_file)
-        logger.verbose("set ignore patterns")
 
     def get_path_spec(self):
         """

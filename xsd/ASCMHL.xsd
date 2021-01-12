@@ -115,6 +115,7 @@
             <extension base="string">
                 <attribute name="action" type="ascmhl:ActionAttributeType"/>
                 <attribute name="hashdate" type="dateTime"/>
+                <attribute name="structure" type="string"/>
             </extension>
         </simpleContent>
     </complexType>

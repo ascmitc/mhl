@@ -5,7 +5,7 @@
     <hostname>myHost.local</hostname>
     <root directory="true">
       <path lastmodificationdate="2020-01-15T13:30:00+00:00">/file_server/Reels/A003R2EC</path>
-      <xxh64>f8fa1de2169f68b8</xxh64>
+      <xxh64 structure="0729474d03751da0">f6c455e7941fe0f3</xxh64>
     </root>
     <tool version="0.2 alpha">ascmhl.py</tool>
     <process>in-place</process>
@@ -21,7 +21,7 @@
     </hash>
     <hash directory="true">
       <path lastmodificationdate="2020-01-15T13:30:00+00:00">Clips</path>
-      <xxh64>ea9d3add207cb956</xxh64>
+      <xxh64 structure="2be728e9147a4b67">8d220e119e7b3b04</xxh64>
     </hash>
     <hash>
       <path size="45" lastmodificationdate="2020-01-15T13:30:00+00:00">Sidecar.txt</path>

@@ -187,7 +187,7 @@ def create_for_single_files_subcommand(root_path, verbose, hash_format, no_direc
 @click.option('--directory_hash', '-dh', default=False, is_flag=True,
               help="Record single file, no completeness check (multiple occurrences possible for adding multiple files")
 @click.option('--hash_format', '-h', type=click.Choice(ascmhl_supported_hashformats),
-              multiple=False, default='xxh64',
+              multiple=False,
               help="Algorithm")
 
 def verify(root_path, verbose, directory_hash, hash_format):
@@ -295,9 +295,22 @@ def verify_directory_hash_subcommand(root_path, verbose, hash_format):
 
     existing_history = MHLHistory.load_from_path(root_path)
 
-    # FIXME: somehow chose the right hash format from data in history (first directory hash?)
+    # choose the hash format of the latest root directory hash
     if hash_format is None:
-        hash_format = 'xxh64'
+        generation = -1
+        for hash_list in existing_history.hash_lists:
+            if hash_list.generation_number > generation:
+                if len(hash_list.root_media_hash.hash_entries) > 0:
+                    hash_format = hash_list.root_media_hash.hash_entries[0].hash_format
+
+        if hash_format is None:
+            logger.verbose(f'default hash format: c4')
+            hash_format = 'c4'
+        else:
+            logger.verbose(f'hash format from latest generation with directory hashes: {hash_format}')
+    else:
+        logger.verbose(f'hash format: {hash_format}')
+
 
     # we collect all paths we expect to find first and remove every path that we actually found while
     # traversing the file system, so this set will at the end contain the file paths not found in the file system
@@ -341,7 +354,8 @@ def verify_directory_hash_subcommand(root_path, verbose, hash_format):
                         num_failed_verifications += 1
 
                 if not found_hash_format:
-                    logger.error(f'ERROR: verification of folder {relative_path}: No directory hash of type {hash_format} found for folder {relative_path}')
+                    logger.error(
+                        f'ERROR: verification of folder {relative_path}: No directory hash of type {hash_format} found')
                     num_failed_verifications += 1
             else:
                 hash_string = hash_file_path(existing_history, file_path, hash_format, session)
@@ -358,11 +372,16 @@ def verify_directory_hash_subcommand(root_path, verbose, hash_format):
 
         # compare root hashes, works differently
         if folder_path == root_path:
+            found_hash_format = False
             for hash_list in existing_history.hash_lists:
                 root_hash_entries = hash_list.root_media_hash.hash_entries
                 if len(root_hash_entries) > 0:
                     for root_hash_entry in root_hash_entries:
-                        num_current_successful_verifications = _compare_and_log_directory_hashes(".", root_hash_entry, dir_content_hash, dir_structure_hash)
+                        if root_hash_entry.hash_format == hash_format:
+                            _compare_and_log_directory_hashes(".", root_hash_entry, dir_content_hash, dir_structure_hash)
+                            found_hash_format = True
+            if not found_hash_format:
+                logger.error(f'ERROR: verification of root folder: No directory hash of type {hash_format} found')
 
     exception = None
     if num_failed_verifications > 0:

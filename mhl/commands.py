@@ -329,35 +329,17 @@ def verify_directory_hash_subcommand(root_path, verbose, hash_format):
                 dir_hash_context.append_directory_hashes(file_path, content_hash, structure_hash)
 
                 num_successful_verifications = 0
+                found_hash_format = False
                 for directory_hash_entry in directory_hash_entries:
-                    found_hash_format = False
                     if directory_hash_entry.hash_format != hash_format:
                         continue
                     found_hash_format = True
-                    if directory_hash_entry.hash_string == content_hash and \
-                            directory_hash_entry.structure_hash_string == structure_hash:
-                        logger.verbose(f'  verification of folder        {relative_path} OK (generation {directory_hash_entry.temp_generation_number:04d})')
+                    num_current_successful_verifications = _compare_and_log_directory_hashes(relative_path, directory_hash_entry, content_hash, structure_hash)
+                    if num_current_successful_verifications == 2:
                         num_successful_verifications += 1
-                    else:
-                        if directory_hash_entry.hash_string != content_hash:
-                            logger.error(f'ERROR: content hash mismatch   for {relative_path} '
-                                         f'old {directory_hash_entry.hash_format}: {directory_hash_entry.hash_string}, '
-                                         f'new {hash_format}: {content_hash} '
-                                         f'(generation {directory_hash_entry.temp_generation_number:04d})')
-                        else:
-                            logger.verbose(f'  content hash matches for      {relative_path} '
-                                           f' {directory_hash_entry.hash_format}: {directory_hash_entry.hash_string}'
-                                           f' (generation {directory_hash_entry.temp_generation_number:04d})')
-                        if directory_hash_entry.structure_hash_string != structure_hash:
-                            logger.error(f'ERROR: structure hash mismatch for {relative_path} '
-                                         f'old {directory_hash_entry.hash_format}: {directory_hash_entry.structure_hash_string}, '
-                                         f'new {hash_format}: {structure_hash} '
-                                         f'(generation {directory_hash_entry.temp_generation_number:04d})')
-                        else:
-                            logger.verbose(f'  structure hash matches for    {relative_path} '
-                                           f' {directory_hash_entry.hash_format}: {directory_hash_entry.hash_string} '
-                                           f' (generation {directory_hash_entry.temp_generation_number:04d})')
+                    if num_current_successful_verifications == 1:
                         num_failed_verifications += 1
+
                 if not found_hash_format:
                     logger.error(f'ERROR: verification of folder {relative_path}: No directory hash of type {hash_format} found for folder {relative_path}')
                     num_failed_verifications += 1
@@ -373,9 +355,14 @@ def verify_directory_hash_subcommand(root_path, verbose, hash_format):
             dir_structure_hash_mappings[folder_path] = dir_structure_hash
         modification_date = datetime.datetime.fromtimestamp(os.path.getmtime(folder_path))
         session.append_directory_hashes(folder_path, modification_date, hash_format, dir_content_hash, dir_structure_hash)
-        # FIXME also compare created root hashes (dir_content_hash, dir_structure_hash) with the root hashes in all generations
-        # if folder_path == root_path:
 
+        # compare root hashes, works differently
+        if folder_path == root_path:
+            for hash_list in existing_history.hash_lists:
+                root_hash_entries = hash_list.root_media_hash.hash_entries
+                if len(root_hash_entries) > 0:
+                    for root_hash_entry in root_hash_entries:
+                        num_current_successful_verifications = _compare_and_log_directory_hashes(".", root_hash_entry, dir_content_hash, dir_structure_hash)
 
     exception = None
     if num_failed_verifications > 0:
@@ -383,6 +370,44 @@ def verify_directory_hash_subcommand(root_path, verbose, hash_format):
 
     if exception:
         raise exception
+
+def _compare_and_log_directory_hashes(relative_path, directory_hash_entry,
+                                      calculated_content_hash_string, calculated_structure_hash_string):
+    num_successful_verifications = 0
+    if directory_hash_entry.hash_string == calculated_content_hash_string and \
+            directory_hash_entry.structure_hash_string == calculated_structure_hash_string:
+        if relative_path == ".":
+            logger.verbose(f'  verification of root folder   OK '
+                           f'(generation {directory_hash_entry.temp_generation_number:04d})')
+        else:
+            logger.verbose(f'  verification of folder        {relative_path} OK '
+                           f'(generation {directory_hash_entry.temp_generation_number:04d})')
+
+        num_successful_verifications += 2
+    else:
+        if directory_hash_entry.hash_string != calculated_content_hash_string:
+            logger.error(f'ERROR: content hash mismatch   for {relative_path} '
+                         f'old {directory_hash_entry.hash_format}: {directory_hash_entry.hash_string}, '
+                         f'new {directory_hash_entry.hash_format}: {calculated_content_hash_string} '
+                         f'(generation {directory_hash_entry.temp_generation_number:04d})')
+        else:
+            logger.verbose(f'  content hash matches for      {relative_path} '
+                           f' {directory_hash_entry.hash_format}: {directory_hash_entry.hash_string}'
+                           f' (generation {directory_hash_entry.temp_generation_number:04d})')
+
+        if directory_hash_entry.structure_hash_string != calculated_structure_hash_string:
+            logger.error(f'ERROR: structure hash mismatch for {relative_path} '
+                         f'old {directory_hash_entry.hash_format}: {directory_hash_entry.structure_hash_string}, '
+                         f'new {directory_hash_entry.hash_format}: {calculated_structure_hash_string} '
+                         f'(generation {directory_hash_entry.temp_generation_number:04d})')
+        else:
+            logger.verbose(f'  structure hash matches for    {relative_path} '
+                           f' {directory_hash_entry.hash_format}: {directory_hash_entry.hash_string} '
+                           f' (generation {directory_hash_entry.temp_generation_number:04d})')
+
+        num_successful_verifications += 1
+
+    return num_successful_verifications
 
 #TODO def verify_single_file_subcommand(root_path, verbose):
 

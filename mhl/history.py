@@ -115,7 +115,7 @@ class MHLHistory:
                 continue
             if media_hash.is_directory:
                 for hash_entry in media_hash.hash_entries:
-                    # FIXME is there a way of accessing the generation from a hash entry?
+                    # FIXME is there a better way of accessing the generation from a hash entry?
                     hash_entry.temp_generation_number = hash_list.generation_number
                 directory_hash_entries = directory_hash_entries + media_hash.hash_entries
 
@@ -206,9 +206,11 @@ class MHLHistory:
                     if len(parts) == 1 and len(parts[0]) == 2:
                         file_path = os.path.join(asc_mhl_folder_path, filename)
                         hash_list = hashlist_xml_parser.parse(file_path)
-
                         generation_number = int(parts[0][0])
                         hash_list.generation_number = generation_number
+                        # FIXME is there a better way of accessing the generation from a hash entry?
+                        for hash_entry in hash_list.root_media_hash.hash_entries:
+                            hash_entry.temp_generation_number = hash_list.generation_number
                         hash_lists.append(hash_list)
                     else:
                         logger.error(f'name of ascmhl file {filename} does not conform to naming convention')

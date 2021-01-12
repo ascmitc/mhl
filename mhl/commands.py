@@ -106,7 +106,8 @@ def create_for_folder_subcommand(root_path, verbose, hash_format, no_directory_h
                 hash_string, success = seal_file_path(existing_history, file_path, hash_format, session)
                 if not success:
                     num_failed_verifications += 1
-                dir_hash_context.append_file_hash(file_path, hash_string)
+                if not no_directory_hashes:
+                    dir_hash_context.append_file_hash(file_path, hash_string)
         dir_content_hash = None
         dir_structure_hash = None
         if dir_hash_context:

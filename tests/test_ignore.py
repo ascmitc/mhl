@@ -16,21 +16,8 @@ import pytest
 import mhl.commands
 from lxml import etree
 
-
-# TODO: determine which fixture is being used
-
 XML_IGNORESPEC_TAG = 'ignorespec'
 XML_IGNORE_TAG = 'ignore'
-
-@pytest.fixture()
-def reusable_fs(fs):
-    fs.create_file('/root/B/BB/BB2.txt', contents='BB2\n')
-    fs.create_file('root/a.txt', contents='a')
-    fs.create_file('root/b.txt', contents='b')
-    fs.create_file('root/1/c.txt', contents='c')
-    fs.create_file('root/1/2/d.txt', contents='d')
-    fs.create_file('root/1/2/e.txt', contents='e')
-    print("FS", fs)
 
 
 @pytest.fixture(scope="function")
@@ -144,16 +131,15 @@ def test_ignore_on_diff(temp_tree):
     assert runner.invoke(mhl.commands.diff, [root_dir, '--ignore_spec', f'{temp_tree.path}/ignorespec'])
 
 
-# def test_ignore_on_nested_histories(temp_tree):
-#     """
-#     tests that nested histories have proper interaction with the ignore specification
-#     """
-#     runner = CliRunner()
-#     root_dir, mhl_dir = f'{temp_tree.path}', f'{temp_tree.path}/ascmhl'
-#     child_dir = f'{root_dir}/1'
-#
-#     # create a generation
-#     runner.invoke(mhl.commands.create, [child_dir, '-h', 'md5'])
-#     runner.invoke(mhl.commands.create, [root_dir, '-h', 'c4'])
-#     runner.invoke(mhl.commands.create, [child_dir, '-h', 'sha1'])
-#     runner.invoke(mhl.commands.create, [root_dir, '-h', 'xxh64'])
+def test_ignore_on_nested_histories(temp_tree):
+    """
+    tests that nested histories have proper interaction with the ignore specification
+    """
+    runner = CliRunner()
+    root_dir, child_dir, mhl_dir = f'{temp_tree.path}', f'{temp_tree.path}/1', f'{temp_tree.path}/ascmhl'
+
+    # create a generation
+    runner.invoke(mhl.commands.create, [child_dir, '-h', 'md5'])
+    runner.invoke(mhl.commands.create, [root_dir, '-h', 'c4'])
+    runner.invoke(mhl.commands.create, [child_dir, '-h', 'sha1'])
+    runner.invoke(mhl.commands.create, [root_dir, '-h', 'xxh64'])

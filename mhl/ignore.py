@@ -69,3 +69,11 @@ class MHLIgnoreSpec:
             with open(filepath, 'r') as fh:
                 patters_from_file.extend(line.rstrip('\n') for line in fh if line != '\n')
                 self._append_patterns_list(patters_from_file)
+
+    # For call to repr().
+    def __repr__(self):
+        return repr(self._ignore_list)
+
+    # For call to str().
+    def __str__(self):
+        return str(self._ignore_list)

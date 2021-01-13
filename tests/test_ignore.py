@@ -7,14 +7,14 @@ __email__ = "opensource@pomfort.com"
 """
 
 import os
-from click.testing import CliRunner
-from freezegun import freeze_time
-from mhl.history import MHLHistory
-from testfixtures import TempDirectory
 import pytest
+import shutil
+from click.testing import CliRunner
+from lxml import etree
+from testfixtures import TempDirectory
 
 import mhl.commands
-from lxml import etree
+
 
 XML_IGNORESPEC_TAG = 'ignorespec'
 XML_IGNORE_TAG = 'ignore'
@@ -22,8 +22,18 @@ XML_IGNORE_TAG = 'ignore'
 
 @pytest.fixture(scope="function")
 def temp_tree():
-    # TODO: flip back to with, yield
     # with TempDirectory() as tmpdir:
+    #     tmpdir = TempDirectory()
+    #     tmpdir.write('a.txt', b'a')
+    #     tmpdir.write('b.txt', b'b')
+    #     tmpdir.write('1/c.txt', b'c')
+    #     tmpdir.write('1/11/d.txt', b'd')
+    #     tmpdir.write('1/12/e.txt', b'e')
+    #     tmpdir.write('2/11/f.txt', b'f')
+    #     tmpdir.write('2/12/g.txt', b'g')
+    #     yield tmpdir
+
+    # create and populate a temp dir with static data
     tmpdir = TempDirectory()
     tmpdir.write('a.txt', b'a')
     tmpdir.write('b.txt', b'b')
@@ -32,8 +42,15 @@ def temp_tree():
     tmpdir.write('1/12/e.txt', b'e')
     tmpdir.write('2/11/f.txt', b'f')
     tmpdir.write('2/12/g.txt', b'g')
-    return tmpdir
-    # yield tmpdir
+
+    # yield the directory to the test function
+    yield tmpdir
+
+    # test function is done... cleanup the temp dir
+    try:
+        shutil.rmtree(tmpdir.path)
+    except OSError as e:
+        print("Error: %s - %s." % (e.filename, e.strerror))
 
 
 def ignore_patterns_from_mhl_file(mhl_file):
@@ -50,6 +67,16 @@ def assert_mhl_file_has_exact_ignore_patterns(mhl_file: str, patterns_to_check: 
     """
     patterns_in_file = set(ignore_patterns_from_mhl_file(mhl_file))
     assert patterns_in_file == patterns_to_check, 'mhl file has incorrect ignore patterns'
+
+
+def mhl_file_for_gen(mhl_dir: str, mhl_gen: int):
+    """
+    returns the mhl file associated with a generation number.
+    """
+    assert mhl_gen != 0  # ensure we sent the gen number and not array number
+    mhl_files = os.listdir(mhl_dir)
+    mhl_files.sort()
+    return f'{mhl_dir}/{mhl_files[mhl_gen - 1]}'
 
 
 def test_ignore_on_create(temp_tree):
@@ -133,13 +160,28 @@ def test_ignore_on_diff(temp_tree):
 
 def test_ignore_on_nested_histories(temp_tree):
     """
-    tests that nested histories have proper interaction with the ignore specification
+    tests that nested histories have proper interaction with the ignore specification.
+    parent ignore specs are propagated to their children and appended to the existing child specs.
+    ensure we append but do not overwrite.
     """
     runner = CliRunner()
-    root_dir, child_dir, mhl_dir = f'{temp_tree.path}', f'{temp_tree.path}/1', f'{temp_tree.path}/ascmhl'
+    root_dir, root_mhl_dir = f'{temp_tree.path}', f'{temp_tree.path}/ascmhl'
+    child_dir, child_mhl_dir = f'{temp_tree.path}/1', f'{temp_tree.path}/1/ascmhl'
 
-    # create a generation
-    runner.invoke(mhl.commands.create, [child_dir, '-h', 'md5'])
-    runner.invoke(mhl.commands.create, [root_dir, '-h', 'c4'])
-    runner.invoke(mhl.commands.create, [child_dir, '-h', 'sha1'])
-    runner.invoke(mhl.commands.create, [root_dir, '-h', 'xxh64'])
+    # create an mhl gen on a nested dir
+    runner.invoke(mhl.commands.create, [child_dir, '-i', 'c1'])
+    assert_mhl_file_has_exact_ignore_patterns(mhl_file_for_gen(child_mhl_dir, 1), {'.DS_Store', 'ascmhl', 'c1'})
+
+    # create mhl gen on parent, ensure parent is correct and child updated.
+    runner.invoke(mhl.commands.create, [root_dir, '-i', 'p1'])
+    assert_mhl_file_has_exact_ignore_patterns(mhl_file_for_gen(root_mhl_dir, 1), {'.DS_Store', 'ascmhl', 'p1'})
+    assert_mhl_file_has_exact_ignore_patterns(mhl_file_for_gen(child_mhl_dir, 2), {'.DS_Store', 'ascmhl', 'c1', 'p1'})
+
+    # add just to child again.
+    runner.invoke(mhl.commands.create, [child_dir, '-i', 'c2'])
+    assert_mhl_file_has_exact_ignore_patterns(mhl_file_for_gen(child_mhl_dir, 3), {'.DS_Store', 'ascmhl', 'c1', 'p1', 'c2'})
+
+    # add to parent and test one last time.
+    runner.invoke(mhl.commands.create, [root_dir, '-i', 'p2'])
+    assert_mhl_file_has_exact_ignore_patterns(mhl_file_for_gen(root_mhl_dir, 2), {'.DS_Store', 'ascmhl', 'p1', 'p2'})
+    assert_mhl_file_has_exact_ignore_patterns(mhl_file_for_gen(child_mhl_dir, 4), {'.DS_Store', 'ascmhl', 'c1', 'p1', 'c2', 'p2'})

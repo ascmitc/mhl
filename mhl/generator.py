@@ -132,7 +132,8 @@ class MHLGenerationCreationSession:
                 new_hash_list = self.new_hash_lists[history]
             new_hash_list.referenced_hash_lists = referenced_hash_lists[history]
             new_hash_list.creator_info = creator_info
-            new_hash_list.ignore_spec = self.ignore_spec
+            new_hash_list.ignore_spec = MHLIgnoreSpec(history.latest_ignore_patterns(), self.ignore_spec.get_pattern_list())
+
             history.write_new_generation(new_hash_list)
             relative_generation_path = self.root_history.get_relative_file_path(new_hash_list.file_path)
             logger.verbose(f'Created new generation {relative_generation_path}')

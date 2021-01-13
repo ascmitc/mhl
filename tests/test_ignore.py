@@ -12,27 +12,18 @@ import shutil
 from click.testing import CliRunner
 from lxml import etree
 from testfixtures import TempDirectory
-
 import mhl.commands
 
 
-XML_IGNORESPEC_TAG = 'ignorespec'
 XML_IGNORE_TAG = 'ignore'
 
 
 @pytest.fixture(scope="function")
 def temp_tree():
-    # with TempDirectory() as tmpdir:
-    #     tmpdir = TempDirectory()
-    #     tmpdir.write('a.txt', b'a')
-    #     tmpdir.write('b.txt', b'b')
-    #     tmpdir.write('1/c.txt', b'c')
-    #     tmpdir.write('1/11/d.txt', b'd')
-    #     tmpdir.write('1/12/e.txt', b'e')
-    #     tmpdir.write('2/11/f.txt', b'f')
-    #     tmpdir.write('2/12/g.txt', b'g')
-    #     yield tmpdir
-
+    """
+    fixture used by all tests in this file.
+    sets up a static file tree in a temp dir for each test, then deletes after test.
+    """
     # create and populate a temp dir with static data
     tmpdir = TempDirectory()
     tmpdir.write('a.txt', b'a')
@@ -53,7 +44,7 @@ def temp_tree():
         print("Error: %s - %s." % (e.filename, e.strerror))
 
 
-def ignore_patterns_from_mhl_file(mhl_file):
+def ignore_patterns_from_mhl_file(mhl_file: str):
     """
     returns a set of the patterns found in the mhl_file
     """
@@ -97,9 +88,9 @@ def test_ignore_on_create(temp_tree):
     # we should now have 3 total mhl generations. ensure each one has exactly the expected patterns
     mhl_files = os.listdir(f'{temp_tree.path}/ascmhl')
     mhl_files.sort()
-    assert_mhl_file_has_exact_ignore_patterns(f'{mhl_dir}/{mhl_files[0]}', {'.DS_Store', 'ascmhl', '1'})
-    assert_mhl_file_has_exact_ignore_patterns(f'{mhl_dir}/{mhl_files[1]}', {'.DS_Store', 'ascmhl', '1', '2', '3'})
-    assert_mhl_file_has_exact_ignore_patterns(f'{mhl_dir}/{mhl_files[2]}', {'.DS_Store', 'ascmhl', '1', '2', '3', '4', '5', '6', '7'})
+    assert_mhl_file_has_exact_ignore_patterns(mhl_file_for_gen(mhl_dir, 1), {'.DS_Store', 'ascmhl', '1'})
+    assert_mhl_file_has_exact_ignore_patterns(mhl_file_for_gen(mhl_dir, 2), {'.DS_Store', 'ascmhl', '1', '2', '3'})
+    assert_mhl_file_has_exact_ignore_patterns(mhl_file_for_gen(mhl_dir, 3), {'.DS_Store', 'ascmhl', '1', '2', '3', '4', '5', '6', '7'})
 
 
 def test_ignore_on_verify(temp_tree):

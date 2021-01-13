@@ -1,5 +1,5 @@
 """
-__author__ = "Patrick Renner"
+__author__ = "Jon Waggoner"
 __copyright__ = "Copyright 2020, Pomfort GmbH"
 __license__ = "MIT"
 __maintainer__ = "Patrick Renner, Alexander Sahm"
@@ -14,17 +14,13 @@ from testfixtures import TempDirectory
 import pytest
 
 import mhl.commands
-
-
-# @pytest.fixture(scope="module")
-# def smtp_connection():
-#     smtp_connection = smtplib.SMTP("smtp.gmail.com", 587, timeout=5)
-#     yield smtp_connection  # provide the fixture value
-#     print("teardown smtp")
-#     smtp_connection.close()
+from lxml import etree
 
 
 # TODO: determine which fixture is being used
+
+XML_IGNORESPEC_TAG = 'ignorespec'
+XML_IGNORE_TAG = 'ignore'
 
 @pytest.fixture()
 def reusable_fs(fs):
@@ -54,42 +50,35 @@ def temp_tree():
     # yield tmpdir
 
 
-def test_ignore_propagation(temp_tree):
+def ignore_patterns_from_mhl_file(mhl_file):
     """
-    this test ensures that if a parent node has a generation created, the ignore specification propagates to the children.
+    returns a set of the patterns found in the mhl_file
     """
+    pattern_list = [element.text for event, element in etree.iterparse(mhl_file) if element.tag.split('}', 1)[-1] == XML_IGNORE_TAG]
+    return set(pattern_list)
+
+
+def assert_mhl_file_has_exact_ignore_patterns(mhl_file: str, patterns_to_check: set):
+    """
+    asserts the ignore patterns in an mhl are exactly the same as the patterns in
+    """
+    patterns_in_file = set(ignore_patterns_from_mhl_file(mhl_file))
+    assert patterns_in_file == patterns_to_check, 'mhl file has incorrect ignore pattern'
+
+
+def test_ignore_on_create(temp_tree):
     runner = CliRunner()
-    # seal child dir
-    runner.invoke(mhl.commands.create, [f'{temp_tree.path}/1', '-h', 'md5'])
-    # seal root dir.
-    runner.invoke(mhl.commands.create, [f'{temp_tree.path}', '-i', 'd.txt', '-h', 'md5'])
+    root_dir, mhl_dir = f'{temp_tree.path}', f'{temp_tree.path}/ascmhl'
 
-    runner.invoke(mhl.commands.create, [f'{temp_tree.path}'], '-h', 'xxhash')
-    # ensure second gen of child dir has parent ignore spec propagated.
+    runner.invoke(mhl.commands.create, [root_dir, '-i', '1'])
+    runner.invoke(mhl.commands.create, [root_dir, '-i', '2', '-i', '3'])
 
+    temp_tree.write('ignorespec', b'6\n7')
+    runner.invoke(mhl.commands.create, [root_dir, '-i', '4', '-i', '5', '--ignore_spec', f'{temp_tree.path}/ignorespec'])
 
-def test_command_params(temp_tree):
-    pass
+    names = os.listdir(f'{temp_tree.path}/ascmhl')
+    names.sort()
 
-# @freeze_time("2020-11-19 09:15:00")
-# def test_simple_create_with_ignore(fs, simple_mhl_folder):
-#     runner = CliRunner()
-#     result = runner.invoke(mhl.commands.create, ['-i', 'Stuff.txt', '/root/'])
-#     assert result.exit_code == 0
-#
-#     hash_list = MHLHistory.load_from_path('/root').hash_lists[-1]
-#     assert hash_list.find_media_hash_for_path('Stuff.txt') is None
-#     assert hash_list.find_media_hash_for_path('A/A1.txt') is not None
-#
-# @freeze_time("2020-11-19 09:15:00")
-# def test_simple_verify_with_ignore(fs, simple_mhl_history):
-#     runner = CliRunner()
-#     result = runner.invoke(mhl.commands.create, ['/root/'])
-#     result = runner.invoke(mhl.commands.verify, ['-i', 'Stuff.txt', '/root/'])
-#     assert result.exit_code == 0
-#
-# @freeze_time("2020-11-19 09:15:00")
-# def test_nested_create_with_ignore(fs, nested_mhl_histories):
-#     runner = CliRunner()
-#     result = runner.invoke(mhl.commands.create, ['-v', '-i', 'BB1.txt', '/root/'])
-#     assert result.exit_code == 0
+    assert_mhl_file_has_exact_ignore_patterns(f'{mhl_dir}/{names[0]}', {'.DS_Store', 'ascmhl', '1'})
+    assert_mhl_file_has_exact_ignore_patterns(f'{mhl_dir}/{names[1]}', {'.DS_Store', 'ascmhl', '1', '2', '3'})
+    assert_mhl_file_has_exact_ignore_patterns(f'{mhl_dir}/{names[2]}', {'.DS_Store', 'ascmhl', '1', '2', '3', '4', '5', '6', '7'})

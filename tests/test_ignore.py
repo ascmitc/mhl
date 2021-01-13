@@ -33,7 +33,7 @@ def reusable_fs(fs):
     print("FS", fs)
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def temp_tree():
     # TODO: flip back to with, yield
     # with TempDirectory() as tmpdir:
@@ -45,7 +45,6 @@ def temp_tree():
     tmpdir.write('1/12/e.txt', b'e')
     tmpdir.write('2/11/f.txt', b'f')
     tmpdir.write('2/12/g.txt', b'g')
-    print(f'tmpdir: {tmpdir.path}')
     return tmpdir
     # yield tmpdir
 
@@ -110,11 +109,39 @@ def test_ignore_on_verify(temp_tree):
     # assert that verification fails
     assert runner.invoke(mhl.commands.verify, [root_dir]).exit_code != 0
     # assert that we can suppress this verification error by ignoring a parent directory
-    assert runner.invoke(mhl.commands.verify, [root_dir, '-i', 'a.txt', '--ignore', '1/c.txt']).exit_code == 0
+    assert runner.invoke(mhl.commands.verify, [root_dir, '-i', 'a.txt', '--ignore', 'c.txt']).exit_code == 0
 
     # assert that the same verification works by using an ignore spec from file
     temp_tree.write('ignorespec', b'a.txt\n1/c.txt')  # write an ignore spec to file
     assert runner.invoke(mhl.commands.verify, [root_dir, '--ignore_spec', f'{temp_tree.path}/ignorespec'])
+
+
+def test_ignore_on_diff(temp_tree):
+    """
+    tests that the "diff" command properly receives and processes all ignore spec arguments
+    """
+    runner = CliRunner()
+    root_dir, mhl_dir = f'{temp_tree.path}', f'{temp_tree.path}/ascmhl'
+
+    # create a generation
+    runner.invoke(mhl.commands.create, [root_dir])
+    # purposely alter integrity by deleting a file
+    os.remove(f'{root_dir}/a.txt')
+    # assert that verification fails
+    assert runner.invoke(mhl.commands.diff, [root_dir]).exit_code != 0
+    # assert that we can suppress this verification error by ignoring the deleted file
+    assert runner.invoke(mhl.commands.diff, [root_dir, '-i', 'a.txt']).exit_code == 0
+
+    # again, but by ignoring a dir. alter a file, then ignore the parent.
+    temp_tree.write(f'{root_dir}/1/c.txt', b'BAD_CONTENTS')
+    # assert that verification fails
+    assert runner.invoke(mhl.commands.diff, [root_dir]).exit_code != 0
+    # assert that we can suppress this verification error by ignoring a parent directory
+    assert runner.invoke(mhl.commands.diff, [root_dir, '-i', 'a.txt', '--ignore', '1/c.txt']).exit_code == 0
+
+    # assert that the same verification works by using an ignore spec from file
+    temp_tree.write('ignorespec', b'a.txt\n1/c.txt')  # write an ignore spec to file
+    assert runner.invoke(mhl.commands.diff, [root_dir, '--ignore_spec', f'{temp_tree.path}/ignorespec'])
 
 
 # def test_ignore_on_nested_histories(temp_tree):

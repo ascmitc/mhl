@@ -63,22 +63,66 @@ def assert_mhl_file_has_exact_ignore_patterns(mhl_file: str, patterns_to_check: 
     asserts the ignore patterns in an mhl are exactly the same as the patterns in
     """
     patterns_in_file = set(ignore_patterns_from_mhl_file(mhl_file))
-    assert patterns_in_file == patterns_to_check, 'mhl file has incorrect ignore pattern'
+    assert patterns_in_file == patterns_to_check, 'mhl file has incorrect ignore patterns'
 
 
 def test_ignore_on_create(temp_tree):
+    """
+    tests that the "create" command properly receives and processes all ignore spec arguments
+    """
     runner = CliRunner()
     root_dir, mhl_dir = f'{temp_tree.path}', f'{temp_tree.path}/ascmhl'
 
+    # write generation 1,
     runner.invoke(mhl.commands.create, [root_dir, '-i', '1'])
-    runner.invoke(mhl.commands.create, [root_dir, '-i', '2', '-i', '3'])
+    # write generation 2, appending ignore patterns using both CLI args
+    runner.invoke(mhl.commands.create, [root_dir, '-i', '2', '--ignore', '3'])
+    # write generation 3, appending ignore_spec from file and both CLI args
+    temp_tree.write('ignorespec', b'6\n7')  # write an ignore spec to file
+    runner.invoke(mhl.commands.create, [root_dir, '-i', '4', '--ignore', '5', '--ignore_spec', f'{temp_tree.path}/ignorespec'])
 
-    temp_tree.write('ignorespec', b'6\n7')
-    runner.invoke(mhl.commands.create, [root_dir, '-i', '4', '-i', '5', '--ignore_spec', f'{temp_tree.path}/ignorespec'])
+    # we should now have 3 total mhl generations. ensure each one has exactly the expected patterns
+    mhl_files = os.listdir(f'{temp_tree.path}/ascmhl')
+    mhl_files.sort()
+    assert_mhl_file_has_exact_ignore_patterns(f'{mhl_dir}/{mhl_files[0]}', {'.DS_Store', 'ascmhl', '1'})
+    assert_mhl_file_has_exact_ignore_patterns(f'{mhl_dir}/{mhl_files[1]}', {'.DS_Store', 'ascmhl', '1', '2', '3'})
+    assert_mhl_file_has_exact_ignore_patterns(f'{mhl_dir}/{mhl_files[2]}', {'.DS_Store', 'ascmhl', '1', '2', '3', '4', '5', '6', '7'})
 
-    names = os.listdir(f'{temp_tree.path}/ascmhl')
-    names.sort()
 
-    assert_mhl_file_has_exact_ignore_patterns(f'{mhl_dir}/{names[0]}', {'.DS_Store', 'ascmhl', '1'})
-    assert_mhl_file_has_exact_ignore_patterns(f'{mhl_dir}/{names[1]}', {'.DS_Store', 'ascmhl', '1', '2', '3'})
-    assert_mhl_file_has_exact_ignore_patterns(f'{mhl_dir}/{names[2]}', {'.DS_Store', 'ascmhl', '1', '2', '3', '4', '5', '6', '7'})
+def test_ignore_on_verify(temp_tree):
+    """
+    tests that the "verify" command properly receives and processes all ignore spec arguments
+    """
+    runner = CliRunner()
+    root_dir, mhl_dir = f'{temp_tree.path}', f'{temp_tree.path}/ascmhl'
+
+    # create a generation
+    runner.invoke(mhl.commands.create, [root_dir])
+    # purposely alter integrity by deleting a file
+    os.remove(f'{root_dir}/a.txt')
+    # assert that verification fails
+    assert runner.invoke(mhl.commands.verify, [root_dir]).exit_code != 0
+    # assert that we can suppress this verification error by ignoring the deleted file
+    assert runner.invoke(mhl.commands.verify, [root_dir, '-i', 'a.txt']).exit_code == 0
+
+    # one more time, but by ignoring a dir. alter a file, then ignore the parent.
+    temp_tree.write(f'{root_dir}/1/c.txt', b'BAD_CONTENTS')
+    # assert that verification fails
+    assert runner.invoke(mhl.commands.verify, [root_dir]).exit_code != 0
+    # assert that we can suppress this verification error by ignoring a parent directory
+    assert runner.invoke(mhl.commands.verify, [root_dir, '-i', 'a.txt', '--ignore', '1/c.txt']).exit_code == 0
+
+
+# def test_ignore_on_nested_histories(temp_tree):
+#     """
+#     tests that nested histories have proper interaction with the ignore specification
+#     """
+#     runner = CliRunner()
+#     root_dir, mhl_dir = f'{temp_tree.path}', f'{temp_tree.path}/ascmhl'
+#     child_dir = f'{root_dir}/1'
+#
+#     # create a generation
+#     runner.invoke(mhl.commands.create, [child_dir, '-h', 'md5'])
+#     runner.invoke(mhl.commands.create, [root_dir, '-h', 'c4'])
+#     runner.invoke(mhl.commands.create, [child_dir, '-h', 'sha1'])
+#     runner.invoke(mhl.commands.create, [root_dir, '-h', 'xxh64'])

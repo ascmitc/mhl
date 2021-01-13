@@ -105,12 +105,16 @@ def test_ignore_on_verify(temp_tree):
     # assert that we can suppress this verification error by ignoring the deleted file
     assert runner.invoke(mhl.commands.verify, [root_dir, '-i', 'a.txt']).exit_code == 0
 
-    # one more time, but by ignoring a dir. alter a file, then ignore the parent.
+    # again, but by ignoring a dir. alter a file, then ignore the parent.
     temp_tree.write(f'{root_dir}/1/c.txt', b'BAD_CONTENTS')
     # assert that verification fails
     assert runner.invoke(mhl.commands.verify, [root_dir]).exit_code != 0
     # assert that we can suppress this verification error by ignoring a parent directory
     assert runner.invoke(mhl.commands.verify, [root_dir, '-i', 'a.txt', '--ignore', '1/c.txt']).exit_code == 0
+
+    # assert that the same verification works by using an ignore spec from file
+    temp_tree.write('ignorespec', b'a.txt\n1/c.txt')  # write an ignore spec to file
+    assert runner.invoke(mhl.commands.verify, [root_dir, '--ignore_spec', f'{temp_tree.path}/ignorespec'])
 
 
 # def test_ignore_on_nested_histories(temp_tree):

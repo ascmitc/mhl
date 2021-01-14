@@ -8,7 +8,6 @@ Seal the copy of A002R2EC on the travel drive /travel_01 to create the original 
 
 $ ascmhl.py create -v /travel_01/Reels/A002R2EC
 Sealing folder at path: /travel_01/Reels/A002R2EC ...
-ignore patterns ['.DS_Store', 'ascmhl']
   created original hash for     Clips/A002C006_141024_R2EC.mov  xxh64: 0ea03b369a463d9d
   created original hash for     Clips/A002C007_141024_R2EC.mov  xxh64: 7680e5f98f4a80fd
   calculated directory hash for Clips  xxh64: 2d51faa2b1834454
@@ -24,7 +23,6 @@ Seal the copy of A003R2EC on the travel drive /travel_01 to create the original 
 
 $ ascmhl.py create -v /travel_01/Reels/A003R2EC
 Sealing folder at path: /travel_01/Reels/A003R2EC ...
-ignore patterns ['.DS_Store', 'ascmhl']
   created original hash for     Clips/A003C011_141024_R2EC.mov  xxh64: 52392f79a36d6571
   created original hash for     Clips/A003C012_141024_R2EC.mov  xxh64: 5dbca064ddddd6fc
   calculated directory hash for Clips  xxh64: ea9d3add207cb956
@@ -47,14 +45,11 @@ of the card sub folders.
 
 $ ascmhl.py create -v /file_server/Reels
 Sealing folder at path: /file_server/Reels ...
-ignore patterns ['.DS_Store', 'ascmhl']
-ignoring filepath /file_server/Reels/A002R2EC/ascmhl
   verified                      A002R2EC/Clips/A002C006_141024_R2EC.mov  OK
   verified                      A002R2EC/Clips/A002C007_141024_R2EC.mov  OK
   calculated directory hash for A002R2EC/Clips  xxh64: 2d51faa2b1834454
   verified                      A002R2EC/Sidecar.txt  OK
   calculated directory hash for A002R2EC  xxh64: d22ad81d5ef6dfd5
-ignoring filepath /file_server/Reels/A003R2EC/ascmhl
   verified                      A003R2EC/Clips/A003C011_141024_R2EC.mov  OK
   verified                      A003R2EC/Clips/A003C012_141024_R2EC.mov  OK
   calculated directory hash for A003R2EC/Clips  xxh64: ea9d3add207cb956

@@ -8,7 +8,6 @@ Seal the copy on the travel drive /travel_01 to create the original mhl generati
 
 $ ascmhl.py create -v /travel_01/A002R2EC
 Sealing folder at path: /travel_01/A002R2EC ...
-ignore patterns ['.DS_Store', 'ascmhl']
   created original hash for     Clips/A002C006_141024_R2EC.mov  xxh64: 0ea03b369a463d9d
   created original hash for     Clips/A002C007_141024_R2EC.mov  xxh64: 7680e5f98f4a80fd
   calculated directory hash for Clips  xxh64: 2d51faa2b1834454
@@ -30,8 +29,6 @@ An error is shown and create a new generation that documents the failed verifica
 
 $ ascmhl.py create -v /file_server/A002R2EC
 Sealing folder at path: /file_server/A002R2EC ...
-ignore patterns ['.DS_Store', 'ascmhl']
-ignoring filepath /file_server/A002R2EC/ascmhl
   verified                      Clips/A002C006_141024_R2EC.mov  OK
   verified                      Clips/A002C007_141024_R2EC.mov  OK
   calculated directory hash for Clips  xxh64: 2d51faa2b1834454

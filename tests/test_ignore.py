@@ -39,7 +39,7 @@ def temp_tree():
 
     # test function is done... cleanup the temp dir
     try:
-        shutil.rmtree(tmpdir.path)
+        tmpdir.cleanup()
     except OSError as e:
         print("Error: %s - %s." % (e.filename, e.strerror))
 

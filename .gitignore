@@ -8,3 +8,5 @@ xsd/xsdvi.log
 
 docs/build
 docs/docenv
+.coverage
+htmlcov

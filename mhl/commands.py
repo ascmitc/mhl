@@ -394,34 +394,37 @@ def verify_directory_hash_subcommand(root_path, verbose, hash_format):
 def _compare_and_log_directory_hashes(relative_path, directory_hash_entry,
                                       calculated_content_hash_string, calculated_structure_hash_string):
     num_successful_verifications = 0
+    root_string = ""
+    if hasattr(directory_hash_entry, "temp_is_root_folder") and directory_hash_entry.temp_is_root_folder:
+        root_string = " (root folder in child history)"
     if directory_hash_entry.hash_string == calculated_content_hash_string and \
             directory_hash_entry.structure_hash_string == calculated_structure_hash_string:
         if relative_path == ".":
             logger.verbose(f'  verification of root folder   OK '
                            f'(generation {directory_hash_entry.temp_generation_number:04d})')
         else:
-            logger.verbose(f'  verification of folder        {relative_path} OK '
+            logger.verbose(f'  verification of folder        {relative_path}{root_string} OK '
                            f'(generation {directory_hash_entry.temp_generation_number:04d})')
 
         num_successful_verifications += 2
     else:
         if directory_hash_entry.hash_string != calculated_content_hash_string:
-            logger.error(f'ERROR: content hash mismatch   for {relative_path} '
+            logger.error(f'ERROR: content hash mismatch   for {relative_path}{root_string} '
                          f'old {directory_hash_entry.hash_format}: {directory_hash_entry.hash_string}, '
                          f'new {directory_hash_entry.hash_format}: {calculated_content_hash_string} '
                          f'(generation {directory_hash_entry.temp_generation_number:04d})')
         else:
-            logger.verbose(f'  content hash matches for      {relative_path} '
+            logger.verbose(f'  content hash matches for      {relative_path}{root_string} '
                            f' {directory_hash_entry.hash_format}: {directory_hash_entry.hash_string}'
                            f' (generation {directory_hash_entry.temp_generation_number:04d})')
 
         if directory_hash_entry.structure_hash_string != calculated_structure_hash_string:
-            logger.error(f'ERROR: structure hash mismatch for {relative_path} '
+            logger.error(f'ERROR: structure hash mismatch for {relative_path}{root_string} '
                          f'old {directory_hash_entry.hash_format}: {directory_hash_entry.structure_hash_string}, '
                          f'new {directory_hash_entry.hash_format}: {calculated_structure_hash_string} '
                          f'(generation {directory_hash_entry.temp_generation_number:04d})')
         else:
-            logger.verbose(f'  structure hash matches for    {relative_path} '
+            logger.verbose(f'  structure hash matches for    {relative_path}{root_string} '
                            f' {directory_hash_entry.hash_format}: {directory_hash_entry.hash_string} '
                            f' (generation {directory_hash_entry.temp_generation_number:04d})')
 

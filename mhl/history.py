@@ -85,6 +85,18 @@ class MHLHistory:
                 latest_number = hash_list.generation_number
         return latest_number
 
+    def latest_ignore_patterns(self) -> Optional[List[str]]:
+        """
+        latest_ignore_patterns will return the list of ignore patterns from the latest generation.
+        returns None if does not exist.
+        """
+        if len(self.hash_lists) == 0:
+            return None
+        hash_list = self.hash_lists[-1]
+        if not hash_list or not hash_list.ignore_spec:
+            return None
+        return hash_list.ignore_spec.get_pattern_list()
+
     # methods to query and compare hashes
     def find_original_hash_entry_for_path(self, relative_path: str) -> Optional[MHLHashEntry]:
         """Searches the history for the first (original) hash of a file

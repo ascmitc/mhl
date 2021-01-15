@@ -360,7 +360,7 @@ def info(verbose, single_file, root_path):
                     root_path = current_dir
                     break
                 current_dir = os.path.dirname(current_dir)
-        if root_path is "":
+        if root_path == "":
             raise errors.NoMHLHistoryExceptionForPath(single_file[0])
         else:
             info_for_single_file(root_path, verbose, single_file)

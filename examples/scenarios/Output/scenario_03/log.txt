@@ -33,9 +33,12 @@ Sealing folder at path: /file_server/A002R2EC ...
   verified                      Clips/A002C007_141024_R2EC.mov  OK
   created new hash for          Clips/A002C007_141024_R2EC.mov  md5: 614dd0e977becb4c6f7fa99e64549b12
   calculated directory hash for Clips  md5: f5c3ace05a05992f8fd338eb2be34341
+ignoring filepath /file_server/A002R2EC/ascmhl/0001_A002R2EC_2020-01-16_091500.mhl
+ignoring filepath /file_server/A002R2EC/ascmhl/chain.txt
+  calculated directory hash for ascmhl  md5: d41d8cd98f00b204e9800998ecf8427e
   verified                      Sidecar.txt  OK
   created new hash for          Sidecar.txt  md5: 6425c5a180ca0f420dd2b25be4536a91
-  calculated root hash  md5: 2c32f5fbcd0ffa1ddb36f71f77d8d7d7
+  calculated root hash  md5: 86d13708f01e5708d6cbc2104197507f
 Created new generation ascmhl/0002_A002R2EC_2020-01-17_143000.mhl
 
 

@@ -12,7 +12,7 @@ from . import logger
 
 
 def default_ignore_list():
-    return ['.DS_Store', 'ascmhl']
+    return ['.DS_Store', 'ascmhl', 'ascmhl/']
 
 
 class MHLIgnoreSpec:

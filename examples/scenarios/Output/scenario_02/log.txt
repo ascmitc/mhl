@@ -28,8 +28,11 @@ Sealing folder at path: /file_server/A002R2EC ...
   verified                      Clips/A002C006_141024_R2EC.mov  OK
   verified                      Clips/A002C007_141024_R2EC.mov  OK
   calculated directory hash for Clips  xxh64: 2d51faa2b1834454
+ignoring filepath /file_server/A002R2EC/ascmhl/0001_A002R2EC_2020-01-16_091500.mhl
+ignoring filepath /file_server/A002R2EC/ascmhl/chain.txt
+  calculated directory hash for ascmhl  xxh64: ef46db3751d8e999
   verified                      Sidecar.txt  OK
-  calculated root hash  xxh64: d22ad81d5ef6dfd5
+  calculated root hash  xxh64: 85440dcfbef186d2
 Created new generation ascmhl/0002_A002R2EC_2020-01-17_143000.mhl
 
 

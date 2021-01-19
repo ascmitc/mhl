@@ -12,7 +12,7 @@
   </creatorinfo>
   <ignorespec>
     <ignore>.DS_Store</ignore>
-    <ignore>ascmhl</ignore>
+    <ignore>ascmhl/</ignore>
   </ignorespec>
   <hashes>
     <hash>

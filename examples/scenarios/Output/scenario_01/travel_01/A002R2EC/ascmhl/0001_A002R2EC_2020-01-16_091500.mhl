@@ -10,6 +10,10 @@
     <tool version="0.2 alpha">ascmhl.py</tool>
     <process>in-place</process>
   </creatorinfo>
+  <ignorespec>
+    <ignore>.DS_Store</ignore>
+    <ignore>ascmhl/</ignore>
+  </ignorespec>
   <hashes>
     <hash>
       <path size="5" lastmodificationdate="2020-01-15T13:00:00+00:00">Clips/A002C006_141024_R2EC.mov</path>

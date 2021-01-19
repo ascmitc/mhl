@@ -31,6 +31,7 @@ def parse(file_path):
     # use iterparse to prevent large memory usage when parsing large files
     # pass a file handle to iterparse instead of the path directly to support the fake filesystem used in the tests
     file = open(file_path, "rb")
+    existing_ignore_patterns = []
     for event, element in etree.iterparse(file, events=('start', 'end')):
         if current_object and event == 'end':
             # the tag might contain the namespace like {urn:ASC:MHL:v2.0}hash, so we need to strip the namespace part
@@ -48,7 +49,12 @@ def parse(file_path):
                 elif tag == 'creatorinfo':
                     hash_list.creator_info = current_object
                     current_object = None
-                # TODO: missing location, comment, ignore
+                # TODO: missing location, comment
+            elif type(current_object) is MHLIgnoreSpec:
+                if tag == 'ignore':
+                    existing_ignore_patterns.append(element.text)
+                else:
+                    current_object = None
             elif type(current_object) is MHLMediaHash:
                 if tag == 'path':
                     current_object.path = element.text
@@ -96,6 +102,8 @@ def parse(file_path):
                 current_object = MHLMediaHash()
             elif tag == 'creatorinfo':
                 current_object = MHLCreatorInfo()
+            elif tag == 'ignorespec':
+                current_object = MHLIgnoreSpec()
             elif tag == 'hashlistreference':
                 current_object = MHLHashListReference()
         elif type(current_object) is MHLCreatorInfo and event == 'start':
@@ -106,6 +114,7 @@ def parse(file_path):
                 object_stack.append(current_object)
                 current_object = MHLMediaHash()
 
+    hash_list.ignore_spec = MHLIgnoreSpec(existing_ignore_patterns)
     logger.debug(f'parsing took: {timer() - start}')
 
     return hash_list
@@ -129,6 +138,15 @@ def write_hash_list(hash_list: MHLHashList, file_path: str):
     hash_list.file_path = file_path
     # write creator info
     _write_xml_element_to_file(file, _creator_info_xml_element(hash_list), '  ')
+
+    # ignore_spec. for each ignore pattern, write ignore tag to file.
+    _write_xml_string_to_file(file, '<ignorespec>\n', current_indent)
+    current_indent += '  '
+    if hash_list.ignore_spec:
+        for ignore_pattern in hash_list.ignore_spec.get_pattern_list():
+            _write_xml_element_to_file(file, _ignore_xml_element(ignore_pattern), current_indent)
+    current_indent = current_indent[:-2]
+    _write_xml_string_to_file(file, '</ignorespec>\n', current_indent)
 
     # write hashes
     hashes_tag = '<hashes>\n'
@@ -217,6 +235,12 @@ def _creator_info_xml_element(hash_list: MHLHashList):
     )
     # TODO: missing location, comment, ignore
     return info_element
+
+
+def _ignore_xml_element(ignore_pattern: str):
+    """builds and returns one <ignore> element for a given ignore_spec pattern entry"""
+    return E.ignore(ignore_pattern)
+
 
 
 def _root_media_hash_xml_element(root_media_hash: MHLMediaHash):

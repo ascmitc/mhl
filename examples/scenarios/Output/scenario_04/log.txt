@@ -32,8 +32,11 @@ Sealing folder at path: /file_server/A002R2EC ...
   verified                      Clips/A002C006_141024_R2EC.mov  OK
   verified                      Clips/A002C007_141024_R2EC.mov  OK
   calculated directory hash for Clips  xxh64: 2d51faa2b1834454
+ignoring filepath /file_server/A002R2EC/ascmhl/0001_A002R2EC_2020-01-16_091500.mhl
+ignoring filepath /file_server/A002R2EC/ascmhl/chain.txt
+  calculated directory hash for ascmhl  xxh64: ef46db3751d8e999
 ERROR: hash mismatch for        Sidecar.txt  xxh64 (old): 3ab5a4166b9bde44, xxh64 (new): 70d2cf31aaa3eac4
-  calculated root hash  xxh64: 1a32e7e9a703af52
+  calculated root hash  xxh64: 97fa0623ebf8a5ee
 Created new generation ascmhl/0002_A002R2EC_2020-01-17_143000.mhl
 Error: Verification of files referenced in the ASC MHL history failed
 

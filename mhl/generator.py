@@ -12,6 +12,7 @@ from typing import Dict, List
 
 from . import chain_txt_parser
 from . import logger
+from .ignore import MHLIgnoreSpec
 from .hashlist import MHLHashList, MHLHashEntry, MHLCreatorInfo
 from .history import MHLHistory
 
@@ -33,10 +34,12 @@ class MHLGenerationCreationSession:
 
     root_history: MHLHistory
     new_hash_lists: Dict[MHLHistory, MHLHashList]
+    ignore_spec: MHLIgnoreSpec
 
-    def __init__(self, history: MHLHistory):
+    def __init__(self, history: MHLHistory, ignore_spec: MHLIgnoreSpec = MHLIgnoreSpec()):
         self.root_history = history
         self.new_hash_lists = defaultdict(MHLHashList)
+        self.ignore_spec = ignore_spec
 
     def append_file_hash(self, file_path, file_size, file_modification_date, hash_format, hash_string) -> bool:
 
@@ -129,6 +132,8 @@ class MHLGenerationCreationSession:
                 new_hash_list = self.new_hash_lists[history]
             new_hash_list.referenced_hash_lists = referenced_hash_lists[history]
             new_hash_list.creator_info = creator_info
+            new_hash_list.ignore_spec = MHLIgnoreSpec(history.latest_ignore_patterns(), self.ignore_spec.get_pattern_list())
+
             history.write_new_generation(new_hash_list)
             relative_generation_path = self.root_history.get_relative_file_path(new_hash_list.file_path)
             logger.verbose(f'Created new generation {relative_generation_path}')

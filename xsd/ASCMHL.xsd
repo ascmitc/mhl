@@ -18,6 +18,7 @@
     <complexType name="HashListType">
         <all maxOccurs="1">
             <element name="creatorinfo" type="ascmhl:CreatorInfoType"/>
+            <element name="ignorespec" type="ascmhl:IgnoreSpec"/>
             <element name="metadata" type="ascmhl:MetadataType" minOccurs="0"/>
             <element name="hashes" type="ascmhl:HashesType" minOccurs="1"/>
             <element maxOccurs="1" minOccurs="0" name="references" type="ascmhl:ReferencesType"/>
@@ -134,6 +135,11 @@
         <complexContent>
             <extension base="anyType"/>
         </complexContent>
+    </complexType>
+    <complexType name="IgnoreSpec">
+        <choice maxOccurs="unbounded">
+            <element minOccurs="1" name="ignore" type="string"/>
+        </choice>
     </complexType>
     <element name="hashlist" type="ascmhl:HashListType"/>
 </schema>

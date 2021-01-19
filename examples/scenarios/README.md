@@ -55,8 +55,11 @@ Sealing folder at path: /file_server/A002R2EC ...
   verified                      Clips/A002C006_141024_R2EC.mov  OK
   verified                      Clips/A002C007_141024_R2EC.mov  OK
   calculated directory hash for Clips  xxh64: 2d51faa2b1834454
+ignoring filepath /file_server/A002R2EC/ascmhl/0001_A002R2EC_2020-01-16_091500.mhl
+ignoring filepath /file_server/A002R2EC/ascmhl/chain.txt
+  calculated directory hash for ascmhl  xxh64: ef46db3751d8e999
   verified                      Sidecar.txt  OK
-  calculated root hash  xxh64: d22ad81d5ef6dfd5
+  calculated root hash  xxh64: 85440dcfbef186d2
 Created new generation ascmhl/0002_A002R2EC_2020-01-17_143000.mhl
 
 
@@ -99,9 +102,12 @@ Sealing folder at path: /file_server/A002R2EC ...
   verified                      Clips/A002C007_141024_R2EC.mov  OK
   created new hash for          Clips/A002C007_141024_R2EC.mov  md5: 614dd0e977becb4c6f7fa99e64549b12
   calculated directory hash for Clips  md5: f5c3ace05a05992f8fd338eb2be34341
+ignoring filepath /file_server/A002R2EC/ascmhl/0001_A002R2EC_2020-01-16_091500.mhl
+ignoring filepath /file_server/A002R2EC/ascmhl/chain.txt
+  calculated directory hash for ascmhl  md5: d41d8cd98f00b204e9800998ecf8427e
   verified                      Sidecar.txt  OK
   created new hash for          Sidecar.txt  md5: 6425c5a180ca0f420dd2b25be4536a91
-  calculated root hash  md5: 2c32f5fbcd0ffa1ddb36f71f77d8d7d7
+  calculated root hash  md5: 86d13708f01e5708d6cbc2104197507f
 Created new generation ascmhl/0002_A002R2EC_2020-01-17_143000.mhl
 
 
@@ -143,10 +149,13 @@ Sealing folder at path: /file_server/A002R2EC ...
   verified                      Clips/A002C006_141024_R2EC.mov  OK
   verified                      Clips/A002C007_141024_R2EC.mov  OK
   calculated directory hash for Clips  xxh64: 2d51faa2b1834454
+ignoring filepath /file_server/A002R2EC/ascmhl/0001_A002R2EC_2020-01-16_091500.mhl
+ignoring filepath /file_server/A002R2EC/ascmhl/chain.txt
+  calculated directory hash for ascmhl  xxh64: ef46db3751d8e999
 ERROR: hash mismatch for        Sidecar.txt  xxh64 (old): 3ab5a4166b9bde44, xxh64 (new): 70d2cf31aaa3eac4
-  calculated root hash  xxh64: 1a32e7e9a703af52
+  calculated root hash  xxh64: 97fa0623ebf8a5ee
 Created new generation ascmhl/0002_A002R2EC_2020-01-17_143000.mhl
-Error: Verification of files referenced in the mhl history failed
+Error: Verification of files referenced in the ASC MHL history failed
 
 
 ```
@@ -203,15 +212,21 @@ Sealing folder at path: /file_server/Reels ...
   verified                      A002R2EC/Clips/A002C006_141024_R2EC.mov  OK
   verified                      A002R2EC/Clips/A002C007_141024_R2EC.mov  OK
   calculated directory hash for A002R2EC/Clips  xxh64: 2d51faa2b1834454
+ignoring filepath /file_server/Reels/A002R2EC/ascmhl/0001_A002R2EC_2020-01-16_091500.mhl
+ignoring filepath /file_server/Reels/A002R2EC/ascmhl/chain.txt
+  calculated directory hash for A002R2EC/ascmhl  xxh64: ef46db3751d8e999
   verified                      A002R2EC/Sidecar.txt  OK
-  calculated directory hash for A002R2EC  xxh64: d22ad81d5ef6dfd5
+  calculated directory hash for A002R2EC  xxh64: 85440dcfbef186d2
   verified                      A003R2EC/Clips/A003C011_141024_R2EC.mov  OK
   verified                      A003R2EC/Clips/A003C012_141024_R2EC.mov  OK
   calculated directory hash for A003R2EC/Clips  xxh64: ea9d3add207cb956
+ignoring filepath /file_server/Reels/A003R2EC/ascmhl/0001_A003R2EC_2020-01-16_091500.mhl
+ignoring filepath /file_server/Reels/A003R2EC/ascmhl/chain.txt
+  calculated directory hash for A003R2EC/ascmhl  xxh64: ef46db3751d8e999
   verified                      A003R2EC/Sidecar.txt  OK
-  calculated directory hash for A003R2EC  xxh64: f8fa1de2169f68b8
+  calculated directory hash for A003R2EC  xxh64: 835d4a2edc4d5f2a
   created original hash for     Summary.txt  xxh64: 0ac48e431d4538ba
-  calculated root hash  xxh64: ae3a5a8b334bbb40
+  calculated root hash  xxh64: daa1ec71056a6165
 Created new generation A002R2EC/ascmhl/0002_A002R2EC_2020-01-17_143000.mhl
 Created new generation A003R2EC/ascmhl/0002_A003R2EC_2020-01-17_143000.mhl
 Created new generation ascmhl/0001_Reels_2020-01-17_143000.mhl

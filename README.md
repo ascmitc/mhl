@@ -1,3 +1,4 @@
+![ascmhl-build-test](https://github.com/ascmitc/mhl/workflows/ascmhl-build-test/badge.svg) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 # ASC Media Hash List (ASC MHL)
 > The software in this repository aids the ongoing specification process of the ASC MHL format by the Advanced Data Management Subcommittee of the ASC Motion Imaging Technology Council at the [American Society of Cinematographers](https://theasc.com) (ASC). 

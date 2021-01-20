@@ -10,6 +10,11 @@
     <tool version="0.2 alpha">ascmhl.py</tool>
     <process>in-place</process>
   </creatorinfo>
+  <ignorespec>
+    <ignore>.DS_Store</ignore>
+    <ignore>ascmhl</ignore>
+    <ignore>ascmhl/</ignore>
+  </ignorespec>
   <hashes>
     <hash directory="true">
       <path lastmodificationdate="2020-01-15T13:00:00+00:00">A002R2EC</path>
@@ -27,11 +32,11 @@
   <references>
     <hashlistreference>
       <path>A002R2EC/ascmhl/0002_A002R2EC_2020-01-17_143000.mhl</path>
-      <c4>c41dyTdyzY61kKUuZAk6nATo4vyWL1JoMwMHHVVwJopFDmJh1H2BdKapKyUHoFScBqmCV5iQiWE7CpXtuj4KESGTWt</c4>
+      <c4>c42TQvoPvKvL9Vz2bZrQqdJwDYjzwTSopRP58b1cKTaq15RHGWBDRrjsiixVKMbryHxDLsRTHrgFPxUz9zkMBFK6Nd</c4>
     </hashlistreference>
     <hashlistreference>
       <path>A003R2EC/ascmhl/0002_A003R2EC_2020-01-17_143000.mhl</path>
-      <c4>c44yY4MBuF7vsXGEXVxnEtqyf8D1jNxWBJdeuemzur2MGERAQURbNCUHMVyisZFjmGESZ7rpuVixwpcHrEbBduogzw</c4>
+      <c4>c422RRnrBh9oQqRMS3fe4PLWpGPaZw7sxa68NPhFeExd9JcErTZui4g5Jz2XrH4qzFJSafbmfzkLCffXxosDPodk6c</c4>
     </hashlistreference>
   </references>
 </hashlist>

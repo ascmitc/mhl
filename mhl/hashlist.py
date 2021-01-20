@@ -180,13 +180,20 @@ class MHLMediaHash:
                 indicator = "!"
             elif self.is_directory:
                 indicator = "d"
-            hash_action = (hash_entry.action if hash_entry.action is not None else "").ljust(10)
-            logger.info("{0} {1}: {2} {3}: {4}".format(indicator,
-                                                       hash_entry.hash_format.rjust(6),
-                                                       hash_entry.hash_string.ljust(32),
-                                                       hash_action,
-                                                       self.path))
 
+            hash_action = (hash_entry.action if hash_entry.action is not None else "").ljust(10)
+            structure_string = ""
+            if hash_entry.structure_hash_string is not None and hash_entry.structure_hash_string != "":
+                structure_string = " (structure " + hash_entry.structure_hash_string + ")"
+            action_string = ""
+            if hash_action is not None and hash_action != "":
+                action_string = "(action: " + hash_action + ")"
+            logger.info(f'{indicator}'
+                        f' {hash_entry.hash_format.rjust(6)}'
+                        f': {hash_entry.hash_string.ljust(32)}'
+                        f'{structure_string}'
+                        f'{action_string}'
+                        f': {self.path}')
 
 class MHLHashEntry:
     """
@@ -202,12 +209,15 @@ class MHLHashEntry:
     """
 
     hash_string: str
+    structure_hash_string: str
     hash_format: str
     action: Optional[str]
 
     def __init__(self, hash_format: str, hash_string: str, action: str = None):
-        self.hash_string = hash_string
         self.hash_format = hash_format
+        self.hash_string = hash_string
+        self.structure_hash_string = None
+
         self.action = action
 
 

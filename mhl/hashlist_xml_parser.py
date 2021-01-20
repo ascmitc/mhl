@@ -15,7 +15,7 @@ from lxml.builder import E
 
 from .hashlist import *
 from .utils import datetime_isostring
-
+from .__version__ import ascmhl_supported_hashformats
 
 def parse(file_path):
     """parsing the MHL XML file and building the MHLHashList for the hash_list member variable"""
@@ -27,7 +27,6 @@ def parse(file_path):
     hash_list.file_path = file_path
     object_stack = []
     current_object = None
-    supported_hash_formats = {'md5', 'sha1', 'c4', 'xxh32', 'xxh64', 'xxh3'}
     # use iterparse to prevent large memory usage when parsing large files
     # pass a file handle to iterparse instead of the path directly to support the fake filesystem used in the tests
     file = open(file_path, "rb")
@@ -63,8 +62,10 @@ def parse(file_path):
                 # TODO: parse date
                 # elif tag == 'lastmodificationdate':
                 # 	current_object.file_size = element.text
-                elif tag in supported_hash_formats:
+                elif tag in ascmhl_supported_hashformats:
                     entry = MHLHashEntry(tag, element.text, element.attrib.get('action'))
+                    if element.attrib.get('structure') is not None:
+                        entry.structure_hash_string = element.attrib.get('structure')
                     current_object.append_hash_entry(entry)
                 elif tag == 'hash':
                     if element.attrib.get('directory') == 'true':
@@ -198,6 +199,8 @@ def _media_hash_xml_element(media_hash: MHLMediaHash):
 
     for hash_entry in media_hash.hash_entries:
         entry_element = E(hash_entry.hash_format)
+        if hash_entry.structure_hash_string is not None:
+            entry_element.attrib['structure'] = hash_entry.structure_hash_string
         entry_element.text = hash_entry.hash_string
         if hash_entry.action:
             entry_element.attrib['action'] = hash_entry.action

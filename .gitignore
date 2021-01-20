@@ -8,6 +8,3 @@ xsd/xsdvi.log
 
 docs/build
 docs/docenv
-
-# ignore the ascmhl folder if one gets generated in this repo
-ascmhl/

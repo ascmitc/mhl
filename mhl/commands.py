@@ -54,12 +54,12 @@ def create(root_path, verbose, hash_format, no_directory_hashes, single_file, ig
     """
     # distinguish different behavior for entire folder vs single files
     if single_file is not None and len(single_file) > 0:
-        create_for_single_files_subcommand(root_path, verbose, hash_format, no_directory_hashes, single_file)
+        create_for_single_files_subcommand(root_path, verbose, hash_format, single_file, ignore_list, ignore_spec_file)
         return
-    create_for_folder_subcommand(root_path, verbose, hash_format, no_directory_hashes, single_file, ignore_list, ignore_spec_file)
+    create_for_folder_subcommand(root_path, verbose, hash_format, no_directory_hashes, ignore_list, ignore_spec_file)
     return
 
-def create_for_folder_subcommand(root_path, verbose, hash_format, no_directory_hashes, single_file, ignore_list=None, ignore_spec_file=None):
+def create_for_folder_subcommand(root_path, verbose, hash_format, no_directory_hashes, ignore_list=None, ignore_spec_file=None):
     # command formerly known as "seal"
     """
       Creates a new generation with all files in a folder hierarchy.
@@ -135,7 +135,7 @@ def create_for_folder_subcommand(root_path, verbose, hash_format, no_directory_h
     if exception:
         raise exception
 
-def create_for_single_files_subcommand(root_path, verbose, hash_format, no_directory_hashes, single_file):
+def create_for_single_files_subcommand(root_path, verbose, hash_format, single_file, ignore_list=None, ignore_spec_file=None):
     # command formerly known as "record"
     """
     Creates a new generation with the given file(s) or folder(s).
@@ -212,7 +212,7 @@ def verify(root_path, verbose, directory_hash, hash_format, ignore_list, ignore_
     generation is created.
     """
     if directory_hash is True:
-        verify_directory_hash_subcommand(root_path, verbose, ignore_list, ignore_spec_file, hash_format)
+        verify_directory_hash_subcommand(root_path, verbose, hash_format, ignore_list, ignore_spec_file)
         return
 
     verify_entire_folder_against_full_history_subcommand(root_path, verbose, ignore_list, ignore_spec_file)
@@ -289,7 +289,7 @@ def verify_entire_folder_against_full_history_subcommand(root_path, verbose, ign
     if exception:
         raise exception
 
-def verify_directory_hash_subcommand(root_path, verbose, hash_format):
+def verify_directory_hash_subcommand(root_path, verbose, hash_format, ignore_list=None, ignore_spec_file=None):
     """
     Checks MHL directory hashes from all generations against computed directory hashes.
 
@@ -308,6 +308,8 @@ def verify_directory_hash_subcommand(root_path, verbose, hash_format):
 
     existing_history = MHLHistory.load_from_path(root_path)
 
+    ignore_spec = ignore.MHLIgnoreSpec(existing_history.latest_ignore_patterns(), ignore_list, ignore_spec_file)
+
     # choose the hash format of the latest root directory hash
     if hash_format is None:
         generation = -1
@@ -324,7 +326,6 @@ def verify_directory_hash_subcommand(root_path, verbose, hash_format):
     else:
         logger.verbose(f'hash format: {hash_format}')
 
-
     # we collect all paths we expect to find first and remove every path that we actually found while
     # traversing the file system, so this set will at the end contain the file paths not found in the file system
     not_found_paths = existing_history.set_of_file_paths()
@@ -336,7 +337,7 @@ def verify_directory_hash_subcommand(root_path, verbose, hash_format):
     # store the directory hashes of sub folders so we can use it when calculating the hash of the parent folder
     dir_content_hash_mappings = {}
     dir_structure_hash_mappings = {}
-    for folder_path, children in post_order_lexicographic(root_path):
+    for folder_path, children in post_order_lexicographic(root_path, ignore_spec.get_path_spec()):
         # generate directory hashes
         dir_hash_context = None
         dir_hash_context = DirectoryHashContext(hash_format)

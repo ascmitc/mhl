@@ -56,6 +56,10 @@ def context_type_for_hash_format(hash_format):
         return xxhash.xxh32
     elif hash_format == 'xxh64':
         return xxhash.xxh64
+    elif hash_format == 'xxh3_64':
+        return xxhash.xxh3_64
+    elif hash_format == 'xxh3_128':
+        return xxhash.xxh3_128
     elif hash_format == 'c4':
         return C4HashContext
     assert False, 'unsupported hash format'

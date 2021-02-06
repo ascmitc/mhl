@@ -326,10 +326,6 @@ def verify_directory_hash_subcommand(root_path, verbose, hash_format, ignore_lis
     else:
         logger.verbose(f'hash format: {hash_format}')
 
-    # we collect all paths we expect to find first and remove every path that we actually found while
-    # traversing the file system, so this set will at the end contain the file paths not found in the file system
-    not_found_paths = existing_history.set_of_file_paths()
-
     # start a verification session on the existing history
     session = MHLGenerationCreationSession(existing_history)
 
@@ -343,7 +339,6 @@ def verify_directory_hash_subcommand(root_path, verbose, hash_format, ignore_lis
         dir_hash_context = DirectoryHashContext(hash_format)
         for item_name, is_dir in children:
             file_path = os.path.join(folder_path, item_name)
-            not_found_paths.discard(file_path)
             if is_dir:
                 file_path = os.path.join(folder_path, item_name)
                 relative_path = existing_history.get_relative_file_path(file_path)

@@ -16,6 +16,8 @@ from lxml.builder import E
 from .hashlist import *
 from .utils import datetime_isostring
 
+from .__version__ import ascmhl_supported_hashformats
+
 
 def parse(file_path):
     """parsing the MHL XML file and building the MHLHashList for the hash_list member variable"""
@@ -27,7 +29,7 @@ def parse(file_path):
     hash_list.file_path = file_path
     object_stack = []
     current_object = None
-    supported_hash_formats = {'md5', 'sha1', 'c4', 'xxh32', 'xxh64', 'xxh3'}
+    supported_hash_formats = set(ascmhl_supported_hashformats)
     # use iterparse to prevent large memory usage when parsing large files
     # pass a file handle to iterparse instead of the path directly to support the fake filesystem used in the tests
     file = open(file_path, "rb")

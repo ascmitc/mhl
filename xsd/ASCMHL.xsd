@@ -9,35 +9,39 @@
     <simpleType name="ActionAttributeType">
         <restriction base="string">
             <enumeration value="original"/>
-            <enumeration value="new"/>
             <enumeration value="verified"/>
             <enumeration value="failed"/>
         </restriction>
     </simpleType>
-
     <complexType name="HashListType">
-        <all maxOccurs="1">
+        <sequence>
             <element name="creatorinfo" type="ascmhl:CreatorInfoType"/>
-            <element name="ignorespec" type="ascmhl:IgnoreSpec"/>
+            <element name="processinfo" type="ascmhl:ProcessInfoType"/>
+            <element name="hashes" type="ascmhl:HashesType"/>
             <element name="metadata" type="ascmhl:MetadataType" minOccurs="0"/>
-            <element name="hashes" type="ascmhl:HashesType" minOccurs="1"/>
-            <element maxOccurs="1" minOccurs="0" name="references" type="ascmhl:ReferencesType"/>
-        </all>
+            <element name="references" type="ascmhl:ReferencesType" minOccurs="0"/>
+        </sequence>
         <attribute fixed="2.0" name="version" use="required"/>
     </complexType>
     <complexType name="CreatorInfoType">
         <sequence>
-            <element name="creationdate" type="dateTime" maxOccurs="1" minOccurs="1"/>
-            <element name="hostname" type="string" maxOccurs="1" minOccurs="1"/>
-            <element name="root" type="ascmhl:HashType"/>
-            <element name="tool" type="ascmhl:ToolType" maxOccurs="1" minOccurs="1"/>
-            <element maxOccurs="unbounded" minOccurs="0" name="author" type="ascmhl:AuthorType"/>
-            <element minOccurs="0" name="location" type="string"/>
-            <element name="process" type="ascmhl:ProcessType" maxOccurs="1" minOccurs="1"/>
-            <element minOccurs="0" name="comment" type="string"/>
+            <element name="creationdate" type="dateTime"/>
+            <element name="hostname" type="string"/>
+            <element name="tool" type="ascmhl:ToolType"/>
+            <element name="author" type="ascmhl:AuthorType" maxOccurs="unbounded" minOccurs="0"/>
+            <element name="location" type="string" minOccurs="0"/>
+            <element name="comment" type="string" minOccurs="0"/>
+        </sequence>
+    </complexType>
+
+    <complexType name="ProcessInfoType">
+        <sequence>
+            <element name="roothash" type="ascmhl:HashType"/>
+            <element name="process" type="ascmhl:ProcessType"/>
             <element name="ignore" type="ascmhl:IgnoreType" minOccurs="0"/>
         </sequence>
     </complexType>
+
     <complexType name="AuthorType">
         <simpleContent>
             <extension base="string">
@@ -54,36 +58,20 @@
             </extension>
         </simpleContent>
     </complexType>
-    <simpleType name="ProcessTypeType">
+    <simpleType name="ProcessType">
         <restriction base="string">
             <enumeration value="in-place"/>
             <enumeration value="transfer"/>
         </restriction>
     </simpleType>
-    <complexType block="" name="ProcessType">
-        <simpleContent>
-            <extension base="ascmhl:ProcessTypeType">
-                <attribute name="hashsource" use="optional">
-                    <simpleType>
-                        <restriction base="string">
-                            <enumeration value="file"/>
-                            <enumeration value="source"/>
-                            <enumeration value="source+file"/>
-                            <enumeration value="other"/>
-                        </restriction>
-                    </simpleType>
-                </attribute>
-            </extension>
-        </simpleContent>
-    </complexType>
     <complexType name="IgnoreType">
         <sequence>
-            <element maxOccurs="unbounded" name="pattern" type="string"/>
+            <element name="pattern" type="string" maxOccurs="unbounded"/>
         </sequence>
     </complexType>
     <complexType name="HashesType">
         <sequence>
-            <element name="hash" type="ascmhl:HashType" maxOccurs="unbounded" minOccurs="1"/>
+            <element name="hash" type="ascmhl:HashType" maxOccurs="unbounded"/>
         </sequence>
     </complexType>
     <complexType name="HashType">
@@ -103,9 +91,9 @@
                 <element name="md5" type="ascmhl:HashFormatType" minOccurs="0"/>
                 <element name="sha1" type="ascmhl:HashFormatType" minOccurs="0"/>
                 <element name="c4" type="ascmhl:HashFormatType" minOccurs="0"/>
-                <element name="xxh32" type="ascmhl:HashFormatType" maxOccurs="1" minOccurs="0"/>
-                <element name="xxh64" type="ascmhl:HashFormatType" maxOccurs="1" minOccurs="0"/>
-                <element name="xxh3" type="ascmhl:HashFormatType" maxOccurs="1" minOccurs="0"/>
+                <element name="xxh32" type="ascmhl:HashFormatType" minOccurs="0"/>
+                <element name="xxh64" type="ascmhl:HashFormatType" minOccurs="0"/>
+                <element name="xxh3" type="ascmhl:HashFormatType" minOccurs="0"/>
             </choice>
             <element minOccurs="0" name="metadata" type="ascmhl:MetadataType"/>
         </sequence>
@@ -135,11 +123,6 @@
         <complexContent>
             <extension base="anyType"/>
         </complexContent>
-    </complexType>
-    <complexType name="IgnoreSpec">
-        <choice maxOccurs="unbounded">
-            <element minOccurs="1" name="ignore" type="string"/>
-        </choice>
     </complexType>
     <element name="hashlist" type="ascmhl:HashListType"/>
 </schema>

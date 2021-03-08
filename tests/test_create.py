@@ -45,7 +45,7 @@ def test_create_directory_hashes(fs):
     assert hash_list.find_media_hash_for_path('A').is_directory
     assert hash_list.find_media_hash_for_path('A').hash_entries[0].hash_string == 'ee2c3b94b6eecb8d'
     # and the directory hash of the root folder is set in the header
-    assert hash_list.root_media_hash.hash_entries[0].hash_string == '15ef0ade91fff267'
+    assert hash_list.process_info.root_media_hash.hash_entries[0].hash_string == '15ef0ade91fff267'
 
     # test that the directory-hash command creates the same directory hashes
     result = CliRunner().invoke(mhl.commands.directory_hash, ['/root', '-v', '-h', 'xxh64'])
@@ -71,7 +71,7 @@ def test_create_directory_hashes(fs):
     hash_list = MHLHistory.load_from_path('/root').hash_lists[-1]
     # due to the additional content the directory hash of folder A and the root folder changed
     assert hash_list.find_media_hash_for_path('A').hash_entries[0].hash_string == '47e7687ce4800633'
-    assert hash_list.root_media_hash.hash_entries[0].hash_string == '5f4af3b3fd736415'
+    assert hash_list.process_info.root_media_hash.hash_entries[0].hash_string == '5f4af3b3fd736415'
     # empty folder all have the same directory hash
     assert hash_list.find_media_hash_for_path('emptyFolderA').hash_entries[0].hash_string == 'ef46db3751d8e999'
     assert hash_list.find_media_hash_for_path('emptyFolderB').hash_entries[0].hash_string == 'ef46db3751d8e999'
@@ -93,7 +93,7 @@ def test_create_directory_hashes(fs):
     assert 'ERROR: hash mismatch for        A/A2.txt' in result.output
     hash_list = MHLHistory.load_from_path('/root').hash_lists[-1]
     # an altered file leads to a different root directory hash
-    assert hash_list.root_media_hash.hash_entries[0].hash_string == 'adf18c910489663c'
+    assert hash_list.process_info.root_media_hash.hash_entries[0].hash_string == 'adf18c910489663c'
 
     # test that the directory-hash command creates the same root hash
     result = CliRunner().invoke(mhl.commands.directory_hash, ['/root', '-h', 'xxh64'])
@@ -112,7 +112,7 @@ def test_create_directory_hashes(fs):
     # the file name is part of the directory hash of the containing directory so it's hash changes
     assert hash_list.find_media_hash_for_path('B').hash_entries[0].hash_string == '8cdb106e71c4989d'
     # a renamed file also leads to a different root directory hash
-    assert hash_list.root_media_hash.hash_entries[0].hash_string == '01441cdf1803e2b8'
+    assert hash_list.process_info.root_media_hash.hash_entries[0].hash_string == '01441cdf1803e2b8'
 
     # test that the directory-hash command creates the same root hash
     result = CliRunner().invoke(mhl.commands.directory_hash, ['/root', '-h', 'xxh64'])
@@ -135,7 +135,7 @@ def test_create_no_directory_hashes(fs):
     assert hash_list.find_media_hash_for_path('A').is_directory
     assert len(hash_list.find_media_hash_for_path('A').hash_entries) == 0
     # and no directory hash of the root folder is set in the header
-    assert len(hash_list.root_media_hash.hash_entries) == 0
+    assert len(hash_list.process_info.root_media_hash.hash_entries) == 0
     # the empty folder is still referenced even if not creating directory hashes
     assert hash_list.find_media_hash_for_path('emptyFolder').is_directory
 
@@ -233,5 +233,5 @@ def test_create_nested_new_format(fs, nested_mhl_histories):
     assert media_hash.hash_entries[0].hash_format == 'xxh64'
 
     # assure that the second hash entry is the new md5 hash
-    assert media_hash.hash_entries[1].action == 'new'
+    assert media_hash.hash_entries[1].action == 'verified' # formerly 'new'
     assert media_hash.hash_entries[1].hash_format == 'md5'

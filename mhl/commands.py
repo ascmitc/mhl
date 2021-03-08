@@ -22,7 +22,7 @@ from .ignore import MHLIgnoreSpec
 from .__version__ import ascmhl_supported_hashformats, ascmhl_folder_name, ascmhl_tool_name, ascmhl_tool_version, ascmhl_default_hashformat
 from .generator import MHLGenerationCreationSession
 from .hasher import create_filehash, DirectoryHashContext
-from .hashlist import MHLCreatorInfo, MHLTool, MHLProcess
+from .hashlist import MHLCreatorInfo, MHLProcessInfo, MHLTool, MHLProcess
 from .history import MHLHistory
 from .traverse import post_order_lexicographic
 
@@ -412,10 +412,12 @@ def info_for_single_file(root_path, verbose, single_file):
                 if logger.verbose_logging == True:
                     absolutePath = os.path.join(hash_list.get_root_path(), media_hash.path)
                     creatorInfo = hash_list.creator_info.summary()
+                    processInfo = hash_list.process_info.summary()
                     logger.info(
                         f'  Generation {hash_list.generation_number} ({hash_list.creator_info.creation_date}) {hash_entry.hash_format}: {hash_entry.hash_string} ({hash_entry.action}) \n'
                         f'    {absolutePath}\n'
-                        f'    {creatorInfo}')
+                        f'    {creatorInfo}\n'
+                        f'    {processInfo}')
                 else:
                     logger.info(f'  Generation {hash_list.generation_number} ({hash_list.creator_info.creation_date}) {hash_entry.hash_format}: {hash_entry.hash_string} ({hash_entry.action})')
 
@@ -504,8 +506,9 @@ def commit_session(session):
     creator_info.tool = MHLTool(ascmhl_tool_name, ascmhl_tool_version)
     creator_info.creation_date = utils.datetime_now_isostring()
     creator_info.host_name = platform.node()
-    creator_info.process = MHLProcess('in-place')
-    session.commit(creator_info)
+    process_info = MHLProcessInfo()
+    process_info.process = MHLProcess('in-place')
+    session.commit(creator_info, process_info)
 
 
 def seal_file_path(existing_history, file_path, hash_format, session) -> (str, bool):

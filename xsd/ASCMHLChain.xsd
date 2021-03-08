@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema targetNamespace="urn:ASC:MHL:CHAIN:v2.0" elementFormDefault="qualified"
+    xmlns="http://www.w3.org/2001/XMLSchema" xmlns:ascmhlchain="urn:ASC:MHL:CHAIN:v2.0">
+   <complexType name="ChainType">
+	    <sequence>
+		    <element name="ascmhlmanifest" type="ascmhlchain:AscMhlManifestType" maxOccurs="unbounded"/>
+	    </sequence>
+    </complexType>
+    <complexType name="AscMhlManifestType">
+	    <attribute name="sequencenr" type="integer"/>
+	    <sequence>
+		    <element name="path" type="string"/>
+		    <element name="c4" type="ascmhl:HashFormatType"/>
+	    </sequence>
+    </complexType>
+
+   	<element name=”ascmhlchain” type=”ascmhl:ChainType”>
+</schema>

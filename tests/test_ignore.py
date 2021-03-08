@@ -15,7 +15,7 @@ from testfixtures import TempDirectory
 import mhl.commands
 
 
-XML_IGNORE_TAG = 'ignore'
+XML_IGNORE_TAG = 'pattern'
 XML_HASH_PATH_TAG = 'path'
 
 DEFAULT_IGNORE_SET = {'.DS_Store', 'ascmhl', 'ascmhl/'}

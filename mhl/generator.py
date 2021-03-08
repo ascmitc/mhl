@@ -67,9 +67,9 @@ class MHLGenerationCreationSession:
                                  f'{hash_format} (old): {existing_hash_entry.hash_string}, '
                                  f'{hash_format} (new): {hash_string}')
             else:
-                # in case there is no hash entry for this hash format yet, we mark this hash as new
-                hash_entry.action = 'new'
-                logger.verbose(f'  created new hash for          {relative_path}  {hash_format}: {hash_string}')
+                # in case there is no hash entry for this hash format yet
+                hash_entry.action = 'new'   # mark as 'new' here, will be changed to verified in _validate_new_hash_list
+                logger.verbose(f'  created new, verified hash for          {relative_path}  {hash_format}: {hash_string}')
 
         # in case the same file is hashes multiple times we want to add all hash entries
         new_hash_list = self.new_hash_lists[history]

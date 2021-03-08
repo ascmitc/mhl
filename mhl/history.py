@@ -293,6 +293,7 @@ class MHLHistory:
                     if required_hash_entry.action != 'verified':
                         raise AssertionError('hash entry for new hash not verified',
                                              hash_entry, required_hash_entry)
+                    hash_entry.action = 'verified'
         return True
 
     # accessors

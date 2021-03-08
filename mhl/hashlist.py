@@ -199,7 +199,7 @@ class MHLHashEntry:
     attribute member variables:
     hash_string -- string representation (hex) of the hash value
     hash_format -- string value, hash format, e.g. 'md5', 'xxh64'
-    action -- action/result of verification, e.g. 'verified', 'failed', 'new', 'original'
+    action -- action/result of verification, e.g. 'verified', 'failed', 'original'
 
     other member variables:
     """

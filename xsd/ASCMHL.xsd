@@ -91,9 +91,10 @@
                 <element name="md5" type="ascmhl:HashFormatType" minOccurs="0"/>
                 <element name="sha1" type="ascmhl:HashFormatType" minOccurs="0"/>
                 <element name="c4" type="ascmhl:HashFormatType" minOccurs="0"/>
-                <element name="xxh32" type="ascmhl:HashFormatType" minOccurs="0"/>
-                <element name="xxh64" type="ascmhl:HashFormatType" minOccurs="0"/>
-                <element name="xxh3" type="ascmhl:HashFormatType" minOccurs="0"/>
+                <element name="xxh32" type="ascmhl:HashFormatType" maxOccurs="1" minOccurs="0"/>
+                <element name="xxh64" type="ascmhl:HashFormatType" maxOccurs="1" minOccurs="0"/>
+                <element name="xxh3_64" type="ascmhl:HashFormatType" maxOccurs="1" minOccurs="0"/>
+                <element name="xxh3_128" type="ascmhl:HashFormatType" maxOccurs="1" minOccurs="0"/>
             </choice>
             <element minOccurs="0" name="metadata" type="ascmhl:MetadataType"/>
         </sequence>

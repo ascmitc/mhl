@@ -8,7 +8,7 @@ Assume the source card /A002R2EC is copied to a travel drive /travel_01.
 
 Seal the copy on the travel drive /travel_01 to create the original mhl generation.
 
-$ ascmhl.py create -v /travel_01/A002R2EC
+$ ascmhl.py create -v /travel_01/A002R2EC -h xxh64
 Sealing folder at path: /travel_01/A002R2EC ...
   created original hash for     Clips/A002C006_141024_R2EC.mov  xxh64: 0ea03b369a463d9d
   created original hash for     Clips/A002C007_141024_R2EC.mov  xxh64: 7680e5f98f4a80fd

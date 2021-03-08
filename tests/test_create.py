@@ -24,7 +24,7 @@ def test_create_succeed(fs):
     fs.create_file('/root/A/A1.txt', contents='A1\n')
 
     runner = CliRunner()
-    result = runner.invoke(mhl.commands.create, ['/root'])
+    result = runner.invoke(mhl.commands.create, ['/root', '-h', 'xxh64', '-v'])
     assert not result.exception
     assert os.path.exists('/root/ascmhl/0001_root_2020-01-16_091500.mhl')
     # with open('/root/ascmhl/0001_root_2020-01-16_091500.mhl', 'r') as fin:
@@ -37,7 +37,7 @@ def test_create_directory_hashes(fs):
     fs.create_file('/root/Stuff.txt', contents='stuff\n')
     fs.create_file('/root/A/A1.txt', contents='A1\n')
 
-    result = CliRunner().invoke(mhl.commands.create, ['/root', '-v'])
+    result = CliRunner().invoke(mhl.commands.create, ['/root', '-h', 'xxh64', '-v'])
     assert result.exit_code == 0
 
     # a directory hash for the folder A was created
@@ -48,8 +48,9 @@ def test_create_directory_hashes(fs):
     assert hash_list.process_info.root_media_hash.hash_entries[0].hash_string == '15ef0ade91fff267'
 
     # test that the directory-hash command creates the same directory hashes
-    result = CliRunner().invoke(mhl.commands.directory_hash, ['/root', '-v'])
+    result = CliRunner().invoke(mhl.commands.directory_hash, ['/root', '-v', '-h', 'xxh64'])
     assert result.exit_code == 0
+    print(result.output)
     assert 'directory hash for: /root/A xxh64: ee2c3b94b6eecb8d' in result.output
     assert 'root hash: xxh64: 15ef0ade91fff267' in result.output
 
@@ -64,7 +65,7 @@ def test_create_directory_hashes(fs):
     os.mkdir('/root/emptyFolderC/emptyFolderCB')
 
     runner = CliRunner()
-    result = runner.invoke(mhl.commands.create, ['/root', '-v'])
+    result = runner.invoke(mhl.commands.create, ['/root', '-v', '-h', 'xxh64'])
     assert result.exit_code == 0
 
     hash_list = MHLHistory.load_from_path('/root').hash_lists[-1]
@@ -79,7 +80,7 @@ def test_create_directory_hashes(fs):
     assert hash_list.find_media_hash_for_path('emptyFolderC').hash_entries[0].hash_string == '877071123901a4db'
 
     # test that the directory-hash command creates the same directory hashes
-    result = CliRunner().invoke(mhl.commands.directory_hash, ['/root'])
+    result = CliRunner().invoke(mhl.commands.directory_hash, ['/root', '-h', 'xxh64'])
     assert result.exit_code == 0
     assert '  calculated root hash: xxh64: 5f4af3b3fd736415' in result.output
 
@@ -88,14 +89,14 @@ def test_create_directory_hashes(fs):
         file.write('!!')
 
     runner = CliRunner()
-    result = runner.invoke(mhl.commands.create, ['/root', '-v'])
+    result = runner.invoke(mhl.commands.create, ['/root', '-v', '-h', 'xxh64'])
     assert 'ERROR: hash mismatch for        A/A2.txt' in result.output
     hash_list = MHLHistory.load_from_path('/root').hash_lists[-1]
     # an altered file leads to a different root directory hash
     assert hash_list.process_info.root_media_hash.hash_entries[0].hash_string == 'adf18c910489663c'
 
     # test that the directory-hash command creates the same root hash
-    result = CliRunner().invoke(mhl.commands.directory_hash, ['/root'])
+    result = CliRunner().invoke(mhl.commands.directory_hash, ['/root', '-h', 'xxh64'])
     assert result.exit_code == 0
     assert 'root hash: xxh64: adf18c910489663c' in result.output
 
@@ -103,7 +104,7 @@ def test_create_directory_hashes(fs):
     os.rename('/root/B/B1.txt', '/root/B/B2.txt')
 
     runner = CliRunner()
-    result = runner.invoke(mhl.commands.create, ['/root', '-v'])
+    result = runner.invoke(mhl.commands.create, ['/root', '-v', '-h', 'xxh64'])
     assert 'ERROR: hash mismatch for        A/A2.txt' in result.output
     # in addition to the failing verification we also have a missing file B1/B1.txt
     assert 'missing file(s):\n  B/B1.txt' in result.output
@@ -114,7 +115,7 @@ def test_create_directory_hashes(fs):
     assert hash_list.process_info.root_media_hash.hash_entries[0].hash_string == '01441cdf1803e2b8'
 
     # test that the directory-hash command creates the same root hash
-    result = CliRunner().invoke(mhl.commands.directory_hash, ['/root'])
+    result = CliRunner().invoke(mhl.commands.directory_hash, ['/root', '-h', 'xxh64'])
     assert result.exit_code == 0
     assert 'root hash: xxh64: 01441cdf1803e2b8' in result.output
 

@@ -55,8 +55,11 @@ def parse(file_path):
                     hash_list.process_info = current_object
                     current_object = None
             elif type(current_object) is MHLIgnoreSpec:
-                if tag == 'ignore':
+                if tag == 'pattern':
                     existing_ignore_patterns.append(element.text)
+                elif tag == 'ignore':
+                    hash_list.process_info.ignore_spec = current_object
+                    current_object = object_stack.pop()
                 else:
                     current_object = None
             elif type(current_object) is MHLMediaHash:
@@ -108,13 +111,14 @@ def parse(file_path):
                 current_object = MHLCreatorInfo()
             elif tag == 'processinfo':
                 current_object = MHLProcessInfo()
-            elif tag == 'ignorespec':
-                current_object = MHLIgnoreSpec()
             elif tag == 'hashlistreference':
                 current_object = MHLHashListReference()
         elif type(current_object) is MHLProcessInfo and event == 'start':
             tag = element.tag.split('}', 1)[-1]
-            if tag == 'roothash':
+            if tag == 'ignore':
+                object_stack.append(current_object)
+                current_object = MHLIgnoreSpec()
+            elif tag == 'roothash':
                 object_stack.append(current_object)
                 current_object = MHLMediaHash()
 
@@ -242,9 +246,8 @@ def _process_info_xml_element(hash_list: MHLHashList):
     return info_element
 
 def _ignorespec_xml_element(ignore_spec: MHLIgnoreSpec):
-    spec_element = E.ignorespec()
+    spec_element = E.ignore()
     if ignore_spec:
-        spec_element = E.ignore()
         for ignore_pattern in ignore_spec.get_pattern_list():
             spec_element.append(E.pattern(ignore_pattern))
     return spec_element

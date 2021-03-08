@@ -11,7 +11,7 @@ Assume the source card /A002R2EC is copied to a travel drive /travel_01.
 
 Seal the copy on the travel drive /travel_01 to create the original mhl generation.
 
-$ ascmhl.py create -v /travel_01/A002R2EC
+$ ascmhl.py create -v /travel_01/A002R2EC -h xxh64
 Sealing folder at path: /travel_01/A002R2EC ...
   created original hash for     Clips/A002C006_141024_R2EC.mov  xxh64: 0ea03b369a463d9d
   created original hash for     Clips/A002C007_141024_R2EC.mov  xxh64: 7680e5f98f4a80fd
@@ -33,7 +33,7 @@ Assume the source card /A002R2EC is copied to a travel drive /travel_01.
 
 Seal the copy on the travel drive /travel_01 to create the original mhl generation.
 
-$ ascmhl.py create -v /travel_01/A002R2EC
+$ ascmhl.py create -v /travel_01/A002R2EC -h xxh64
 Sealing folder at path: /travel_01/A002R2EC ...
   created original hash for     Clips/A002C006_141024_R2EC.mov  xxh64: 0ea03b369a463d9d
   created original hash for     Clips/A002C007_141024_R2EC.mov  xxh64: 7680e5f98f4a80fd
@@ -50,7 +50,7 @@ And the folder A002R2EC is copied there from the travel drive to a file server a
 Sealing the folder A002R2EC again on the file server
 this will verify all hashes, check for completeness and create a second generation
 
-$ ascmhl.py create -v /file_server/A002R2EC
+$ ascmhl.py create -v /file_server/A002R2EC -h xxh64
 Sealing folder at path: /file_server/A002R2EC ...
   verified                      Clips/A002C006_141024_R2EC.mov  OK
   verified                      Clips/A002C007_141024_R2EC.mov  OK
@@ -74,7 +74,7 @@ Assume the source card /A002R2EC is copied to a travel drive /travel_01.
 
 Seal the copy on the travel drive /travel_01 to create the original mhl generation.
 
-$ ascmhl.py create -v /travel_01/A002R2EC
+$ ascmhl.py create -v /travel_01/A002R2EC -h xxh64
 Sealing folder at path: /travel_01/A002R2EC ...
   created original hash for     Clips/A002C006_141024_R2EC.mov  xxh64: 0ea03b369a463d9d
   created original hash for     Clips/A002C007_141024_R2EC.mov  xxh64: 7680e5f98f4a80fd
@@ -117,7 +117,7 @@ Assume the source card /A002R2EC is copied to a travel drive /travel_01.
 
 Seal the copy on the travel drive /travel_01 to create the original mhl generation.
 
-$ ascmhl.py create -v /travel_01/A002R2EC
+$ ascmhl.py create -v /travel_01/A002R2EC -h xxh64
 Sealing folder at path: /travel_01/A002R2EC ...
   created original hash for     Clips/A002C006_141024_R2EC.mov  xxh64: 0ea03b369a463d9d
   created original hash for     Clips/A002C007_141024_R2EC.mov  xxh64: 7680e5f98f4a80fd
@@ -138,7 +138,7 @@ Sealing the folder A002R2EC again on the file server.
 This will verify all existing hashes and fail because Sidecar.txt was altered.
 An error is shown and create a new generation that documents the failed verification
 
-$ ascmhl.py create -v /file_server/A002R2EC
+$ ascmhl.py create -v /file_server/A002R2EC -h xxh64
 Sealing folder at path: /file_server/A002R2EC ...
   verified                      Clips/A002C006_141024_R2EC.mov  OK
   verified                      Clips/A002C007_141024_R2EC.mov  OK
@@ -161,7 +161,7 @@ Assume the source card /A002R2EC is copied to a Reels folder on travel drive /tr
 
 Seal the copy of A002R2EC on the travel drive /travel_01 to create the original mhl generation.
 
-$ ascmhl.py create -v /travel_01/Reels/A002R2EC
+$ ascmhl.py create -v /travel_01/Reels/A002R2EC -h xxh64
 Sealing folder at path: /travel_01/Reels/A002R2EC ...
   created original hash for     Clips/A002C006_141024_R2EC.mov  xxh64: 0ea03b369a463d9d
   created original hash for     Clips/A002C007_141024_R2EC.mov  xxh64: 7680e5f98f4a80fd
@@ -176,7 +176,7 @@ Assume a second card /A003R2EC is copied to the same Reels folder on travel driv
 
 Seal the copy of A003R2EC on the travel drive /travel_01 to create the original mhl generation.
 
-$ ascmhl.py create -v /travel_01/Reels/A003R2EC
+$ ascmhl.py create -v /travel_01/Reels/A003R2EC -h xxh64
 Sealing folder at path: /travel_01/Reels/A003R2EC ...
   created original hash for     Clips/A003C011_141024_R2EC.mov  xxh64: 52392f79a36d6571
   created original hash for     Clips/A003C012_141024_R2EC.mov  xxh64: 5dbca064ddddd6fc
@@ -198,7 +198,7 @@ in the card sub folders A002R2EC and A003R2EC and an initial one for the Reels f
 with the original hash of the Summary.txt and references to the child histories
 of the card sub folders.
 
-$ ascmhl.py create -v /file_server/Reels
+$ ascmhl.py create -v /file_server/Reels -h xxh64
 Sealing folder at path: /file_server/Reels ...
   verified                      A002R2EC/Clips/A002C006_141024_R2EC.mov  OK
   verified                      A002R2EC/Clips/A002C007_141024_R2EC.mov  OK

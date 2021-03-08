@@ -13,7 +13,7 @@ from typing import Dict, List
 from . import chain_txt_parser
 from . import logger
 from .ignore import MHLIgnoreSpec
-from .hashlist import MHLHashList, MHLHashEntry, MHLCreatorInfo
+from .hashlist import MHLHashList, MHLHashEntry, MHLCreatorInfo, MHLProcessInfo
 from .history import MHLHistory
 
 
@@ -114,7 +114,7 @@ class MHLGenerationCreationSession:
             if hash_string:
                 parent_media_hash.append_hash_entry(MHLHashEntry(hash_format, hash_string))
 
-    def commit(self, creator_info: MHLCreatorInfo):
+    def commit(self, creator_info: MHLCreatorInfo, process_info: MHLProcessInfo):
         """
         this method needs to create the generations of the children bottom up
         # so each history can reference the children correctly and can get the actual hash of the file
@@ -132,6 +132,7 @@ class MHLGenerationCreationSession:
                 new_hash_list = self.new_hash_lists[history]
             new_hash_list.referenced_hash_lists = referenced_hash_lists[history]
             new_hash_list.creator_info = creator_info
+            new_hash_list.process_info = process_info
             new_hash_list.ignore_spec = MHLIgnoreSpec(history.latest_ignore_patterns(), self.ignore_spec.get_pattern_list())
 
             history.write_new_generation(new_hash_list)

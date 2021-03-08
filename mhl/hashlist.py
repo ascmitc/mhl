@@ -43,6 +43,7 @@ class MHLHashList:
     """
 
     creator_info: Optional[MHLCreatorInfo]
+    process_info: MHLProcessInfo
     media_hashes: List[MHLMediaHash]
     media_hashes_path_map: Dict[str, MHLMediaHash]
     # referenced_hash_lists are the loaded hash list object
@@ -56,6 +57,7 @@ class MHLHashList:
 
     def __init__(self):
         self.creator_info = None
+        self.process_info = None
         self.media_hashes = []
         self.file_path = None
         self.generation_number = None
@@ -111,6 +113,7 @@ class MHLHashList:
         logger.info("    generation: {0}".format(self.generation_number))
 
         self.creator_info.log()
+        self.process_info.log()
         for media_hash in self.media_hashes:
             media_hash.log()
 
@@ -230,14 +233,12 @@ class MHLCreatorInfo:
     host_name: Optional[str]
     tool: Optional[MHLTool]
     creation_date: Optional[datetime]
-    process: Optional[MHLProcess]
     authors: List[MHLAuthor]
 
     def __init__(self):
         self.host_name = None
         self.tool = None
         self.creation_date = None
-        self.process = None
         self.authors = []
         # TODO: missing location, comment, ignore
 
@@ -245,7 +246,6 @@ class MHLCreatorInfo:
         logger.info("      host_name: {0}".format(self.host_name))
         logger.info("           tool: {0} {1}".format(self.tool.name, self.tool.version))
         logger.info("  creation_date: {0}".format(self.creation_date))
-        logger.info("        process: {0}".format(self.process))
 
     def summary(self):
         summary = ""
@@ -257,8 +257,6 @@ class MHLCreatorInfo:
             summary += ", " + str(self.tool.name)
             if self.tool.version is not None:
                 summary += " " + str(self.tool.version)
-        if self.process is not None:
-            summary += ", " + str(self.process)
         for author in self.authors:
             summary += ", " + str(author.name)
             summary += " (" + str(author.email)
@@ -266,6 +264,28 @@ class MHLCreatorInfo:
             summary += ")"
         # TODO: missing location, comment, ignore
         return summary
+
+
+class MHLProcessInfo:
+    """
+    Stores the creator info that is part of the header of each hash list file
+    """
+    process: Optional[MHLProcess]
+
+    def __init__(self):
+        self.process = None
+        # TODO: missing location, comment, ignore
+
+    def log(self):
+        logger.info("        process: {0}".format(self.process))
+
+    def summary(self):
+        summary = ""
+        if self.process is not None:
+            summary += ", " + str(self.process)
+        # TODO: missing location, comment, ignore
+        return summary
+
 
 class MHLTool:
     name: str

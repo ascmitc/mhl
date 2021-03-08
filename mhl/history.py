@@ -93,9 +93,9 @@ class MHLHistory:
         if len(self.hash_lists) == 0:
             return None
         hash_list = self.hash_lists[-1]
-        if not hash_list or not hash_list.ignore_spec:
+        if not hash_list or not hash_list.process_info.ignore_spec:
             return None
-        return hash_list.ignore_spec.get_pattern_list()
+        return hash_list.process_info.ignore_spec.get_pattern_list()
 
     # methods to query and compare hashes
     def find_original_hash_entry_for_path(self, relative_path: str) -> Optional[MHLHashEntry]:

@@ -503,10 +503,10 @@ def test_for_missing_files(not_found_paths, root_path, ignore_spec: MHLIgnoreSpe
 
 def commit_session(session):
     creator_info = MHLCreatorInfo()
-    process_info = MHLProcessInfo()
     creator_info.tool = MHLTool(ascmhl_tool_name, ascmhl_tool_version)
     creator_info.creation_date = utils.datetime_now_isostring()
     creator_info.host_name = platform.node()
+    process_info = MHLProcessInfo()
     process_info.process = MHLProcess('in-place')
     session.commit(creator_info, process_info)
 

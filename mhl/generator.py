@@ -103,7 +103,7 @@ class MHLGenerationCreationSession:
             logger.verbose(f'  added directory entry for     {relative_path}')
 
         # in case we just created the root media hash of the current hash list we also add it one history level above
-        if new_hash_list.root_media_hash is media_hash and history.parent_history:
+        if new_hash_list.process_info.root_media_hash is media_hash and history.parent_history:
             parent_history = history.parent_history
             parent_relative_path = parent_history.get_relative_file_path(path)
             parent_hash_list = self.new_hash_lists[parent_history]
@@ -132,8 +132,8 @@ class MHLGenerationCreationSession:
                 new_hash_list = self.new_hash_lists[history]
             new_hash_list.referenced_hash_lists = referenced_hash_lists[history]
             new_hash_list.creator_info = creator_info
-            new_hash_list.process_info = process_info
-            new_hash_list.ignore_spec = MHLIgnoreSpec(history.latest_ignore_patterns(), self.ignore_spec.get_pattern_list())
+            new_hash_list.process_info.process = process_info.process
+            new_hash_list.process_info.ignore_spec = MHLIgnoreSpec(history.latest_ignore_patterns(), self.ignore_spec.get_pattern_list())
 
             history.write_new_generation(new_hash_list)
             relative_generation_path = self.root_history.get_relative_file_path(new_hash_list.file_path)

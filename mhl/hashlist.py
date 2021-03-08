@@ -52,20 +52,16 @@ class MHLHashList:
     hash_list_references = List['MHLHashListReference']
     file_path: Optional[str]
     generation_number: Optional[int]
-    root_media_hash: Optional[MHLMediaHash]
-    ignore_spec: MHLIgnoreSpec
 
     def __init__(self):
         self.creator_info = None
-        self.process_info = None
+        self.process_info = MHLProcessInfo()
         self.media_hashes = []
         self.file_path = None
         self.generation_number = None
         self.referenced_hash_lists = []
         self.hash_list_references = []
         self.media_hashes_path_map = {}
-        self.root_media_hash = None
-        self.ignore_spec = MHLIgnoreSpec()
 
     # methods to query for hashes
     def find_media_hash_for_path(self, relative_path):
@@ -99,7 +95,7 @@ class MHLHashList:
     # build
     def append_hash(self, media_hash: MHLMediaHash):
         if media_hash.path == '.':
-            self.root_media_hash = media_hash
+            self.process_info.root_media_hash = media_hash
         else:
             self.media_hashes.append(media_hash)
         self.media_hashes_path_map[media_hash.path] = media_hash
@@ -271,10 +267,13 @@ class MHLProcessInfo:
     Stores the creator info that is part of the header of each hash list file
     """
     process: Optional[MHLProcess]
+    root_media_hash: Optional[MHLMediaHash]
+    ignore_spec: MHLIgnoreSpec
 
     def __init__(self):
         self.process = None
-        # TODO: missing location, comment, ignore
+        self.root_media_hash = None
+        self.ignore_spec = MHLIgnoreSpec()
 
     def log(self):
         logger.info("        process: {0}".format(self.process))
@@ -299,12 +298,10 @@ class MHLTool:
 class MHLProcess:
     process_type: str
     name: str
-    hash_source: Optional[str]
 
     def __init__(self, process_type: str, name: str = None):
         self.process_type = process_type
         self.name = name
-        self.hash_source = None
 
 
 class MHLAuthor:

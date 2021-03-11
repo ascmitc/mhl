@@ -8,7 +8,7 @@ __email__ = "opensource@pomfort.com"
 """
 
 ascmhl_tool_name = "ascmhl.py"
-ascmhl_tool_version = "0.2 alpha"
+ascmhl_tool_version = "0.3 alpha"
 
 ascmhl_folder_name = "ascmhl"
 ascmhl_file_extension = ".mhl"

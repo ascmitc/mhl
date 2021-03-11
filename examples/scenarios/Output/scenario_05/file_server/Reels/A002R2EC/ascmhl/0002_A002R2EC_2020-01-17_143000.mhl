@@ -3,7 +3,7 @@
   <creatorinfo>
     <creationdate>2020-01-17T14:30:00+00:00</creationdate>
     <hostname>myHost.local</hostname>
-    <tool version="0.2 alpha">ascmhl.py</tool>
+    <tool version="0.3 alpha">ascmhl.py</tool>
   </creatorinfo>
   <processinfo>
     <roothash directory="true">

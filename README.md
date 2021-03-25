@@ -48,7 +48,7 @@ The source code for `mhllib` can be found in the `./mhl` folder.
 
 ## The `ascmhl` Tool
 
-The `ascmhl` tool is a command line tool (`./ascmhl.py`) based on `mhllib` that allows to perform typical activities for the use cases of ASC MHL.
+The `ascmhl` tool is a command line tool based on `mhllib` that allows to perform typical activities for the use cases of ASC MHL.
 
 The ASC MHL tool implementation can
 
@@ -76,6 +76,12 @@ $ brew install python3
 $ brew postinstall python3
 ```
 
+### Installing `ascmhl` via package manager
+
+```shell
+$ pip3 install -U git+https://github.com/ascmitc/mhl.git
+```
+
 ### Installing `ascmhl` manually
 
 Download the source code and install dependencies using a [Virtual Environment](https://docs.python.org/3/tutorial/venv.html):
@@ -85,18 +91,13 @@ $ git clone https://github.com/ascmitc/mhl.git
 $ cd mhl
 $ python3 -m venv env
 $ source env/bin/activate
-$ pip3 install -r requirements.txt
+$ pip3 install -e .
 ```
 
 > As of now, this process has only been tested on macOS 10.13 and 10.14.
 
 
-### Installing `ascmhl` via package manager
-
-> TBD
-
-
-## Common Scenarios for `ascmhl.py`
+## Common Scenarios for `ascmhl`
 
 The ascmhl tool can be used to 
 
@@ -111,7 +112,7 @@ Additional utility commands:
 
 ### Working with file hierarchies (with completeness check)
 
-The most common commands when using the `ascmhl.py ` in data management scenarios are the `create` and the `check` commands in their default behavior (without subcommand options). 
+The most common commands when using the `ascmhl ` in data management scenarios are the `create` and the `check` commands in their default behavior (without subcommand options). 
 
 Sealing a folder / drive with the `create` command traverses through a folder hierarchy, hashes all found files and compares the hashes against the records in the `ascmhl` folder (if present). The command creates a new generation (or an initial one) for the content of an entire folder at the given folder level. It can be used to document all files in a folder or drive with all verified or newly created file hashes of the moment the `create` command ran.
 
@@ -131,7 +132,7 @@ Hashing and verifying single files against hash information stored in the `ascmh
 The `info -sf` ("single file") command prints the known history of a single file with details about all generations.
 
 
-## Commands of `ascmhl.py`
+## Commands of `ascmhl`
 
 _Implementation status 2020-09-08:_
 
@@ -156,7 +157,7 @@ Files that are existent in the file system but are not registered in the `ascmhl
 The `create` command takes the root path of the file hierarchy as the parameter:
 
 ```
-$ ./ascmhl.py create [-i ignore pattern|-ii /path/to/ignore-file.txt] /path/to/folder/
+$ ascmhl create [-i ignore pattern|-ii /path/to/ignore-file.txt] /path/to/folder/
 ```
 
 It works on folders with or without an `ascmhl` folder within the given folder hierarchy, and creates a new `ascmhl` folder at the given folder level if none is present before.
@@ -186,7 +187,7 @@ The `create` command with `-sf` option is run with the root path of the file hie
 This command can be used for instance when adding single files to an already mhl-managed file hierarchy.
 
 ```
-$ ./ascmhl.py create /path/to/root/folder -sf /path/to/single/file1 [-sf /path/to/single/file2 ..]
+$ ascmhl create /path/to/root/folder -sf /path/to/single/file1 [-sf /path/to/single/file2 ..]
 ```
 
 A new generation is created in all `ascmhl` folders below the given root path (e.g. in a nested mhl-history). If no mhl-history is present yet, an error is thrown.
@@ -218,7 +219,7 @@ The command detects, prints errors, and exits with a non-0 exit code for
 It is run with the root path of the file hierarchy as the parameter.
 
 ```
-$ ./ascmhl.py verify /path/to/folder/
+$ ascmhl verify /path/to/folder/
 ```
 
 If no `ascmhl` folder is found on the root level, an error is thrown.
@@ -253,8 +254,8 @@ The `verify` command can be used to verify a single or multiple files. It is run
 as the parameter.
 
 ```
-$ ./ascmhl.py verify -sf /path/to/single/file
-$ ./ascmhl.py verify -sf -l list/of/files.txt
+$ ascmhl verify -sf /path/to/single/file
+$ ascmhl verify -sf -l list/of/files.txt
 ```
 
 The command looks for an `ascmhl` folder in the folders above the given files. If no mhl-history is present yet, an error is thrown.
@@ -285,7 +286,7 @@ The `verify` command with the `-dh` subcommand option creates the directory hash
 
 
 ```
-$ ./ascmhl.py verify -dh /path/to/folder
+$ ascmhl verify -dh /path/to/folder
 ```
 
 Implementation:
@@ -316,7 +317,7 @@ The command detects, prints errors, and exits with a non-0 exit code for
 It is run with the root path of the file hierarchy as the parameter.
 
 ```
-$ ./ascmhl.py diff /path/to/folder/ 
+$ ascmhl diff /path/to/folder/ 
 ```
 
 If no `ascmhl` folder is found on the root level, an error is thrown.
@@ -352,7 +353,7 @@ The `info` command prints
 It is run with the path to a specific `ascmhl`folder.
 
 ```
-$ ./ascmhl.py info [-s|-l] /path/to/ascmhl/ 
+$ ascmhl info [-s|-l] /path/to/ascmhl/ 
 ```
 
 Implementation:
@@ -373,7 +374,7 @@ if list option:
 The `info` command with the `-sf` subcommand option outputs information about the full and detailed history information about one file.
 
 ```
-$ ./ascmhl.py info -sf /path/to/file [-sf /path/to/other/file] [-rp /root/path]
+$ ascmhl info -sf /path/to/file [-sf /path/to/other/file] [-rp /root/path]
 ```
 
 The command outputs each generation where the file has been handled, including date, hash, and activity (and creator info and absolute path with the `-v` option). The history information is read from the "next" ASC MHL history found in the path, of at the fiven root path (`-rp` option).
@@ -397,7 +398,7 @@ The directory hash can be used to quickly verify if the state of a folder struct
 It is run with the path to a specific `ascmhl`folder and the path to the desired folder for the computed directory hash.
 
 ```
-$ ./ascmhl.py info -dh /path/to/ascmhl/ /path/to/sub/folder 
+$ ascmhl info -dh /path/to/ascmhl/ /path/to/sub/folder 
 ```
 
 Implementation:
@@ -416,7 +417,7 @@ The `xsd-schema-check` command validates a given ASC MHL file against the XML XS
 
 
 ```
-$ ./ascmhl.py xsd-schema-check /path/to/ascmhl/XXXXX.mhl
+$ ascmhl xsd-schema-check /path/to/ascmhl/XXXXX.mhl
 ```
 
 

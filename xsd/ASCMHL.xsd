@@ -17,7 +17,7 @@
         <sequence>
             <element name="creatorinfo" type="ascmhl:CreatorInfoType"/>
             <element name="processinfo" type="ascmhl:ProcessInfoType"/>
-            <element name="hashes" type="ascmhl:HashesType"/>
+            <element name="hashes" type="ascmhl:HashesType" minOccurs="0"/>
             <element name="metadata" type="ascmhl:MetadataType" minOccurs="0"/>
             <element name="references" type="ascmhl:ReferencesType" minOccurs="0"/>
         </sequence>
@@ -96,6 +96,7 @@
                 <element name="xxh3_64" type="ascmhl:HashFormatType" maxOccurs="1" minOccurs="0"/>
                 <element name="xxh3_128" type="ascmhl:HashFormatType" maxOccurs="1" minOccurs="0"/>
             </choice>
+            <element name="previousPath" type="string" minOccurs="0"/>
             <element minOccurs="0" name="metadata" type="ascmhl:MetadataType"/>
         </sequence>
         <attribute name="directory" type="boolean"/>

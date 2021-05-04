@@ -80,6 +80,7 @@ $ brew postinstall python3
 
 ```shell
 $ pip3 install -U git+https://github.com/ascmitc/mhl.git
+$ ascmhl --help
 ```
 
 ### Installing `ascmhl` manually
@@ -94,7 +95,14 @@ $ source env/bin/activate
 $ pip3 install -e .
 ```
 
-> As of now, this process has only been tested on macOS 10.13 and 10.14.
+You can use the `ascmhl.py` script located in `./mhl/cli/` in order to run `ascmhl` from the repository directly. Make sure to add the path of this repository's root directory to the `PYTHONPATH` environment variable.
+
+```shell
+$ export PYTHONPATH=$PYTHONPATH:/path/to/repository
+$ ./mhl/cli/ascmhl.py --help
+``` 
+
+> As of now, this process has been tested on macOS 10.13 and 10.14.
 
 
 ## Common Scenarios for `ascmhl`

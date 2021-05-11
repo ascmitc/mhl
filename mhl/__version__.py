@@ -13,6 +13,7 @@ ascmhl_tool_version = "0.3 alpha"
 ascmhl_folder_name = "ascmhl"
 ascmhl_file_extension = ".mhl"
 ascmhl_chainfile_name = "chain.txt"
+ascmhl_collectionfile_name = "collection.txt"
 ascmhl_supported_hashformats = ['md5', 'sha1', 'xxh3_128', 'xxh3_64', 'xxh64', 'c4']  # decreasing priority list for verification
 ascmhl_default_hashformat = 'xxh3_128'
 ascmhl_reference_hash_format = "c4"  # hash format used to reference other files, e.g. in references and the chain

@@ -353,6 +353,63 @@ def diff_entire_folder_against_full_history_subcommand(root_path, verbose, ignor
     if exception:
         raise exception
 
+
+
+@click.command()
+@click.argument('root_path', type=click.Path(exists=True))
+@click.argument('destination_path', type=click.Path())
+# general options
+@click.option('--verbose', '-v', default=False, is_flag=True,
+              help="Verbose output")
+@click.option('--no_directory_hashes', '-n', default=False, is_flag=True,
+              help="Skip creation of directory hashes, only reference directories without hash")
+@click.option('ignore_list', '--ignore', '-i', multiple=True, help="A single file pattern to ignore.")
+@click.option('ignore_spec_file', '--ignore_spec', '-ii', type=click.Path(exists=True), help="A file containing multiple file patterns to ignore.")
+def flatten(root_path, destination_path, verbose, no_directory_hashes, ignore_list, ignore_spec_file):
+    """
+    Flatten an MHL history into one external manifest file
+
+    \b
+    The flatten command iterates through the mhl-history, collects all known files and
+    their hashes in multiple hash formats and writes them to a new mhl file outside of the
+    iterated history.
+    """
+    flatten_history(root_path, destination_path, verbose, no_directory_hashes, ignore_list, ignore_spec_file)
+    return
+
+def flatten_history(root_path, destination_path, verbose, no_directory_hashes, ignore_list=None, ignore_spec_file=None):
+    logger.verbose_logging = verbose
+
+    if not os.path.isabs(root_path):
+        root_path = os.path.join(os.getcwd(), root_path)
+
+    logger.verbose(f'Flattening folder at path: {root_path} ...')
+
+    existing_history = MHLHistory.load_from_path(root_path)
+
+    # create the ignore specification
+    ignore_spec = ignore.MHLIgnoreSpec(existing_history.latest_ignore_patterns(), ignore_list, ignore_spec_file)
+
+    # start a verification session on the existing history
+    collection_history = MHLHistory.create_collection_at_path(destination_path, debug=True)  # FIXME: remove debug
+    session = MHLGenerationCreationSession(collection_history, ignore_spec)
+
+    # store the directory hashes of sub folders so we can use it when calculating the hash of the parent folder
+    dir_hash_mappings = {}
+
+    if len(existing_history.hash_lists) == 0:
+        raise errors.NoMHLHistoryException(root_path)
+
+    for hash_list in existing_history.hash_lists:
+        for media_hash in hash_list.media_hashes:
+            for hash_entry in media_hash.hash_entries:
+                # FIXME: check if this entry is newer than the one already in there, avoid duplicate entries
+                session.append_file_hash(media_hash.path, media_hash.file_size, media_hash.last_modification_date,
+                                         hash_entry.hash_format, hash_entry.hash_string, action=hash_entry.action)
+
+    commit_session_for_collection(session)
+
+
 @click.command()
 @click.option('--verbose', '-v', default=False, is_flag=True, help="Verbose output")
 # subcommands
@@ -510,6 +567,14 @@ def commit_session(session):
     process_info.process = MHLProcess('in-place')
     session.commit(creator_info, process_info)
 
+def commit_session_for_collection(session):
+    creator_info = MHLCreatorInfo()
+    creator_info.tool = MHLTool(ascmhl_tool_name, ascmhl_tool_version)
+    creator_info.creation_date = utils.datetime_now_isostring()
+    creator_info.host_name = platform.node()
+    process_info = MHLProcessInfo()
+    process_info.process = MHLProcess('flatten')
+    session.commit(creator_info, process_info)
 
 def seal_file_path(existing_history, file_path, hash_format, session) -> (str, bool):
     relative_path = existing_history.get_relative_file_path(file_path)

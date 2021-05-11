@@ -41,12 +41,16 @@ class MHLGenerationCreationSession:
         self.new_hash_lists = defaultdict(MHLHashList)
         self.ignore_spec = ignore_spec
 
-    def append_file_hash(self, file_path, file_size, file_modification_date, hash_format, hash_string) -> bool:
+    def append_file_hash(self, file_path, file_size, file_modification_date, hash_format, hash_string, action=None) -> bool:
 
         relative_path = self.root_history.get_relative_file_path(file_path)
         # TODO: handle if path is outside of history root path
 
         history, history_relative_path = self.root_history.find_history_for_path(relative_path)
+        # for collections we cannot create a valid relative path (we are in the "wrong" history), but in that case
+        # the file_path is inputted already as the relative path (a bit of implicit functionality here)
+        if history_relative_path == None:
+            history_relative_path = file_path
 
         # check if there is an existing hash in the other generations and verify
         original_hash_entry = history.find_original_hash_entry_for_path(history_relative_path)
@@ -76,6 +80,11 @@ class MHLGenerationCreationSession:
         media_hash = new_hash_list.find_or_create_media_hash_for_path(history_relative_path,
                                                                       file_size,
                                                                       file_modification_date)
+
+        # collection behavior: overwrite action with action from flattened history
+        if action != None:
+            hash_entry.action = action
+
         media_hash.append_hash_entry(hash_entry)
         return hash_entry.action != 'failed'
 

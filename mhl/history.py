@@ -11,8 +11,9 @@ __email__ = "opensource@pomfort.com"
 from __future__ import annotations
 import os
 import re
+from datetime import datetime, date, time
 
-from .__version__ import ascmhl_folder_name, ascmhl_file_extension, ascmhl_chainfile_name
+from .__version__ import ascmhl_folder_name, ascmhl_file_extension, ascmhl_chainfile_name, ascmhl_collectionfile_name
 from . import hashlist_xml_parser, chain_txt_parser
 from .utils import datetime_now_filename_string
 from typing import Tuple, List, Dict, Optional, Set
@@ -210,6 +211,27 @@ class MHLHistory:
             history.append_hash_list(hash_list)
 
         history._find_and_load_child_histories()
+
+        return history
+
+    @classmethod
+    def create_collection_at_path(cls, root_path, debug=False):
+        now = datetime.now()
+        collection_folder_name = "debug"
+        if not debug:
+            date_time_string = now.strftime('%Y-%m-%d_%H%M')
+            collection_folder_name = "collection_" + date_time_string
+
+        collection_folder_path = os.path.join(root_path, collection_folder_name)
+
+        if not os.path.isdir(collection_folder_path):
+            os.mkdir(collection_folder_path)
+
+        history = cls()
+        history.asc_mhl_path = collection_folder_path
+
+        file_path = os.path.join(collection_folder_path, ascmhl_collectionfile_name)
+        history.chain = chain_txt_parser.parse(file_path)
 
         return history
 

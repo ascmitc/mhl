@@ -29,7 +29,7 @@ def test_create_succeed(fs):
     assert os.path.exists('/root/ascmhl/0001_root_2020-01-16_091500.mhl')
     # with open('/root/ascmhl/0001_root_2020-01-16_091500.mhl', 'r') as fin:
     #     print(fin.read())
-    assert os.path.exists('/root/ascmhl/chain.txt')
+    assert os.path.exists('/root/ascmhl/ascmhl_chain.txt')
 
 
 @freeze_time("2020-01-16 09:15:00")

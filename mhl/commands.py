@@ -391,7 +391,7 @@ def flatten_history(root_path, destination_path, verbose, no_directory_hashes, i
     ignore_spec = ignore.MHLIgnoreSpec(existing_history.latest_ignore_patterns(), ignore_list, ignore_spec_file)
 
     # start a verification session on the existing history
-    collection_history = MHLHistory.create_collection_at_path(destination_path, debug=True)  # FIXME: remove debug
+    collection_history = MHLHistory.create_collection_at_path(destination_path)
     session = MHLGenerationCreationSession(collection_history, ignore_spec)
 
     # store the directory hashes of sub folders so we can use it when calculating the hash of the parent folder

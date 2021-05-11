@@ -219,7 +219,7 @@ class MHLHistory:
         now = datetime.now()
         collection_folder_name = "debug"
         if not debug:
-            date_time_string = now.strftime('%Y-%m-%d_%H%M')
+            date_time_string = now.strftime('%Y-%m-%d')
             collection_folder_name = "collection_" + date_time_string
 
         collection_folder_path = os.path.join(root_path, collection_folder_name)

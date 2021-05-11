@@ -137,8 +137,9 @@ def write_hash_list(hash_list: MHLHashList, file_path: str):
     e.g. we create xml objects only for single elemnts like one media hash element and write it to disk
     before creating the next one"""
 
-    if not os.path.isdir(os.path.dirname(file_path)):
-        os.mkdir(os.path.dirname(file_path))
+    directory_path = os.path.dirname(file_path)
+    if not os.path.isdir(directory_path):
+        os.mkdir(directory_path)
 
     file = open(file_path, 'wb')
     file.write(b'<?xml version="1.0" encoding="UTF-8"?>\n<hashlist version="2.0" xmlns="urn:ASC:MHL:v2.0">\n')

@@ -224,6 +224,9 @@ class MHLHistory:
 
         collection_folder_path = os.path.join(root_path, collection_folder_name)
 
+        parent_path = os.path.dirname(collection_folder_path)
+        if not os.path.isdir(parent_path):
+            os.mkdir(parent_path)
         if not os.path.isdir(collection_folder_path):
             os.mkdir(collection_folder_path)
 

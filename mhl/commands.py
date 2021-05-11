@@ -367,7 +367,7 @@ def diff_entire_folder_against_full_history_subcommand(root_path, verbose, ignor
 @click.option('ignore_spec_file', '--ignore_spec', '-ii', type=click.Path(exists=True), help="A file containing multiple file patterns to ignore.")
 def flatten(root_path, destination_path, verbose, no_directory_hashes, ignore_list, ignore_spec_file):
     """
-    Flatten an MHL history into one external manifest file
+    Flatten an MHL history into one external manifest
 
     \b
     The flatten command iterates through the mhl-history, collects all known files and

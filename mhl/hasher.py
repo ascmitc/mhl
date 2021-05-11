@@ -125,6 +125,7 @@ class DirectoryHashContext:
     def final_content_hash_str(self):
         # simply create a list-digest of all content digests
         element_list = self.content_hash_strings
+        element_list = list(set(element_list))   # deduplicate, is not happening in digest_for_digest_list any more
         content_hash = digest_for_digest_list(element_list, self.hash_format)
         return content_hash
 
@@ -158,7 +159,8 @@ def digest_for_digest_list(digest_list, hash_format: str):
     if len(digest_list) == 0:
         return digest_for_string("", hash_format);
     # from pseudo code in 30MR-WD-ST-2114-C4ID-2017-01-17 V0 (1).pdf (cont'd)
-    digest_list_names = sorted_deduplicates(digest_list)
+    digest_list.sort()  # dedupliaction is not happening here, happening outside where suitable
+    digest_list_names = digest_list
     while len(digest_list_names) != 1:
         last_digest = None
         if (len(digest_list_names) % 2) == 1:

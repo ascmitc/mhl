@@ -39,7 +39,7 @@ The reference library covers
 
 ASC MHL supports the hash formats
 
-* xxHash (32-bit, 64-bit, and latest 128-bit/XXH3)
+* xxHash (64-bit, and latest XXH3 with 64-bit and 128-bit)
 * MD5
 * SHA1, SHA256
 * C4

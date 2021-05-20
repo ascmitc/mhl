@@ -19,7 +19,7 @@ setup(
     dependency_links=[],
     long_description=long_description,
     long_description_content_type="text/markdown",
-    name="mhl",
+    name="ascmhl",
     packages=find_packages(),
     setup_requires=["pytest-runner", "setuptools_scm"],
     tests_require=["pytest", "pyfakefs", "freezegun", "testfixtures"],

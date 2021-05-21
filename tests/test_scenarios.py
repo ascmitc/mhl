@@ -6,22 +6,30 @@ __license__ = "MIT"
 __maintainer__ = "Patrick Renner, Alexander Sahm"
 __email__ = "opensource@pomfort.com"
 """
+import difflib
+import filecmp
 import glob
-
-import pytest
 import os
 import shutil
-import filecmp
-import difflib
-from freezegun import freeze_time
-from click.testing import CliRunner
-from pyfakefs.fake_filesystem_unittest import Pause
+from importlib import reload
 from typing import List
+
+import pytest
+from click.testing import CliRunner
+from freezegun import freeze_time
+from pyfakefs.fake_filesystem_unittest import Pause
 
 import mhl.commands
 
 scenario_output_path = 'examples/scenarios/Output'
 fake_ref_root_path = '/ref'
+
+
+@pytest.fixture(autouse=True)
+def version(monkeypatch):
+    monkeypatch.setattr('mhl.__version__.ascmhl_tool_version', '0.3 alpha')
+    monkeypatch.setattr('mhl.__version__.ascmhl_tool_name', 'ascmhl.py')
+    reload(mhl.commands)
 
 
 @pytest.fixture()

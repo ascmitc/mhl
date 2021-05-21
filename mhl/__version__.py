@@ -6,9 +6,13 @@ __license__ = "MIT"
 __maintainer__ = "Patrick Renner, Alexander Sahm"
 __email__ = "opensource@pomfort.com"
 """
+try:
+    from importlib.metadata import version
+except ImportError:
+    from importlib_metadata import version  # noqa
 
-ascmhl_tool_name = "ascmhl.py"
-ascmhl_tool_version = "0.3 alpha"
+ascmhl_tool_name = "ascmhl"
+ascmhl_tool_version = version("ascmhl")
 
 ascmhl_folder_name = "ascmhl"
 ascmhl_file_extension = ".mhl"

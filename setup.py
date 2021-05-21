@@ -16,6 +16,7 @@ setup(
         "requests>=2.25.1",
         "xattr>=0.9.6",
         "xxhash>=2.0.0",
+        "importlib-metadata>=4.0.1; python_version < '3.8'",
     ],
     dependency_links=[],
     long_description=long_description,

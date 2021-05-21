@@ -36,7 +36,13 @@ from .traverse import post_order_lexicographic
 @click.command()
 @click.argument("root_path", type=click.Path(exists=True))
 # general options
-@click.option("--verbose", "-v", default=False, is_flag=True, help="Verbose output")
+@click.option(
+    "--verbose",
+    "-v",
+    default=False,
+    is_flag=True,
+    help="Verbose output",
+)
 @click.option(
     "--hash_format",
     "-h",
@@ -61,7 +67,13 @@ from .traverse import post_order_lexicographic
     type=click.Path(exists=True),
     help="Record single file, no completeness check (multiple occurrences possible for adding multiple files",
 )
-@click.option("ignore_list", "--ignore", "-i", multiple=True, help="A single file pattern to ignore.")
+@click.option(
+    "ignore_list",
+    "--ignore",
+    "-i",
+    multiple=True,
+    help="A single file pattern to ignore.",
+)
 @click.option(
     "ignore_spec_file",
     "--ignore_spec",
@@ -215,8 +227,20 @@ def create_for_single_files_subcommand(root_path, verbose, hash_format, no_direc
 
 @click.command()
 @click.argument("root_path", type=click.Path(exists=True))
-@click.option("--verbose", "-v", default=False, is_flag=True, help="Verbose output")
-@click.option("ignore_list", "--ignore", "-i", multiple=True, help="A single file pattern to ignore.")
+@click.option(
+    "--verbose",
+    "-v",
+    default=False,
+    is_flag=True,
+    help="Verbose output",
+)
+@click.option(
+    "ignore_list",
+    "--ignore",
+    "-i",
+    multiple=True,
+    help="A single file pattern to ignore.",
+)
 @click.option(
     "ignore_spec_file",
     "--ignore_spec",
@@ -320,8 +344,20 @@ def verify_entire_folder_against_full_history_subcommand(root_path, verbose, ign
 
 @click.command()
 @click.argument("root_path", type=click.Path(exists=True))
-@click.option("--verbose", "-v", default=False, is_flag=True, help="Verbose output")
-@click.option("ignore_list", "--ignore", "-i", multiple=True, help="A single file pattern to ignore.")
+@click.option(
+    "--verbose",
+    "-v",
+    default=False,
+    is_flag=True,
+    help="Verbose output",
+)
+@click.option(
+    "ignore_list",
+    "--ignore",
+    "-i",
+    multiple=True,
+    help="A single file pattern to ignore.",
+)
 @click.option(
     "ignore_spec_file",
     "--ignore_spec",
@@ -404,7 +440,13 @@ def diff_entire_folder_against_full_history_subcommand(root_path, verbose, ignor
 
 
 @click.command()
-@click.option("--verbose", "-v", default=False, is_flag=True, help="Verbose output")
+@click.option(
+    "--verbose",
+    "-v",
+    default=False,
+    is_flag=True,
+    help="Verbose output",
+)
 # subcommands
 @click.option(
     "--single_file",
@@ -415,7 +457,13 @@ def diff_entire_folder_against_full_history_subcommand(root_path, verbose, ignor
     help="Info for single file",
 )
 # options
-@click.option("--root_path", "-rp", default="", type=click.STRING, help="Root path for history")
+@click.option(
+    "--root_path",
+    "-rp",
+    default="",
+    type=click.STRING,
+    help="Root path for history",
+)
 def info(verbose, single_file, root_path):
     """
     Prints information from the ASC MHL history
@@ -513,7 +561,13 @@ def xsd_schema_check(file_path):
 # TODO should be part of the `verify -dh` subcommand
 @click.command()
 @click.argument("root_path", type=click.Path(exists=True))
-@click.option("--verbose", "-v", default=False, is_flag=True, help="Print all directory hashes of sub directories")
+@click.option(
+    "--verbose",
+    "-v",
+    default=False,
+    is_flag=True,
+    help="Print all directory hashes of sub directories",
+)
 @click.option(
     "--hash_format",
     "-h",
@@ -522,7 +576,13 @@ def xsd_schema_check(file_path):
     default=ascmhl_default_hashformat,
     help="Algorithm",
 )
-@click.option("ignore_list", "--ignore", "-i", multiple=True, help="A single file pattern to ignore.")
+@click.option(
+    "ignore_list",
+    "--ignore",
+    "-i",
+    multiple=True,
+    help="A single file pattern to ignore.",
+)
 @click.option(
     "ignore_spec_file",
     "--ignore_spec",

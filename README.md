@@ -79,7 +79,7 @@ $ brew postinstall python3
 ### Installing / updating `ascmhl` as a user
 Please run the following command to install (or upgrade to) the latest development version of `ascmhl`:
 ```shell
-$ pip3 install --upgrade git+https://github.com/ascmitc/mhl.git
+$ pip3 install --upgrade ascmhl
 ```
 
 To verify that it has been correctly installed run:

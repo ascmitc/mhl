@@ -2,6 +2,7 @@
 
 import os
 import sys
+
 # inserting root in path for autodoc
 sys.path.insert(0, os.path.abspath('../..'))
 
@@ -38,6 +39,7 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # a list of builtin themes.
 #
 import sphinx_rtd_theme  # ignore your editor, this import is used
+
 html_theme = 'sphinx_rtd_theme'
 
 # Add any paths that contain custom static files (such as style sheets) here,

@@ -203,9 +203,20 @@ def test_create_fail_missing_file(fs, nested_mhl_histories):
 
     # since we scan all generations for file paths we now get old files, missing files and new files here
     # as well as all entries for the directories
-    assert paths == {'/root/B/B1.txt', '/root/B/BA/BA1.txt', '/root/B', '/root/A/AA', '/root/A/AB/AB1.txt',
-                     '/root/B/BA', '/root/A/AA/AA1.txt', '/root/A/AB', '/root/Stuff.txt', '/root/B/BB',
-                     '/root/A', '/root/B/BB/BB1.txt'}
+    assert paths == {
+        '/root/B/B1.txt',
+        '/root/B/BA/BA1.txt',
+        '/root/B',
+        '/root/A/AA',
+        '/root/A/AB/AB1.txt',
+        '/root/B/BA',
+        '/root/A/AA/AA1.txt',
+        '/root/A/AB',
+        '/root/Stuff.txt',
+        '/root/B/BB',
+        '/root/A',
+        '/root/B/BB/BB1.txt',
+    }
 
     # since the file /root/A/AA/AA1.txt is still missing all further seal attempts will still fail
     runner = CliRunner()
@@ -233,5 +244,5 @@ def test_create_nested_new_format(fs, nested_mhl_histories):
     assert media_hash.hash_entries[0].hash_format == 'xxh64'
 
     # assure that the second hash entry is the new md5 hash
-    assert media_hash.hash_entries[1].action == 'verified' # formerly 'new'
+    assert media_hash.hash_entries[1].action == 'verified'  # formerly 'new'
     assert media_hash.hash_entries[1].hash_format == 'md5'

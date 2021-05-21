@@ -55,14 +55,14 @@ class ContentDircmp(filecmp.dircmp):
     Compare the content of dir1 and dir2. In contrast with filecmp.dircmp, this
     subclass compares the content of files with the same path.
     """
+
     # noinspection PyAttributeOutsideInit
     def phase3(self):
         """
         Find out differences between common files.
         Ensure we are using content comparison with shallow=False.
         """
-        fcomp = filecmp.cmpfiles(self.left, self.right, self.common_files,
-                                 shallow=False)
+        fcomp = filecmp.cmpfiles(self.left, self.right, self.common_files, shallow=False)
         self.same_files, self.diff_files, self.funny_files = fcomp
 
 
@@ -163,7 +163,7 @@ def compare_files_against_reference(scenario_reference: str, folder_paths: List[
 
 
 def validate_all_mhl_files_against_xml_schema(folder_path: str):
-    """ Find all mhl files created and validate them against the xsd"""
+    """Find all mhl files created and validate them against the xsd"""
     mhl_files = glob.glob(folder_path + r'/**/*.mhl', recursive=True)
     runner = CliRunner()
     for file in mhl_files:
@@ -172,7 +172,7 @@ def validate_all_mhl_files_against_xml_schema(folder_path: str):
 
 
 def copy_fake_directory_to_real_fs(fake_dir: str, real_dir: str, fake_fs):
-    """ Utility function to copy a directory in the fake file system recursively to the real file system """
+    """Utility function to copy a directory in the fake file system recursively to the real file system"""
     for root, _, file_names in os.walk(fake_dir):
         relative_root = root.lstrip(os.sep)
         current_real_dir = os.path.join(real_dir, relative_root)
@@ -355,8 +355,9 @@ def test_scenario_05(fs, reference, card_a002, card_a003):
         log_message('')
         log_message('Afterwards an arbitrary file Summary.txt is added to the Reels folder.')
         # An arbitrary file `Summary.txt` is added to the `Reels` folder.
-        fs.create_file('/file_server/Reels/Summary.txt',
-                       contents='This is a random summary\n\n* A002R2EC\n* A003R2EC\n')
+        fs.create_file(
+            '/file_server/Reels/Summary.txt', contents='This is a random summary\n\n* A002R2EC\n* A003R2EC\n'
+        )
 
         log_message('')
         log_message('Sealing the Reels folder on the file server.')

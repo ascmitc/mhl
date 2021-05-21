@@ -46,5 +46,3 @@ def fatal(msg, *args):
         msg %= args
     click.echo(click.style(msg, fg='red', bold=True, blink=True), file=sys.stderr)
     click.get_current_context().abort()
-
-

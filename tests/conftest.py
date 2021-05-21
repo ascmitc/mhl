@@ -25,12 +25,15 @@ def set_timezone():
     os.environ['TZ'] = 'UTZ'
     time.tzset()
 
+
 @pytest.fixture(autouse=True)
 def setup_environment(monkeypatch):
     def fake_hostname():
         return 'myHost.local'
+
     monkeypatch.setattr(platform, 'node', fake_hostname)
     # TODO: also patch ascmhl_tool_version ?
+
 
 @pytest.fixture
 @freeze_time("2020-01-15 13:00:00")
@@ -68,6 +71,7 @@ def simple_mhl_history(fs):
     runner = CliRunner()
     result = runner.invoke(mhl.commands.create, ['/root', '-h', 'xxh64'])
     assert result.exit_code == 0
+
 
 @pytest.fixture
 @freeze_time("2020-01-15 13:00:00")

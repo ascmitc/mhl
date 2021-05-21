@@ -39,8 +39,7 @@ def parse(file_path):
 
 
 def _generation_from_line_in_chainfile(line):
-    """ creates a Generation object from a line int the chain file
-    """
+    """creates a Generation object from a line int the chain file"""
 
     # TODO split by whitespace
     parts = line.split(None)
@@ -49,10 +48,12 @@ def _generation_from_line_in_chainfile(line):
         logger.error("cannot read line \"{line}\"")
         return None
 
-    generation = MHLChainGeneration(int(parts[0]),
-                                    parts[1],
-                                    (parts[2])[:-1],
-                                    parts[3])
+    generation = MHLChainGeneration(
+        int(parts[0]),
+        parts[1],
+        (parts[2])[:-1],
+        parts[3],
+    )
 
     if parts.__len__() == 6:
         generation.signature_identifier = parts[4]
@@ -68,26 +69,30 @@ def write_chain(chain: MHLChain, new_hash_list: MHLHashList):
 
 
 def _line_for_chainfile(chain_generation: MHLChainGeneration):
-    """creates a text line for appending a generation to a chain file
-    """
-    result_string = \
-        str(chain_generation.generation_number).zfill(4) + " " + \
-        chain_generation.ascmhl_filename + " " + \
-        chain_generation.hash_format + ": " + \
-        chain_generation.hash_string
+    """creates a text line for appending a generation to a chain file"""
+    result_string = (
+        str(chain_generation.generation_number).zfill(4)
+        + " "
+        + chain_generation.ascmhl_filename
+        + " "
+        + chain_generation.hash_format
+        + ": "
+        + chain_generation.hash_string
+    )
 
     return result_string
 
 
 def _append_new_generation_to_file(chain: MHLChain, hash_list: MHLHashList):
-    """ appends an externally created Generation object to the chain file
-    """
+    """appends an externally created Generation object to the chain file"""
 
     # get a new generation for a hashlist
-    generation = MHLChainGeneration(hash_list.generation_number,
-                                    hash_list.get_file_name(),
-                                    ascmhl_reference_hash_format,
-                                    create_filehash(ascmhl_reference_hash_format, hash_list.file_path))
+    generation = MHLChainGeneration(
+        hash_list.generation_number,
+        hash_list.get_file_name(),
+        ascmhl_reference_hash_format,
+        create_filehash(ascmhl_reference_hash_format, hash_list.file_path),
+    )
 
     # TODO sanity checks
     # - if generation is already part of self.generations

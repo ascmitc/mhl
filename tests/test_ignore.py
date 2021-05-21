@@ -51,7 +51,9 @@ def ignore_patterns_from_mhl_file(mhl_file: str):
     """
     returns a set of the patterns found in the mhl_file
     """
-    pattern_list = [element.text for event, element in etree.iterparse(mhl_file) if element.tag.split('}', 1)[-1] == XML_IGNORE_TAG]
+    pattern_list = [
+        element.text for event, element in etree.iterparse(mhl_file) if element.tag.split('}', 1)[-1] == XML_IGNORE_TAG
+    ]
     return set(pattern_list)
 
 
@@ -59,7 +61,11 @@ def paths_from_mhl_file(mhl_file: str):
     """
     returns a set of the hash entires found in the mhl_file
     """
-    hash_list = [element.text for event, element in etree.iterparse(mhl_file) if element.tag.split('}', 1)[-1] == XML_HASH_PATH_TAG]
+    hash_list = [
+        element.text
+        for event, element in etree.iterparse(mhl_file)
+        if element.tag.split('}', 1)[-1] == XML_HASH_PATH_TAG
+    ]
     return set(hash_list)
 
 
@@ -115,7 +121,9 @@ def test_ignore_on_create(temp_tree):
     runner.invoke(mhl.commands.create, [root_dir, '-i', '2', '--ignore', '3'])
     # write generation 3, appending ignore_spec from file and both CLI args
     temp_tree.write('ignorespec', b'6\n7')  # write an ignore spec to file
-    runner.invoke(mhl.commands.create, [root_dir, '-i', '4', '--ignore', '5', '--ignore_spec', f'{temp_tree.path}/ignorespec'])
+    runner.invoke(
+        mhl.commands.create, [root_dir, '-i', '4', '--ignore', '5', '--ignore_spec', f'{temp_tree.path}/ignorespec']
+    )
 
     # we should now have 3 total mhl generations. ensure each one has exactly the expected patterns
     mhl_files = os.listdir(f'{temp_tree.path}/ascmhl')

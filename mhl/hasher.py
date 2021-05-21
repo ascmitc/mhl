@@ -66,7 +66,6 @@ def context_type_for_hash_format(hash_format):
 
 
 class C4HashContext:
-
     def __init__(self):
         self.internal_context = hashlib.sha512()
 
@@ -93,7 +92,6 @@ class C4HashContext:
 
 
 class DirectoryHashContext:
-
     def __init__(self, hash_format: str):
         self.hash_context = context_type_for_hash_format(hash_format)()
         self.hash_format = hash_format

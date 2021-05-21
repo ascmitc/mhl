@@ -18,7 +18,6 @@ from .__version__ import ascmhl_reference_hash_format
 from .hasher import create_filehash
 
 
-
 class MHLHashList:
     """
     class for representing one MHL generation
@@ -136,6 +135,7 @@ class MHLMediaHash:
 
     other member variables:
     """
+
     hash_entries: List[MHLHashEntry]
     path: Optional[str]
     file_size: Optional[int]
@@ -180,11 +180,15 @@ class MHLMediaHash:
             elif self.is_directory:
                 indicator = "d"
             hash_action = (hash_entry.action if hash_entry.action is not None else "").ljust(10)
-            logger.info("{0} {1}: {2} {3}: {4}".format(indicator,
-                                                       hash_entry.hash_format.rjust(6),
-                                                       hash_entry.hash_string.ljust(32),
-                                                       hash_action,
-                                                       self.path))
+            logger.info(
+                "{0} {1}: {2} {3}: {4}".format(
+                    indicator,
+                    hash_entry.hash_format.rjust(6),
+                    hash_entry.hash_string.ljust(32),
+                    hash_action,
+                    self.path,
+                )
+            )
 
 
 class MHLHashEntry:
@@ -214,6 +218,7 @@ class MHLHashListReference:
     """
     class to store the ascmhlreference to a child history mhl file
     """
+
     path: Optional[str]
     reference_hash: Optional[str]
 
@@ -226,6 +231,7 @@ class MHLCreatorInfo:
     """
     Stores the creator info that is part of the header of each hash list file
     """
+
     host_name: Optional[str]
     tool: Optional[MHLTool]
     creation_date: Optional[datetime]
@@ -248,7 +254,7 @@ class MHLCreatorInfo:
         if self.host_name is not None:
             summary += str(self.host_name)
         else:
-            summary += "[unknown host]";
+            summary += "[unknown host]"
         if self.tool.name is not None:
             summary += ", " + str(self.tool.name)
             if self.tool.version is not None:
@@ -266,6 +272,7 @@ class MHLProcessInfo:
     """
     Stores the creator info that is part of the header of each hash list file
     """
+
     process: Optional[MHLProcess]
     root_media_hash: Optional[MHLMediaHash]
     ignore_spec: MHLIgnoreSpec

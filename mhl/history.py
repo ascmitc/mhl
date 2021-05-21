@@ -179,7 +179,7 @@ class MHLHistory:
 
     @classmethod
     def load_from_path(cls, root_path):
-        """finds all MHL files in the asc-mhl folder, returns the mhl_history instance with all mhl_hashlists """
+        """finds all MHL files in the asc-mhl folder, returns the mhl_history instance with all mhl_hashlists"""
 
         asc_mhl_folder_path = os.path.join(root_path, ascmhl_folder_name)
         history = cls()
@@ -291,8 +291,7 @@ class MHLHistory:
                     if required_hash_entry is None:
                         raise AssertionError('no hash entry found for new hash', hash_entry)
                     if required_hash_entry.action != 'verified':
-                        raise AssertionError('hash entry for new hash not verified',
-                                             hash_entry, required_hash_entry)
+                        raise AssertionError('hash entry for new hash not verified', hash_entry, required_hash_entry)
                     hash_entry.action = 'verified'
         return True
 

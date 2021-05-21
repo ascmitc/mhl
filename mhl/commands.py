@@ -19,7 +19,13 @@ from . import errors
 from . import ignore
 from . import utils
 from .ignore import MHLIgnoreSpec
-from .__version__ import ascmhl_supported_hashformats, ascmhl_folder_name, ascmhl_tool_name, ascmhl_tool_version, ascmhl_default_hashformat
+from .__version__ import (
+    ascmhl_supported_hashformats,
+    ascmhl_folder_name,
+    ascmhl_tool_name,
+    ascmhl_tool_version,
+    ascmhl_default_hashformat,
+)
 from .generator import MHLGenerationCreationSession
 from .hasher import create_filehash, DirectoryHashContext
 from .hashlist import MHLCreatorInfo, MHLProcessInfo, MHLTool, MHLProcess
@@ -30,19 +36,39 @@ from .traverse import post_order_lexicographic
 @click.command()
 @click.argument('root_path', type=click.Path(exists=True))
 # general options
-@click.option('--verbose', '-v', default=False, is_flag=True,
-              help="Verbose output")
-@click.option('--hash_format', '-h', type=click.Choice(ascmhl_supported_hashformats),
-              multiple=False, default=ascmhl_default_hashformat,
-              help="Algorithm")
-@click.option('--no_directory_hashes', '-n', default=False, is_flag=True,
-              help="Skip creation of directory hashes, only reference directories without hash")
+@click.option('--verbose', '-v', default=False, is_flag=True, help="Verbose output")
+@click.option(
+    '--hash_format',
+    '-h',
+    type=click.Choice(ascmhl_supported_hashformats),
+    multiple=False,
+    default=ascmhl_default_hashformat,
+    help="Algorithm",
+)
+@click.option(
+    '--no_directory_hashes',
+    '-n',
+    default=False,
+    is_flag=True,
+    help="Skip creation of directory hashes, only reference directories without hash",
+)
 # subcommands
-@click.option('--single_file', '-sf', default=False, multiple=True,
-              type=click.Path(exists=True),
-              help="Record single file, no completeness check (multiple occurrences possible for adding multiple files")
+@click.option(
+    '--single_file',
+    '-sf',
+    default=False,
+    multiple=True,
+    type=click.Path(exists=True),
+    help="Record single file, no completeness check (multiple occurrences possible for adding multiple files",
+)
 @click.option('ignore_list', '--ignore', '-i', multiple=True, help="A single file pattern to ignore.")
-@click.option('ignore_spec_file', '--ignore_spec', '-ii', type=click.Path(exists=True), help="A file containing multiple file patterns to ignore.")
+@click.option(
+    'ignore_spec_file',
+    '--ignore_spec',
+    '-ii',
+    type=click.Path(exists=True),
+    help="A file containing multiple file patterns to ignore.",
+)
 def create(root_path, verbose, hash_format, no_directory_hashes, single_file, ignore_list, ignore_spec_file):
     """
     Create a new generation for a folder or file(s)
@@ -56,21 +82,26 @@ def create(root_path, verbose, hash_format, no_directory_hashes, single_file, ig
     if single_file is not None and len(single_file) > 0:
         create_for_single_files_subcommand(root_path, verbose, hash_format, no_directory_hashes, single_file)
         return
-    create_for_folder_subcommand(root_path, verbose, hash_format, no_directory_hashes, single_file, ignore_list, ignore_spec_file)
+    create_for_folder_subcommand(
+        root_path, verbose, hash_format, no_directory_hashes, single_file, ignore_list, ignore_spec_file
+    )
     return
 
-def create_for_folder_subcommand(root_path, verbose, hash_format, no_directory_hashes, single_file, ignore_list=None, ignore_spec_file=None):
+
+def create_for_folder_subcommand(
+    root_path, verbose, hash_format, no_directory_hashes, single_file, ignore_list=None, ignore_spec_file=None
+):
     # command formerly known as "seal"
     """
-      Creates a new generation with all files in a folder hierarchy.
+    Creates a new generation with all files in a folder hierarchy.
 
-      ROOT_PATH: the root path to use for the asc mhl history
+    ROOT_PATH: the root path to use for the asc mhl history
 
-      All files are hashed and will be compared to previous records in the `asc-mhl` folder if they exists.
-      The command finds files that are registered in the `asc-mhl` folder but that are missing in the file system.
-      Files that are existent in the file system but are not registered in the `asc-mhl` folder yet, are registered
-      as new entries in the newly created generation(s).
-      """
+    All files are hashed and will be compared to previous records in the `asc-mhl` folder if they exists.
+    The command finds files that are registered in the `asc-mhl` folder but that are missing in the file system.
+    Files that are existent in the file system but are not registered in the `asc-mhl` folder yet, are registered
+    as new entries in the newly created generation(s).
+    """
     logger.verbose_logging = verbose
 
     if not os.path.isabs(root_path):
@@ -128,6 +159,7 @@ def create_for_folder_subcommand(root_path, verbose, hash_format, no_directory_h
     if exception:
         raise exception
 
+
 def create_for_single_files_subcommand(root_path, verbose, hash_format, no_directory_hashes, single_file):
     # command formerly known as "record"
     """
@@ -151,7 +183,7 @@ def create_for_single_files_subcommand(root_path, verbose, hash_format, no_direc
     if not os.path.isabs(root_path):
         root_path = os.path.join(os.getcwd(), root_path)
 
-    assert(len(single_file) != 0)
+    assert len(single_file) != 0
 
     existing_history = MHLHistory.load_from_path(root_path)
     # start a creation session on the existing history
@@ -185,7 +217,13 @@ def create_for_single_files_subcommand(root_path, verbose, hash_format, no_direc
 @click.argument('root_path', type=click.Path(exists=True))
 @click.option('--verbose', '-v', default=False, is_flag=True, help="Verbose output")
 @click.option('ignore_list', '--ignore', '-i', multiple=True, help="A single file pattern to ignore.")
-@click.option('ignore_spec_file', '--ignore_spec', '-ii', type=click.Path(exists=True), help="A file containing multiple file patterns to ignore.")
+@click.option(
+    'ignore_spec_file',
+    '--ignore_spec',
+    '-ii',
+    type=click.Path(exists=True),
+    help="A file containing multiple file patterns to ignore.",
+)
 def verify(root_path, verbose, ignore_list, ignore_spec_file):
     """
     Verify a folder, single file(s), or a directory hash
@@ -197,9 +235,10 @@ def verify(root_path, verbose, ignore_list, ignore_spec_file):
     files in the file system are reported as errors. No new ASC MHL file /
     generation is created.
     """
-    #TODO distinguish different behavior
+    # TODO distinguish different behavior
     verify_entire_folder_against_full_history_subcommand(root_path, verbose, ignore_list, ignore_spec_file)
     return
+
 
 def verify_entire_folder_against_full_history_subcommand(root_path, verbose, ignore_list=None, ignore_spec_file=None):
     # command formerly known as "check"
@@ -258,9 +297,11 @@ def verify_entire_folder_against_full_history_subcommand(root_path, verbose, ign
             if original_hash_entry.hash_string == current_hash:
                 logger.verbose(f'verification of file {relative_path}: OK')
             else:
-                logger.error(f'ERROR: hash mismatch        for {relative_path} '
-                             f'old {original_hash_entry.hash_format}: {original_hash_entry.hash_string}, '
-                             f'new {original_hash_entry.hash_format}: {current_hash}')
+                logger.error(
+                    f'ERROR: hash mismatch        for {relative_path} '
+                    f'old {original_hash_entry.hash_format}: {original_hash_entry.hash_string}, '
+                    f'new {original_hash_entry.hash_format}: {current_hash}'
+                )
                 num_failed_verifications += 1
 
     exception = test_for_missing_files(not_found_paths, root_path, ignore_spec)
@@ -272,15 +313,22 @@ def verify_entire_folder_against_full_history_subcommand(root_path, verbose, ign
     if exception:
         raise exception
 
-#TODO def verify_single_file_subcommand(root_path, verbose):
-#TODO def verify_directory_hash_subcommand(root_path, verbose):
+
+# TODO def verify_single_file_subcommand(root_path, verbose):
+# TODO def verify_directory_hash_subcommand(root_path, verbose):
 
 
 @click.command()
 @click.argument('root_path', type=click.Path(exists=True))
 @click.option('--verbose', '-v', default=False, is_flag=True, help="Verbose output")
 @click.option('ignore_list', '--ignore', '-i', multiple=True, help="A single file pattern to ignore.")
-@click.option('ignore_spec_file', '--ignore_spec', '-ii', type=click.Path(exists=True), help="A file containing multiple file patterns to ignore.")
+@click.option(
+    'ignore_spec_file',
+    '--ignore_spec',
+    '-ii',
+    type=click.Path(exists=True),
+    help="A file containing multiple file patterns to ignore.",
+)
 def diff(root_path, verbose, ignore_list, ignore_spec_file):
     """
     Diff an entire folder structure
@@ -294,6 +342,7 @@ def diff(root_path, verbose, ignore_list, ignore_spec_file):
     """
     diff_entire_folder_against_full_history_subcommand(root_path, verbose, ignore_list, ignore_spec_file)
     return
+
 
 def diff_entire_folder_against_full_history_subcommand(root_path, verbose, ignore_list=None, ignore_spec_file=None):
     """
@@ -353,15 +402,20 @@ def diff_entire_folder_against_full_history_subcommand(root_path, verbose, ignor
     if exception:
         raise exception
 
+
 @click.command()
 @click.option('--verbose', '-v', default=False, is_flag=True, help="Verbose output")
 # subcommands
-@click.option('--single_file', '-sf', default=False, multiple=True,
-              type=click.Path(exists=True),
-              help="Info for single file")
+@click.option(
+    '--single_file',
+    '-sf',
+    default=False,
+    multiple=True,
+    type=click.Path(exists=True),
+    help="Info for single file",
+)
 # options
-@click.option('--root_path', '-rp', default="", type=click.STRING,
-              help="Root path for history")
+@click.option('--root_path', '-rp', default="", type=click.STRING, help="Root path for history")
 def info(verbose, single_file, root_path):
     """
     Prints information from the ASC MHL history
@@ -383,6 +437,7 @@ def info(verbose, single_file, root_path):
             info_for_single_file(root_path, verbose, single_file)
         return
     return
+
 
 def info_for_single_file(root_path, verbose, single_file):
     """
@@ -414,12 +469,15 @@ def info_for_single_file(root_path, verbose, single_file):
                     creatorInfo = hash_list.creator_info.summary()
                     processInfo = hash_list.process_info.summary()
                     logger.info(
-                        f'  Generation {hash_list.generation_number} ({hash_list.creator_info.creation_date}) {hash_entry.hash_format}: {hash_entry.hash_string} ({hash_entry.action}) \n'
-                        f'    {absolutePath}\n'
-                        f'    {creatorInfo}\n'
-                        f'    {processInfo}')
+                        f'  Generation {hash_list.generation_number} ({hash_list.creator_info.creation_date})'
+                        f' {hash_entry.hash_format}: {hash_entry.hash_string} ({hash_entry.action}) \n   '
+                        f' {absolutePath}\n    {creatorInfo}\n    {processInfo}'
+                    )
                 else:
-                    logger.info(f'  Generation {hash_list.generation_number} ({hash_list.creator_info.creation_date}) {hash_entry.hash_format}: {hash_entry.hash_string} ({hash_entry.action})')
+                    logger.info(
+                        f'  Generation {hash_list.generation_number} ({hash_list.creator_info.creation_date})'
+                        f' {hash_entry.hash_format}: {hash_entry.hash_string} ({hash_entry.action})'
+                    )
 
 
 @click.command()
@@ -449,14 +507,27 @@ def xsd_schema_check(file_path):
         logger.info(f'Issues:\n{xsd.error_log}')
         raise errors.VerificationFailedException
 
-#TODO should be part of the `verify -dh` subcommand
+
+# TODO should be part of the `verify -dh` subcommand
 @click.command()
 @click.argument('root_path', type=click.Path(exists=True))
 @click.option('--verbose', '-v', default=False, is_flag=True, help="Print all directory hashes of sub directories")
-@click.option('--hash_format', '-h', type=click.Choice(ascmhl_supported_hashformats), multiple=False,
-              default=ascmhl_default_hashformat, help="Algorithm")
+@click.option(
+    '--hash_format',
+    '-h',
+    type=click.Choice(ascmhl_supported_hashformats),
+    multiple=False,
+    default=ascmhl_default_hashformat,
+    help="Algorithm",
+)
 @click.option('ignore_list', '--ignore', '-i', multiple=True, help="A single file pattern to ignore.")
-@click.option('ignore_spec_file', '--ignore_spec', '-ii', type=click.Path(exists=True), help="A file containing multiple file patterns to ignore.")
+@click.option(
+    'ignore_spec_file',
+    '--ignore_spec',
+    '-ii',
+    type=click.Path(exists=True),
+    help="A file containing multiple file patterns to ignore.",
+)
 def directory_hash(root_path, verbose, hash_format, ignore_list, ignore_spec_file):
     """
     [TMP] Creates the directory hash of a given folder
@@ -529,8 +600,9 @@ def seal_file_path(existing_history, file_path, hash_format, session) -> (str, b
         hash_in_existing_format = create_filehash(existing_hash_format, file_path)
         # FIXME: test what happens if the existing hash verification fails in other format fails
         # should we then really create two entries
-        success &= session.append_file_hash(file_path, file_size, file_modification_date,
-                                            existing_hash_format, hash_in_existing_format)
+        success &= session.append_file_hash(
+            file_path, file_size, file_modification_date, existing_hash_format, hash_in_existing_format
+        )
     current_format_hash = create_filehash(hash_format, file_path)
     # in case the existing hash verification failed we don't want to add the current format hash to the generation
     # but we need to return it for directory hash creation

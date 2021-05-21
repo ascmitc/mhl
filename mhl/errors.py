@@ -9,6 +9,7 @@ __email__ = "opensource@pomfort.com"
 
 import click
 
+
 class CompletenessCheckFailedException(click.ClickException):
     exit_code = 15
 
@@ -22,6 +23,7 @@ class NoMHLHistoryException(click.ClickException):
     def __init__(self, path):
         super().__init__(f'Missing ASC MHL history at path {path}')
 
+
 class VerificationFailedException(click.ClickException):
     exit_code = 12
 
@@ -34,6 +36,7 @@ class NewFilesFoundException(click.ClickException):
 
     def __init__(self):
         super().__init__('New files not referenced in the ASC MHL history have been found')
+
 
 class NoMHLHistoryExceptionForPath(click.ClickException):
     exit_code = 14

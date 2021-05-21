@@ -26,9 +26,7 @@ def test_simple_parsing():
 
 @freeze_time("2020-01-16 09:15:00")
 def test_child_history_parsing(fs, nested_mhl_histories):
-    """
-
-    """
+    """ """
 
     root_history = MHLHistory.load_from_path('/root')
     assert len(root_history.child_histories) == 2
@@ -69,9 +67,7 @@ def test_child_history_parsing(fs, nested_mhl_histories):
 
 @freeze_time("2020-01-16 09:15:00")
 def test_child_history_verify(fs, nested_mhl_histories):
-    """
-
-    """
+    """ """
 
     runner = CliRunner()
     result = runner.invoke(mhl.commands.create, ['/root'], catch_exceptions=False)
@@ -125,9 +121,7 @@ def test_child_history_verify(fs, nested_mhl_histories):
 
 @freeze_time("2020-01-16 09:15:00")
 def test_child_history_partial_verification_ba_1_file(fs, nested_mhl_histories):
-    """
-
-    """
+    """ """
 
     # create an additional file the record command will not add since we only pass it B1 as single file
     fs.create_file('/root/B/B2.txt', contents='B2\n')
@@ -164,9 +158,7 @@ def test_child_history_partial_verification_ba_1_file(fs, nested_mhl_histories):
 
 @freeze_time("2020-01-16 09:15:00")
 def test_child_history_partial_verification_bb_folder(fs, nested_mhl_histories):
-    """
-
-    """
+    """ """
 
     # create an additional file the record command will find because we pass it a folder
     fs.create_file('/root/B/BB/BB2.txt', contents='BB2\n')
@@ -204,7 +196,6 @@ def test_child_history_partial_verification_bb_folder(fs, nested_mhl_histories):
 
 
 def test_hash_list_name_parsing():
-
     def _test_regex(filename, should_match):
         filename_no_extension, _ = os.path.splitext(filename)
         if filename.endswith(ascmhl_file_extension):
@@ -225,4 +216,3 @@ def test_hash_list_name_parsing():
     _test_regex('0001_AA_2020-01-16_091500.xml', False)
     _test_regex('AA_2020-01-16_091500_0002.mhl', False)
     _test_regex('0003_.mhl', False)
-

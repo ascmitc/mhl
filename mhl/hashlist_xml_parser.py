@@ -215,7 +215,8 @@ def _ascmhlreference_xml_element(hash_list: MHLHashList, file_path: str):
     root_path = os.path.dirname(os.path.dirname(file_path))
     hash_element = E.hashlistreference(
         E.path(os.path.relpath(hash_list.file_path, root_path)),
-        E.c4(hash_list.generate_reference_hash()))
+        E.c4(hash_list.generate_reference_hash()),
+    )
 
     return hash_element
 
@@ -231,6 +232,7 @@ def _creator_info_xml_element(hash_list: MHLHashList):
     # TODO: missing location, comment, ignore
     return info_element
 
+
 def _process_info_xml_element(hash_list: MHLHashList):
     """builds and returns one <creatorinfo> element for a given creator info instance"""
     process_info = hash_list.process_info
@@ -243,9 +245,10 @@ def _process_info_xml_element(hash_list: MHLHashList):
     info_element = E.processinfo(
         _root_media_hash_xml_element(root_hash),
         E.process(process_info.process.process_type),
-        _ignorespec_xml_element(hash_list.process_info.ignore_spec)
+        _ignorespec_xml_element(hash_list.process_info.ignore_spec),
     )
     return info_element
+
 
 def _ignorespec_xml_element(ignore_spec: MHLIgnoreSpec):
     spec_element = E.ignore()
@@ -254,10 +257,10 @@ def _ignorespec_xml_element(ignore_spec: MHLIgnoreSpec):
             spec_element.append(E.pattern(ignore_pattern))
     return spec_element
 
+
 def _ignore_xml_element(ignore_pattern: str):
     """builds and returns one <ignore> element for a given ignore_spec pattern entry"""
     return E.ignore(ignore_pattern)
-
 
 
 def _root_media_hash_xml_element(root_media_hash: MHLMediaHash):

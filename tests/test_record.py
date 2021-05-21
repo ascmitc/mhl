@@ -95,4 +95,3 @@ def test_record_fail_altered_file(fs, simple_mhl_history):
     assert history.hash_lists[1].media_hashes[0].hash_entries[0].action == 'failed'
     assert history.hash_lists[2].media_hashes[0].path == 'A/A1.txt'
     assert history.hash_lists[2].media_hashes[0].hash_entries[0].action == 'verified'
-

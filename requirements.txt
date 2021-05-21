@@ -9,5 +9,4 @@ pytest_mock==3.6.1
 requests-mock==1.9.2
 requests==2.25.1
 testfixtures==6.17.0
-xattr==0.9.6
 xxhash==2.0.0

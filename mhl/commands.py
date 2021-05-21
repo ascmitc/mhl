@@ -470,8 +470,10 @@ def info_for_single_file(root_path, verbose, single_file):
                     processInfo = hash_list.process_info.summary()
                     logger.info(
                         f"  Generation {hash_list.generation_number} ({hash_list.creator_info.creation_date})"
-                        f" {hash_entry.hash_format}: {hash_entry.hash_string} ({hash_entry.action}) \n   "
-                        f" {absolutePath}\n    {creatorInfo}\n    {processInfo}"
+                        f" {hash_entry.hash_format}: {hash_entry.hash_string} ({hash_entry.action}) \n"
+                        f"    {absolutePath}\n"
+                        f"    {creatorInfo}\n"
+                        f"    {processInfo}"
                     )
                 else:
                     logger.info(

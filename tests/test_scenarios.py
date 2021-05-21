@@ -27,8 +27,8 @@ fake_ref_root_path = "/ref"
 
 @pytest.fixture(autouse=True)
 def version(monkeypatch):
-    monkeypatch.setattr('mhl.__version__.ascmhl_tool_version', '0.3 alpha')
-    monkeypatch.setattr('mhl.__version__.ascmhl_tool_name', 'ascmhl.py')
+    monkeypatch.setattr("mhl.__version__.ascmhl_tool_version", "0.3 alpha")
+    monkeypatch.setattr("mhl.__version__.ascmhl_tool_name", "ascmhl.py")
     reload(mhl.commands)
 
 

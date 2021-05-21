@@ -28,7 +28,7 @@ class MHLChain:
     # init
 
     file_path: str
-    generations: List['MHLChainGeneration']
+    generations: List["MHLChainGeneration"]
 
     def __init__(self, file_path: str):
         self.file_path = file_path

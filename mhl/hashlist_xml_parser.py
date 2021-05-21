@@ -21,7 +21,7 @@ from .__version__ import ascmhl_supported_hashformats
 
 def parse(file_path):
     """parsing the MHL XML file and building the MHLHashList for the hash_list member variable"""
-    logger.debug(f'parsing {file_path}...')
+    logger.debug(f"parsing {file_path}...")
 
     start = timer()
 
@@ -34,63 +34,63 @@ def parse(file_path):
     # pass a file handle to iterparse instead of the path directly to support the fake filesystem used in the tests
     file = open(file_path, "rb")
     existing_ignore_patterns = []
-    for event, element in etree.iterparse(file, events=('start', 'end')):
-        if current_object and event == 'end':
+    for event, element in etree.iterparse(file, events=("start", "end")):
+        if current_object and event == "end":
             # the tag might contain the namespace like {urn:ASC:MHL:v2.0}hash, so we need to strip the namespace part
             # doing it with split is faster than using the lxml QName method
-            tag = element.tag.split('}', 1)[-1]
+            tag = element.tag.split("}", 1)[-1]
             if type(current_object) is MHLCreatorInfo:
-                if tag == 'creationdate':
+                if tag == "creationdate":
                     current_object.creation_date = element.text
-                elif tag == 'tool':
-                    current_object.tool = MHLTool(element.text, element.attrib['version'])
-                elif tag == 'hostname':
+                elif tag == "tool":
+                    current_object.tool = MHLTool(element.text, element.attrib["version"])
+                elif tag == "hostname":
                     current_object.host_name = element.text
-                elif tag == 'creatorinfo':
+                elif tag == "creatorinfo":
                     hash_list.creator_info = current_object
                     current_object = None
                 # TODO: missing location, comment
             elif type(current_object) is MHLProcessInfo:
-                if tag == 'process':
+                if tag == "process":
                     current_object.process = element.text
-                elif tag == 'processinfo':
+                elif tag == "processinfo":
                     hash_list.process_info = current_object
                     current_object = None
             elif type(current_object) is MHLIgnoreSpec:
-                if tag == 'pattern':
+                if tag == "pattern":
                     existing_ignore_patterns.append(element.text)
-                elif tag == 'ignore':
+                elif tag == "ignore":
                     hash_list.process_info.ignore_spec = current_object
                     current_object = object_stack.pop()
                 else:
                     current_object = None
             elif type(current_object) is MHLMediaHash:
-                if tag == 'path':
+                if tag == "path":
                     current_object.path = element.text
-                    file_size = element.attrib.get('size')
+                    file_size = element.attrib.get("size")
                     current_object.file_size = int(file_size) if file_size else None
                 # TODO: parse date
                 # elif tag == 'lastmodificationdate':
                 # 	current_object.file_size = element.text
                 elif tag in supported_hash_formats:
-                    entry = MHLHashEntry(tag, element.text, element.attrib.get('action'))
+                    entry = MHLHashEntry(tag, element.text, element.attrib.get("action"))
                     current_object.append_hash_entry(entry)
-                elif tag == 'hash':
-                    if element.attrib.get('directory') == 'true':
+                elif tag == "hash":
+                    if element.attrib.get("directory") == "true":
                         current_object.is_directory = True
                     hash_list.append_hash(current_object)
                     current_object = None
-                elif tag == 'roothash':
+                elif tag == "roothash":
                     root_media_hash = current_object
                     root_media_hash.is_directory = True
                     current_object = object_stack.pop()
                     current_object.root_media_hash = root_media_hash
             elif type(current_object) is MHLHashListReference:
-                if tag == 'path':
+                if tag == "path":
                     current_object.path = element.text
-                elif tag == 'c4':
+                elif tag == "c4":
                     current_object.reference_hash = element.text
-                elif tag == 'hashlistreference':
+                elif tag == "hashlistreference":
                     hash_list.append_hash_list_reference(current_object)
                     current_object = None
 
@@ -103,29 +103,29 @@ def parse(file_path):
                     del element.getparent()[0]
 
         # check if we need to create a new container
-        elif not current_object and event == 'start':
+        elif not current_object and event == "start":
             # remove namespace here again instead of outside of the if
             # since we don't want to do it for tags we don't compare at all
-            tag = element.tag.split('}', 1)[-1]
-            if tag == 'hash':
+            tag = element.tag.split("}", 1)[-1]
+            if tag == "hash":
                 current_object = MHLMediaHash()
-            elif tag == 'creatorinfo':
+            elif tag == "creatorinfo":
                 current_object = MHLCreatorInfo()
-            elif tag == 'processinfo':
+            elif tag == "processinfo":
                 current_object = MHLProcessInfo()
-            elif tag == 'hashlistreference':
+            elif tag == "hashlistreference":
                 current_object = MHLHashListReference()
-        elif type(current_object) is MHLProcessInfo and event == 'start':
-            tag = element.tag.split('}', 1)[-1]
-            if tag == 'ignore':
+        elif type(current_object) is MHLProcessInfo and event == "start":
+            tag = element.tag.split("}", 1)[-1]
+            if tag == "ignore":
                 object_stack.append(current_object)
                 current_object = MHLIgnoreSpec()
-            elif tag == 'roothash':
+            elif tag == "roothash":
                 object_stack.append(current_object)
                 current_object = MHLMediaHash()
 
     hash_list.process_info.ignore_spec = MHLIgnoreSpec(existing_ignore_patterns)
-    logger.debug(f'parsing took: {timer() - start}')
+    logger.debug(f"parsing took: {timer() - start}")
 
     return hash_list
 
@@ -140,39 +140,39 @@ def write_hash_list(hash_list: MHLHashList, file_path: str):
     if not os.path.isdir(os.path.dirname(file_path)):
         os.mkdir(os.path.dirname(file_path))
 
-    file = open(file_path, 'wb')
+    file = open(file_path, "wb")
     file.write(b'<?xml version="1.0" encoding="UTF-8"?>\n<hashlist version="2.0" xmlns="urn:ASC:MHL:v2.0">\n')
-    current_indent = '  '
+    current_indent = "  "
 
     # set the file name early so we can use it to e.g. get the root path
     hash_list.file_path = file_path
     # write creator info
-    _write_xml_element_to_file(file, _creator_info_xml_element(hash_list), '  ')
+    _write_xml_element_to_file(file, _creator_info_xml_element(hash_list), "  ")
     # write process info
-    _write_xml_element_to_file(file, _process_info_xml_element(hash_list), '  ')
+    _write_xml_element_to_file(file, _process_info_xml_element(hash_list), "  ")
 
     # write hashes
-    hashes_tag = '<hashes>\n'
+    hashes_tag = "<hashes>\n"
     _write_xml_string_to_file(file, hashes_tag, current_indent)
-    current_indent += '  '
+    current_indent += "  "
 
     for media_hash in hash_list.media_hashes:
         _write_xml_element_to_file(file, _media_hash_xml_element(media_hash), current_indent)
 
     current_indent = current_indent[:-2]
-    _write_xml_string_to_file(file, '</hashes>\n', current_indent)
+    _write_xml_string_to_file(file, "</hashes>\n", current_indent)
 
     # only write the optional references section if there are actually some references
     if len(hash_list.referenced_hash_lists) > 0:
-        _write_xml_string_to_file(file, '<references>\n', current_indent)
-        current_indent += '  '
+        _write_xml_string_to_file(file, "<references>\n", current_indent)
+        current_indent += "  "
         for ref_hash_list in hash_list.referenced_hash_lists:
             _write_xml_element_to_file(file, _ascmhlreference_xml_element(ref_hash_list, file_path), current_indent)
         current_indent = current_indent[:-2]
-        _write_xml_string_to_file(file, '</references>\n', current_indent)
+        _write_xml_string_to_file(file, "</references>\n", current_indent)
 
     current_indent = current_indent[:-2]
-    _write_xml_string_to_file(file, '</hashlist>\n', current_indent)
+    _write_xml_string_to_file(file, "</hashlist>\n", current_indent)
     file.flush()
 
 
@@ -183,7 +183,7 @@ def _write_xml_element_to_file(file, xml_element, indent: str):
 
 def _write_xml_string_to_file(file, xml_string: str, indent: str):
     result = textwrap.indent(xml_string, indent)
-    file.write(result.encode('utf-8'))
+    file.write(result.encode("utf-8"))
 
 
 def _media_hash_xml_element(media_hash: MHLMediaHash):
@@ -191,19 +191,19 @@ def _media_hash_xml_element(media_hash: MHLMediaHash):
 
     path_element = E.path(media_hash.path)
     if media_hash.file_size:
-        path_element.attrib['size'] = str(media_hash.file_size)
+        path_element.attrib["size"] = str(media_hash.file_size)
     if media_hash.last_modification_date:
-        path_element.attrib['lastmodificationdate'] = datetime_isostring(media_hash.last_modification_date)
+        path_element.attrib["lastmodificationdate"] = datetime_isostring(media_hash.last_modification_date)
 
     hash_element = E.hash(path_element)
     if media_hash.is_directory:
-        hash_element.attrib['directory'] = 'true'
+        hash_element.attrib["directory"] = "true"
 
     for hash_entry in media_hash.hash_entries:
         entry_element = E(hash_entry.hash_format)
         entry_element.text = hash_entry.hash_string
         if hash_entry.action:
-            entry_element.attrib['action'] = hash_entry.action
+            entry_element.attrib["action"] = hash_entry.action
         hash_element.append(entry_element)
 
     return hash_element
@@ -265,5 +265,5 @@ def _ignore_xml_element(ignore_pattern: str):
 
 def _root_media_hash_xml_element(root_media_hash: MHLMediaHash):
     element = _media_hash_xml_element(root_media_hash)
-    element.tag = 'roothash'
+    element.tag = "roothash"
     return element

@@ -34,5 +34,5 @@ mhltool_cli.add_command(commands.xsd_schema_check)
 mhltool_cli.add_command(commands.directory_hash, "dirhash")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     mhltool_cli()

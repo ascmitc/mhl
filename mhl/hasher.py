@@ -24,7 +24,7 @@ def generate_checksum(csum_type, file_path):
         print("ERROR: file_path is None")
         return None
 
-    with open(file_path, 'rb') as fd:
+    with open(file_path, "rb") as fd:
         # process files in 1MB chunks so that large files won't cause excessive memory consumption.
         chunk = fd.read(1024 * 1024)
         while chunk:
@@ -48,21 +48,21 @@ def create_filehash(hash_format, filepath):
 
 
 def context_type_for_hash_format(hash_format):
-    if hash_format == 'md5':
+    if hash_format == "md5":
         return hashlib.md5
-    elif hash_format == 'sha1':
+    elif hash_format == "sha1":
         return hashlib.sha1
-    elif hash_format == 'xxh32':
+    elif hash_format == "xxh32":
         return xxhash.xxh32
-    elif hash_format == 'xxh64':
+    elif hash_format == "xxh64":
         return xxhash.xxh64
-    elif hash_format == 'xxh3':
+    elif hash_format == "xxh3":
         return xxhash.xxh3_64
-    elif hash_format == 'xxh128':
+    elif hash_format == "xxh128":
         return xxhash.xxh3_128
-    elif hash_format == 'c4':
+    elif hash_format == "c4":
         return C4HashContext
-    assert False, 'unsupported hash format'
+    assert False, "unsupported hash format"
 
 
 class C4HashContext:
@@ -78,7 +78,7 @@ class C4HashContext:
         charset = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
         base58 = 58  # the encoding basis
         c4id_length = 90  # the guaranteed length
-        zero = '1'  # '0' is not in the C4ID alphabet so '1' is zero
+        zero = "1"  # '0' is not in the C4ID alphabet so '1' is zero
 
         hash_value = int(sha512_string, 16)
         c4_string = ""
@@ -99,11 +99,11 @@ class DirectoryHashContext:
     def append_hash(self, hash_string: str, item_name: str):
         # print('append hash:', hash_string, 'item name: ', item_name)
         # first we add the name of the item (file or directory) to the context
-        self.hash_context.update(item_name.encode('utf-8'))
+        self.hash_context.update(item_name.encode("utf-8"))
         # then we add the binary representation of the hash of the file or directory
         # in case of C4 we can't easily use the binary value so we encode the hash string instead
-        if self.hash_format == 'c4':
-            hash_binary = hash_string.encode('utf-8')
+        if self.hash_format == "c4":
+            hash_binary = hash_string.encode("utf-8")
         else:
             hash_binary = binascii.unhexlify(hash_string)
         self.hash_context.update(hash_binary)

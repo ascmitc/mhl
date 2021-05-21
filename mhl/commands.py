@@ -34,38 +34,38 @@ from .traverse import post_order_lexicographic
 
 
 @click.command()
-@click.argument('root_path', type=click.Path(exists=True))
+@click.argument("root_path", type=click.Path(exists=True))
 # general options
-@click.option('--verbose', '-v', default=False, is_flag=True, help="Verbose output")
+@click.option("--verbose", "-v", default=False, is_flag=True, help="Verbose output")
 @click.option(
-    '--hash_format',
-    '-h',
+    "--hash_format",
+    "-h",
     type=click.Choice(ascmhl_supported_hashformats),
     multiple=False,
     default=ascmhl_default_hashformat,
     help="Algorithm",
 )
 @click.option(
-    '--no_directory_hashes',
-    '-n',
+    "--no_directory_hashes",
+    "-n",
     default=False,
     is_flag=True,
     help="Skip creation of directory hashes, only reference directories without hash",
 )
 # subcommands
 @click.option(
-    '--single_file',
-    '-sf',
+    "--single_file",
+    "-sf",
     default=False,
     multiple=True,
     type=click.Path(exists=True),
     help="Record single file, no completeness check (multiple occurrences possible for adding multiple files",
 )
-@click.option('ignore_list', '--ignore', '-i', multiple=True, help="A single file pattern to ignore.")
+@click.option("ignore_list", "--ignore", "-i", multiple=True, help="A single file pattern to ignore.")
 @click.option(
-    'ignore_spec_file',
-    '--ignore_spec',
-    '-ii',
+    "ignore_spec_file",
+    "--ignore_spec",
+    "-ii",
     type=click.Path(exists=True),
     help="A file containing multiple file patterns to ignore.",
 )
@@ -107,7 +107,7 @@ def create_for_folder_subcommand(
     if not os.path.isabs(root_path):
         root_path = os.path.join(os.getcwd(), root_path)
 
-    logger.verbose(f'Sealing folder at path: {root_path} ...')
+    logger.verbose(f"Sealing folder at path: {root_path} ...")
 
     existing_history = MHLHistory.load_from_path(root_path)
 
@@ -214,13 +214,13 @@ def create_for_single_files_subcommand(root_path, verbose, hash_format, no_direc
 
 
 @click.command()
-@click.argument('root_path', type=click.Path(exists=True))
-@click.option('--verbose', '-v', default=False, is_flag=True, help="Verbose output")
-@click.option('ignore_list', '--ignore', '-i', multiple=True, help="A single file pattern to ignore.")
+@click.argument("root_path", type=click.Path(exists=True))
+@click.option("--verbose", "-v", default=False, is_flag=True, help="Verbose output")
+@click.option("ignore_list", "--ignore", "-i", multiple=True, help="A single file pattern to ignore.")
 @click.option(
-    'ignore_spec_file',
-    '--ignore_spec',
-    '-ii',
+    "ignore_spec_file",
+    "--ignore_spec",
+    "-ii",
     type=click.Path(exists=True),
     help="A file containing multiple file patterns to ignore.",
 )
@@ -257,7 +257,7 @@ def verify_entire_folder_against_full_history_subcommand(root_path, verbose, ign
     if not os.path.isabs(root_path):
         root_path = os.path.join(os.getcwd(), root_path)
 
-    logger.verbose(f'check folder at path: {root_path}')
+    logger.verbose(f"check folder at path: {root_path}")
 
     existing_history = MHLHistory.load_from_path(root_path)
 
@@ -288,19 +288,19 @@ def verify_entire_folder_against_full_history_subcommand(root_path, verbose, ign
 
             # in case there is no original hash entry continue
             if original_hash_entry is None:
-                logger.error(f'found new file {relative_path}')
+                logger.error(f"found new file {relative_path}")
                 num_new_files += 1
                 continue
 
             # create a new hash and compare it against the original hash entry
             current_hash = create_filehash(original_hash_entry.hash_format, file_path)
             if original_hash_entry.hash_string == current_hash:
-                logger.verbose(f'verification of file {relative_path}: OK')
+                logger.verbose(f"verification of file {relative_path}: OK")
             else:
                 logger.error(
-                    f'ERROR: hash mismatch        for {relative_path} '
-                    f'old {original_hash_entry.hash_format}: {original_hash_entry.hash_string}, '
-                    f'new {original_hash_entry.hash_format}: {current_hash}'
+                    f"ERROR: hash mismatch        for {relative_path} "
+                    f"old {original_hash_entry.hash_format}: {original_hash_entry.hash_string}, "
+                    f"new {original_hash_entry.hash_format}: {current_hash}"
                 )
                 num_failed_verifications += 1
 
@@ -319,13 +319,13 @@ def verify_entire_folder_against_full_history_subcommand(root_path, verbose, ign
 
 
 @click.command()
-@click.argument('root_path', type=click.Path(exists=True))
-@click.option('--verbose', '-v', default=False, is_flag=True, help="Verbose output")
-@click.option('ignore_list', '--ignore', '-i', multiple=True, help="A single file pattern to ignore.")
+@click.argument("root_path", type=click.Path(exists=True))
+@click.option("--verbose", "-v", default=False, is_flag=True, help="Verbose output")
+@click.option("ignore_list", "--ignore", "-i", multiple=True, help="A single file pattern to ignore.")
 @click.option(
-    'ignore_spec_file',
-    '--ignore_spec',
-    '-ii',
+    "ignore_spec_file",
+    "--ignore_spec",
+    "-ii",
     type=click.Path(exists=True),
     help="A file containing multiple file patterns to ignore.",
 )
@@ -359,7 +359,7 @@ def diff_entire_folder_against_full_history_subcommand(root_path, verbose, ignor
     if not os.path.isabs(root_path):
         root_path = os.path.join(os.getcwd(), root_path)
 
-    logger.verbose(f'check folder at path: {root_path}')
+    logger.verbose(f"check folder at path: {root_path}")
 
     existing_history = MHLHistory.load_from_path(root_path)
 
@@ -389,7 +389,7 @@ def diff_entire_folder_against_full_history_subcommand(root_path, verbose, ignor
 
             # in case there is no original hash entry continue
             if original_hash_entry is None:
-                logger.error(f'found new file {relative_path}')
+                logger.error(f"found new file {relative_path}")
                 num_new_files += 1
                 continue
 
@@ -404,18 +404,18 @@ def diff_entire_folder_against_full_history_subcommand(root_path, verbose, ignor
 
 
 @click.command()
-@click.option('--verbose', '-v', default=False, is_flag=True, help="Verbose output")
+@click.option("--verbose", "-v", default=False, is_flag=True, help="Verbose output")
 # subcommands
 @click.option(
-    '--single_file',
-    '-sf',
+    "--single_file",
+    "-sf",
     default=False,
     multiple=True,
     type=click.Path(exists=True),
     help="Info for single file",
 )
 # options
-@click.option('--root_path', '-rp', default="", type=click.STRING, help="Root path for history")
+@click.option("--root_path", "-rp", default="", type=click.STRING, help="Root path for history")
 def info(verbose, single_file, root_path):
     """
     Prints information from the ASC MHL history
@@ -449,7 +449,7 @@ def info_for_single_file(root_path, verbose, single_file):
     if not os.path.isabs(root_path):
         root_path = os.path.join(os.getcwd(), root_path)
 
-    logger.info(f'Info with history at path: {root_path}')
+    logger.info(f"Info with history at path: {root_path}")
 
     existing_history = MHLHistory.load_from_path(root_path)
 
@@ -458,7 +458,7 @@ def info_for_single_file(root_path, verbose, single_file):
 
     for path in single_file:
         relative_path = existing_history.get_relative_file_path(os.path.abspath(path))
-        logger.info(f'{relative_path}:')
+        logger.info(f"{relative_path}:")
         for hash_list in existing_history.hash_lists:
             media_hash = hash_list.find_media_hash_for_path(relative_path)
             if media_hash is None:
@@ -469,19 +469,19 @@ def info_for_single_file(root_path, verbose, single_file):
                     creatorInfo = hash_list.creator_info.summary()
                     processInfo = hash_list.process_info.summary()
                     logger.info(
-                        f'  Generation {hash_list.generation_number} ({hash_list.creator_info.creation_date})'
-                        f' {hash_entry.hash_format}: {hash_entry.hash_string} ({hash_entry.action}) \n   '
-                        f' {absolutePath}\n    {creatorInfo}\n    {processInfo}'
+                        f"  Generation {hash_list.generation_number} ({hash_list.creator_info.creation_date})"
+                        f" {hash_entry.hash_format}: {hash_entry.hash_string} ({hash_entry.action}) \n   "
+                        f" {absolutePath}\n    {creatorInfo}\n    {processInfo}"
                     )
                 else:
                     logger.info(
-                        f'  Generation {hash_list.generation_number} ({hash_list.creator_info.creation_date})'
-                        f' {hash_entry.hash_format}: {hash_entry.hash_string} ({hash_entry.action})'
+                        f"  Generation {hash_list.generation_number} ({hash_list.creator_info.creation_date})"
+                        f" {hash_entry.hash_format}: {hash_entry.hash_string} ({hash_entry.action})"
                     )
 
 
 @click.command()
-@click.argument('file_path', type=click.Path(exists=True))
+@click.argument("file_path", type=click.Path(exists=True))
 def xsd_schema_check(file_path):
     """
     Checks a .mhl file against the xsd schema definition
@@ -493,38 +493,38 @@ def xsd_schema_check(file_path):
     files.
     """
 
-    xsd_path = 'xsd/ASCMHL.xsd'
+    xsd_path = "xsd/ASCMHL.xsd"
     xsd = etree.XMLSchema(etree.parse(xsd_path))
 
     # pass a file handle to support the fake file system used in the tests
-    file = open(file_path, 'rb')
+    file = open(file_path, "rb")
     result = xsd.validate(etree.parse(file))
 
     if result:
-        logger.info(f'validated: {file_path}')
+        logger.info(f"validated: {file_path}")
     else:
-        logger.error(f'ERROR: {file_path} didn\'t validate against XSD!')
-        logger.info(f'Issues:\n{xsd.error_log}')
+        logger.error(f"ERROR: {file_path} didn't validate against XSD!")
+        logger.info(f"Issues:\n{xsd.error_log}")
         raise errors.VerificationFailedException
 
 
 # TODO should be part of the `verify -dh` subcommand
 @click.command()
-@click.argument('root_path', type=click.Path(exists=True))
-@click.option('--verbose', '-v', default=False, is_flag=True, help="Print all directory hashes of sub directories")
+@click.argument("root_path", type=click.Path(exists=True))
+@click.option("--verbose", "-v", default=False, is_flag=True, help="Print all directory hashes of sub directories")
 @click.option(
-    '--hash_format',
-    '-h',
+    "--hash_format",
+    "-h",
     type=click.Choice(ascmhl_supported_hashformats),
     multiple=False,
     default=ascmhl_default_hashformat,
     help="Algorithm",
 )
-@click.option('ignore_list', '--ignore', '-i', multiple=True, help="A single file pattern to ignore.")
+@click.option("ignore_list", "--ignore", "-i", multiple=True, help="A single file pattern to ignore.")
 @click.option(
-    'ignore_spec_file',
-    '--ignore_spec',
-    '-ii',
+    "ignore_spec_file",
+    "--ignore_spec",
+    "-ii",
     type=click.Path(exists=True),
     help="A file containing multiple file patterns to ignore.",
 )
@@ -554,9 +554,9 @@ def directory_hash(root_path, verbose, hash_format, ignore_list, ignore_spec_fil
         dir_hash = dir_hash_context.final_hash_str()
         dir_hash_mappings[folder_path] = dir_hash
         if folder_path == root_path:
-            logger.info(f'  calculated root hash: {hash_format}: {dir_hash}')
+            logger.info(f"  calculated root hash: {hash_format}: {dir_hash}")
         elif verbose:
-            logger.info(f'directory hash for: {folder_path} {hash_format}: {dir_hash}')
+            logger.info(f"directory hash for: {folder_path} {hash_format}: {dir_hash}")
 
 
 def test_for_missing_files(not_found_paths, root_path, ignore_spec: MHLIgnoreSpec = MHLIgnoreSpec()):
@@ -578,7 +578,7 @@ def commit_session(session):
     creator_info.creation_date = utils.datetime_now_isostring()
     creator_info.host_name = platform.node()
     process_info = MHLProcessInfo()
-    process_info.process = MHLProcess('in-place')
+    process_info.process = MHLProcess("in-place")
     session.commit(creator_info, process_info)
 
 

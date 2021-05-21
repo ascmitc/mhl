@@ -22,16 +22,16 @@ import platform
 def set_timezone():
     """Fakes the host timezone to UTC so we don't get different mhl files if the tests run on different time zones
     seems like freezegun can't handle timezones like we want"""
-    os.environ['TZ'] = 'UTZ'
+    os.environ["TZ"] = "UTZ"
     time.tzset()
 
 
 @pytest.fixture(autouse=True)
 def setup_environment(monkeypatch):
     def fake_hostname():
-        return 'myHost.local'
+        return "myHost.local"
 
-    monkeypatch.setattr(platform, 'node', fake_hostname)
+    monkeypatch.setattr(platform, "node", fake_hostname)
     # TODO: also patch ascmhl_tool_version ?
 
 
@@ -40,23 +40,23 @@ def setup_environment(monkeypatch):
 def nested_mhl_histories(fs):
 
     # create mhl histories on different directly levels
-    fs.create_file('/root/Stuff.txt', contents='stuff\n')
+    fs.create_file("/root/Stuff.txt", contents="stuff\n")
     runner = CliRunner()
-    result = runner.invoke(mhl.commands.create, ['/root', '-h', 'xxh64'])
+    result = runner.invoke(mhl.commands.create, ["/root", "-h", "xxh64"])
     assert result.exit_code == 0
 
-    fs.create_file('/root/A/AA/AA1.txt', contents='AA1\n')
-    fs.create_file('/root/A/AB/AB1.txt', contents='AB1\n')
-    result = runner.invoke(mhl.commands.create, ['/root/A/AA', '-h', 'xxh64'])
+    fs.create_file("/root/A/AA/AA1.txt", contents="AA1\n")
+    fs.create_file("/root/A/AB/AB1.txt", contents="AB1\n")
+    result = runner.invoke(mhl.commands.create, ["/root/A/AA", "-h", "xxh64"])
     assert result.exit_code == 0
 
-    fs.create_file('/root/B/B1.txt', contents='B1\n')
-    result = runner.invoke(mhl.commands.create, ['/root/B', '-h', 'xxh64'])
+    fs.create_file("/root/B/B1.txt", contents="B1\n")
+    result = runner.invoke(mhl.commands.create, ["/root/B", "-h", "xxh64"])
     assert result.exit_code == 0
 
-    fs.create_file('/root/B/BA/BA1.txt', contents='BA1\n')
-    fs.create_file('/root/B/BB/BB1.txt', contents='BB1\n')
-    result = runner.invoke(mhl.commands.create, ['/root/B/BB', '-h', 'xxh64'])
+    fs.create_file("/root/B/BA/BA1.txt", contents="BA1\n")
+    fs.create_file("/root/B/BB/BB1.txt", contents="BB1\n")
+    result = runner.invoke(mhl.commands.create, ["/root/B/BB", "-h", "xxh64"])
     assert result.exit_code == 0
 
 
@@ -65,11 +65,11 @@ def nested_mhl_histories(fs):
 def simple_mhl_history(fs):
 
     # create a simple mhl history with two files in one generation
-    fs.create_file('/root/Stuff.txt', contents='stuff\n')
-    fs.create_file('/root/A/A1.txt', contents='A1\n')
+    fs.create_file("/root/Stuff.txt", contents="stuff\n")
+    fs.create_file("/root/A/A1.txt", contents="A1\n")
 
     runner = CliRunner()
-    result = runner.invoke(mhl.commands.create, ['/root', '-h', 'xxh64'])
+    result = runner.invoke(mhl.commands.create, ["/root", "-h", "xxh64"])
     assert result.exit_code == 0
 
 
@@ -78,5 +78,5 @@ def simple_mhl_history(fs):
 def simple_mhl_folder(fs):
 
     # create a simple folder structure with two files
-    fs.create_file('/root/Stuff.txt', contents='stuff\n')
-    fs.create_file('/root/A/A1.txt', contents='A1\n')
+    fs.create_file("/root/Stuff.txt", contents="stuff\n")
+    fs.create_file("/root/A/A1.txt", contents="A1\n")

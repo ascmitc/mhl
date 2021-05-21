@@ -46,9 +46,9 @@ class MHLHashList:
     media_hashes: List[MHLMediaHash]
     media_hashes_path_map: Dict[str, MHLMediaHash]
     # referenced_hash_lists are the loaded hash list object
-    referenced_hash_lists = List['MHLHashList']
+    referenced_hash_lists = List["MHLHashList"]
     # while hash_list_references store the reference objects found in the mhl files
-    hash_list_references = List['MHLHashListReference']
+    hash_list_references = List["MHLHashListReference"]
     file_path: Optional[str]
     generation_number: Optional[int]
 
@@ -93,7 +93,7 @@ class MHLHashList:
 
     # build
     def append_hash(self, media_hash: MHLMediaHash):
-        if media_hash.path == '.':
+        if media_hash.path == ".":
             self.process_info.root_media_hash = media_hash
         else:
             self.media_hashes.append(media_hash)
@@ -175,7 +175,7 @@ class MHLMediaHash:
             if hash_entry.hash_format != hash_format:
                 continue
             indicator = " "
-            if hash_entry.action == 'failed':
+            if hash_entry.action == "failed":
                 indicator = "!"
             elif self.is_directory:
                 indicator = "d"

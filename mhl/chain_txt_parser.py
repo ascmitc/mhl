@@ -17,14 +17,14 @@ import os
 
 def parse(file_path):
     """parsing the chain.txt file and building the MHLChain for the chain member variable"""
-    logger.debug(f'parsing \"{os.path.basename(file_path)}\"...')
+    logger.debug(f'parsing "{os.path.basename(file_path)}"...')
 
     chain = MHLChain(file_path)
 
     if not os.path.exists(file_path):
         return chain
 
-    lines = [line.rstrip('\n') for line in open(file_path)]
+    lines = [line.rstrip("\n") for line in open(file_path)]
 
     for line in lines:
         line = line.rstrip().lstrip()
@@ -45,7 +45,7 @@ def _generation_from_line_in_chainfile(line):
     parts = line.split(None)
 
     if parts is not None and parts.__len__() < 4:
-        logger.error("cannot read line \"{line}\"")
+        logger.error('cannot read line "{line}"')
         return None
 
     generation = MHLChainGeneration(
@@ -64,7 +64,7 @@ def _generation_from_line_in_chainfile(line):
 
 
 def write_chain(chain: MHLChain, new_hash_list: MHLHashList):
-    logger.debug(f'writing \"{os.path.basename(chain.file_path)}\"...')
+    logger.debug(f'writing "{os.path.basename(chain.file_path)}"...')
     _append_new_generation_to_file(chain, new_hash_list)
 
 
@@ -99,9 +99,9 @@ def _append_new_generation_to_file(chain: MHLChain, hash_list: MHLHashList):
     # - if generation number is sequential
 
     # immediately write to file
-    logger.debug(f'   appending chain generation for \"{generation.ascmhl_filename}\" to chain file')
+    logger.debug(f'   appending chain generation for "{generation.ascmhl_filename}" to chain file')
 
-    with open(chain.file_path, 'a') as file:
+    with open(chain.file_path, "a") as file:
         file.write(_line_for_chainfile(generation) + "\n")
 
     # FIXME: check if file could be created

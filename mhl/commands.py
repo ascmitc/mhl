@@ -62,7 +62,6 @@ from .traverse import post_order_lexicographic
 @click.option(
     "--single_file",
     "-sf",
-    default=False,
     multiple=True,
     type=click.Path(exists=True),
     help="Record single file, no completeness check (multiple occurrences possible for adding multiple files",
@@ -451,7 +450,6 @@ def diff_entire_folder_against_full_history_subcommand(root_path, verbose, ignor
 @click.option(
     "--single_file",
     "-sf",
-    default=False,
     multiple=True,
     type=click.Path(exists=True),
     help="Info for single file",

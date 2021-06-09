@@ -22,8 +22,11 @@ import platform
 def set_timezone():
     """Fakes the host timezone to UTC so we don't get different mhl files if the tests run on different time zones
     seems like freezegun can't handle timezones like we want"""
-    os.environ["TZ"] = "UTZ"
-    time.tzset()
+    if not os.name == "nt":
+        os.environ["TZ"] = "UTZ"
+        time.tzset()
+    else:
+        os.system('tzutil /s "UTC"')
 
 
 @pytest.fixture(autouse=True)

@@ -12,6 +12,7 @@ setup(
     install_requires=[
         "Click>=7.0",
         "lxml>=4.6.2",
+        "packaging>=20.9",
         "pathspec>=0.8.0",
         "requests>=2.25.1",
         "xattr>=0.9.6",

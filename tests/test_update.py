@@ -5,18 +5,18 @@ import requests
 
 
 def test_updater(requests_mock, mocker):
-    mocker.patch("mhl.__version__.ascmhl_tool_version", "0.0.1")
+    mocker.patch("ascmhl.__version__.ascmhl_tool_version", "0.0.1")
     requests_mock.get(
         "https://api.github.com/repos/ascmitc/mhl/releases/latest",
         json={"tag_name": "v0.6.5"},
     )
 
     from importlib import reload
-    import mhl.cli.update
+    import ascmhl.cli.update
 
-    reload(mhl.cli.update)
+    reload(ascmhl.cli.update)
 
-    updater = mhl.cli.update.Updater()
+    updater = ascmhl.cli.update.Updater()
     while not updater.finished:
         time.sleep(0.1)
 
@@ -26,18 +26,18 @@ def test_updater(requests_mock, mocker):
 
 
 def test_updater_prerelease(requests_mock, mocker):
-    mocker.patch("mhl.__version__.ascmhl_tool_version", "0.0.1")
+    mocker.patch("ascmhl.__version__.ascmhl_tool_version", "0.0.1")
     requests_mock.get(
         "https://api.github.com/repos/ascmitc/mhl/releases/latest",
         json={"tag_name": "v0.6.5-alpha.2"},
     )
 
     from importlib import reload
-    import mhl.cli.update
+    import ascmhl.cli.update
 
-    reload(mhl.cli.update)
+    reload(ascmhl.cli.update)
 
-    updater = mhl.cli.update.Updater()
+    updater = ascmhl.cli.update.Updater()
     while not updater.finished:
         time.sleep(0.1)
 
@@ -47,7 +47,7 @@ def test_updater_prerelease(requests_mock, mocker):
 
 
 def test_updater_timeout(requests_mock, mocker):
-    mocker.patch("mhl.__version__.ascmhl_tool_version", "0.0.1")
+    mocker.patch("ascmhl.__version__.ascmhl_tool_version", "0.0.1")
 
     requests_mock.get(
         "https://api.github.com/repos/ascmitc/mhl/releases/latest",
@@ -55,11 +55,11 @@ def test_updater_timeout(requests_mock, mocker):
     )
 
     from importlib import reload
-    import mhl.cli.update
+    import ascmhl.cli.update
 
-    reload(mhl.cli.update)
+    reload(ascmhl.cli.update)
 
-    updater = mhl.cli.update.Updater()
+    updater = ascmhl.cli.update.Updater()
     while not updater.finished:
         time.sleep(0.1)
 

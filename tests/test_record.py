@@ -11,8 +11,8 @@ import os
 from freezegun import freeze_time
 from click.testing import CliRunner
 
-from mhl.history import MHLHistory
-import mhl.commands
+from ascmhl.history import MHLHistory
+import ascmhl.commands
 
 scenario_output_path = "examples/scenarios/Output"
 fake_ref_path = "/ref"
@@ -25,7 +25,7 @@ def test_record_succeed_single_file(fs):
     fs.create_file("/root/A/A2.txt", contents="A2\n")
 
     runner = CliRunner()
-    result = runner.invoke(mhl.commands.create, ["/root", "-sf", "/root/A/A1.txt"])
+    result = runner.invoke(ascmhl.commands.create, ["/root", "-sf", "/root/A/A1.txt"])
     assert result.exit_code == 0
     assert os.path.exists("/root/ascmhl/0001_root_2020-01-16_091500.mhl")
     assert os.path.exists("/root/ascmhl/chain.txt")
@@ -43,7 +43,7 @@ def test_record_succeed_single_directory(fs):
     fs.create_file("/root/A/A2.txt", contents="A2\n")
 
     runner = CliRunner()
-    result = runner.invoke(mhl.commands.create, ["/root", "-sf", "/root/A"])
+    result = runner.invoke(ascmhl.commands.create, ["/root", "-sf", "/root/A"])
     assert result.exit_code == 0
     assert os.path.exists("/root/ascmhl/0001_root_2020-01-16_091500.mhl")
     assert os.path.exists("/root/ascmhl/chain.txt")
@@ -62,7 +62,7 @@ def test_record_succeed_multiple_files(fs):
     fs.create_file("/root/A/A2.txt", contents="A2\n")
 
     runner = CliRunner()
-    result = runner.invoke(mhl.commands.create, ["/root", "-sf", "/root/A/A1.txt", "-sf", "/root/A/A2.txt"])
+    result = runner.invoke(ascmhl.commands.create, ["/root", "-sf", "/root/A/A1.txt", "-sf", "/root/A/A2.txt"])
     assert result.exit_code == 0
     assert os.path.exists("/root/ascmhl/0001_root_2020-01-16_091500.mhl")
     assert os.path.exists("/root/ascmhl/chain.txt")
@@ -80,13 +80,13 @@ def test_record_fail_altered_file(fs, simple_mhl_history):
         file.write("!!")
 
     runner = CliRunner()
-    result = runner.invoke(mhl.commands.create, ["/root", "-sf", "/root/Stuff.txt"])
+    result = runner.invoke(ascmhl.commands.create, ["/root", "-sf", "/root/Stuff.txt"])
     assert result.exit_code == 12
     assert "Stuff.txt" in result.output
 
     # when passing a different file to record no error ws thrown since the altered file is ignored
     runner = CliRunner()
-    result = runner.invoke(mhl.commands.create, ["/root", "-sf", "/root/A/A1.txt"])
+    result = runner.invoke(ascmhl.commands.create, ["/root", "-sf", "/root/A/A1.txt"])
     assert result.exit_code == 0
 
     # make sure we have created one failing and one succeeded generation

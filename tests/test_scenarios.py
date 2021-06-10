@@ -19,7 +19,7 @@ from click.testing import CliRunner
 from freezegun import freeze_time
 from pyfakefs.fake_filesystem_unittest import Pause
 
-import mhl.commands
+import ascmhl.commands
 
 scenario_output_path = "examples/scenarios/Output"
 fake_ref_root_path = "/ref"
@@ -27,9 +27,9 @@ fake_ref_root_path = "/ref"
 
 @pytest.fixture(autouse=True)
 def version(monkeypatch):
-    monkeypatch.setattr("mhl.__version__.ascmhl_tool_version", "0.3 alpha")
-    monkeypatch.setattr("mhl.__version__.ascmhl_tool_name", "ascmhl.py")
-    reload(mhl.commands)
+    monkeypatch.setattr("ascmhl.__version__.ascmhl_tool_version", "0.3 alpha")
+    monkeypatch.setattr("ascmhl.__version__.ascmhl_tool_name", "ascmhl.py")
+    reload(ascmhl.commands)
 
 
 @pytest.fixture()
@@ -175,7 +175,7 @@ def validate_all_mhl_files_against_xml_schema(folder_path: str):
     mhl_files = glob.glob(folder_path + r"/**/*.mhl", recursive=True)
     runner = CliRunner()
     for file in mhl_files:
-        result = runner.invoke(mhl.commands.xsd_schema_check, file)
+        result = runner.invoke(ascmhl.commands.xsd_schema_check, file)
         assert result.exit_code == 0, result.output
 
 
@@ -223,7 +223,7 @@ def test_scenario_01(fs, reference, card_a002):
 
     log_message("")
     log_message("Seal the copy on the travel drive /travel_01 to create the original mhl generation.")
-    result = execute_command(mhl.commands.create, ["-v", "/travel_01/A002R2EC", "-h", "xxh64"])
+    result = execute_command(ascmhl.commands.create, ["-v", "/travel_01/A002R2EC", "-h", "xxh64"])
     assert result.exit_code == 0
     assert compare_files_against_reference("scenario_01", ["/travel_01"], fs)
 
@@ -240,7 +240,7 @@ def test_scenario_02(fs, reference, card_a002):
 
     log_message("")
     log_message("Seal the copy on the travel drive /travel_01 to create the original mhl generation.")
-    result = execute_command(mhl.commands.create, ["-v", "/travel_01/A002R2EC", "-h", "xxh64"])
+    result = execute_command(ascmhl.commands.create, ["-v", "/travel_01/A002R2EC", "-h", "xxh64"])
     assert result.exit_code == 0
 
     with freeze_time("2020-01-17 14:30:00"):
@@ -252,7 +252,7 @@ def test_scenario_02(fs, reference, card_a002):
         log_message("")
         log_message("Sealing the folder A002R2EC again on the file server")
         log_message("this will verify all hashes, check for completeness and create a second generation")
-        result = execute_command(mhl.commands.create, ["-v", "/file_server/A002R2EC", "-h", "xxh64"])
+        result = execute_command(ascmhl.commands.create, ["-v", "/file_server/A002R2EC", "-h", "xxh64"])
         assert result.exit_code == 0
         assert compare_files_against_reference("scenario_02", ["/travel_01", "/file_server"], fs)
 
@@ -271,7 +271,7 @@ def test_scenario_03(fs, reference, card_a002):
 
     log_message("")
     log_message("Seal the copy on the travel drive /travel_01 to create the original mhl generation.")
-    result = execute_command(mhl.commands.create, ["-v", "/travel_01/A002R2EC", "-h", "xxh64"])
+    result = execute_command(ascmhl.commands.create, ["-v", "/travel_01/A002R2EC", "-h", "xxh64"])
     assert result.exit_code == 0
 
     with freeze_time("2020-01-17 14:30:00"):
@@ -284,7 +284,7 @@ def test_scenario_03(fs, reference, card_a002):
         log_message("Sealing the folder A002R2EC again on the file server using MD5 hash format")
         log_message("this will verify all existing xxHashes, check for completeness,")
         log_message("and create a second generation with additional (new) MD5 hashes.")
-        result = execute_command(mhl.commands.create, ["-v", "-h", "md5", "/file_server/A002R2EC"])
+        result = execute_command(ascmhl.commands.create, ["-v", "-h", "md5", "/file_server/A002R2EC"])
         assert result.exit_code == 0
         assert compare_files_against_reference("scenario_03", ["/travel_01", "/file_server"], fs)
 
@@ -301,7 +301,7 @@ def test_scenario_04(fs, reference, card_a002):
 
     log_message("")
     log_message("Seal the copy on the travel drive /travel_01 to create the original mhl generation.")
-    result = execute_command(mhl.commands.create, ["-v", "/travel_01/A002R2EC", "-h", "xxh64"])
+    result = execute_command(ascmhl.commands.create, ["-v", "/travel_01/A002R2EC", "-h", "xxh64"])
     assert result.exit_code == 0
 
     with freeze_time("2020-01-17 14:30:00"):
@@ -320,7 +320,7 @@ def test_scenario_04(fs, reference, card_a002):
         log_message("Sealing the folder A002R2EC again on the file server.")
         log_message("This will verify all existing hashes and fail because Sidecar.txt was altered.")
         log_message("An error is shown and create a new generation that documents the failed verification")
-        result = execute_command(mhl.commands.create, ["-v", "/file_server/A002R2EC", "-h", "xxh64"])
+        result = execute_command(ascmhl.commands.create, ["-v", "/file_server/A002R2EC", "-h", "xxh64"])
         assert result.exit_code == 12
         assert compare_files_against_reference("scenario_04", ["/travel_01", "/file_server"], fs)
 
@@ -342,7 +342,7 @@ def test_scenario_05(fs, reference, card_a002, card_a003):
 
     log_message("")
     log_message("Seal the copy of A002R2EC on the travel drive /travel_01 to create the original mhl generation.")
-    result = execute_command(mhl.commands.create, ["-v", "/travel_01/Reels/A002R2EC", "-h", "xxh64"])
+    result = execute_command(ascmhl.commands.create, ["-v", "/travel_01/Reels/A002R2EC", "-h", "xxh64"])
     assert result.exit_code == 0
 
     log_message("")
@@ -351,7 +351,7 @@ def test_scenario_05(fs, reference, card_a002, card_a003):
 
     log_message("")
     log_message("Seal the copy of A003R2EC on the travel drive /travel_01 to create the original mhl generation.")
-    result = execute_command(mhl.commands.create, ["-v", "/travel_01/Reels/A003R2EC", "-h", "xxh64"])
+    result = execute_command(ascmhl.commands.create, ["-v", "/travel_01/Reels/A003R2EC", "-h", "xxh64"])
     assert result.exit_code == 0
 
     with freeze_time("2020-01-17 14:30:00"):
@@ -374,6 +374,6 @@ def test_scenario_05(fs, reference, card_a002, card_a003):
         log_message("with the original hash of the Summary.txt and references to the child histories")
         log_message("of the card sub folders.")
         # The `Reels` folder is verified on the file server.
-        result = execute_command(mhl.commands.create, ["-v", "/file_server/Reels", "-h", "xxh64"])
+        result = execute_command(ascmhl.commands.create, ["-v", "/file_server/Reels", "-h", "xxh64"])
         assert result.exit_code == 0
         assert compare_files_against_reference("scenario_05", ["/travel_01", "/file_server"], fs)

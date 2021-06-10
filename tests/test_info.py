@@ -11,21 +11,21 @@ import os
 from click.testing import CliRunner
 from freezegun import freeze_time
 
-import mhl.commands
+import ascmhl.commands
 
 
 @freeze_time("2020-01-16 09:15:00")
 def test_simple_info_fails_no_history(fs, simple_mhl_history):
     runner = CliRunner()
     os.rename("/root/ascmhl", "/root/_ascmhl")
-    result = runner.invoke(mhl.commands.info, ["-sf", "/root/Stuff.txt"])
+    result = runner.invoke(ascmhl.commands.info, ["-sf", "/root/Stuff.txt"])
     assert result.exit_code == 14
 
 
 @freeze_time("2020-01-16 09:15:00")
 def test_simple_info(fs, simple_mhl_history):
     runner = CliRunner()
-    result = runner.invoke(mhl.commands.info, ["-sf", "/root/Stuff.txt"])
+    result = runner.invoke(ascmhl.commands.info, ["-sf", "/root/Stuff.txt"])
     assert (
         result.output
         == "Info with history at path: /root\nStuff.txt:\n  Generation 1 (2020-01-15T13:00:00+00:00) xxh64:"
@@ -37,10 +37,10 @@ def test_simple_info(fs, simple_mhl_history):
 @freeze_time("2020-01-16 09:15:00")
 def test_info(fs, simple_mhl_history):
     runner = CliRunner()
-    result = runner.invoke(mhl.commands.create, ["/root/", "-h", "xxh64"])
-    result = runner.invoke(mhl.commands.create, ["/root/", "-h", "md5"])
-    result = runner.invoke(mhl.commands.create, ["/root/", "-h", "xxh64"])
-    result = runner.invoke(mhl.commands.info, ["-sf", "/root/Stuff.txt"])
+    result = runner.invoke(ascmhl.commands.create, ["/root/", "-h", "xxh64"])
+    result = runner.invoke(ascmhl.commands.create, ["/root/", "-h", "md5"])
+    result = runner.invoke(ascmhl.commands.create, ["/root/", "-h", "xxh64"])
+    result = runner.invoke(ascmhl.commands.info, ["-sf", "/root/Stuff.txt"])
     assert (
         result.output
         == "Info with history at path: /root\nStuff.txt:\n  Generation 1 (2020-01-15T13:00:00+00:00) xxh64:"
@@ -57,11 +57,11 @@ def test_altered_file(fs, simple_mhl_history):
     # alter a file
     with open("/root/Stuff.txt", "a") as file:
         file.write("!!")
-    CliRunner().invoke(mhl.commands.create, ["/root"])
-    CliRunner().invoke(mhl.commands.create, ["/root", "-h", "md5"])
+    CliRunner().invoke(ascmhl.commands.create, ["/root"])
+    CliRunner().invoke(ascmhl.commands.create, ["/root", "-h", "md5"])
 
     runner = CliRunner()
-    result = runner.invoke(mhl.commands.info, ["-sf", "/root/Stuff.txt"])
+    result = runner.invoke(ascmhl.commands.info, ["-sf", "/root/Stuff.txt"])
     assert (
         result.output
         == "Info with history at path: /root\nStuff.txt:\n  Generation 1 (2020-01-15T13:00:00+00:00) xxh64:"
@@ -73,11 +73,11 @@ def test_altered_file(fs, simple_mhl_history):
 
 @freeze_time("2020-01-16 09:15:00")
 def test_nested_info(fs, nested_mhl_histories):
-    CliRunner().invoke(mhl.commands.create, ["/root", "-h", "xxh64"])
-    CliRunner().invoke(mhl.commands.create, ["/root", "-h", "md5"])
+    CliRunner().invoke(ascmhl.commands.create, ["/root", "-h", "xxh64"])
+    CliRunner().invoke(ascmhl.commands.create, ["/root", "-h", "md5"])
 
     runner = CliRunner()
-    result = runner.invoke(mhl.commands.info, ["-sf", "/root/Stuff.txt"])
+    result = runner.invoke(ascmhl.commands.info, ["-sf", "/root/Stuff.txt"])
     assert (
         result.output
         == "Info with history at path: /root\nStuff.txt:\n  Generation 1 (2020-01-15T13:00:00+00:00) xxh64:"

@@ -11,8 +11,8 @@ import os
 from freezegun import freeze_time
 from click.testing import CliRunner
 
-from mhl.history import MHLHistory
-import mhl.commands
+from ascmhl.history import MHLHistory
+import ascmhl.commands
 
 scenario_output_path = "examples/scenarios/Output"
 fake_ref_path = "/ref"
@@ -24,7 +24,7 @@ def test_create_succeed(fs):
     fs.create_file("/root/A/A1.txt", contents="A1\n")
 
     runner = CliRunner()
-    result = runner.invoke(mhl.commands.create, ["/root", "-h", "xxh64", "-v"])
+    result = runner.invoke(ascmhl.commands.create, ["/root", "-h", "xxh64", "-v"])
     assert not result.exception
     assert os.path.exists("/root/ascmhl/0001_root_2020-01-16_091500.mhl")
     # with open('/root/ascmhl/0001_root_2020-01-16_091500.mhl', 'r') as fin:
@@ -37,7 +37,7 @@ def test_create_directory_hashes(fs):
     fs.create_file("/root/Stuff.txt", contents="stuff\n")
     fs.create_file("/root/A/A1.txt", contents="A1\n")
 
-    result = CliRunner().invoke(mhl.commands.create, ["/root", "-h", "xxh64", "-v"])
+    result = CliRunner().invoke(ascmhl.commands.create, ["/root", "-h", "xxh64", "-v"])
     assert result.exit_code == 0
 
     # a directory hash for the folder A was created
@@ -48,7 +48,7 @@ def test_create_directory_hashes(fs):
     assert hash_list.process_info.root_media_hash.hash_entries[0].hash_string == "15ef0ade91fff267"
 
     # test that the directory-hash command creates the same directory hashes
-    result = CliRunner().invoke(mhl.commands.directory_hash, ["/root", "-v", "-h", "xxh64"])
+    result = CliRunner().invoke(ascmhl.commands.directory_hash, ["/root", "-v", "-h", "xxh64"])
     assert result.exit_code == 0
     print(result.output)
     assert "directory hash for: /root/A xxh64: ee2c3b94b6eecb8d" in result.output
@@ -65,7 +65,7 @@ def test_create_directory_hashes(fs):
     os.mkdir("/root/emptyFolderC/emptyFolderCB")
 
     runner = CliRunner()
-    result = runner.invoke(mhl.commands.create, ["/root", "-v", "-h", "xxh64"])
+    result = runner.invoke(ascmhl.commands.create, ["/root", "-v", "-h", "xxh64"])
     assert result.exit_code == 0
 
     hash_list = MHLHistory.load_from_path("/root").hash_lists[-1]
@@ -80,7 +80,7 @@ def test_create_directory_hashes(fs):
     assert hash_list.find_media_hash_for_path("emptyFolderC").hash_entries[0].hash_string == "877071123901a4db"
 
     # test that the directory-hash command creates the same directory hashes
-    result = CliRunner().invoke(mhl.commands.directory_hash, ["/root", "-h", "xxh64"])
+    result = CliRunner().invoke(ascmhl.commands.directory_hash, ["/root", "-h", "xxh64"])
     assert result.exit_code == 0
     assert "  calculated root hash: xxh64: 5f4af3b3fd736415" in result.output
 
@@ -89,14 +89,14 @@ def test_create_directory_hashes(fs):
         file.write("!!")
 
     runner = CliRunner()
-    result = runner.invoke(mhl.commands.create, ["/root", "-v", "-h", "xxh64"])
+    result = runner.invoke(ascmhl.commands.create, ["/root", "-v", "-h", "xxh64"])
     assert "ERROR: hash mismatch for        A/A2.txt" in result.output
     hash_list = MHLHistory.load_from_path("/root").hash_lists[-1]
     # an altered file leads to a different root directory hash
     assert hash_list.process_info.root_media_hash.hash_entries[0].hash_string == "adf18c910489663c"
 
     # test that the directory-hash command creates the same root hash
-    result = CliRunner().invoke(mhl.commands.directory_hash, ["/root", "-h", "xxh64"])
+    result = CliRunner().invoke(ascmhl.commands.directory_hash, ["/root", "-h", "xxh64"])
     assert result.exit_code == 0
     assert "root hash: xxh64: adf18c910489663c" in result.output
 
@@ -104,7 +104,7 @@ def test_create_directory_hashes(fs):
     os.rename("/root/B/B1.txt", "/root/B/B2.txt")
 
     runner = CliRunner()
-    result = runner.invoke(mhl.commands.create, ["/root", "-v", "-h", "xxh64"])
+    result = runner.invoke(ascmhl.commands.create, ["/root", "-v", "-h", "xxh64"])
     assert "ERROR: hash mismatch for        A/A2.txt" in result.output
     # in addition to the failing verification we also have a missing file B1/B1.txt
     assert "missing file(s):\n  B/B1.txt" in result.output
@@ -115,7 +115,7 @@ def test_create_directory_hashes(fs):
     assert hash_list.process_info.root_media_hash.hash_entries[0].hash_string == "01441cdf1803e2b8"
 
     # test that the directory-hash command creates the same root hash
-    result = CliRunner().invoke(mhl.commands.directory_hash, ["/root", "-h", "xxh64"])
+    result = CliRunner().invoke(ascmhl.commands.directory_hash, ["/root", "-h", "xxh64"])
     assert result.exit_code == 0
     assert "root hash: xxh64: 01441cdf1803e2b8" in result.output
 
@@ -127,7 +127,7 @@ def test_create_no_directory_hashes(fs):
     os.mkdir("/root/emptyFolder")
 
     runner = CliRunner()
-    result = runner.invoke(mhl.commands.create, ["/root", "-v", "-n"])
+    result = runner.invoke(ascmhl.commands.create, ["/root", "-v", "-n"])
     assert result.exit_code == 0
 
     # a directory entry without hash was created for the folder A
@@ -142,7 +142,7 @@ def test_create_no_directory_hashes(fs):
     # removing an empty folder will cause sealing to fail
     os.removedirs("/root/emptyFolder")
     runner = CliRunner()
-    result = runner.invoke(mhl.commands.create, ["/root", "-v", "-n"])
+    result = runner.invoke(ascmhl.commands.create, ["/root", "-v", "-n"])
     assert result.exit_code == 15
     assert "1 missing file(s):\n  emptyFolder" in result.output
 
@@ -152,17 +152,17 @@ def test_create_fail_altered_file(fs, simple_mhl_history):
     with open("/root/Stuff.txt", "a") as file:
         file.write("!!")
 
-    result = CliRunner().invoke(mhl.commands.create, ["/root"])
+    result = CliRunner().invoke(ascmhl.commands.create, ["/root"])
     assert result.exit_code == 12
     assert "Stuff.txt" in result.output
 
     # since the file is still altered every other seal will fail as well since we compare to the original hash
-    result = CliRunner().invoke(mhl.commands.create, ["/root"])
+    result = CliRunner().invoke(ascmhl.commands.create, ["/root"])
     assert result.exit_code == 12
     assert "Stuff.txt" in result.output
 
     # when we now choose a new hash format we still fail but will add the new hash in the new format
-    result = CliRunner().invoke(mhl.commands.create, ["/root", "-h", "md5"])
+    result = CliRunner().invoke(ascmhl.commands.create, ["/root", "-h", "md5"])
     assert result.exit_code == 12
     assert "Stuff.txt" in result.output
 
@@ -176,7 +176,7 @@ def test_create_fail_altered_file(fs, simple_mhl_history):
     assert len(stuff_txt_latest_media_hash.hash_entries) == 1
 
     # since we didn't add a new md5 hash for the failing file before sealing will still fail for the altered file
-    result = CliRunner().invoke(mhl.commands.create, ["/root", "-h", "md5"])
+    result = CliRunner().invoke(ascmhl.commands.create, ["/root", "-h", "md5"])
     assert result.exit_code == 12
     assert "Stuff.txt" in result.output
 
@@ -192,7 +192,7 @@ def test_create_fail_missing_file(fs, nested_mhl_histories):
     assert paths == {"/root/B/B1.txt", "/root/B/BB/BB1.txt", "/root/Stuff.txt", "/root/A/AA/AA1.txt"}
     os.remove("/root/A/AA/AA1.txt")
     runner = CliRunner()
-    result = runner.invoke(mhl.commands.create, ["/root"])
+    result = runner.invoke(ascmhl.commands.create, ["/root"])
     assert result.exit_code == 15
     assert "1 missing file(s):\n  A/AA/AA1.txt" in result.output
 
@@ -220,7 +220,7 @@ def test_create_fail_missing_file(fs, nested_mhl_histories):
 
     # since the file /root/A/AA/AA1.txt is still missing all further seal attempts will still fail
     runner = CliRunner()
-    result = runner.invoke(mhl.commands.create, ["/root"])
+    result = runner.invoke(ascmhl.commands.create, ["/root"])
     assert result.exit_code == 15
     assert "1 missing file(s):\n  A/AA/AA1.txt" in result.output
 
@@ -232,7 +232,7 @@ def test_create_nested_new_format(fs, nested_mhl_histories):
     """
 
     runner = CliRunner()
-    result = runner.invoke(mhl.commands.create, ["/root", "-h", "md5"])
+    result = runner.invoke(ascmhl.commands.create, ["/root", "-h", "md5"])
     assert result.exit_code == 0
 
     # load one of the the nested histories and check the first media hash of the last generation

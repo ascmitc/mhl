@@ -10,7 +10,7 @@ __email__ = "opensource@pomfort.com"
 import pytest
 from freezegun import freeze_time
 from click.testing import CliRunner
-import mhl.commands
+import ascmhl.commands
 import os
 import time
 import platform
@@ -42,21 +42,21 @@ def nested_mhl_histories(fs):
     # create mhl histories on different directly levels
     fs.create_file("/root/Stuff.txt", contents="stuff\n")
     runner = CliRunner()
-    result = runner.invoke(mhl.commands.create, ["/root", "-h", "xxh64"])
+    result = runner.invoke(ascmhl.commands.create, ["/root", "-h", "xxh64"])
     assert result.exit_code == 0
 
     fs.create_file("/root/A/AA/AA1.txt", contents="AA1\n")
     fs.create_file("/root/A/AB/AB1.txt", contents="AB1\n")
-    result = runner.invoke(mhl.commands.create, ["/root/A/AA", "-h", "xxh64"])
+    result = runner.invoke(ascmhl.commands.create, ["/root/A/AA", "-h", "xxh64"])
     assert result.exit_code == 0
 
     fs.create_file("/root/B/B1.txt", contents="B1\n")
-    result = runner.invoke(mhl.commands.create, ["/root/B", "-h", "xxh64"])
+    result = runner.invoke(ascmhl.commands.create, ["/root/B", "-h", "xxh64"])
     assert result.exit_code == 0
 
     fs.create_file("/root/B/BA/BA1.txt", contents="BA1\n")
     fs.create_file("/root/B/BB/BB1.txt", contents="BB1\n")
-    result = runner.invoke(mhl.commands.create, ["/root/B/BB", "-h", "xxh64"])
+    result = runner.invoke(ascmhl.commands.create, ["/root/B/BB", "-h", "xxh64"])
     assert result.exit_code == 0
 
 
@@ -69,7 +69,7 @@ def simple_mhl_history(fs):
     fs.create_file("/root/A/A1.txt", contents="A1\n")
 
     runner = CliRunner()
-    result = runner.invoke(mhl.commands.create, ["/root", "-h", "xxh64"])
+    result = runner.invoke(ascmhl.commands.create, ["/root", "-h", "xxh64"])
     assert result.exit_code == 0
 
 

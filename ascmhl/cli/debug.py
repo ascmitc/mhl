@@ -11,7 +11,7 @@ __email__ = "opensource@pomfort.com"
 import click
 
 # noinspection PyProtectedMember
-from mhl import _debug_commands
+from ascmhl import _debug_commands
 
 
 @click.group()

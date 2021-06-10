@@ -3,7 +3,7 @@ from threading import Thread
 
 import requests
 
-from mhl.__version__ import ascmhl_tool_version
+from ascmhl.__version__ import ascmhl_tool_version
 
 
 class Updater(Thread):

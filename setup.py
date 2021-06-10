@@ -7,7 +7,7 @@ setup(
     author="Patrick Renner, Alexander Sahm",
     author_email="opensource@pomfort.com",
     description="ASC Media Hash List (ASC MHL)",
-    entry_points={"console_scripts": ["ascmhl = mhl.cli.ascmhl:mhltool_cli"]},
+    entry_points={"console_scripts": ["ascmhl = ascmhl.cli.ascmhl:mhltool_cli"]},
     include_package_data=True,
     install_requires=[
         "Click>=7.0",

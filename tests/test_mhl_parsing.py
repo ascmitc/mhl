@@ -12,10 +12,10 @@ import re
 from freezegun import freeze_time
 from click.testing import CliRunner
 
-from mhl import hashlist_xml_parser
-from mhl.__version__ import ascmhl_file_extension
-from mhl.history import MHLHistory
-import mhl.commands
+from ascmhl import hashlist_xml_parser
+from ascmhl.__version__ import ascmhl_file_extension
+from ascmhl.history import MHLHistory
+import ascmhl.commands
 
 
 def test_simple_parsing():
@@ -70,7 +70,7 @@ def test_child_history_verify(fs, nested_mhl_histories):
     """ """
 
     runner = CliRunner()
-    result = runner.invoke(mhl.commands.create, ["/root"], catch_exceptions=False)
+    result = runner.invoke(ascmhl.commands.create, ["/root"], catch_exceptions=False)
     assert result.exit_code == 0
 
     assert os.path.isfile("/root/ascmhl/0002_root_2020-01-16_091500.mhl")
@@ -126,7 +126,7 @@ def test_child_history_partial_verification_ba_1_file(fs, nested_mhl_histories):
     # create an additional file the record command will not add since we only pass it B1 as single file
     fs.create_file("/root/B/B2.txt", contents="B2\n")
     runner = CliRunner()
-    result = runner.invoke(mhl.commands.create, ["/root", "-sf", "/root/B/B1.txt"], catch_exceptions=False)
+    result = runner.invoke(ascmhl.commands.create, ["/root", "-sf", "/root/B/B1.txt"], catch_exceptions=False)
     assert result.exit_code == 0
 
     # two new generations have been written
@@ -163,7 +163,7 @@ def test_child_history_partial_verification_bb_folder(fs, nested_mhl_histories):
     # create an additional file the record command will find because we pass it a folder
     fs.create_file("/root/B/BB/BB2.txt", contents="BB2\n")
     runner = CliRunner()
-    result = runner.invoke(mhl.commands.create, ["/root", "-sf", "/root/B/BB"])
+    result = runner.invoke(ascmhl.commands.create, ["/root", "-sf", "/root/B/BB"])
     assert result.exit_code == 0
 
     assert os.path.isfile("/root/ascmhl/0002_root_2020-01-16_091500.mhl")

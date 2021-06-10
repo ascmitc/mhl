@@ -10,8 +10,8 @@ __email__ = "opensource@pomfort.com"
 
 import click
 
-from mhl import commands
-from mhl.cli.update import Updater
+from ascmhl import commands
+from ascmhl.cli.update import Updater
 
 updater = Updater()
 

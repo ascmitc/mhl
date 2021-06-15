@@ -31,9 +31,9 @@ def test_simple_info(fs, simple_mhl_history):
 @freeze_time("2020-01-16 09:15:00")
 def test_info(fs, simple_mhl_history):
     runner = CliRunner()
-    result = runner.invoke(mhl.commands.create, ['/root/'])
-    result = runner.invoke(mhl.commands.create, ['-h', 'md5', '/root/'])
-    result = runner.invoke(mhl.commands.create, ['/root/'])
+    result = runner.invoke(mhl.commands.create, ['/root/', '-h', 'xxh64'])
+    result = runner.invoke(mhl.commands.create, ['/root/', '-h', 'md5'])
+    result = runner.invoke(mhl.commands.create, ['/root/', '-h', 'xxh64'])
     result = runner.invoke(mhl.commands.info, ['-sf', '/root/Stuff.txt'])
     assert result.output == "Info with history at path: /root\nStuff.txt:\n  Generation 1 (2020-01-15T13:00:00+00:00) xxh64: 94c399c2a9a21f9a (original)\n  Generation 2 (2020-01-16T09:15:00+00:00) xxh64: 94c399c2a9a21f9a (verified)\n  Generation 3 (2020-01-16T09:15:00+00:00) xxh64: 94c399c2a9a21f9a (verified)\n  Generation 3 (2020-01-16T09:15:00+00:00) md5: 9eb84090956c484e32cb6c08455a667b (new)\n  Generation 4 (2020-01-16T09:15:00+00:00) xxh64: 94c399c2a9a21f9a (verified)\n"
     assert result.exit_code == 0
@@ -53,7 +53,7 @@ def test_altered_file(fs, simple_mhl_history):
 
 @freeze_time("2020-01-16 09:15:00")
 def test_nested_info(fs, nested_mhl_histories):
-    CliRunner().invoke(mhl.commands.create, ['/root'])
+    CliRunner().invoke(mhl.commands.create, ['/root', '-h', 'xxh64'])
     CliRunner().invoke(mhl.commands.create, ['/root', '-h', 'md5'])
 
     runner = CliRunner()

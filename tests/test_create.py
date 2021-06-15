@@ -24,7 +24,7 @@ def test_create_succeed(fs):
     fs.create_file('/root/A/A1.txt', contents='A1\n')
 
     runner = CliRunner()
-    result = runner.invoke(mhl.commands.create, ['/root'])
+    result = runner.invoke(mhl.commands.create, ['/root', '-h', 'xxh64', '-v'])
     assert not result.exception
     assert os.path.exists('/root/ascmhl/0001_root_2020-01-16_091500.mhl')
     # with open('/root/ascmhl/0001_root_2020-01-16_091500.mhl', 'r') as fin:
@@ -37,7 +37,7 @@ def test_create_directory_hashes(fs):
     fs.create_file('/root/Stuff.txt', contents='stuff\n')
     fs.create_file('/root/A/A1.txt', contents='A1\n')
 
-    result = CliRunner().invoke(mhl.commands.create, ['/root', '-v'])
+    result = CliRunner().invoke(mhl.commands.create, ['/root', '-h', 'xxh64', '-v'])
     assert result.exit_code == 0
 
     # a directory hash for the folder A was created
@@ -65,7 +65,7 @@ def test_create_directory_hashes(fs):
     os.mkdir('/root/emptyFolderC/emptyFolderCB')
 
     runner = CliRunner()
-    result = runner.invoke(mhl.commands.create, ['/root', '-v'])
+    result = runner.invoke(mhl.commands.create, ['/root', '-v', '-h', 'xxh64'])
     assert result.exit_code == 0
 
     hash_list = MHLHistory.load_from_path('/root').hash_lists[-1]
@@ -92,7 +92,7 @@ def test_create_directory_hashes(fs):
         file.write('!!')
 
     runner = CliRunner()
-    result = runner.invoke(mhl.commands.create, ['/root', '-v'])
+    result = runner.invoke(mhl.commands.create, ['/root', '-v', '-h', 'xxh64'])
     assert 'ERROR: hash mismatch for        A/A2.txt' in result.output
     hash_list = MHLHistory.load_from_path('/root').hash_lists[-1]
     # an altered file leads to a different root directory content hash
@@ -115,7 +115,7 @@ def test_create_directory_hashes(fs):
     os.rename('/root/B/B1.txt', '/root/B/B2.txt')
 
     runner = CliRunner()
-    result = runner.invoke(mhl.commands.create, ['/root', '-v'])
+    result = runner.invoke(mhl.commands.create, ['/root', '-v', '-h', 'xxh64'])
     assert 'ERROR: hash mismatch for        A/A2.txt' in result.output
     # in addition to the failing verification we also have a missing file B1/B1.txt
     assert 'missing file(s):\n  B/B1.txt' in result.output

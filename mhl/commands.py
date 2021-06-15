@@ -19,7 +19,7 @@ from . import errors
 from . import ignore
 from . import utils
 from .ignore import MHLIgnoreSpec
-from .__version__ import ascmhl_supported_hashformats, ascmhl_folder_name, ascmhl_tool_name, ascmhl_tool_version
+from .__version__ import ascmhl_supported_hashformats, ascmhl_folder_name, ascmhl_tool_name, ascmhl_tool_version, ascmhl_default_hashformat
 from .generator import MHLGenerationCreationSession
 from .hasher import create_filehash, DirectoryHashContext
 from .hashlist import MHLCreatorInfo, MHLTool, MHLProcess
@@ -33,7 +33,7 @@ from .traverse import post_order_lexicographic
 @click.option('--verbose', '-v', default=False, is_flag=True,
               help="Verbose output")
 @click.option('--hash_format', '-h', type=click.Choice(ascmhl_supported_hashformats),
-              multiple=False, default='xxh64',
+              multiple=False, default=ascmhl_default_hashformat,
               help="Algorithm")
 @click.option('--no_directory_hashes', '-n', default=False, is_flag=True,
               help="Skip creation of directory hashes, only reference directories without hash")
@@ -620,7 +620,7 @@ def xsd_schema_check(file_path):
 @click.argument('root_path', type=click.Path(exists=True))
 @click.option('--verbose', '-v', default=False, is_flag=True, help="Print all directory hashes of sub directories")
 @click.option('--hash_format', '-h', type=click.Choice(ascmhl_supported_hashformats), multiple=False,
-              default='xxh64', help="Algorithm")
+              default=ascmhl_default_hashformat, help="Algorithm")
 @click.option('ignore_list', '--ignore', '-i', multiple=True, help="A single file pattern to ignore.")
 @click.option('ignore_spec_file', '--ignore_spec', type=click.Path(exists=True), help="A file containing multiple file patterns to ignore.")
 def directory_hash(root_path, verbose, hash_format, ignore_list, ignore_spec_file):

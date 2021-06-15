@@ -11,8 +11,8 @@ import os
 from freezegun import freeze_time
 from click.testing import CliRunner
 
-from mhl.history import MHLHistory
-import mhl.commands
+from ascmhl.history import MHLHistory
+import ascmhl.commands
 
 scenario_output_path = 'examples/scenarios/Output'
 fake_ref_path = '/ref'
@@ -24,7 +24,7 @@ fake_ref_path = '/ref'
 #    """
 #
 #    runner = CliRunner()
-#    result = runner.invoke(mhl.commands.create, ['/root', '-h', 'md5'])
+#    result = runner.invoke(ascmhl.commands.create, ['/root', '-h', 'md5'])
 #    assert result.exit_code == 0
 
 
@@ -35,6 +35,6 @@ def test_create_nested(fs, nested_mhl_histories):
     """
 
     runner = CliRunner()
-    result = runner.invoke(mhl.commands.create, ['/root', '-h', 'md5'])
+    result = runner.invoke(ascmhl.commands.create, ['/root', '-h', 'md5'])
     assert result.exit_code == 0
 

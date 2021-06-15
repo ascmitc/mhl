@@ -177,7 +177,7 @@ def create_for_folder_subcommand(
     if exception:
         raise exception
 
-def create_for_single_files_subcommand(root_path, verbose, hash_format, no_directory_hashes, ignore_list=None, ignore_spec_file=None):
+def create_for_single_files_subcommand(root_path, verbose, hash_format, single_file, ignore_list=None, ignore_spec_file=None):
     # command formerly known as "record"
     """
     Creates a new generation with the given file(s) or folder(s).

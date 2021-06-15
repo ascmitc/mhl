@@ -7,7 +7,7 @@ __maintainer__ = "Patrick Renner, Alexander Sahm"
 __email__ = "opensource@pomfort.com"
 """
 
-from mhl.hasher import digest_for_list, digest_for_string
+from ascmhl.hasher import digest_for_list, digest_for_string
 
 def test_C4_non_contiguous_blocks_of_data():
 	# test from example in 30MR-WD-ST-2114-C4ID-2017-01-17 V0 (1).pdf

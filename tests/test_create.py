@@ -49,7 +49,7 @@ def test_create_directory_hashes(fs):
 
     # test that the directory-hash command creates the same directory hashes
     # FIXME: command doesn't exist any more, replace with tests of verify directory hashes command?
-#    result = CliRunner().invoke(mhl.commands.directory_hash, ["/root", "-v"])
+#    result = CliRunner().invoke(ascmhl.commands.directory_hash, ["/root", "-v"])
 #    assert result.exit_code == 0
 #    assert "directory hash for: /root/A xxh64: ee2c3b94b6eecb8d" in result.output
 #    assert "root hash: xxh64: 15ef0ade91fff267" in result.output
@@ -83,7 +83,7 @@ def test_create_directory_hashes(fs):
 
     # test that the directory-hash command creates the same directory hashes
     # FIXME: command doesn't exist any more, replace with tests of verify directory hashes command?
-#    result = CliRunner().invoke(mhl.commands.directory_hash, ["/root"])
+#    result = CliRunner().invoke(ascmhl.commands.directory_hash, ["/root"])
 #    assert result.exit_code == 0
 #    assert "  calculated root hash: xxh64: 5f4af3b3fd736415" in result.output
 
@@ -102,7 +102,7 @@ def test_create_directory_hashes(fs):
 
     # test that the directory-hash command creates the same root hash
     # FIXME: command doesn't exist any more, replace with tests of verify directory hashes command?
-#    result = CliRunner().invoke(mhl.commands.directory_hash, ["/root"])
+#    result = CliRunner().invoke(ascmhl.commands.directory_hash, ["/root"])
 #    assert result.exit_code == 0
 #    assert "root hash: xxh64: adf18c910489663c" in result.output
 
@@ -132,7 +132,7 @@ def test_create_directory_hashes(fs):
 
     # test that the directory-hash command creates the same root hash
     # FIXME: command doesn't exist any more, replace with tests of verify directory hashes command?
-#    result = CliRunner().invoke(mhl.commands.directory_hash, ["/root"])
+#    result = CliRunner().invoke(ascmhl.commands.directory_hash, ["/root"])
 #    assert result.exit_code == 0
 #    assert "root hash: xxh64: 01441cdf1803e2b8" in result.output
 

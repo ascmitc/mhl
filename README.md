@@ -295,7 +295,7 @@ on error (including mismatching hashes):
 ```
 
 
-#### `verify` with `-dh` subcommand option (for directory hash) _[not implemented yet]_
+#### `verify` with `-dh` subcommand option (for directory hash)
 
 The `verify` command with the `-dh` subcommand option creates the directory hash by hashing the contained files of the given directory path (filtered by the ignore patterns from the `ascmhl` folder) and compares it with the to-be-expected directory hash calculated from the file hashes (same calculation as the `info` command with the `-dh` subcommand option).
 

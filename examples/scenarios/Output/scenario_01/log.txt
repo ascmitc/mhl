@@ -10,9 +10,9 @@ $ ascmhl.py create -v /travel_01/A002R2EC -h xxh64
 Sealing folder at path: /travel_01/A002R2EC ...
   created original hash for     Clips/A002C006_141024_R2EC.mov  xxh64: 0ea03b369a463d9d
   created original hash for     Clips/A002C007_141024_R2EC.mov  xxh64: 7680e5f98f4a80fd
-  calculated directory hash for Clips  xxh64: 2d51faa2b1834454
+  calculated directory hash for Clips  xxh64: 6d43a82e7a5d40f6 (content), a27e08b77ae22c78 (structure)
   created original hash for     Sidecar.txt  xxh64: 3ab5a4166b9bde44
-  calculated root hash  xxh64: d22ad81d5ef6dfd5
+  calculated root hash  xxh64: 7e423206834bf81a (content), 574ab2d2afc981cd (structure)
 Created new generation ascmhl/0001_A002R2EC_2020-01-16_091500.mhl
 
 

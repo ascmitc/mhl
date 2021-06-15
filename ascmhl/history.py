@@ -113,6 +113,35 @@ class MHLHistory:
                     return hash_entry
         return None
 
+    # methods to query and compare hashes
+    def find_directory_hash_entries_for_path(self, relative_path: str) -> List[MHLHashEntry]:
+        """Searches the history for directory hash entries of a folder
+
+        starts with the first generation through all other generations
+        and collects all directory hashes found for the given folder.
+        """
+        directory_hash_entries = []
+        for hash_list in self.hash_lists:
+            media_hash = hash_list.find_media_hash_for_path(relative_path)
+            if media_hash is None:
+                continue
+            if media_hash.is_directory:
+                for hash_entry in media_hash.hash_entries:
+                    # FIXME is there a better way of accessing the generation from a hash entry?
+                    hash_entry.temp_generation_number = hash_list.generation_number
+                directory_hash_entries = directory_hash_entries + media_hash.hash_entries
+
+        # also search the root directory hashes from all child histories
+        if relative_path == ".":
+            for hash_list in self.hash_lists:
+                for hash_entry in hash_list.process_info.root_media_hash.hash_entries:
+                    # FIXME is there a better way of accessing the generation from a hash entry?
+                    hash_entry.temp_generation_number = hash_list.generation_number
+                    hash_entry.temp_is_root_folder = True
+                directory_hash_entries = directory_hash_entries + hash_list.process_info.root_media_hash.hash_entries
+
+        return directory_hash_entries
+
     def find_first_hash_entry_for_path(self, relative_path, hash_format=None) -> Optional[MHLHashEntry]:
         """Searches the history for the first (original) hash entry of a file
         or if an optional hash format is given the first hash in that format
@@ -198,9 +227,11 @@ class MHLHistory:
                     if len(parts) == 1 and len(parts[0]) == 2:
                         file_path = os.path.join(asc_mhl_folder_path, filename)
                         hash_list = hashlist_xml_parser.parse(file_path)
-
                         generation_number = int(parts[0][0])
                         hash_list.generation_number = generation_number
+                        # FIXME is there a better way of accessing the generation from a hash entry?
+                        for hash_entry in hash_list.process_info.root_media_hash.hash_entries:
+                            hash_entry.temp_generation_number = hash_list.generation_number
                         hash_lists.append(hash_list)
                     else:
                         logger.error(f"name of ascmhl file {filename} does not conform to naming convention")

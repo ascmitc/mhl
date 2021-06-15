@@ -114,11 +114,11 @@ def test_child_history_verify(fs, nested_mhl_histories):
     # as root media hash and in the parent history to represent the directory that contains the child history
     aa_dir_hash = root_hash_list.find_media_hash_for_path('A/AA').hash_entries[0].hash_string
     assert aa_dir_hash
-    assert aa_hash_list.root_media_hash.hash_entries[0].hash_string == aa_dir_hash
+    assert aa_hash_list.process_info.root_media_hash.hash_entries[0].hash_string == aa_dir_hash
     # the dir hash of BB is in the history of B not in the root history
     assert root_hash_list.find_media_hash_for_path('B/BB') is None
     bb_dir_hash = b_hash_list.find_media_hash_for_path('BB').hash_entries[0].hash_string
-    assert bb_hash_list.root_media_hash.hash_entries[0].hash_string == bb_dir_hash
+    assert bb_hash_list.process_info.root_media_hash.hash_entries[0].hash_string == bb_dir_hash
     # but the dir hash of B is also in the root history
     assert root_hash_list.find_media_hash_for_path('B')
 

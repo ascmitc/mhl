@@ -45,7 +45,7 @@ def test_create_directory_hashes(fs):
     assert hash_list.find_media_hash_for_path('A').is_directory
     assert hash_list.find_media_hash_for_path('A').hash_entries[0].hash_string == '95e230e90be29dd6'
     # and the directory hash of the root folder is set in the header
-    assert hash_list.root_media_hash.hash_entries[0].hash_string == '36e824bc313f3b77'
+    assert hash_list.process_info.root_media_hash.hash_entries[0].hash_string == '36e824bc313f3b77'
 
     # test that the directory-hash command creates the same directory hashes
     # FIXME: command doesn't exist any more, replace with tests of verify directory hashes command?
@@ -71,7 +71,7 @@ def test_create_directory_hashes(fs):
     hash_list = MHLHistory.load_from_path('/root').hash_lists[-1]
     # due to the additional content the directory hash of folder A and the root folder changed
     assert hash_list.find_media_hash_for_path('A').hash_entries[0].hash_string == 'a8d0ad812ab102bd'
-    assert hash_list.root_media_hash.hash_entries[0].hash_string == 'd6b881fed0b325bd'
+    assert hash_list.process_info.root_media_hash.hash_entries[0].hash_string == 'd6b881fed0b325bd'
     # empty folder all have the same directory hash
     assert hash_list.find_media_hash_for_path('emptyFolderA').hash_entries[0].hash_string == 'ef46db3751d8e999'
     assert hash_list.find_media_hash_for_path('emptyFolderB').hash_entries[0].hash_string == 'ef46db3751d8e999'
@@ -95,10 +95,10 @@ def test_create_directory_hashes(fs):
     result = runner.invoke(mhl.commands.create, ['/root', '-v', '-h', 'xxh64'])
     assert 'ERROR: hash mismatch for        A/A2.txt' in result.output
     hash_list = MHLHistory.load_from_path('/root').hash_lists[-1]
-    # an altered file leads to a different root directory content hash
-    assert hash_list.root_media_hash.hash_entries[0].hash_string == 'cae6659fc7b34c2f'
+    # an altered file leads to a different root directory hash
+    assert hash_list.process_info.root_media_hash.hash_entries[0].hash_string == 'cae6659fc7b34c2f'
     # structure hash stays the same
-    assert hash_list.root_media_hash.hash_entries[0].structure_hash_string == '2c99e94e8fa7d90c'
+    assert hash_list.process_info.root_media_hash.hash_entries[0].structure_hash_string == '2c99e94e8fa7d90c'
 
     # test that the directory-hash command creates the same root hash
     # FIXME: command doesn't exist any more, replace with tests of verify directory hashes command?
@@ -126,9 +126,9 @@ def test_create_directory_hashes(fs):
     assert hash_list.find_media_hash_for_path('B').hash_entries[0].hash_string == '51fb8fb099e92821'
 
     # a renamed file also leads to a different root structure directory hash
-    assert hash_list.root_media_hash.hash_entries[0].structure_hash_string == 'b758c9b165fb6c2a'
+    assert hash_list.process_info.root_media_hash.hash_entries[0].structure_hash_string == 'b758c9b165fb6c2a'
     # and an unchanged content hash
-    assert hash_list.root_media_hash.hash_entries[0].hash_string == 'cae6659fc7b34c2f'
+    assert hash_list.process_info.root_media_hash.hash_entries[0].hash_string == 'cae6659fc7b34c2f'
 
     # test that the directory-hash command creates the same root hash
     # FIXME: command doesn't exist any more, replace with tests of verify directory hashes command?
@@ -152,7 +152,7 @@ def test_create_no_directory_hashes(fs):
     assert hash_list.find_media_hash_for_path('A').is_directory
     assert len(hash_list.find_media_hash_for_path('A').hash_entries) == 0
     # and no directory hash of the root folder is set in the header
-    assert len(hash_list.root_media_hash.hash_entries) == 0
+    assert len(hash_list.process_info.root_media_hash.hash_entries) == 0
     # the empty folder is still referenced even if not creating directory hashes
     assert hash_list.find_media_hash_for_path('emptyFolder').is_directory
 
@@ -250,5 +250,5 @@ def test_create_nested_new_format(fs, nested_mhl_histories):
     assert media_hash.hash_entries[0].hash_format == 'xxh64'
 
     # assure that the second hash entry is the new md5 hash
-    assert media_hash.hash_entries[1].action == 'new'
+    assert media_hash.hash_entries[1].action == 'verified' # formerly 'new'
     assert media_hash.hash_entries[1].hash_format == 'md5'

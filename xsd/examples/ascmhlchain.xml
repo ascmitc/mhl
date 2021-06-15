@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ascmhlchain xmlns="urn:ASC:MHL:CHAIN:v2.0">
+    <ascmhlmanifest sequencenr="1">
+        <path>0001_TEST01_2019-10-11_155603.mhl</path>
+        <c4>c44pdRyHLMvHsYbJnRpTrh5ohdWW6uVbm4mZx421aTN7y9MUKk74TqyshmTLgvnq2tcZex6khpxrYUq87Hczcmnyq3</c4>
+    </ascmhlmanifest>
+</ascmhlchain>

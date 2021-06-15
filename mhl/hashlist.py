@@ -43,6 +43,7 @@ class MHLHashList:
     """
 
     creator_info: Optional[MHLCreatorInfo]
+    process_info: MHLProcessInfo
     media_hashes: List[MHLMediaHash]
     media_hashes_path_map: Dict[str, MHLMediaHash]
     # referenced_hash_lists are the loaded hash list object
@@ -51,19 +52,16 @@ class MHLHashList:
     hash_list_references = List['MHLHashListReference']
     file_path: Optional[str]
     generation_number: Optional[int]
-    root_media_hash: Optional[MHLMediaHash]
-    ignore_spec: MHLIgnoreSpec
 
     def __init__(self):
         self.creator_info = None
+        self.process_info = MHLProcessInfo()
         self.media_hashes = []
         self.file_path = None
         self.generation_number = None
         self.referenced_hash_lists = []
         self.hash_list_references = []
         self.media_hashes_path_map = {}
-        self.root_media_hash = None
-        self.ignore_spec = MHLIgnoreSpec()
 
     # methods to query for hashes
     def find_media_hash_for_path(self, relative_path):
@@ -97,7 +95,7 @@ class MHLHashList:
     # build
     def append_hash(self, media_hash: MHLMediaHash):
         if media_hash.path == '.':
-            self.root_media_hash = media_hash
+            self.process_info.root_media_hash = media_hash
         else:
             self.media_hashes.append(media_hash)
         self.media_hashes_path_map[media_hash.path] = media_hash
@@ -111,6 +109,7 @@ class MHLHashList:
         logger.info("    generation: {0}".format(self.generation_number))
 
         self.creator_info.log()
+        self.process_info.log()
         for media_hash in self.media_hashes:
             media_hash.log()
 
@@ -203,7 +202,7 @@ class MHLHashEntry:
     attribute member variables:
     hash_string -- string representation (hex) of the hash value
     hash_format -- string value, hash format, e.g. 'md5', 'xxh64'
-    action -- action/result of verification, e.g. 'verified', 'failed', 'new', 'original'
+    action -- action/result of verification, e.g. 'verified', 'failed', 'original'
 
     other member variables:
     """
@@ -240,14 +239,12 @@ class MHLCreatorInfo:
     host_name: Optional[str]
     tool: Optional[MHLTool]
     creation_date: Optional[datetime]
-    process: Optional[MHLProcess]
     authors: List[MHLAuthor]
 
     def __init__(self):
         self.host_name = None
         self.tool = None
         self.creation_date = None
-        self.process = None
         self.authors = []
         # TODO: missing location, comment, ignore
 
@@ -255,7 +252,6 @@ class MHLCreatorInfo:
         logger.info("      host_name: {0}".format(self.host_name))
         logger.info("           tool: {0} {1}".format(self.tool.name, self.tool.version))
         logger.info("  creation_date: {0}".format(self.creation_date))
-        logger.info("        process: {0}".format(self.process))
 
     def summary(self):
         summary = ""
@@ -267,8 +263,6 @@ class MHLCreatorInfo:
             summary += ", " + str(self.tool.name)
             if self.tool.version is not None:
                 summary += " " + str(self.tool.version)
-        if self.process is not None:
-            summary += ", " + str(self.process)
         for author in self.authors:
             summary += ", " + str(author.name)
             summary += " (" + str(author.email)
@@ -276,6 +270,31 @@ class MHLCreatorInfo:
             summary += ")"
         # TODO: missing location, comment, ignore
         return summary
+
+
+class MHLProcessInfo:
+    """
+    Stores the creator info that is part of the header of each hash list file
+    """
+    process: Optional[MHLProcess]
+    root_media_hash: Optional[MHLMediaHash]
+    ignore_spec: MHLIgnoreSpec
+
+    def __init__(self):
+        self.process = None
+        self.root_media_hash = None
+        self.ignore_spec = MHLIgnoreSpec()
+
+    def log(self):
+        logger.info("        process: {0}".format(self.process))
+
+    def summary(self):
+        summary = ""
+        if self.process is not None:
+            summary += ", " + str(self.process)
+        # TODO: missing location, comment, ignore
+        return summary
+
 
 class MHLTool:
     name: str
@@ -289,12 +308,10 @@ class MHLTool:
 class MHLProcess:
     process_type: str
     name: str
-    hash_source: Optional[str]
 
     def __init__(self, process_type: str, name: str = None):
         self.process_type = process_type
         self.name = name
-        self.hash_source = None
 
 
 class MHLAuthor:

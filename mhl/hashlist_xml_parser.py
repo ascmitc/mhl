@@ -43,15 +43,22 @@ def parse(file_path):
                     current_object.tool = MHLTool(element.text, element.attrib['version'])
                 elif tag == 'hostname':
                     current_object.host_name = element.text
-                elif tag == 'process':
-                    current_object.process = element.text
                 elif tag == 'creatorinfo':
                     hash_list.creator_info = current_object
                     current_object = None
                 # TODO: missing location, comment
+            elif type(current_object) is MHLProcessInfo:
+                if tag == 'process':
+                    current_object.process = element.text
+                elif tag == 'processinfo':
+                    hash_list.process_info = current_object
+                    current_object = None
             elif type(current_object) is MHLIgnoreSpec:
-                if tag == 'ignore':
+                if tag == 'pattern':
                     existing_ignore_patterns.append(element.text)
+                elif tag == 'ignore':
+                    hash_list.process_info.ignore_spec = current_object
+                    current_object = object_stack.pop()
                 else:
                     current_object = None
             elif type(current_object) is MHLMediaHash:
@@ -72,11 +79,11 @@ def parse(file_path):
                         current_object.is_directory = True
                     hash_list.append_hash(current_object)
                     current_object = None
-                elif tag == 'root':
+                elif tag == 'roothash':
                     root_media_hash = current_object
                     root_media_hash.is_directory = True
                     current_object = object_stack.pop()
-                    hash_list.root_media_hash = root_media_hash
+                    current_object.root_media_hash = root_media_hash
             elif type(current_object) is MHLHashListReference:
                 if tag == 'path':
                     current_object.path = element.text
@@ -103,19 +110,20 @@ def parse(file_path):
                 current_object = MHLMediaHash()
             elif tag == 'creatorinfo':
                 current_object = MHLCreatorInfo()
-            elif tag == 'ignorespec':
-                current_object = MHLIgnoreSpec()
+            elif tag == 'processinfo':
+                current_object = MHLProcessInfo()
             elif tag == 'hashlistreference':
                 current_object = MHLHashListReference()
-        elif type(current_object) is MHLCreatorInfo and event == 'start':
-            # remove namespace here again instead of outside of the if
-            # since we don't want to do it for tags we don't compare at all
+        elif type(current_object) is MHLProcessInfo and event == 'start':
             tag = element.tag.split('}', 1)[-1]
-            if tag == 'root':
+            if tag == 'ignore':
+                object_stack.append(current_object)
+                current_object = MHLIgnoreSpec()
+            elif tag == 'roothash':
                 object_stack.append(current_object)
                 current_object = MHLMediaHash()
 
-    hash_list.ignore_spec = MHLIgnoreSpec(existing_ignore_patterns)
+    hash_list.process_info.ignore_spec = MHLIgnoreSpec(existing_ignore_patterns)
     logger.debug(f'parsing took: {timer() - start}')
 
     return hash_list
@@ -139,15 +147,8 @@ def write_hash_list(hash_list: MHLHashList, file_path: str):
     hash_list.file_path = file_path
     # write creator info
     _write_xml_element_to_file(file, _creator_info_xml_element(hash_list), '  ')
-
-    # ignore_spec. for each ignore pattern, write ignore tag to file.
-    _write_xml_string_to_file(file, '<ignorespec>\n', current_indent)
-    current_indent += '  '
-    if hash_list.ignore_spec:
-        for ignore_pattern in hash_list.ignore_spec.get_pattern_list():
-            _write_xml_element_to_file(file, _ignore_xml_element(ignore_pattern), current_indent)
-    current_indent = current_indent[:-2]
-    _write_xml_string_to_file(file, '</ignorespec>\n', current_indent)
+    # write process info
+    _write_xml_element_to_file(file, _process_info_xml_element(hash_list), '  ')
 
     # write hashes
     hashes_tag = '<hashes>\n'
@@ -223,22 +224,36 @@ def _ascmhlreference_xml_element(hash_list: MHLHashList, file_path: str):
 def _creator_info_xml_element(hash_list: MHLHashList):
     """builds and returns one <creatorinfo> element for a given creator info instance"""
     creator_info = hash_list.creator_info
-    # create empty root hash if directory hashes are disabled or use the generated one from the hash list
-    root_hash = hash_list.root_media_hash
-    if not root_hash:
-        root_hash = MHLMediaHash()
-    root_hash.path = hash_list.get_root_path()
-
     info_element = E.creatorinfo(
         E.creationdate(creator_info.creation_date),
         E.hostname(creator_info.host_name),
-        _root_media_hash_xml_element(root_hash),
         E.tool(creator_info.tool.name, version=creator_info.tool.version),
-        E.process(creator_info.process.process_type)
     )
     # TODO: missing location, comment, ignore
     return info_element
 
+def _process_info_xml_element(hash_list: MHLHashList):
+    """builds and returns one <creatorinfo> element for a given creator info instance"""
+    process_info = hash_list.process_info
+    # create empty root hash if directory hashes are disabled or use the generated one from the hash list
+    root_hash = hash_list.process_info.root_media_hash
+    if not root_hash:
+        root_hash = MHLMediaHash()
+    root_hash.path = hash_list.get_root_path()
+
+    info_element = E.processinfo(
+        _root_media_hash_xml_element(root_hash),
+        E.process(process_info.process.process_type),
+        _ignorespec_xml_element(hash_list.process_info.ignore_spec)
+    )
+    return info_element
+
+def _ignorespec_xml_element(ignore_spec: MHLIgnoreSpec):
+    spec_element = E.ignore()
+    if ignore_spec:
+        for ignore_pattern in ignore_spec.get_pattern_list():
+            spec_element.append(E.pattern(ignore_pattern))
+    return spec_element
 
 def _ignore_xml_element(ignore_pattern: str):
     """builds and returns one <ignore> element for a given ignore_spec pattern entry"""
@@ -248,5 +263,5 @@ def _ignore_xml_element(ignore_pattern: str):
 
 def _root_media_hash_xml_element(root_media_hash: MHLMediaHash):
     element = _media_hash_xml_element(root_media_hash)
-    element.tag = 'root'
+    element.tag = 'roothash'
     return element

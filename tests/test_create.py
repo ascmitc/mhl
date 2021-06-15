@@ -108,8 +108,8 @@ def test_create_directory_hashes(fs):
 
     assert hash_list.find_media_hash_for_path('B').hash_entries[0].hash_string == '51fb8fb099e92821'
     assert hash_list.find_media_hash_for_path('B').hash_entries[0].structure_hash_string == '945ecf443295ffbd'
-    assert hash_list.root_media_hash.hash_entries[0].hash_string == 'cae6659fc7b34c2f'
-    assert hash_list.root_media_hash.hash_entries[0].structure_hash_string == '2c99e94e8fa7d90c'
+    assert hash_list.process_info.root_media_hash.hash_entries[0].hash_string == 'cae6659fc7b34c2f'
+    assert hash_list.process_info.root_media_hash.hash_entries[0].structure_hash_string == '2c99e94e8fa7d90c'
 
     # rename one file
     os.rename('/root/B/B1.txt', '/root/B/B2.txt')

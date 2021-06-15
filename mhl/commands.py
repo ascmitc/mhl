@@ -314,8 +314,8 @@ def verify_directory_hash_subcommand(root_path, verbose, hash_format, ignore_lis
         generation = -1
         for hash_list in existing_history.hash_lists:
             if hash_list.generation_number > generation:
-                if len(hash_list.root_media_hash.hash_entries) > 0:
-                    hash_format = hash_list.root_media_hash.hash_entries[0].hash_format
+                if len(hash_list.process_info.root_media_hash.hash_entries) > 0:
+                    hash_format = hash_list.process_info.root_media_hash.hash_entries[0].hash_format
 
         if hash_format is None:
             logger.verbose(f'default hash format: c4')
@@ -382,7 +382,7 @@ def verify_directory_hash_subcommand(root_path, verbose, hash_format, ignore_lis
         if folder_path == root_path:
             found_hash_format = False
             for hash_list in existing_history.hash_lists:
-                root_hash_entries = hash_list.root_media_hash.hash_entries
+                root_hash_entries = hash_list.process_info.root_media_hash.hash_entries
                 if len(root_hash_entries) > 0:
                     for root_hash_entry in root_hash_entries:
                         if root_hash_entry.hash_format == hash_format:

@@ -134,11 +134,11 @@ class MHLHistory:
         # also search the root directory hashes from all child histories
         if relative_path == ".":
             for hash_list in self.hash_lists:
-                for hash_entry in hash_list.root_media_hash.hash_entries:
+                for hash_entry in hash_list.process_info.root_media_hash.hash_entries:
                     # FIXME is there a better way of accessing the generation from a hash entry?
                     hash_entry.temp_generation_number = hash_list.generation_number
                     hash_entry.temp_is_root_folder = True
-                directory_hash_entries = directory_hash_entries + hash_list.root_media_hash.hash_entries
+                directory_hash_entries = directory_hash_entries + hash_list.process_info.root_media_hash.hash_entries
 
         return directory_hash_entries
 
@@ -230,7 +230,7 @@ class MHLHistory:
                         generation_number = int(parts[0][0])
                         hash_list.generation_number = generation_number
                         # FIXME is there a better way of accessing the generation from a hash entry?
-                        for hash_entry in hash_list.root_media_hash.hash_entries:
+                        for hash_entry in hash_list.process_info.root_media_hash.hash_entries:
                             hash_entry.temp_generation_number = hash_list.generation_number
                         hash_lists.append(hash_list)
                     else:

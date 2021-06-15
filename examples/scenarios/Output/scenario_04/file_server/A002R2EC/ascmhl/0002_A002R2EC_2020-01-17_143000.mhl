@@ -3,18 +3,20 @@
   <creatorinfo>
     <creationdate>2020-01-17T14:30:00+00:00</creationdate>
     <hostname>myHost.local</hostname>
-    <root directory="true">
+    <tool version="0.2 alpha">ascmhl.py</tool>
+  </creatorinfo>
+  <processinfo>
+    <roothash directory="true">
       <path lastmodificationdate="2020-01-15T13:00:00+00:00">/file_server/A002R2EC</path>
       <xxh64 structure="574ab2d2afc981cd">2ca8e358d014d65e</xxh64>
-    </root>
-    <tool version="0.2 alpha">ascmhl.py</tool>
+    </roothash>
     <process>in-place</process>
-  </creatorinfo>
-  <ignorespec>
-    <ignore>.DS_Store</ignore>
-    <ignore>ascmhl</ignore>
-    <ignore>ascmhl/</ignore>
-  </ignorespec>
+    <ignore>
+      <pattern>.DS_Store</pattern>
+      <pattern>ascmhl</pattern>
+      <pattern>ascmhl/</pattern>
+    </ignore>
+  </processinfo>
   <hashes>
     <hash>
       <path size="5" lastmodificationdate="2020-01-15T13:00:00+00:00">Clips/A002C006_141024_R2EC.mov</path>

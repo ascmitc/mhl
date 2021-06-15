@@ -3,7 +3,7 @@
   <creatorinfo>
     <creationdate>2020-01-17T14:30:00+00:00</creationdate>
     <hostname>myHost.local</hostname>
-    <tool version="0.2 alpha">ascmhl.py</tool>
+    <tool version="0.3 alpha">ascmhl.py</tool>
   </creatorinfo>
   <processinfo>
     <roothash directory="true">
@@ -34,11 +34,11 @@
   <references>
     <hashlistreference>
       <path>A002R2EC/ascmhl/0002_A002R2EC_2020-01-17_143000.mhl</path>
-      <c4>c44TemrtJGYTxwe4wcK33JBRKrzz1493KDv55J7b69pzziKMPbtDScRUQ8SL7yN54ByLUSTzc5xNjF1fNTPkxT6eKj</c4>
+      <c4>c44pAeEMJUFqdb9maTgqJKg4va3KhSNmHK467fM2cnNrJ18DjJPVsX2ni4Sbr4p7pw96CrJLvc5VWiuWfnmuJzzXt4</c4>
     </hashlistreference>
     <hashlistreference>
       <path>A003R2EC/ascmhl/0002_A003R2EC_2020-01-17_143000.mhl</path>
-      <c4>c467UcGwaZ89QBgsD7VDFWZyuosByH5RuVwcnQGmKFo392wuS3fecVUysWvjwcFB7zrooSQt64wgSUFHyqJZnFYBPC</c4>
+      <c4>c43j8tZw6tVvv9Q8axFuB7zwLs2WDxLDyRenqzJa5eWhXYu5ZzWRanQVkkRaHAAaRxCG8oyTZnyWpoqvVZuJyRsMJu</c4>
     </hashlistreference>
   </references>
 </hashlist>

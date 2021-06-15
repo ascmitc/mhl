@@ -42,7 +42,7 @@ from .traverse import post_order_lexicographic
               type=click.Path(exists=True),
               help="Record single file, no completeness check (multiple occurrences possible for adding multiple files")
 @click.option('ignore_list', '--ignore', '-i', multiple=True, help="A single file pattern to ignore.")
-@click.option('ignore_spec_file', '--ignore_spec', type=click.Path(exists=True), help="A file containing multiple file patterns to ignore.")
+@click.option('ignore_spec_file', '--ignore_spec', '-ii', type=click.Path(exists=True), help="A file containing multiple file patterns to ignore.")
 def create(root_path, verbose, hash_format, no_directory_hashes, single_file, ignore_list, ignore_spec_file):
     """
     Create a new generation for a folder or file(s)
@@ -192,14 +192,13 @@ def create_for_single_files_subcommand(root_path, verbose, hash_format, single_f
 @click.argument('root_path', type=click.Path(exists=True))
 @click.option('--verbose', '-v', default=False, is_flag=True, help="Verbose output")
 @click.option('ignore_list', '--ignore', '-i', multiple=True, help="A single file pattern to ignore.")
-@click.option('ignore_spec_file', '--ignore_spec', type=click.Path(exists=True), help="A file containing multiple file patterns to ignore.")
+@click.option('ignore_spec_file', '--ignore_spec', '-ii', type=click.Path(exists=True), help="A file containing multiple file patterns to ignore.")
 # subcommand
 @click.option('--directory_hash', '-dh', default=False, is_flag=True,
               help="Record single file, no completeness check (multiple occurrences possible for adding multiple files")
 @click.option('--hash_format', '-h', type=click.Choice(ascmhl_supported_hashformats),
               multiple=False,
               help="Algorithm")
-
 def verify(root_path, verbose, directory_hash, hash_format, ignore_list, ignore_spec_file):
     """
     Verify a folder, single file(s), or a directory hash
@@ -448,7 +447,7 @@ def _compare_and_log_directory_hashes(relative_path, directory_hash_entry,
 @click.argument('root_path', type=click.Path(exists=True))
 @click.option('--verbose', '-v', default=False, is_flag=True, help="Verbose output")
 @click.option('ignore_list', '--ignore', '-i', multiple=True, help="A single file pattern to ignore.")
-@click.option('ignore_spec_file', '--ignore_spec', type=click.Path(exists=True), help="A file containing multiple file patterns to ignore.")
+@click.option('ignore_spec_file', '--ignore_spec', '-ii', type=click.Path(exists=True), help="A file containing multiple file patterns to ignore.")
 def diff(root_path, verbose, ignore_list, ignore_spec_file):
     """
     Diff an entire folder structure
@@ -622,7 +621,7 @@ def xsd_schema_check(file_path):
 @click.option('--hash_format', '-h', type=click.Choice(ascmhl_supported_hashformats), multiple=False,
               default=ascmhl_default_hashformat, help="Algorithm")
 @click.option('ignore_list', '--ignore', '-i', multiple=True, help="A single file pattern to ignore.")
-@click.option('ignore_spec_file', '--ignore_spec', type=click.Path(exists=True), help="A file containing multiple file patterns to ignore.")
+@click.option('ignore_spec_file', '--ignore_spec', '-ii', type=click.Path(exists=True), help="A file containing multiple file patterns to ignore.")
 def directory_hash(root_path, verbose, hash_format, ignore_list, ignore_spec_file):
     """
     [TMP] Creates the directory hash of a given folder

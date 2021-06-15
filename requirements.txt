@@ -1,5 +1,5 @@
 Click==7.0
-lxml==4.6.2
+lxml==4.6.3
 xattr==0.9.6
 xxhash==2.0.0
 pytest==5.3.4

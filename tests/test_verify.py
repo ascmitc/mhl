@@ -57,12 +57,12 @@ def test_directory_verify_detect_changes(fs, simple_mhl_history):
 		file.write('!!')
 
 	result = runner.invoke(mhl.commands.verify, ['-v', '-dh', '/root/'])
-	assert "ERROR: content hash mismatch   for A old xxh64: a8d0ad812ab102bd, new xxh64: 60b973f674b7a8d6 (generation 0002)" in result.output
+	assert "ERROR: content hash mismatch   for A old xxh3_128: 4c8e69c311b21a0a1b3e54fac069fdab, new xxh3_128: 26f0b33a4f7de085f5128d6972ced366 (generation 0002)" in result.output
 	assert result.exit_code == 15
 
 	# rename one file
 	os.rename('/root/B/B1.txt', '/root/B/B2.txt')
 
 	result = runner.invoke(mhl.commands.verify, ['-v', '-dh', '/root/'])
-	assert "ERROR: structure hash mismatch for B old xxh64: 945ecf443295ffbd, new xxh64: fa4e99472911e118 (generation 0002)" in result.output
+	assert "ERROR: structure hash mismatch for B old xxh3_128: c523dc4f6078c7617bf958873544aab6, new xxh3_128: 5c3a07fb32c5180f763d29d762f5c746 (generation 0002)" in result.output
 	assert result.exit_code == 15

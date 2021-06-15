@@ -187,12 +187,15 @@ class MHLMediaHash:
             action_string = ""
             if hash_action is not None and hash_action != "":
                 action_string = "(action: " + hash_action + ")"
-            logger.info(f'{indicator}'
-                        f' {hash_entry.hash_format.rjust(6)}'
-                        f': {hash_entry.hash_string.ljust(32)}'
-                        f'{structure_string}'
-                        f'{action_string}'
-                        f': {self.path}')
+            logger.info(
+                f"{indicator}"
+                f" {hash_entry.hash_format.rjust(6)}"
+                f": {hash_entry.hash_string.ljust(32)}"
+                f"{structure_string}"
+                f"{action_string}"
+                f": {self.path}"
+            )
+
 
 class MHLHashEntry:
     """

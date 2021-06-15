@@ -93,9 +93,7 @@ def create(root_path, verbose, hash_format, no_directory_hashes, single_file, ig
     if single_file is not None and len(single_file) > 0:
         create_for_single_files_subcommand(root_path, verbose, hash_format, single_file, ignore_list, ignore_spec_file)
         return
-    create_for_folder_subcommand(
-        root_path, verbose, hash_format, no_directory_hashes, ignore_list, ignore_spec_file
-    )
+    create_for_folder_subcommand(root_path, verbose, hash_format, no_directory_hashes, ignore_list, ignore_spec_file)
     return
 
 
@@ -148,9 +146,9 @@ def create_for_folder_subcommand(
                 if not dir_hash_context:
                     continue
                 if dir_hash_context:
-                    dir_hash_context.append_directory_hashes(file_path,
-                                                             dir_content_hash_mappings.pop(file_path),
-                                                             dir_structure_hash_mappings.pop(file_path))
+                    dir_hash_context.append_directory_hashes(
+                        file_path, dir_content_hash_mappings.pop(file_path), dir_structure_hash_mappings.pop(file_path)
+                    )
             else:
                 hash_string, success = seal_file_path(existing_history, file_path, hash_format, session)
                 if not success:
@@ -165,8 +163,9 @@ def create_for_folder_subcommand(
             dir_content_hash_mappings[folder_path] = dir_content_hash
             dir_structure_hash_mappings[folder_path] = dir_structure_hash
         modification_date = datetime.datetime.fromtimestamp(os.path.getmtime(folder_path))
-        session.append_directory_hashes(folder_path, modification_date, hash_format, dir_content_hash, dir_structure_hash)
-
+        session.append_directory_hashes(
+            folder_path, modification_date, hash_format, dir_content_hash, dir_structure_hash
+        )
 
     commit_session(session)
 
@@ -177,7 +176,10 @@ def create_for_folder_subcommand(
     if exception:
         raise exception
 
-def create_for_single_files_subcommand(root_path, verbose, hash_format, single_file, ignore_list=None, ignore_spec_file=None):
+
+def create_for_single_files_subcommand(
+    root_path, verbose, hash_format, single_file, ignore_list=None, ignore_spec_file=None
+):
     # command formerly known as "record"
     """
     Creates a new generation with the given file(s) or folder(s).
@@ -255,17 +257,13 @@ def create_for_single_files_subcommand(root_path, verbose, hash_format, single_f
 )
 # subcommand
 @click.option(
-              "--directory_hash",
-              "-dh",
-              default=False,
-              is_flag=True,
-              help="Record single file, no completeness check (multiple occurrences possible for adding multiple files")
-@click.option(
-              "--hash_format",
-              "-h",
-              type=click.Choice(ascmhl_supported_hashformats),
-              multiple=False,
-              help="Algorithm")
+    "--directory_hash",
+    "-dh",
+    default=False,
+    is_flag=True,
+    help="Record single file, no completeness check (multiple occurrences possible for adding multiple files",
+)
+@click.option("--hash_format", "-h", type=click.Choice(ascmhl_supported_hashformats), multiple=False, help="Algorithm")
 def verify(root_path, verbose, directory_hash, hash_format, ignore_list, ignore_spec_file):
     """
     Verify a folder, single file(s), or a directory hash
@@ -358,6 +356,7 @@ def verify_entire_folder_against_full_history_subcommand(root_path, verbose, ign
     if exception:
         raise exception
 
+
 def verify_directory_hash_subcommand(root_path, verbose, hash_format, ignore_list=None, ignore_spec_file=None):
     """
     Checks MHL directory hashes from all generations against computed directory hashes.
@@ -373,7 +372,7 @@ def verify_directory_hash_subcommand(root_path, verbose, hash_format, ignore_lis
     if not os.path.isabs(root_path):
         root_path = os.path.join(os.getcwd(), root_path)
 
-    logger.verbose(f'check folder at path: {root_path}')
+    logger.verbose(f"check folder at path: {root_path}")
 
     existing_history = MHLHistory.load_from_path(root_path)
 
@@ -388,12 +387,12 @@ def verify_directory_hash_subcommand(root_path, verbose, hash_format, ignore_lis
                     hash_format = hash_list.process_info.root_media_hash.hash_entries[0].hash_format
 
         if hash_format is None:
-            logger.verbose(f'default hash format: c4')
-            hash_format = 'c4'
+            logger.verbose(f"default hash format: c4")
+            hash_format = "c4"
         else:
-            logger.verbose(f'hash format from latest generation with directory hashes: {hash_format}')
+            logger.verbose(f"hash format from latest generation with directory hashes: {hash_format}")
     else:
-        logger.verbose(f'hash format: {hash_format}')
+        logger.verbose(f"hash format: {hash_format}")
 
     # start a verification session on the existing history
     session = MHLGenerationCreationSession(existing_history)
@@ -425,7 +424,9 @@ def verify_directory_hash_subcommand(root_path, verbose, hash_format, ignore_lis
                     if directory_hash_entry.hash_format != hash_format:
                         continue
                     found_hash_format = True
-                    num_current_successful_verifications = _compare_and_log_directory_hashes(relative_path, directory_hash_entry, content_hash, structure_hash)
+                    num_current_successful_verifications = _compare_and_log_directory_hashes(
+                        relative_path, directory_hash_entry, content_hash, structure_hash
+                    )
                     if num_current_successful_verifications == 2:
                         num_successful_verifications += 1
                     if num_current_successful_verifications == 1:
@@ -433,7 +434,8 @@ def verify_directory_hash_subcommand(root_path, verbose, hash_format, ignore_lis
 
                 if not found_hash_format:
                     logger.error(
-                        f'ERROR: verification of folder {relative_path}: No directory hash of type {hash_format} found')
+                        f"ERROR: verification of folder {relative_path}: No directory hash of type {hash_format} found"
+                    )
                     num_failed_verifications += 1
             else:
                 hash_string = hash_file_path(existing_history, file_path, hash_format, session)
@@ -446,7 +448,9 @@ def verify_directory_hash_subcommand(root_path, verbose, hash_format, ignore_lis
             dir_content_hash_mappings[folder_path] = dir_content_hash
             dir_structure_hash_mappings[folder_path] = dir_structure_hash
         modification_date = datetime.datetime.fromtimestamp(os.path.getmtime(folder_path))
-        session.append_directory_hashes(folder_path, modification_date, hash_format, dir_content_hash, dir_structure_hash)
+        session.append_directory_hashes(
+            folder_path, modification_date, hash_format, dir_content_hash, dir_structure_hash
+        )
 
         # compare root hashes, works differently
         if folder_path == root_path:
@@ -456,10 +460,12 @@ def verify_directory_hash_subcommand(root_path, verbose, hash_format, ignore_lis
                 if len(root_hash_entries) > 0:
                     for root_hash_entry in root_hash_entries:
                         if root_hash_entry.hash_format == hash_format:
-                            _compare_and_log_directory_hashes(".", root_hash_entry, dir_content_hash, dir_structure_hash)
+                            _compare_and_log_directory_hashes(
+                                ".", root_hash_entry, dir_content_hash, dir_structure_hash
+                            )
                             found_hash_format = True
             if not found_hash_format:
-                logger.error(f'ERROR: verification of root folder: No directory hash of type {hash_format} found')
+                logger.error(f"ERROR: verification of root folder: No directory hash of type {hash_format} found")
 
     exception = None
     if num_failed_verifications > 0:
@@ -468,49 +474,64 @@ def verify_directory_hash_subcommand(root_path, verbose, hash_format, ignore_lis
     if exception:
         raise exception
 
-def _compare_and_log_directory_hashes(relative_path, directory_hash_entry,
-                                      calculated_content_hash_string, calculated_structure_hash_string):
+
+def _compare_and_log_directory_hashes(
+    relative_path, directory_hash_entry, calculated_content_hash_string, calculated_structure_hash_string
+):
     num_successful_verifications = 0
     root_string = ""
     if hasattr(directory_hash_entry, "temp_is_root_folder") and directory_hash_entry.temp_is_root_folder:
         root_string = " (root folder in child history)"
-    if directory_hash_entry.hash_string == calculated_content_hash_string and \
-            directory_hash_entry.structure_hash_string == calculated_structure_hash_string:
+    if (
+        directory_hash_entry.hash_string == calculated_content_hash_string
+        and directory_hash_entry.structure_hash_string == calculated_structure_hash_string
+    ):
         if relative_path == ".":
-            logger.verbose(f'  verification of root folder   OK '
-                           f'(generation {directory_hash_entry.temp_generation_number:04d})')
+            logger.verbose(
+                f"  verification of root folder   OK (generation {directory_hash_entry.temp_generation_number:04d})"
+            )
         else:
-            logger.verbose(f'  verification of folder        {relative_path}{root_string} OK '
-                           f'(generation {directory_hash_entry.temp_generation_number:04d})')
+            logger.verbose(
+                f"  verification of folder        {relative_path}{root_string} OK "
+                f"(generation {directory_hash_entry.temp_generation_number:04d})"
+            )
 
         num_successful_verifications += 2
     else:
         if directory_hash_entry.hash_string != calculated_content_hash_string:
-            logger.error(f'ERROR: content hash mismatch   for {relative_path}{root_string} '
-                         f'old {directory_hash_entry.hash_format}: {directory_hash_entry.hash_string}, '
-                         f'new {directory_hash_entry.hash_format}: {calculated_content_hash_string} '
-                         f'(generation {directory_hash_entry.temp_generation_number:04d})')
+            logger.error(
+                f"ERROR: content hash mismatch   for {relative_path}{root_string} "
+                f"old {directory_hash_entry.hash_format}: {directory_hash_entry.hash_string}, "
+                f"new {directory_hash_entry.hash_format}: {calculated_content_hash_string} "
+                f"(generation {directory_hash_entry.temp_generation_number:04d})"
+            )
         else:
-            logger.verbose(f'  content hash matches for      {relative_path}{root_string} '
-                           f' {directory_hash_entry.hash_format}: {directory_hash_entry.hash_string}'
-                           f' (generation {directory_hash_entry.temp_generation_number:04d})')
+            logger.verbose(
+                f"  content hash matches for      {relative_path}{root_string} "
+                f" {directory_hash_entry.hash_format}: {directory_hash_entry.hash_string}"
+                f" (generation {directory_hash_entry.temp_generation_number:04d})"
+            )
 
         if directory_hash_entry.structure_hash_string != calculated_structure_hash_string:
-            logger.error(f'ERROR: structure hash mismatch for {relative_path}{root_string} '
-                         f'old {directory_hash_entry.hash_format}: {directory_hash_entry.structure_hash_string}, '
-                         f'new {directory_hash_entry.hash_format}: {calculated_structure_hash_string} '
-                         f'(generation {directory_hash_entry.temp_generation_number:04d})')
+            logger.error(
+                f"ERROR: structure hash mismatch for {relative_path}{root_string} "
+                f"old {directory_hash_entry.hash_format}: {directory_hash_entry.structure_hash_string}, "
+                f"new {directory_hash_entry.hash_format}: {calculated_structure_hash_string} "
+                f"(generation {directory_hash_entry.temp_generation_number:04d})"
+            )
         else:
-            logger.verbose(f'  structure hash matches for    {relative_path}{root_string} '
-                           f' {directory_hash_entry.hash_format}: {directory_hash_entry.hash_string} '
-                           f' (generation {directory_hash_entry.temp_generation_number:04d})')
+            logger.verbose(
+                f"  structure hash matches for    {relative_path}{root_string} "
+                f" {directory_hash_entry.hash_format}: {directory_hash_entry.hash_string} "
+                f" (generation {directory_hash_entry.temp_generation_number:04d})"
+            )
 
         num_successful_verifications += 1
 
     return num_successful_verifications
 
-#TODO def verify_single_file_subcommand(root_path, verbose):
 
+# TODO def verify_single_file_subcommand(root_path, verbose):
 
 
 @click.command()
@@ -847,6 +868,6 @@ def seal_file_path(existing_history, file_path, hash_format, session) -> (str, b
 def hash_file_path(existing_history, file_path, hash_format, session) -> (str):
     current_format_hash = create_filehash(hash_format, file_path)
     relative_path = session.root_history.get_relative_file_path(file_path)
-    logger.verbose(f'  created file hash for         {relative_path}')
+    logger.verbose(f"  created file hash for         {relative_path}")
 
     return current_format_hash

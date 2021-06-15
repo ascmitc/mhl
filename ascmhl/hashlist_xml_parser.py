@@ -29,6 +29,7 @@ from .hashlist import (
 from .ignore import MHLIgnoreSpec
 from .utils import datetime_isostring
 
+
 def parse(file_path):
     """parsing the MHL XML file and building the MHLHashList for the hash_list member variable"""
     logger.debug(f"parsing {file_path}...")
@@ -213,7 +214,7 @@ def _media_hash_xml_element(media_hash: MHLMediaHash):
     for hash_entry in media_hash.hash_entries:
         entry_element = E(hash_entry.hash_format)
         if hash_entry.structure_hash_string is not None:
-            entry_element.attrib['structure'] = hash_entry.structure_hash_string
+            entry_element.attrib["structure"] = hash_entry.structure_hash_string
         entry_element.text = hash_entry.hash_string
         if hash_entry.action:
             entry_element.attrib["action"] = hash_entry.action

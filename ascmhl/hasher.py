@@ -12,6 +12,7 @@ import xxhash
 import math
 import os
 
+
 def generate_checksum(csum_type, file_path):
     """
     generate a checksum for the hashlib checksum type.
@@ -71,7 +72,6 @@ class C4HashContext:
         self.internal_context = hashlib.sha512()
         self.charset = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
 
-
     def update(self, input_data):
         self.internal_context.update(input_data)
 
@@ -101,7 +101,7 @@ class C4HashContext:
         while i < c4id_length:
             temp = self.charset.index(c4id_string[i])
             result = result * base58 + temp
-            i = i+1
+            i = i + 1
 
         data = result.to_bytes(64, byteorder="big")
         return data
@@ -127,7 +127,7 @@ class DirectoryHashContext:
     def final_content_hash_str(self):
         # simply create a list-digest of all content digests
         element_list = self.content_hash_strings
-        element_list = list(set(element_list))   # deduplicate, is not happening in digest_for_digest_list any more
+        element_list = list(set(element_list))  # deduplicate, is not happening in digest_for_digest_list any more
         content_hash = digest_for_digest_list(element_list, self.hash_format)
         return content_hash
 
@@ -139,27 +139,30 @@ class DirectoryHashContext:
             file_names.append(os.path.basename(os.path.normpath(path)))
         element_list = digest_list_for_list(file_names, self.hash_format)
         # .. and then add digests of concatenated directory names and structure digest
-        assert(len(self.directory_paths) == len(self.structure_hash_strings))
+        assert len(self.directory_paths) == len(self.structure_hash_strings)
         for i in range(len(self.directory_paths)):
             directory_name = os.path.basename(os.path.normpath(self.directory_paths[i]))
-            element_data = directory_name.encode("utf8") + \
-                           digest_data_for_digest_string(self.structure_hash_strings[i], self.hash_format)
+            element_data = directory_name.encode("utf8") + digest_data_for_digest_string(
+                self.structure_hash_strings[i], self.hash_format
+            )
             element_list.append(digest_for_data(element_data, self.hash_format))
         # at the end make a list-digest of all the collected and created digests
         structure_hash = digest_for_digest_list(element_list, self.hash_format)
         return structure_hash
 
+
 def digest_for_list(input_list, hash_format: str):
     if len(input_list) == 0:
-        return digest_for_string("", hash_format);
+        return digest_for_string("", hash_format)
     # from pseudo code in 30MR-WD-ST-2114-C4ID-2017-01-17 V0 (1).pdf
     input_list = sorted_deduplicates(input_list)
     digest_list_names = digest_list_for_list(input_list, hash_format)
     return digest_for_digest_list(digest_list_names, hash_format)
 
+
 def digest_for_digest_list(digest_list, hash_format: str):
     if len(digest_list) == 0:
-        return digest_for_string("", hash_format);
+        return digest_for_string("", hash_format)
     # from pseudo code in 30MR-WD-ST-2114-C4ID-2017-01-17 V0 (1).pdf (cont'd)
     digest_list.sort()  # dedupliaction is not happening here, happening outside where suitable
     digest_list_names = digest_list
@@ -177,7 +180,7 @@ def digest_for_digest_list(digest_list, hash_format: str):
             digest_pair.append(digest_list_names[i * 2 + 1])
             pair_digest = digest_for_digest_pair(digest_pair, hash_format)
             new_digest_list_names.append(pair_digest)
-            i = i+1
+            i = i + 1
 
         if last_digest is not None:
             new_digest_list_names.append(last_digest)
@@ -195,6 +198,7 @@ def digest_list_for_list(input_list, hash_format: str):
 
     return digest_list
 
+
 def digest_data_for_digest_string(digest_string, hash_format: str):
     if hash_format == "c4":
         c4context = C4HashContext()
@@ -202,6 +206,7 @@ def digest_data_for_digest_string(digest_string, hash_format: str):
     else:
         hash_binary = binascii.unhexlify(digest_string)
     return hash_binary
+
 
 def digest_for_digest_pair(input_pair, hash_format: str):
     input_pair.sort()
@@ -212,16 +217,18 @@ def digest_for_digest_pair(input_pair, hash_format: str):
     input_data[64:128] = input_data1[:]
     return digest_for_data(input_data, hash_format)
 
+
 def digest_for_data(input_data, hash_format: str):
     hash_context = context_type_for_hash_format(hash_format)()
     hash_context.update(input_data)
     return hash_context.hexdigest()
 
+
 def digest_for_string(input_string, hash_format: str):
     return digest_for_data(input_string.encode("utf-8"), hash_format)
 
+
 def sorted_deduplicates(input_list):
     input_list = list(set(input_list))  # remove duplicates
-    input_list.sort()                   # sort
+    input_list.sort()  # sort
     return input_list
-

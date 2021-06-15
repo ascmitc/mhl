@@ -83,8 +83,9 @@ class MHLGenerationCreationSession:
         media_hash.append_hash_entry(hash_entry)
         return hash_entry.action != "failed"
 
-    def append_directory_hashes(self, path, modification_date, hash_format,
-                                content_hash_string, structure_hash_string) -> None:
+    def append_directory_hashes(
+        self, path, modification_date, hash_format, content_hash_string, structure_hash_string
+    ) -> None:
 
         relative_path = self.root_history.get_relative_file_path(path)
         # TODO: handle if path is outside of history root path
@@ -101,13 +102,17 @@ class MHLGenerationCreationSession:
             hash_entry.structure_hash_string = structure_hash_string
             media_hash.append_hash_entry(hash_entry)
             if relative_path == ".":
-                logger.verbose(f"  calculated root hash  {hash_format}: "
-                               f"{content_hash_string} (content), "
-                               f"{structure_hash_string} (structure)")
+                logger.verbose(
+                    f"  calculated root hash  {hash_format}: "
+                    f"{content_hash_string} (content), "
+                    f"{structure_hash_string} (structure)"
+                )
             else:
-                logger.verbose(f"  calculated directory hash for {relative_path}  {hash_format}: "
-                               f"{content_hash_string} (content), "
-                               f"{structure_hash_string} (structure)")
+                logger.verbose(
+                    f"  calculated directory hash for {relative_path}  {hash_format}: "
+                    f"{content_hash_string} (content), "
+                    f"{structure_hash_string} (structure)"
+                )
         else:
             logger.verbose(f"  added directory entry for     {relative_path}")
 

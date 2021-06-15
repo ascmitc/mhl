@@ -76,13 +76,18 @@ $ brew install python3
 $ brew postinstall python3
 ```
 
-### Installing `ascmhl` via package manager
-
+### Installing / updating `ascmhl` as a user
+Please run the following command to install (or upgrade to) the latest development version of `ascmhl`:
 ```shell
-$ pip3 install -U git+https://github.com/ascmitc/mhl.git
+$ pip3 install --upgrade git+https://github.com/ascmitc/mhl.git
 ```
 
-### Installing `ascmhl` manually
+To verify that it has been correctly installed run:
+```shell
+$ ascmhl --help
+```
+
+### Installing `ascmhl` as a developer
 
 Download the source code and install dependencies using a [Virtual Environment](https://docs.python.org/3/tutorial/venv.html):
 
@@ -91,15 +96,25 @@ $ git clone https://github.com/ascmitc/mhl.git
 $ cd mhl
 $ python3 -m venv env
 $ source env/bin/activate
-$ pip3 install -e .
+$ pip3 install --editable .
 ```
 
-> As of now, this process has only been tested on macOS 10.13 and 10.14.
+This will install a wrapper script for `ascmhl` to be available on your `$PATH`. Inside the virtualenv, this wrapper 
+will be installed as `env/bin/ascmhl`. Regular users might have it in 
+`/Library/Frameworks/Python.framework/Versions/3.9/bin/ascmhl` or `/usr/local/bin`. For Windows users, pip will 
+create an `ascmhl.exe`.
 
+More information on installing Python commandline tools using `entry_points` can be found here:
+* https://setuptools.readthedocs.io/en/latest/userguide/entry_point.html
+* https://packaging.python.org/specifications/entry-points/#use-for-scripts
+* https://click.palletsprojects.com/en/master/setuptools/
+
+Adding the `-e / --editable` flag installs a linked version to your `site-packages` directory to allow editing the source 
+files in your working directory as usual.
 
 ## Common Scenarios for `ascmhl`
 
-The ascmhl tool can be used to 
+The `ascmhl` tool can be used to 
 
 * create new MHL generations for given files and folders (command `create`), 
 * verify the state of files and folders against the MHL history (command `verify`),
@@ -112,7 +127,7 @@ Additional utility commands:
 
 ### Working with file hierarchies (with completeness check)
 
-The most common commands when using the `ascmhl ` in data management scenarios are the `create` and the `check` commands in their default behavior (without subcommand options). 
+The most common commands when using the `ascmhl` in data management scenarios are the `create` and the `check` commands in their default behavior (without subcommand options). 
 
 Sealing a folder / drive with the `create` command traverses through a folder hierarchy, hashes all found files and compares the hashes against the records in the `ascmhl` folder (if present). The command creates a new generation (or an initial one) for the content of an entire folder at the given folder level. It can be used to document all files in a folder or drive with all verified or newly created file hashes of the moment the `create` command ran.
 

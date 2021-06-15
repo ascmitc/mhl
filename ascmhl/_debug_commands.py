@@ -17,8 +17,8 @@ from . import hashlist_xml_parser
 
 
 @click.command()
-@click.argument('filepath', type=click.Path(exists=True))
-@click.option('--verbose', '-v', default=False, is_flag=True, help="Verbose output")
+@click.argument("filepath", type=click.Path(exists=True))
+@click.option("--verbose", "-v", default=False, is_flag=True, help="Verbose output")
 def readchainfile(filepath, verbose):
     """
     read an ASC-MHL file
@@ -31,8 +31,8 @@ def readchainfile(filepath, verbose):
 
 
 @click.command()
-@click.argument('filepath', type=click.Path(exists=True))
-@click.option('--verbose', '-v', default=False, is_flag=True, help="Verbose output")
+@click.argument("filepath", type=click.Path(exists=True))
+@click.option("--verbose", "-v", default=False, is_flag=True, help="Verbose output")
 def readmhlfile(filepath, verbose):
     """
     read an ASC-MHL file
@@ -45,8 +45,8 @@ def readmhlfile(filepath, verbose):
 
 
 @click.command()
-@click.argument('root_path', type=click.Path(exists=True))
-@click.option('--verbose', '-v', default=False, is_flag=True, help="Verbose output")
+@click.argument("root_path", type=click.Path(exists=True))
+@click.option("--verbose", "-v", default=False, is_flag=True, help="Verbose output")
 def readmhlhistory(root_path, verbose):
     """
     read an ASC-MHL file
@@ -59,19 +59,19 @@ def readmhlhistory(root_path, verbose):
 
 
 @click.command()
-@click.argument('root_path', type=click.Path(exists=False))
+@click.argument("root_path", type=click.Path(exists=False))
 def create_dummy_file_structure(root_path):
     """
     create a potentially huge set of dummy files to test how the commands can handle large file systems
     """
 
     folder_depth = 3
-    print('delete old dummy folder')
-    dummy_folder = os.path.join(root_path, 'dummy_fs')
+    print("delete old dummy folder")
+    dummy_folder = os.path.join(root_path, "dummy_fs")
     if os.path.exists(dummy_folder):
         shutil.rmtree(dummy_folder)
     os.makedirs(dummy_folder, exist_ok=True)
-    create_dummy_folder(dummy_folder, '', folder_depth)
+    create_dummy_folder(dummy_folder, "", folder_depth)
 
 
 def create_dummy_folder(root_path, prefix, depth):
@@ -80,19 +80,19 @@ def create_dummy_folder(root_path, prefix, depth):
     verbose = False
     if len(prefix) > 0:
         folder_path = os.path.join(root_path, prefix)
-        print(f'd: {folder_path}')
+        print(f"d: {folder_path}")
         os.mkdir(folder_path)
         for file in range(0, num_files):
-            file_name = f'{prefix}{file:03}.txt'
+            file_name = f"{prefix}{file:03}.txt"
             file_path = os.path.join(folder_path, file_name)
             if verbose:
-                print(f'f: {file_path}')
-            with open(file_path, 'w') as file_handle:
+                print(f"f: {file_path}")
+            with open(file_path, "w") as file_handle:
                 file_handle.write(file_name)
     else:
         folder_path = root_path
     if depth == 0:
         return
     for folder in range(0, num_folders):
-        folder_name = prefix + chr(ord('A') + folder)
-        create_dummy_folder(folder_path, folder_name, depth-1)
+        folder_name = prefix + chr(ord("A") + folder)
+        create_dummy_folder(folder_path, folder_name, depth - 1)

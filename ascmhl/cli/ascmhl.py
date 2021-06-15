@@ -10,8 +10,8 @@ __email__ = "opensource@pomfort.com"
 
 import click
 
-from mhl import commands
-from mhl.cli.update import Updater
+from ascmhl import commands
+from ascmhl.cli.update import Updater
 
 updater = Updater()
 
@@ -45,5 +45,5 @@ mhltool_cli.add_command(commands.xsd_schema_check)
 mhltool_cli.add_command(commands.directory_hash, "dirhash")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     mhltool_cli()

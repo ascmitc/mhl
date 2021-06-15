@@ -25,7 +25,7 @@ def generate_checksum(csum_type, file_path):
         print("ERROR: file_path is None")
         return None
 
-    with open(file_path, 'rb') as fd:
+    with open(file_path, "rb") as fd:
         # process files in 1MB chunks so that large files won't cause excessive memory consumption.
         chunk = fd.read(1024 * 1024)
         while chunk:
@@ -49,25 +49,24 @@ def create_filehash(hash_format, filepath):
 
 
 def context_type_for_hash_format(hash_format):
-    if hash_format == 'md5':
+    if hash_format == "md5":
         return hashlib.md5
-    elif hash_format == 'sha1':
+    elif hash_format == "sha1":
         return hashlib.sha1
-    elif hash_format == 'xxh32':
+    elif hash_format == "xxh32":
         return xxhash.xxh32
-    elif hash_format == 'xxh64':
+    elif hash_format == "xxh64":
         return xxhash.xxh64
-    elif hash_format == 'xxh3':
+    elif hash_format == "xxh3":
         return xxhash.xxh3_64
-    elif hash_format == 'xxh128':
+    elif hash_format == "xxh128":
         return xxhash.xxh3_128
-    elif hash_format == 'c4':
+    elif hash_format == "c4":
         return C4HashContext
-    assert False, 'unsupported hash format'
+    assert False, "unsupported hash format"
 
 
 class C4HashContext:
-
     def __init__(self):
         self.internal_context = hashlib.sha512()
         self.charset = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
@@ -81,7 +80,7 @@ class C4HashContext:
 
         base58 = 58  # the encoding basis
         c4id_length = 90  # the guaranteed length
-        zero = '1'  # '0' is not in the C4ID alphabet so '1' is zero
+        zero = "1"  # '0' is not in the C4ID alphabet so '1' is zero
 
         hash_value = int(sha512_string, 16)
         c4_string = ""
@@ -104,12 +103,11 @@ class C4HashContext:
             result = result * base58 + temp
             i = i+1
 
-        data = result.to_bytes(64, byteorder='big')
+        data = result.to_bytes(64, byteorder="big")
         return data
 
 
 class DirectoryHashContext:
-
     def __init__(self, hash_format: str):
         self.hash_format = hash_format
         self.content_hash_strings = []
@@ -144,7 +142,7 @@ class DirectoryHashContext:
         assert(len(self.directory_paths) == len(self.structure_hash_strings))
         for i in range(len(self.directory_paths)):
             directory_name = os.path.basename(os.path.normpath(self.directory_paths[i]))
-            element_data = directory_name.encode('utf8') + \
+            element_data = directory_name.encode("utf8") + \
                            digest_data_for_digest_string(self.structure_hash_strings[i], self.hash_format)
             element_list.append(digest_for_data(element_data, self.hash_format))
         # at the end make a list-digest of all the collected and created digests
@@ -198,7 +196,7 @@ def digest_list_for_list(input_list, hash_format: str):
     return digest_list
 
 def digest_data_for_digest_string(digest_string, hash_format: str):
-    if hash_format == 'c4':
+    if hash_format == "c4":
         c4context = C4HashContext()
         hash_binary = c4context.data_for_C4ID_string(digest_string)
     else:
@@ -220,7 +218,7 @@ def digest_for_data(input_data, hash_format: str):
     return hash_context.hexdigest()
 
 def digest_for_string(input_string, hash_format: str):
-    return digest_for_data(input_string.encode('utf-8'), hash_format)
+    return digest_for_data(input_string.encode("utf-8"), hash_format)
 
 def sorted_deduplicates(input_list):
     input_list = list(set(input_list))  # remove duplicates

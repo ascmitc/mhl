@@ -42,8 +42,8 @@ def datetime_now_isostring():
 
 
 def datetime_now_filename_string():
-    """create a string representation for now() for use as part of the MHL filename """
-    return datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%d_%H%M%S')
+    """create a string representation for now() for use as part of the MHL filename"""
+    return datetime.datetime.strftime(datetime.datetime.now(), "%Y-%m-%d_%H%M%S")
 
 
 def datetime_now_isostring_with_microseconds():

@@ -11,7 +11,7 @@ __email__ = "opensource@pomfort.com"
 import click
 
 # noinspection PyProtectedMember
-from mhl import _debug_commands
+from ascmhl import _debug_commands
 
 
 @click.group()
@@ -22,8 +22,8 @@ def debug_cli():
 debug_cli.add_command(_debug_commands.readmhlfile)
 debug_cli.add_command(_debug_commands.readchainfile)
 debug_cli.add_command(_debug_commands.readmhlhistory)
-debug_cli.add_command(_debug_commands.create_dummy_file_structure, 'create_dummy_file_structure')
+debug_cli.add_command(_debug_commands.create_dummy_file_structure, "create_dummy_file_structure")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     debug_cli()

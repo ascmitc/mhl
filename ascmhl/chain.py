@@ -28,7 +28,7 @@ class MHLChain:
     # init
 
     file_path: str
-    generations: List['MHLChainGeneration']
+    generations: List["MHLChainGeneration"]
 
     def __init__(self, file_path: str):
         self.file_path = file_path
@@ -82,8 +82,12 @@ class MHLChainGeneration:
         action = "*"  # FIXME
         indicator = " "
 
-        logger.info("{0} {1}: {2} {3}: {4}".format(indicator,
-                                                   self.hash_format.rjust(6),
-                                                   self.hash_string.ljust(32),
-                                                   action.ljust(10),
-                                                   self.ascmhl_filename))
+        logger.info(
+            "{0} {1}: {2} {3}: {4}".format(
+                indicator,
+                self.hash_format.rjust(6),
+                self.hash_string.ljust(32),
+                action.ljust(10),
+                self.ascmhl_filename,
+            )
+        )

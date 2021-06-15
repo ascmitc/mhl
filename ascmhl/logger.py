@@ -37,14 +37,12 @@ def error(msg, *args):
     """Logs a message to stderr"""
     if args:
         msg %= args
-    click.echo(click.style(msg, fg='red', bold=True), file=sys.stderr)
+    click.echo(click.style(msg, fg="red", bold=True), file=sys.stderr)
 
 
 def fatal(msg, *args):
     """Logs a message to stderr, then exits"""
     if args:
         msg %= args
-    click.echo(click.style(msg, fg='red', bold=True, blink=True), file=sys.stderr)
+    click.echo(click.style(msg, fg="red", bold=True, blink=True), file=sys.stderr)
     click.get_current_context().abort()
-
-

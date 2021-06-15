@@ -33,7 +33,7 @@ def post_order_lexicographic(top: str, ignore_pathspec: pathspec.PathSpec = None
         file_path = os.path.join(top, name)
         if ignore_pathspec and ignore_pathspec.match_file(file_path):
             if os.path.basename(os.path.normpath(file_path)) != ascmhl_folder_name:
-                logger.verbose(f'ignoring filepath {file_path}')
+                logger.verbose(f"ignoring filepath {file_path}")
             continue
         path = join(top, name)
         children.append((name, isdir(path)))

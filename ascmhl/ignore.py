@@ -12,7 +12,7 @@ from . import logger
 
 
 def default_ignore_list():
-    return ['.DS_Store', 'ascmhl', 'ascmhl/']
+    return [".DS_Store", "ascmhl", "ascmhl/"]
 
 
 class MHLIgnoreSpec:
@@ -47,7 +47,7 @@ class MHLIgnoreSpec:
         get_path_spec will return a pathspec.PathSpec instance filled with the contents of self.ignore_list
         the returned pathspec.PathSpec instance can be used to match against filepaths.
         """
-        return pathspec.PathSpec.from_lines('gitwildmatch', iter(self._ignore_list))
+        return pathspec.PathSpec.from_lines("gitwildmatch", iter(self._ignore_list))
 
     def get_pattern_list(self):
         return self._ignore_list.copy()
@@ -66,8 +66,8 @@ class MHLIgnoreSpec:
         """
         patters_from_file = []
         if filepath:
-            with open(filepath, 'r') as fh:
-                patters_from_file.extend(line.rstrip('\n') for line in fh if line != '\n')
+            with open(filepath, "r") as fh:
+                patters_from_file.extend(line.rstrip("\n") for line in fh if line != "\n")
                 self._append_patterns_list(patters_from_file)
 
     # For call to repr().

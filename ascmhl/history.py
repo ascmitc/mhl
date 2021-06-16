@@ -47,7 +47,7 @@ class MHLHistory:
     root_path -- path where the mhl folder resides
     """
 
-    history_file_name_regex = r'^(\d{4,})(?:_(.+))?$'
+    history_file_name_regex = r"^(\d{4,})(?:_(.+))?$"
 
     chain: Optional[MHLChain]
     hash_lists: List[MHLHashList]
@@ -110,9 +110,38 @@ class MHLHistory:
             if media_hash is None:
                 continue
             for hash_entry in media_hash.hash_entries:
-                if hash_entry.action == 'original':
+                if hash_entry.action == "original":
                     return hash_entry
         return None
+
+    # methods to query and compare hashes
+    def find_directory_hash_entries_for_path(self, relative_path: str) -> List[MHLHashEntry]:
+        """Searches the history for directory hash entries of a folder
+
+        starts with the first generation through all other generations
+        and collects all directory hashes found for the given folder.
+        """
+        directory_hash_entries = []
+        for hash_list in self.hash_lists:
+            media_hash = hash_list.find_media_hash_for_path(relative_path)
+            if media_hash is None:
+                continue
+            if media_hash.is_directory:
+                for hash_entry in media_hash.hash_entries:
+                    # FIXME is there a better way of accessing the generation from a hash entry?
+                    hash_entry.temp_generation_number = hash_list.generation_number
+                directory_hash_entries = directory_hash_entries + media_hash.hash_entries
+
+        # also search the root directory hashes from all child histories
+        if relative_path == ".":
+            for hash_list in self.hash_lists:
+                for hash_entry in hash_list.process_info.root_media_hash.hash_entries:
+                    # FIXME is there a better way of accessing the generation from a hash entry?
+                    hash_entry.temp_generation_number = hash_list.generation_number
+                    hash_entry.temp_is_root_folder = True
+                directory_hash_entries = directory_hash_entries + hash_list.process_info.root_media_hash.hash_entries
+
+        return directory_hash_entries
 
     def find_first_hash_entry_for_path(self, relative_path, hash_format=None) -> Optional[MHLHashEntry]:
         """Searches the history for the first (original) hash entry of a file
@@ -180,7 +209,7 @@ class MHLHistory:
 
     @classmethod
     def load_from_path(cls, root_path):
-        """finds all MHL files in the asc-mhl folder, returns the mhl_history instance with all mhl_hashlists """
+        """finds all MHL files in the asc-mhl folder, returns the mhl_history instance with all mhl_hashlists"""
 
         asc_mhl_folder_path = os.path.join(root_path, ascmhl_folder_name)
         history = cls()
@@ -199,12 +228,14 @@ class MHLHistory:
                     if len(parts) == 1 and len(parts[0]) == 2:
                         file_path = os.path.join(asc_mhl_folder_path, filename)
                         hash_list = hashlist_xml_parser.parse(file_path)
-
                         generation_number = int(parts[0][0])
                         hash_list.generation_number = generation_number
+                        # FIXME is there a better way of accessing the generation from a hash entry?
+                        for hash_entry in hash_list.process_info.root_media_hash.hash_entries:
+                            hash_entry.temp_generation_number = hash_list.generation_number
                         hash_lists.append(hash_list)
                     else:
-                        logger.error(f'name of ascmhl file {filename} does not conform to naming convention')
+                        logger.error(f"name of ascmhl file {filename} does not conform to naming convention")
         # sort all found hash lists by generation number first to make sure we add them to the history in order
         hash_lists.sort(key=lambda x: x.generation_number)
         for hash_list in hash_lists:
@@ -297,7 +328,7 @@ class MHLHistory:
         date_string = datetime_now_filename_string()
         index = self.latest_generation_number() + 1
         folder_name = os.path.basename(os.path.normpath(self.get_root_path()))
-        file_name = f'{index:04d}_{folder_name}_{date_string}{ascmhl_file_extension}'
+        file_name = f"{index:04d}_{folder_name}_{date_string}{ascmhl_file_extension}"
         return file_name, index
 
     def _validate_new_hash_list(self, hash_list):
@@ -309,16 +340,15 @@ class MHLHistory:
         # TODO: validate new hash entries
         for media_hash in hash_list.media_hashes:
             for hash_entry in media_hash.hash_entries:
-                if hash_entry.action == 'new':
+                if hash_entry.action == "new":
                     # TODO: do need to use the original hash here or can we also use another hash
                     original_hash_entry = self.find_original_hash_entry_for_path(media_hash.path)
                     required_hash_entry = media_hash.find_hash_entry_for_format(original_hash_entry.hash_format)
                     if required_hash_entry is None:
-                        raise AssertionError('no hash entry found for new hash', hash_entry)
-                    if required_hash_entry.action != 'verified':
-                        raise AssertionError('hash entry for new hash not verified',
-                                             hash_entry, required_hash_entry)
-                    hash_entry.action = 'verified'
+                        raise AssertionError("no hash entry found for new hash", hash_entry)
+                    if required_hash_entry.action != "verified":
+                        raise AssertionError("hash entry for new hash not verified", hash_entry, required_hash_entry)
+                    hash_entry.action = "verified"
         return True
 
     # accessors

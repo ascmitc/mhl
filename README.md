@@ -39,7 +39,7 @@ The reference library covers
 
 ASC MHL supports the hash formats
 
-* xxHash (32-bit, 64-bit, and latest 128-bit/XXH3)
+* xxHash (64-bit, and latest XXH3 with 64-bit and 128-bit)
 * MD5
 * SHA1, SHA256
 * C4
@@ -79,7 +79,7 @@ $ brew postinstall python3
 ### Installing / updating `ascmhl` as a user
 Please run the following command to install (or upgrade to) the latest development version of `ascmhl`:
 ```shell
-$ pip3 install --upgrade git+https://github.com/ascmitc/mhl.git
+$ pip3 install --upgrade ascmhl
 ```
 
 To verify that it has been correctly installed run:
@@ -295,7 +295,7 @@ on error (including mismatching hashes):
 ```
 
 
-#### `verify` with `-dh` subcommand option (for directory hash) _[not implemented yet]_
+#### `verify` with `-dh` subcommand option (for directory hash)
 
 The `verify` command with the `-dh` subcommand option creates the directory hash by hashing the contained files of the given directory path (filtered by the ignore patterns from the `ascmhl` folder) and compares it with the to-be-expected directory hash calculated from the file hashes (same calculation as the `info` command with the `-dh` subcommand option).
 

@@ -9,7 +9,11 @@ __email__ = "opensource@pomfort.com"
 """
 
 import click
-from mhl import commands
+
+from ascmhl import commands
+from ascmhl.cli.update import Updater
+
+updater = Updater()
 
 
 class NaturalOrderGroup(click.Group):
@@ -21,6 +25,13 @@ class NaturalOrderGroup(click.Group):
 @click.version_option()
 def mhltool_cli():
     pass
+
+
+@mhltool_cli.resultcallback()
+def update(*args, **kwargs):
+    updater.join(timeout=1)
+    if updater.needs_update:
+        click.secho(f"Please update to the latest ascmhl version using `pip3 install -U ascmhl`.", fg="blue")
 
 
 # new
@@ -35,5 +46,5 @@ mhltool_cli.add_command(commands.xsd_schema_check)
 mhltool_cli.add_command(commands.directory_hash, "dirhash")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     mhltool_cli()

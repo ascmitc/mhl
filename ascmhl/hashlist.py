@@ -18,7 +18,6 @@ from .__version__ import ascmhl_reference_hash_format
 from .hasher import create_filehash
 
 
-
 class MHLHashList:
     """
     class for representing one MHL generation
@@ -47,9 +46,9 @@ class MHLHashList:
     media_hashes: List[MHLMediaHash]
     media_hashes_path_map: Dict[str, MHLMediaHash]
     # referenced_hash_lists are the loaded hash list object
-    referenced_hash_lists = List['MHLHashList']
+    referenced_hash_lists = List["MHLHashList"]
     # while hash_list_references store the reference objects found in the mhl files
-    hash_list_references = List['MHLHashListReference']
+    hash_list_references = List["MHLHashListReference"]
     file_path: Optional[str]
     generation_number: Optional[int]
 
@@ -94,7 +93,7 @@ class MHLHashList:
 
     # build
     def append_hash(self, media_hash: MHLMediaHash):
-        if media_hash.path == '.':
+        if media_hash.path == ".":
             self.process_info.root_media_hash = media_hash
         else:
             self.media_hashes.append(media_hash)
@@ -136,6 +135,7 @@ class MHLMediaHash:
 
     other member variables:
     """
+
     hash_entries: List[MHLHashEntry]
     path: Optional[str]
     file_size: Optional[int]
@@ -175,16 +175,26 @@ class MHLMediaHash:
             if hash_entry.hash_format != hash_format:
                 continue
             indicator = " "
-            if hash_entry.action == 'failed':
+            if hash_entry.action == "failed":
                 indicator = "!"
             elif self.is_directory:
                 indicator = "d"
+
             hash_action = (hash_entry.action if hash_entry.action is not None else "").ljust(10)
-            logger.info("{0} {1}: {2} {3}: {4}".format(indicator,
-                                                       hash_entry.hash_format.rjust(6),
-                                                       hash_entry.hash_string.ljust(32),
-                                                       hash_action,
-                                                       self.path))
+            structure_string = ""
+            if hash_entry.structure_hash_string is not None and hash_entry.structure_hash_string != "":
+                structure_string = " (structure " + hash_entry.structure_hash_string + ")"
+            action_string = ""
+            if hash_action is not None and hash_action != "":
+                action_string = "(action: " + hash_action + ")"
+            logger.info(
+                f"{indicator}"
+                f" {hash_entry.hash_format.rjust(6)}"
+                f": {hash_entry.hash_string.ljust(32)}"
+                f"{structure_string}"
+                f"{action_string}"
+                f": {self.path}"
+            )
 
 
 class MHLHashEntry:
@@ -201,12 +211,15 @@ class MHLHashEntry:
     """
 
     hash_string: str
+    structure_hash_string: str
     hash_format: str
     action: Optional[str]
 
     def __init__(self, hash_format: str, hash_string: str, action: str = None):
-        self.hash_string = hash_string
         self.hash_format = hash_format
+        self.hash_string = hash_string
+        self.structure_hash_string = None
+
         self.action = action
 
 
@@ -214,6 +227,7 @@ class MHLHashListReference:
     """
     class to store the ascmhlreference to a child history mhl file
     """
+
     path: Optional[str]
     reference_hash: Optional[str]
 
@@ -226,6 +240,7 @@ class MHLCreatorInfo:
     """
     Stores the creator info that is part of the header of each hash list file
     """
+
     host_name: Optional[str]
     tool: Optional[MHLTool]
     creation_date: Optional[datetime]
@@ -248,7 +263,7 @@ class MHLCreatorInfo:
         if self.host_name is not None:
             summary += str(self.host_name)
         else:
-            summary += "[unknown host]";
+            summary += "[unknown host]"
         if self.tool.name is not None:
             summary += ", " + str(self.tool.name)
             if self.tool.version is not None:
@@ -266,6 +281,7 @@ class MHLProcessInfo:
     """
     Stores the creator info that is part of the header of each hash list file
     """
+
     process: Optional[MHLProcess]
     root_media_hash: Optional[MHLMediaHash]
     ignore_spec: MHLIgnoreSpec

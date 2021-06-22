@@ -247,7 +247,7 @@ class MHLHistory:
 
     @classmethod
     def load_from_packing_list_path(cls, packing_list_path, root_path):
-        """returns the mhl_history instance with the one packing list mhl_hashlists """
+        """returns the mhl_history instance with the one packing list mhl_hashlists"""
         # via https://docs.google.com/document/d/1FVSyHq2XJdNt-3Vur_5I_FPOoeeC_cEjkv7p---biyg/edit#
 
         asc_mhl_folder_path = os.path.join(root_path, ascmhl_folder_name)
@@ -265,7 +265,7 @@ class MHLHistory:
         now = datetime.now()
         collection_folder_name = "debug"
         if not debug:
-            date_time_string = now.strftime('%Y-%m-%d')
+            date_time_string = now.strftime("%Y-%m-%d")
             collection_folder_name = "collection_" + date_time_string
 
         collection_folder_path = os.path.join(root_path, collection_folder_name)

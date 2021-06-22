@@ -41,7 +41,9 @@ class MHLGenerationCreationSession:
         self.new_hash_lists = defaultdict(MHLHashList)
         self.ignore_spec = ignore_spec
 
-    def append_file_hash(self, file_path, file_size, file_modification_date, hash_format, hash_string, action=None) -> bool:
+    def append_file_hash(
+        self, file_path, file_size, file_modification_date, hash_format, hash_string, action=None
+    ) -> bool:
 
         relative_path = self.root_history.get_relative_file_path(file_path)
         # TODO: handle if path is outside of history root path
@@ -81,9 +83,9 @@ class MHLGenerationCreationSession:
 
         # in case the same file is hashes multiple times we want to add all hash entries
         new_hash_list = self.new_hash_lists[history]
-        media_hash = new_hash_list.find_or_create_media_hash_for_path(history_relative_path,
-                                                                      file_size,
-                                                                      file_modification_date)
+        media_hash = new_hash_list.find_or_create_media_hash_for_path(
+            history_relative_path, file_size, file_modification_date
+        )
 
         # collection behavior: overwrite action with action from flattened history
         if action != None:

@@ -263,17 +263,17 @@ def create_for_single_files_subcommand(
     is_flag=True,
     help="Record single file, no completeness check (multiple occurrences possible for adding multiple files",
 )
-@click.option("--hash_format",
-              "-h",
-              type=click.Choice(ascmhl_supported_hashformats),
-              multiple=False,
-              help="Algorithm for directory hashes")
+@click.option(
+    "--hash_format",
+    "-h",
+    type=click.Choice(ascmhl_supported_hashformats),
+    multiple=False,
+    help="Algorithm for directory hashes",
+)
 # subcommand
-@click.option("--packing_list",
-              "-pl",
-              default=None,
-              type=click.Path(exists=True),
-              help="Verify against an external packing list")
+@click.option(
+    "--packing_list", "-pl", default=None, type=click.Path(exists=True), help="Verify against an external packing list"
+)
 def verify(root_path, verbose, directory_hash, hash_format, packing_list, ignore_list, ignore_spec_file):
     """
     Verify a folder, single file(s), or a directory hash
@@ -297,6 +297,7 @@ def verify(root_path, verbose, directory_hash, hash_format, packing_list, ignore
     verify_entire_folder(root_path, verbose, None, ignore_list, ignore_spec_file)
     return
 
+
 def verify_entire_folder(root_path, verbose, packing_list_path, ignore_list=None, ignore_spec_file=None):
     """
     Checks MHL hashes from all generations / a packing list against all file hashes.
@@ -314,7 +315,7 @@ def verify_entire_folder(root_path, verbose, packing_list_path, ignore_list=None
     if not os.path.isabs(root_path):
         root_path = os.path.join(os.getcwd(), root_path)
 
-    logger.verbose(f'check folder at path: {root_path}')
+    logger.verbose(f"check folder at path: {root_path}")
 
     if packing_list_path is not None:
         existing_history = MHLHistory.load_from_packing_list_path(packing_list_path, root_path)
@@ -348,18 +349,20 @@ def verify_entire_folder(root_path, verbose, packing_list_path, ignore_list=None
 
             # in case there is no original hash entry continue
             if original_hash_entry is None:
-                logger.error(f'found new file {relative_path}')
+                logger.error(f"found new file {relative_path}")
                 num_new_files += 1
                 continue
 
             # create a new hash and compare it against the original hash entry
             current_hash = create_filehash(original_hash_entry.hash_format, file_path)
             if original_hash_entry.hash_string == current_hash:
-                logger.verbose(f'verification ({original_hash_entry.hash_format}) of file {relative_path}: OK')
+                logger.verbose(f"verification ({original_hash_entry.hash_format}) of file {relative_path}: OK")
             else:
-                logger.error(f'ERROR: hash mismatch        for {relative_path} '
-                             f'old {original_hash_entry.hash_format}: {original_hash_entry.hash_string}, '
-                             f'new {original_hash_entry.hash_format}: {current_hash}')
+                logger.error(
+                    f"ERROR: hash mismatch        for {relative_path} "
+                    f"old {original_hash_entry.hash_format}: {original_hash_entry.hash_string}, "
+                    f"new {original_hash_entry.hash_format}: {current_hash}"
+                )
                 num_failed_verifications += 1
 
     exception = test_for_missing_files(not_found_paths, root_path, ignore_spec)
@@ -370,6 +373,7 @@ def verify_entire_folder(root_path, verbose, packing_list_path, ignore_list=None
 
     if exception:
         raise exception
+
 
 def verify_directory_hash_subcommand(root_path, verbose, hash_format, ignore_list=None, ignore_spec_file=None):
     """
@@ -544,6 +548,7 @@ def _compare_and_log_directory_hashes(
 
     return num_successful_verifications
 
+
 # TODO def verify_single_file_subcommand(root_path, verbose):
 
 
@@ -644,17 +649,26 @@ def diff_entire_folder_against_full_history_subcommand(root_path, verbose, ignor
         raise exception
 
 
-
 @click.command()
-@click.argument('root_path', type=click.Path(exists=True))
-@click.argument('destination_path', type=click.Path())
+@click.argument("root_path", type=click.Path(exists=True))
+@click.argument("destination_path", type=click.Path())
 # general options
-@click.option('--verbose', '-v', default=False, is_flag=True,
-              help="Verbose output")
-@click.option('--no_directory_hashes', '-n', default=False, is_flag=True,
-              help="Skip creation of directory hashes, only reference directories without hash")
-@click.option('ignore_list', '--ignore', '-i', multiple=True, help="A single file pattern to ignore.")
-@click.option('ignore_spec_file', '--ignore_spec', '-ii', type=click.Path(exists=True), help="A file containing multiple file patterns to ignore.")
+@click.option("--verbose", "-v", default=False, is_flag=True, help="Verbose output")
+@click.option(
+    "--no_directory_hashes",
+    "-n",
+    default=False,
+    is_flag=True,
+    help="Skip creation of directory hashes, only reference directories without hash",
+)
+@click.option("ignore_list", "--ignore", "-i", multiple=True, help="A single file pattern to ignore.")
+@click.option(
+    "ignore_spec_file",
+    "--ignore_spec",
+    "-ii",
+    type=click.Path(exists=True),
+    help="A file containing multiple file patterns to ignore.",
+)
 def flatten(root_path, destination_path, verbose, no_directory_hashes, ignore_list, ignore_spec_file):
     """
     Flatten an MHL history into one external manifest
@@ -667,13 +681,14 @@ def flatten(root_path, destination_path, verbose, no_directory_hashes, ignore_li
     flatten_history(root_path, destination_path, verbose, no_directory_hashes, ignore_list, ignore_spec_file)
     return
 
+
 def flatten_history(root_path, destination_path, verbose, no_directory_hashes, ignore_list=None, ignore_spec_file=None):
     logger.verbose_logging = verbose
 
     if not os.path.isabs(root_path):
         root_path = os.path.join(os.getcwd(), root_path)
 
-    logger.verbose(f'Flattening folder at path: {root_path} ...')
+    logger.verbose(f"Flattening folder at path: {root_path} ...")
 
     existing_history = MHLHistory.load_from_path(root_path)
 
@@ -696,10 +711,18 @@ def flatten_history(root_path, destination_path, verbose, no_directory_hashes, i
                 for hash_entry in media_hash.hash_entries:
                     if hash_entry.action != "failed":
                         # check if this entry is newer than the one already in there to avoid duplicate entries
-                        found_media_hash = session.new_hash_lists[collection_history].find_media_hash_for_path(media_hash.path)
+                        found_media_hash = session.new_hash_lists[collection_history].find_media_hash_for_path(
+                            media_hash.path
+                        )
                         if found_media_hash == None:
-                            session.append_file_hash(media_hash.path, media_hash.file_size, media_hash.last_modification_date,
-                                                     hash_entry.hash_format, hash_entry.hash_string, action=hash_entry.action)
+                            session.append_file_hash(
+                                media_hash.path,
+                                media_hash.file_size,
+                                media_hash.last_modification_date,
+                                hash_entry.hash_format,
+                                hash_entry.hash_string,
+                                action=hash_entry.action,
+                            )
                         else:
                             hashformat_is_already_there = False
                             for found_hash_entry in found_media_hash.hash_entries:
@@ -707,10 +730,14 @@ def flatten_history(root_path, destination_path, verbose, no_directory_hashes, i
                                     hashformat_is_already_there = True
                             if not hashformat_is_already_there:
                                 # assuming that hash_entry of same type also has same hash_value ..
-                                session.append_file_hash(media_hash.path, media_hash.file_size,
-                                                         media_hash.last_modification_date,
-                                                         hash_entry.hash_format, hash_entry.hash_string,
-                                                         action=hash_entry.action)
+                                session.append_file_hash(
+                                    media_hash.path,
+                                    media_hash.file_size,
+                                    media_hash.last_modification_date,
+                                    hash_entry.hash_format,
+                                    hash_entry.hash_string,
+                                    action=hash_entry.action,
+                                )
 
     commit_session_for_collection(session)
 
@@ -918,14 +945,16 @@ def commit_session(session):
     process_info.process = MHLProcess("in-place")
     session.commit(creator_info, process_info)
 
+
 def commit_session_for_collection(session):
     creator_info = MHLCreatorInfo()
     creator_info.tool = MHLTool(ascmhl_tool_name, ascmhl_tool_version)
     creator_info.creation_date = utils.datetime_now_isostring()
     creator_info.host_name = platform.node()
     process_info = MHLProcessInfo()
-    process_info.process = MHLProcess('flatten')
+    process_info.process = MHLProcess("flatten")
     session.commit(creator_info, process_info)
+
 
 def seal_file_path(existing_history, file_path, hash_format, session) -> (str, bool):
     relative_path = existing_history.get_relative_file_path(file_path)

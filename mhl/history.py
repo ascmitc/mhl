@@ -215,6 +215,21 @@ class MHLHistory:
         return history
 
     @classmethod
+    def load_from_packing_list_path(cls, packing_list_path, root_path):
+        """returns the mhl_history instance with the one packing list mhl_hashlists """
+        # via https://docs.google.com/document/d/1FVSyHq2XJdNt-3Vur_5I_FPOoeeC_cEjkv7p---biyg/edit#
+
+        asc_mhl_folder_path = os.path.join(root_path, ascmhl_folder_name)
+        history = cls()
+        history.asc_mhl_path = asc_mhl_folder_path
+
+        hash_list = hashlist_xml_parser.parse(packing_list_path)
+        hash_list.generation_number = 1
+        history.append_hash_list(hash_list)
+
+        return history
+
+    @classmethod
     def create_collection_at_path(cls, root_path, debug=False):
         now = datetime.now()
         collection_folder_name = "debug"

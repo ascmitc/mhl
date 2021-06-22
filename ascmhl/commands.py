@@ -263,14 +263,18 @@ def create_for_single_files_subcommand(
     is_flag=True,
     help="Record single file, no completeness check (multiple occurrences possible for adding multiple files",
 )
-@click.option("--hash_format", "-h", type=click.Choice(ascmhl_supported_hashformats), multiple=False, help="Algorithm")
+@click.option("--hash_format",
+              "-h",
+              type=click.Choice(ascmhl_supported_hashformats),
+              multiple=False,
+              help="Algorithm for directory hashes")
 # subcommand
-@click.option('--packing_list', '-pl', default=None,
+@click.option("--packing_list",
+              "-pl",
+              default=None,
               type=click.Path(exists=True),
               help="Verify against an external packing list")
-def verify(root_path, verbose, ignore_list, ignore_spec_file, packing_list):
-
-def verify(root_path, verbose, directory_hash, hash_format, ignore_list, ignore_spec_file):
+def verify(root_path, verbose, directory_hash, hash_format, packing_list, ignore_list, ignore_spec_file):
     """
     Verify a folder, single file(s), or a directory hash
 
@@ -283,37 +287,39 @@ def verify(root_path, verbose, directory_hash, hash_format, ignore_list, ignore_
     """
 
     if packing_list is not None:
-        verify_entire_folder_against_packing_list_subcommand(root_path, verbose, packing_list, ignore_list, ignore_spec_file)
+        verify_entire_folder(root_path, verbose, packing_list, ignore_list, ignore_spec_file)
         return
 
-   if directory_hash is True:
+    if directory_hash is True:
         verify_directory_hash_subcommand(root_path, verbose, hash_format, ignore_list, ignore_spec_file)
-		return
+        return
 
-    verify_entire_folder_against_full_history_subcommand(root_path, verbose, ignore_list, ignore_spec_file)
+    verify_entire_folder(root_path, verbose, None, ignore_list, ignore_spec_file)
     return
 
-
-def verify_entire_folder_against_full_history_subcommand(root_path, verbose, ignore_list=None, ignore_spec_file=None):
-    # command formerly known as "check"
+def verify_entire_folder(root_path, verbose, packing_list_path, ignore_list=None, ignore_spec_file=None):
     """
-    Checks MHL hashes from all generations against all file hashes.
+    Checks MHL hashes from all generations / a packing list against all file hashes.
 
     ROOT_PATH: the root path to use for the asc mhl history
+    packing_list (opt): the path to the packing list
 
     Traverses through the content of a folder, hashes all found files and compares ("verifies") the hashes
-    against the records in the asc-mhl folder. The command finds all files that are existent in the file system
-    but are not registered in the `asc-mhl` folder yet, and all files that are registered in the `asc-mhl` folder
-    but that are missing in the file system.
+    against the records in the asc-mhl folder/packing list. The command finds all files that are existent in
+    the file system but are not registered in the `asc-mhl` folder/packing list yet, and all files that are
+    registered in the `asc-mhl` folder/packing list but that are missing in the file system.
     """
     logger.verbose_logging = verbose
 
     if not os.path.isabs(root_path):
         root_path = os.path.join(os.getcwd(), root_path)
 
-    logger.verbose(f"check folder at path: {root_path}")
+    logger.verbose(f'check folder at path: {root_path}')
 
-    existing_history = MHLHistory.load_from_path(root_path)
+    if packing_list_path is not None:
+        existing_history = MHLHistory.load_from_packing_list_path(packing_list_path, root_path)
+    else:
+        existing_history = MHLHistory.load_from_path(root_path)
 
     if len(existing_history.hash_lists) == 0:
         raise errors.NoMHLHistoryException(root_path)
@@ -342,20 +348,18 @@ def verify_entire_folder_against_full_history_subcommand(root_path, verbose, ign
 
             # in case there is no original hash entry continue
             if original_hash_entry is None:
-                logger.error(f"found new file {relative_path}")
+                logger.error(f'found new file {relative_path}')
                 num_new_files += 1
                 continue
 
             # create a new hash and compare it against the original hash entry
             current_hash = create_filehash(original_hash_entry.hash_format, file_path)
             if original_hash_entry.hash_string == current_hash:
-                logger.verbose(f"verification of file {relative_path}: OK")
+                logger.verbose(f'verification ({original_hash_entry.hash_format}) of file {relative_path}: OK')
             else:
-                logger.error(
-                    f"ERROR: hash mismatch        for {relative_path} "
-                    f"old {original_hash_entry.hash_format}: {original_hash_entry.hash_string}, "
-                    f"new {original_hash_entry.hash_format}: {current_hash}"
-                )
+                logger.error(f'ERROR: hash mismatch        for {relative_path} '
+                             f'old {original_hash_entry.hash_format}: {original_hash_entry.hash_string}, '
+                             f'new {original_hash_entry.hash_format}: {current_hash}')
                 num_failed_verifications += 1
 
     exception = test_for_missing_files(not_found_paths, root_path, ignore_spec)
@@ -366,7 +370,6 @@ def verify_entire_folder_against_full_history_subcommand(root_path, verbose, ign
 
     if exception:
         raise exception
-
 
 def verify_directory_hash_subcommand(root_path, verbose, hash_format, ignore_list=None, ignore_spec_file=None):
     """
@@ -541,80 +544,8 @@ def _compare_and_log_directory_hashes(
 
     return num_successful_verifications
 
-
 # TODO def verify_single_file_subcommand(root_path, verbose):
 
-def verify_entire_folder_against_packing_list_subcommand(root_path, verbose, packing_list_path,
-                                                         ignore_list=None, ignore_spec_file=None):
-    """
-    Checks MHL hashes from a packing list manifest against all file hashes.
-
-    ROOT_PATH: the root path to use for the asc mhl history
-    packing_list: the path to the packing list
-
-    Traverses through the content of a folder, hashes all found files and compares ("verifies") the hashes
-    against the records in the packing list. The command finds all files that are existent in the file system
-    but are not registered in the packing list yet, and all files that are registered in the packing list
-    but that are missing in the file system.
-    """
-    logger.verbose_logging = verbose
-
-    if not os.path.isabs(root_path):
-        root_path = os.path.join(os.getcwd(), root_path)
-
-    logger.verbose(f'check folder at path: {root_path}')
-
-    existing_history = MHLHistory.load_from_packing_list_path(packing_list_path, root_path)
-
-    if len(existing_history.hash_lists) == 0:
-        raise errors.NoMHLHistoryException(root_path)
-
-    # we collect all paths we expect to find first and remove every path that we actually found while
-    # traversing the file system, so this set will at the end contain the file paths not found in the file system
-    not_found_paths = existing_history.set_of_file_paths()
-
-    num_failed_verifications = 0
-    num_new_files = 0
-
-    ignore_spec = ignore.MHLIgnoreSpec(existing_history.latest_ignore_patterns(), ignore_list, ignore_spec_file)
-
-    for folder_path, children in post_order_lexicographic(root_path, ignore_spec.get_path_spec()):
-        for item_name, is_dir in children:
-            file_path = os.path.join(folder_path, item_name)
-            not_found_paths.discard(file_path)
-            relative_path = existing_history.get_relative_file_path(file_path)
-            history, history_relative_path = existing_history.find_history_for_path(relative_path)
-            if is_dir:
-                # TODO: find new directories here
-                continue
-
-            # check if there is an existing hash in the other generations and verify
-            original_hash_entry = history.find_original_hash_entry_for_path(history_relative_path)
-
-            # in case there is no original hash entry continue
-            if original_hash_entry is None:
-                logger.error(f'found new file {relative_path}')
-                num_new_files += 1
-                continue
-
-            # create a new hash and compare it against the original hash entry
-            current_hash = create_filehash(original_hash_entry.hash_format, file_path)
-            if original_hash_entry.hash_string == current_hash:
-                logger.verbose(f'verification ({original_hash_entry.hash_format}) of file {relative_path}: OK')
-            else:
-                logger.error(f'ERROR: hash mismatch        for {relative_path} '
-                             f'old {original_hash_entry.hash_format}: {original_hash_entry.hash_string}, '
-                             f'new {original_hash_entry.hash_format}: {current_hash}')
-                num_failed_verifications += 1
-
-    exception = test_for_missing_files(not_found_paths, root_path, ignore_spec)
-    if num_new_files > 0:
-        exception = errors.NewFilesFoundException()
-    if num_failed_verifications > 0:
-        exception = errors.VerificationFailedException()
-
-    if exception:
-        raise exception
 
 @click.command()
 @click.argument("root_path", type=click.Path(exists=True))

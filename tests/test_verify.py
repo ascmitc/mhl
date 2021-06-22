@@ -29,7 +29,7 @@ def test_simple_verify(fs, simple_mhl_history):
     result = runner.invoke(ascmhl.commands.verify, ["-v", "/root/"])
     assert (
         result.output
-        == "check folder at path: /root/\nverification of file A/A1.txt: OK\nverification of file Stuff.txt: OK\n"
+        == "check folder at path: /root/\nverification (xxh64) of file A/A1.txt: OK\nverification (xxh64) of file Stuff.txt: OK\n"
     )
     assert result.exit_code == 0
 

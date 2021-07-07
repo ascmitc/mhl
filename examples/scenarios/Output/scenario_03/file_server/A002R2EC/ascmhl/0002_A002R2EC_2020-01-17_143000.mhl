@@ -20,13 +20,13 @@
   <hashes>
     <hash>
       <path size="5" lastmodificationdate="2020-01-15T13:00:00+00:00">Clips/A002C006_141024_R2EC.mov</path>
-      <xxh64 action="verified">0ea03b369a463d9d</xxh64>
-      <md5 action="verified">f5ac8127b3b6b85cdc13f237c6005d80</md5>
+      <xxh64 action="verified" hashdate="2020-01-17T14:30:00+00:00">0ea03b369a463d9d</xxh64>
+      <md5 action="verified" hashdate="2020-01-17T14:30:00+00:00">f5ac8127b3b6b85cdc13f237c6005d80</md5>
     </hash>
     <hash>
       <path size="4" lastmodificationdate="2020-01-15T13:00:00+00:00">Clips/A002C007_141024_R2EC.mov</path>
-      <xxh64 action="verified">7680e5f98f4a80fd</xxh64>
-      <md5 action="verified">614dd0e977becb4c6f7fa99e64549b12</md5>
+      <xxh64 action="verified" hashdate="2020-01-17T14:30:00+00:00">7680e5f98f4a80fd</xxh64>
+      <md5 action="verified" hashdate="2020-01-17T14:30:00+00:00">614dd0e977becb4c6f7fa99e64549b12</md5>
     </hash>
     <hash directory="true">
       <path lastmodificationdate="2020-01-15T13:00:00+00:00">Clips</path>
@@ -34,8 +34,8 @@
     </hash>
     <hash>
       <path size="58" lastmodificationdate="2020-01-15T13:00:00+00:00">Sidecar.txt</path>
-      <xxh64 action="verified">3ab5a4166b9bde44</xxh64>
-      <md5 action="verified">6425c5a180ca0f420dd2b25be4536a91</md5>
+      <xxh64 action="verified" hashdate="2020-01-17T14:30:00+00:00">3ab5a4166b9bde44</xxh64>
+      <md5 action="verified" hashdate="2020-01-17T14:30:00+00:00">6425c5a180ca0f420dd2b25be4536a91</md5>
     </hash>
   </hashes>
 </hashlist>

@@ -213,14 +213,19 @@ class MHLHashEntry:
     hash_string: str
     structure_hash_string: str
     hash_format: str
+    hash_date: datetime
     action: Optional[str]
 
-    def __init__(self, hash_format: str, hash_string: str, action: str = None):
+    def __init__(self, hash_format: str, hash_string: str, action: str = None, hash_date: datetime = None):
         self.hash_format = hash_format
         self.hash_string = hash_string
         self.structure_hash_string = None
 
         self.action = action
+        if hash_date != None:
+            self.hash_date = hash_date
+        else:
+            self.hash_date = datetime.now()
 
 
 class MHLHashListReference:

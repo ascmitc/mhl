@@ -8,7 +8,7 @@
   <processinfo>
     <roothash directory="true">
       <path lastmodificationdate="2020-01-15T13:00:00+00:00">/file_server/Reels/A002R2EC</path>
-      <xxh64 structure="574ab2d2afc981cd">7e423206834bf81a</xxh64>
+      <xxh64 structure="574ab2d2afc981cd" hashdate="2020-01-17T14:30:00+00:00">7e423206834bf81a</xxh64>
     </roothash>
     <process>in-place</process>
     <ignore>
@@ -28,7 +28,7 @@
     </hash>
     <hash directory="true">
       <path lastmodificationdate="2020-01-15T13:00:00+00:00">Clips</path>
-      <xxh64 structure="a27e08b77ae22c78">6d43a82e7a5d40f6</xxh64>
+      <xxh64 structure="a27e08b77ae22c78" hashdate="2020-01-17T14:30:00+00:00">6d43a82e7a5d40f6</xxh64>
     </hash>
     <hash>
       <path size="58" lastmodificationdate="2020-01-15T13:00:00+00:00">Sidecar.txt</path>

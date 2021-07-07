@@ -334,10 +334,17 @@ class MHLHistory:
     def write_new_generation(self, new_hash_list: MHLHashList):
         self._validate_new_hash_list(new_hash_list)
         file_name, generation_number = self._new_generation_filename()
+        if new_hash_list.process_info.hashlist_custom_basename is not None:
+            file_name = self._new_custom_filename(new_hash_list.process_info.hashlist_custom_basename)
         file_path = os.path.join(self.asc_mhl_path, file_name)
         new_hash_list.generation_number = generation_number
         hashlist_xml_parser.write_hash_list(new_hash_list, file_path)
         self.append_hash_list(new_hash_list)
+
+    def _new_custom_filename(self, custom_basename):
+        date_string = datetime_now_filename_string()
+        file_name = f"{custom_basename}_{date_string}{ascmhl_file_extension}"
+        return file_name
 
     def _new_generation_filename(self):
         date_string = datetime_now_filename_string()

@@ -159,6 +159,10 @@ class MHLGenerationCreationSession:
                 new_hash_list = self.new_hash_lists[history]
             new_hash_list.referenced_hash_lists = referenced_hash_lists[history]
             new_hash_list.creator_info = creator_info
+
+            if not new_hash_list.process_info.root_media_hash:  # only for flattening we want to inject a custom root hash
+                new_hash_list.process_info.root_media_hash = process_info.root_media_hash
+            new_hash_list.process_info.hashlist_custom_basename = process_info.hashlist_custom_basename
             new_hash_list.process_info.process = process_info.process
             new_hash_list.process_info.ignore_spec = MHLIgnoreSpec(
                 history.latest_ignore_patterns(), self.ignore_spec.get_pattern_list()

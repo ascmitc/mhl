@@ -28,7 +28,7 @@ from .__version__ import (
 )
 from .generator import MHLGenerationCreationSession
 from .hasher import create_filehash, DirectoryHashContext
-from .hashlist import MHLCreatorInfo, MHLProcessInfo, MHLTool, MHLProcess
+from .hashlist import MHLMediaHash, MHLCreatorInfo, MHLProcessInfo, MHLTool, MHLProcess
 from .history import MHLHistory
 from .traverse import post_order_lexicographic
 
@@ -739,7 +739,7 @@ def flatten_history(root_path, destination_path, verbose, no_directory_hashes, i
                                     action=hash_entry.action,
                                 )
 
-    commit_session_for_collection(session)
+    commit_session_for_collection(session, root_path)
 
 
 @click.command()
@@ -946,13 +946,17 @@ def commit_session(session):
     session.commit(creator_info, process_info)
 
 
-def commit_session_for_collection(session):
+def commit_session_for_collection(session, root_path):
     creator_info = MHLCreatorInfo()
     creator_info.tool = MHLTool(ascmhl_tool_name, ascmhl_tool_version)
     creator_info.creation_date = utils.datetime_now_isostring()
     creator_info.host_name = platform.node()
     process_info = MHLProcessInfo()
     process_info.process = MHLProcess("flatten")
+    root_hash = MHLMediaHash()
+    root_hash.path = root_path
+    process_info.root_media_hash = root_hash
+    process_info.hashlist_custom_basename = "packinglist_" + os.path.basename(root_path)
     session.commit(creator_info, process_info)
 
 

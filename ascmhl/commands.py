@@ -722,6 +722,7 @@ def flatten_history(root_path, destination_path, verbose, no_directory_hashes, i
                                 hash_entry.hash_format,
                                 hash_entry.hash_string,
                                 action=hash_entry.action,
+                                hash_date=hash_entry.hash_date,
                             )
                         else:
                             hashformat_is_already_there = False

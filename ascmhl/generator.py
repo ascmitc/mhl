@@ -42,7 +42,7 @@ class MHLGenerationCreationSession:
         self.ignore_spec = ignore_spec
 
     def append_file_hash(
-        self, file_path, file_size, file_modification_date, hash_format, hash_string, action=None
+        self, file_path, file_size, file_modification_date, hash_format, hash_string, action=None, hash_date=None
     ) -> bool:
 
         relative_path = self.root_history.get_relative_file_path(file_path)
@@ -57,7 +57,7 @@ class MHLGenerationCreationSession:
         # check if there is an existing hash in the other generations and verify
         original_hash_entry = history.find_original_hash_entry_for_path(history_relative_path)
 
-        hash_entry = MHLHashEntry(hash_format, hash_string)
+        hash_entry = MHLHashEntry(hash_format, hash_string, hash_date=hash_date)
         if original_hash_entry is None:
             hash_entry.action = "original"
             logger.verbose(f"  created original hash for     {relative_path}  {hash_format}: {hash_string}")

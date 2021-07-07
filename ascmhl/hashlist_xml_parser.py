@@ -9,6 +9,7 @@ __email__ = "opensource@pomfort.com"
 import os
 import textwrap
 from timeit import default_timer as timer
+import dateutil.parser
 
 from lxml import etree
 from lxml.builder import E
@@ -83,7 +84,11 @@ def parse(file_path):
                 # elif tag == 'lastmodificationdate':
                 # 	current_object.file_size = element.text
                 elif tag in ascmhl_supported_hashformats:
-                    entry = MHLHashEntry(tag, element.text, element.attrib.get("action"))
+                    hash_date = None
+                    hash_date_string = element.attrib.get("hashdate")
+                    if hash_date_string is not None:
+                        hash_date = dateutil.parser.parse(hash_date_string)
+                    entry = MHLHashEntry(tag, element.text, element.attrib.get("action"), hash_date)
                     if element.attrib.get("structure") is not None:
                         entry.structure_hash_string = element.attrib.get("structure")
                     current_object.append_hash_entry(entry)

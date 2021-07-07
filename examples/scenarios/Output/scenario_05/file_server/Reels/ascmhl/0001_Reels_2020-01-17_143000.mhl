@@ -8,7 +8,7 @@
   <processinfo>
     <roothash directory="true">
       <path lastmodificationdate="2020-01-16T09:15:00+00:00">/file_server/Reels</path>
-      <xxh64 structure="e6546d6cea0092e2">3b7af44c2476dcd4</xxh64>
+      <xxh64 structure="e6546d6cea0092e2" hashdate="2020-01-17T14:30:00+00:00">3b7af44c2476dcd4</xxh64>
     </roothash>
     <process>in-place</process>
     <ignore>
@@ -20,25 +20,25 @@
   <hashes>
     <hash directory="true">
       <path lastmodificationdate="2020-01-15T13:00:00+00:00">A002R2EC</path>
-      <xxh64 structure="574ab2d2afc981cd">7e423206834bf81a</xxh64>
+      <xxh64 structure="574ab2d2afc981cd" hashdate="2020-01-17T14:30:00+00:00">7e423206834bf81a</xxh64>
     </hash>
     <hash directory="true">
       <path lastmodificationdate="2020-01-15T13:30:00+00:00">A003R2EC</path>
-      <xxh64 structure="0729474d03751da0">f6c455e7941fe0f3</xxh64>
+      <xxh64 structure="0729474d03751da0" hashdate="2020-01-17T14:30:00+00:00">f6c455e7941fe0f3</xxh64>
     </hash>
     <hash>
       <path size="48" lastmodificationdate="2020-01-17T14:30:00+00:00">Summary.txt</path>
-      <xxh64 action="original">0ac48e431d4538ba</xxh64>
+      <xxh64 action="original" hashdate="2020-01-17T14:30:00+00:00">0ac48e431d4538ba</xxh64>
     </hash>
   </hashes>
   <references>
     <hashlistreference>
       <path>A002R2EC/ascmhl/0002_A002R2EC_2020-01-17_143000.mhl</path>
-      <c4>c44pAeEMJUFqdb9maTgqJKg4va3KhSNmHK467fM2cnNrJ18DjJPVsX2ni4Sbr4p7pw96CrJLvc5VWiuWfnmuJzzXt4</c4>
+      <c4>c421FbTZK9bUygzjkvvufBjpR158QsChndHNHTsFW7NxocqgT1dnyXvQFwhJiGLeC9Nau6Muju52zi7cnpjTqJWTTZ</c4>
     </hashlistreference>
     <hashlistreference>
       <path>A003R2EC/ascmhl/0002_A003R2EC_2020-01-17_143000.mhl</path>
-      <c4>c43j8tZw6tVvv9Q8axFuB7zwLs2WDxLDyRenqzJa5eWhXYu5ZzWRanQVkkRaHAAaRxCG8oyTZnyWpoqvVZuJyRsMJu</c4>
+      <c4>c41yqGdCDnGq8d9BAfaTXbMHZoykvmbhBkgzcT5yqWMLsVtW7CeUhWnFCBBkuSBdnxi7n14YYfAESBvkhzdpR2fywJ</c4>
     </hashlistreference>
   </references>
 </hashlist>

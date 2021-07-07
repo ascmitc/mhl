@@ -218,6 +218,8 @@ def _media_hash_xml_element(media_hash: MHLMediaHash):
         entry_element.text = hash_entry.hash_string
         if hash_entry.action:
             entry_element.attrib["action"] = hash_entry.action
+        if hash_entry.hash_date:
+            entry_element.attrib["hashdate"] = datetime_isostring(hash_entry.hash_date, True)
         hash_element.append(entry_element)
 
     return hash_element

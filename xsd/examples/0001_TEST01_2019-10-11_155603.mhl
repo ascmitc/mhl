@@ -52,11 +52,11 @@
   </metadata>
   <references>
     <hashlistreference>
-      <path>A002R2EC/asc-mhl/A002R2EC_2020-01-17_143000_0002.mhl</path>
+      <path>A002R2EC/ascmhl/A002R2EC_2020-01-17_143000_0002.mhl</path>
       <c4>87210d6e0589c31c</c4>
     </hashlistreference>
     <hashlistreference>
-      <path>A003R2EC/asc-mhl/A003R2EC_2020-01-17_143000_0002.mhl</path>
+      <path>A003R2EC/ascmhl/A003R2EC_2020-01-17_143000_0002.mhl</path>
       <c4>40116e7da1ca1487</c4>
     </hashlistreference>
   </references>

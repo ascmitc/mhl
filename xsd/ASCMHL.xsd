@@ -36,7 +36,7 @@
 
     <complexType name="ProcessInfoType">
         <sequence>
-            <element name="roothash" type="ascmhl:HashType"/>
+            <element name="roothash" type="ascmhl:DirectoryHashType"/>
             <element name="process" type="ascmhl:ProcessType"/>
             <element name="ignore" type="ascmhl:IgnoreType" minOccurs="0"/>
         </sequence>
@@ -62,6 +62,7 @@
         <restriction base="string">
             <enumeration value="in-place"/>
             <enumeration value="transfer"/>
+            <enumeration value="flatten"/>
         </restriction>
     </simpleType>
     <complexType name="IgnoreType">
@@ -70,9 +71,10 @@
         </sequence>
     </complexType>
     <complexType name="HashesType">
-        <sequence>
+        <choice minOccurs="1" maxOccurs="unbounded">
             <element name="hash" type="ascmhl:HashType" maxOccurs="unbounded"/>
-        </sequence>
+            <element name="directoryhash" type="ascmhl:DirectoryHashType"/>
+        </choice>
     </complexType>
     <complexType name="HashType">
         <sequence>
@@ -99,7 +101,23 @@
             <element name="previousPath" type="string" minOccurs="0"/>
             <element minOccurs="0" name="metadata" type="ascmhl:MetadataType"/>
         </sequence>
-        <attribute name="directory" type="boolean"/>
+    </complexType>
+    <complexType name="DirectoryHashType">
+        <sequence>
+            <element name="path">
+                <complexType>
+                    <simpleContent>
+                        <extension base="string">
+                            <attribute name="creationdate" type="dateTime"/>
+                            <attribute name="lastmodificationdate" type="dateTime"/>
+                        </extension>
+                    </simpleContent>
+                </complexType>
+            </element>
+            <element name="content" type="ascmhl:DirectoryHashFormatContainerType" minOccurs="0"/>
+            <element name="structure" type="ascmhl:DirectoryHashFormatContainerType" minOccurs="0"/>
+            <element name="metadata" type="ascmhl:MetadataType" minOccurs="0"/>
+        </sequence>
     </complexType>
     <complexType name="HashFormatType">
         <simpleContent>
@@ -109,6 +127,16 @@
                 <attribute name="structure" type="string"/>
             </extension>
         </simpleContent>
+    </complexType>
+    <complexType name="DirectoryHashFormatContainerType">
+		<choice minOccurs="1" maxOccurs="unbounded">
+            <element name="md5" type="ascmhl:HashFormatType"/>
+            <element name="sha1" type="ascmhl:HashFormatType"/>
+            <element name="c4" type="ascmhl:HashFormatType"/>
+            <element name="xxh3" type="ascmhl:HashFormatType"/>
+            <element name="xxh64" type="ascmhl:HashFormatType"/>
+            <element name="xxh128" type="ascmhl:HashFormatType"/>
+        </choice>
     </complexType>
     <complexType name="ReferencesType">
         <sequence>

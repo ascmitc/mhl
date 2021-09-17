@@ -14,7 +14,7 @@
 	</complexType>
 	<complexType name="HashlistType">
 		<sequence>
-			<element name="path" type="string"/>
+			<element name="path" type="ascmhl:RelativePathType"/>
 			<element name="c4" type="ascmhl:HashFormatType"/>
 		</sequence>
 		<attribute name="sequencenr" type="integer"/>

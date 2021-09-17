@@ -12,13 +12,15 @@
     <location>Munich, Germany</location>
   </creatorinfo>
   <processinfo>
+    <process>in-place</process>
     <roothash>
-      <path lastmodificationdate="2019-10-11T15:56:03+02:00">/Users/ptr/Development/MediaHashList/mhl/Scenarios/Output/scenario_01/A002R2EC/</path>
       <content>
         <c4>c44pdRyHLMvHsYbJnRpTrh5ohdWW6uVbm4mZx421aTN7y9MUKk74TqyshmTLgvnq2tcZex6khpxrYUq87Hczcmnyq3</c4>
       </content>
+      <structure>
+        <c4>c44pdRyHLMvHsYbJnRpTrh5ohdWW6uVbm4mZx421aTN7y9MUKk74TqyshmTLgvnq2tcZex6khpxrYUq87Hczcmnyq3</c4>
+      </structure>
     </roothash>
-    <process>in-place</process>
     <ignore>
       <pattern>*.DS_Store</pattern>      
       <pattern>/tmp</pattern>      

@@ -169,7 +169,10 @@ def write_hash_list(hash_list: MHLHashList, file_path: str):
     current_indent += "  "
 
     for media_hash in hash_list.media_hashes:
-        _write_xml_element_to_file(file, _media_hash_xml_element(media_hash), current_indent)
+        if media_hash.is_directory:
+            _write_xml_element_to_file(file, _directory_hash_xml_element(media_hash), current_indent)
+        else:
+            _write_xml_element_to_file(file, _media_hash_xml_element(media_hash), current_indent)
 
     current_indent = current_indent[:-2]
     _write_xml_string_to_file(file, "</hashes>\n", current_indent)
@@ -208,13 +211,8 @@ def _media_hash_xml_element(media_hash: MHLMediaHash):
         path_element.attrib["lastmodificationdate"] = datetime_isostring(media_hash.last_modification_date)
 
     hash_element = E.hash(path_element)
-    if media_hash.is_directory:
-        hash_element.attrib["directory"] = "true"
-
     for hash_entry in media_hash.hash_entries:
         entry_element = E(hash_entry.hash_format)
-        if hash_entry.structure_hash_string is not None:
-            entry_element.attrib["structure"] = hash_entry.structure_hash_string
         entry_element.text = hash_entry.hash_string
         if hash_entry.action:
             entry_element.attrib["action"] = hash_entry.action
@@ -224,6 +222,43 @@ def _media_hash_xml_element(media_hash: MHLMediaHash):
 
     return hash_element
 
+def _directory_hash_xml_element(media_hash: MHLMediaHash, skipPath = False):
+    """builds and returns one <hash> element for a given MediaHash object"""
+
+    content_element = E.content()
+    structure_element = E.structure()
+
+    for hash_entry in media_hash.hash_entries:
+        entry_element_content = E(hash_entry.hash_format)
+        entry_element_content.text = hash_entry.hash_string
+
+        entry_element_structure = E(hash_entry.hash_format)
+        entry_element_structure.text = hash_entry.structure_hash_string
+
+        if hash_entry.action:
+            entry_element_content.attrib["action"] = hash_entry.action
+            entry_element_structure.attrib["action"] = hash_entry.action
+        if hash_entry.hash_date:
+            entry_element_content.attrib["hashdate"] = datetime_isostring(hash_entry.hash_date, True)
+            entry_element_structure.attrib["hashdate"] = datetime_isostring(hash_entry.hash_date, True)
+
+        content_element.append(entry_element_content)
+        structure_element.append(entry_element_structure)
+
+    hash_element = E.directoryhash()
+
+    if skipPath == False:
+        path_element = E.path(media_hash.path)
+        if media_hash.file_size:
+            path_element.attrib["size"] = str(media_hash.file_size)
+        if media_hash.last_modification_date:
+            path_element.attrib["lastmodificationdate"] = datetime_isostring(media_hash.last_modification_date)
+        hash_element.append(path_element)
+
+    hash_element.append(content_element)
+    hash_element.append(structure_element)
+
+    return hash_element
 
 def _ascmhlreference_xml_element(hash_list: MHLHashList, file_path: str):
     """builds and returns one <hashlistreference> element for a given HashList object"""
@@ -259,8 +294,8 @@ def _process_info_xml_element(hash_list: MHLHashList):
     root_hash.path = hash_list.get_root_path()
 
     info_element = E.processinfo(
-        _root_media_hash_xml_element(root_hash),
         E.process(process_info.process.process_type),
+        _root_media_hash_xml_element(root_hash),
         _ignorespec_xml_element(hash_list.process_info.ignore_spec),
     )
     return info_element
@@ -280,6 +315,6 @@ def _ignore_xml_element(ignore_pattern: str):
 
 
 def _root_media_hash_xml_element(root_media_hash: MHLMediaHash):
-    element = _media_hash_xml_element(root_media_hash)
+    element = _directory_hash_xml_element(root_media_hash, skipPath=True)
     element.tag = "roothash"
     return element

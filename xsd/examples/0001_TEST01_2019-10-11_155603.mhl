@@ -12,11 +12,15 @@
     <location>Munich, Germany</location>
   </creatorinfo>
   <processinfo>
-    <roothash directory="true">
-      <path lastmodificationdate="2019-10-11T15:56:03+02:00">/Users/ptr/Development/MediaHashList/mhl/Scenarios/Output/scenario_01/A002R2EC/</path>
-      <c4>c44pdRyHLMvHsYbJnRpTrh5ohdWW6uVbm4mZx421aTN7y9MUKk74TqyshmTLgvnq2tcZex6khpxrYUq87Hczcmnyq3</c4>
-    </roothash>
     <process>in-place</process>
+    <roothash>
+      <content>
+        <c4>c44pdRyHLMvHsYbJnRpTrh5ohdWW6uVbm4mZx421aTN7y9MUKk74TqyshmTLgvnq2tcZex6khpxrYUq87Hczcmnyq3</c4>
+      </content>
+      <structure>
+        <c4>c44pdRyHLMvHsYbJnRpTrh5ohdWW6uVbm4mZx421aTN7y9MUKk74TqyshmTLgvnq2tcZex6khpxrYUq87Hczcmnyq3</c4>
+      </structure>
+    </roothash>
     <ignore>
       <pattern>*.DS_Store</pattern>      
       <pattern>/tmp</pattern>      
@@ -31,11 +35,13 @@
       <path size="5" lastmodificationdate="2019-10-11T15:56:03+02:00">Clips/A002C007_141024_R2EC.mov</path>
       <xxh64 action="original">7680e5f98f4a80fd</xxh64>
     </hash>
-    <hash directory="true">
+    <directoryhash>
       <path lastmodificationdate="2019-10-11T15:56:01+02:00">Clips/</path>
-      <xxh64>7680e5f98f4a80fd</xxh64>
+      <content>
+        <xxh64>7680e5f98f4a80fd</xxh64>
+      </content>
       <metadata>test2</metadata>
-    </hash>
+    </directoryhash>
     <hash>
       <path size="58" lastmodificationdate="2019-10-11T15:56:03+02:00">Sidecar.txt</path>
       <xxh64 action="failed">3ab5a4166b9bde44</xxh64>
@@ -48,11 +54,11 @@
   </metadata>
   <references>
     <hashlistreference>
-      <path>A002R2EC/asc-mhl/A002R2EC_2020-01-17_143000_0002.mhl</path>
+      <path>A002R2EC/ascmhl/A002R2EC_2020-01-17_143000_0002.mhl</path>
       <c4>87210d6e0589c31c</c4>
     </hashlistreference>
     <hashlistreference>
-      <path>A003R2EC/asc-mhl/A003R2EC_2020-01-17_143000_0002.mhl</path>
+      <path>A003R2EC/ascmhl/A003R2EC_2020-01-17_143000_0002.mhl</path>
       <c4>40116e7da1ca1487</c4>
     </hashlistreference>
   </references>

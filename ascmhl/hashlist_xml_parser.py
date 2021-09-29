@@ -256,7 +256,8 @@ def _media_hash_xml_element(media_hash: MHLMediaHash):
 
     return hash_element
 
-def _directory_hash_xml_element(media_hash: MHLMediaHash, skipPath = False):
+
+def _directory_hash_xml_element(media_hash: MHLMediaHash, skipPath=False):
     """builds and returns one <hash> element for a given MediaHash object"""
 
     content_element = E.content()
@@ -293,6 +294,7 @@ def _directory_hash_xml_element(media_hash: MHLMediaHash, skipPath = False):
     hash_element.append(structure_element)
 
     return hash_element
+
 
 def _ascmhlreference_xml_element(hash_list: MHLHashList, file_path: str):
     """builds and returns one <hashlistreference> element for a given HashList object"""

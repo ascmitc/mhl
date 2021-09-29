@@ -28,7 +28,7 @@ def test_record_succeed_single_file(fs):
     result = runner.invoke(ascmhl.commands.create, ["/root", "-sf", "/root/A/A1.txt"])
     assert result.exit_code == 0
     assert os.path.exists("/root/ascmhl/0001_root_2020-01-16_091500.mhl")
-    assert os.path.exists("/root/ascmhl/chain.txt")
+    assert os.path.exists("/root/ascmhl/ascmhl_chain.txt")
 
     # make sure that only the specified file was added
     history = MHLHistory.load_from_path("/root")
@@ -46,7 +46,7 @@ def test_record_succeed_single_directory(fs):
     result = runner.invoke(ascmhl.commands.create, ["/root", "-sf", "/root/A"])
     assert result.exit_code == 0
     assert os.path.exists("/root/ascmhl/0001_root_2020-01-16_091500.mhl")
-    assert os.path.exists("/root/ascmhl/chain.txt")
+    assert os.path.exists("/root/ascmhl/ascmhl_chain.txt")
 
     # make sure that only the specified file was added
     history = MHLHistory.load_from_path("/root")
@@ -65,7 +65,7 @@ def test_record_succeed_multiple_files(fs):
     result = runner.invoke(ascmhl.commands.create, ["/root", "-sf", "/root/A/A1.txt", "-sf", "/root/A/A2.txt"])
     assert result.exit_code == 0
     assert os.path.exists("/root/ascmhl/0001_root_2020-01-16_091500.mhl")
-    assert os.path.exists("/root/ascmhl/chain.txt")
+    assert os.path.exists("/root/ascmhl/ascmhl_chain.txt")
 
     # make sure that only the specified file was added
     history = MHLHistory.load_from_path("/root")

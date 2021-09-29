@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<schema targetNamespace="urn:ASC:MHL:CHAIN:v2.0" 
+<schema targetNamespace="urn:ASC:MHL:DIRECTORY:v2.0" 
 	xmlns="http://www.w3.org/2001/XMLSchema" 
-	xmlns:ascmhlchain="urn:ASC:MHL:CHAIN:v2.0" 
+	xmlns:ascmhldirectory="urn:ASC:MHL:DIRECTORY:v2.0" 
 	xmlns:ascmhl="urn:ASC:MHL:v2.0"  
 	elementFormDefault="qualified">
 		
 	<import schemaLocation="https://raw.githubusercontent.com/ascmitc/mhl/master/xsd/ASCMHL.xsd" namespace="urn:ASC:MHL:v2.0"/>
 	
-	<complexType name="ChainType">
+	<complexType name="DirectoryType">
 		<sequence>
-			<element name="ascmhlmanifest" type="ascmhlchain:AscMhlManifestType" maxOccurs="unbounded"/>
+			<element name="hashlist" type="ascmhldirectory:HashlistType" maxOccurs="unbounded"/>
 		</sequence>
 	</complexType>
-	<complexType name="AscMhlManifestType">
+	<complexType name="HashlistType">
 		<sequence>
-			<element name="path" type="string"/>
+			<element name="path" type="ascmhl:RelativePathType"/>
 			<element name="c4" type="ascmhl:HashFormatType"/>
 		</sequence>
 		<attribute name="sequencenr" type="integer"/>
 	</complexType>
-	<element name="ascmhlchain" type="ascmhlchain:ChainType"/>
+	<element name="ascmhldirectory" type="ascmhldirectory:DirectoryType"/>
 </schema>

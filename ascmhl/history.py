@@ -11,8 +11,9 @@ __email__ = "opensource@pomfort.com"
 from __future__ import annotations
 import os
 import re
+from datetime import datetime, date, time
 
-from .__version__ import ascmhl_folder_name, ascmhl_file_extension, ascmhl_chainfile_name
+from .__version__ import ascmhl_folder_name, ascmhl_file_extension, ascmhl_chainfile_name, ascmhl_collectionfile_name
 from . import hashlist_xml_parser, chain_txt_parser
 from .utils import datetime_now_filename_string
 from typing import Tuple, List, Dict, Optional, Set
@@ -244,6 +245,45 @@ class MHLHistory:
 
         return history
 
+    @classmethod
+    def load_from_packing_list_path(cls, packing_list_path, root_path):
+        """returns the mhl_history instance with the one packing list mhl_hashlists"""
+        # via https://docs.google.com/document/d/1FVSyHq2XJdNt-3Vur_5I_FPOoeeC_cEjkv7p---biyg/edit#
+
+        asc_mhl_folder_path = os.path.join(root_path, ascmhl_folder_name)
+        history = cls()
+        history.asc_mhl_path = asc_mhl_folder_path
+
+        hash_list = hashlist_xml_parser.parse(packing_list_path)
+        hash_list.generation_number = 1
+        history.append_hash_list(hash_list)
+
+        return history
+
+    @classmethod
+    def create_collection_at_path(cls, root_path, debug=False):
+        now = datetime.now()
+        collection_folder_name = "debug"
+        if not debug:
+            date_time_string = now.strftime("%Y-%m-%d")
+            collection_folder_name = "collection_" + date_time_string
+
+        collection_folder_path = os.path.join(root_path, collection_folder_name)
+
+        parent_path = os.path.dirname(collection_folder_path)
+        if not os.path.isdir(parent_path):
+            os.mkdir(parent_path)
+        if not os.path.isdir(collection_folder_path):
+            os.mkdir(collection_folder_path)
+
+        history = cls()
+        history.asc_mhl_path = collection_folder_path
+
+        file_path = os.path.join(collection_folder_path, ascmhl_collectionfile_name)
+        history.chain = chain_txt_parser.parse(file_path)
+
+        return history
+
     def _find_and_load_child_histories(self) -> None:
         """traverses the whole file system tree inside the history to find all sub histories"""
         history_root = self.get_root_path()
@@ -294,10 +334,17 @@ class MHLHistory:
     def write_new_generation(self, new_hash_list: MHLHashList):
         self._validate_new_hash_list(new_hash_list)
         file_name, generation_number = self._new_generation_filename()
+        if new_hash_list.process_info.hashlist_custom_basename is not None:
+            file_name = self._new_custom_filename(new_hash_list.process_info.hashlist_custom_basename)
         file_path = os.path.join(self.asc_mhl_path, file_name)
         new_hash_list.generation_number = generation_number
         hashlist_xml_parser.write_hash_list(new_hash_list, file_path)
         self.append_hash_list(new_hash_list)
+
+    def _new_custom_filename(self, custom_basename):
+        date_string = datetime_now_filename_string()
+        file_name = f"{custom_basename}_{date_string}{ascmhl_file_extension}"
+        return file_name
 
     def _new_generation_filename(self):
         date_string = datetime_now_filename_string()

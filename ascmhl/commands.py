@@ -28,7 +28,7 @@ from .__version__ import (
 )
 from .generator import MHLGenerationCreationSession
 from .hasher import create_filehash, DirectoryHashContext
-from .hashlist import MHLCreatorInfo, MHLProcessInfo, MHLTool, MHLProcess
+from .hashlist import MHLMediaHash, MHLCreatorInfo, MHLProcessInfo, MHLTool, MHLProcess
 from .history import MHLHistory
 from .traverse import post_order_lexicographic
 
@@ -263,8 +263,18 @@ def create_for_single_files_subcommand(
     is_flag=True,
     help="Record single file, no completeness check (multiple occurrences possible for adding multiple files",
 )
-@click.option("--hash_format", "-h", type=click.Choice(ascmhl_supported_hashformats), multiple=False, help="Algorithm")
-def verify(root_path, verbose, directory_hash, hash_format, ignore_list, ignore_spec_file):
+@click.option(
+    "--hash_format",
+    "-h",
+    type=click.Choice(ascmhl_supported_hashformats),
+    multiple=False,
+    help="Algorithm for directory hashes",
+)
+# subcommand
+@click.option(
+    "--packing_list", "-pl", default=None, type=click.Path(exists=True), help="Verify against an external packing list"
+)
+def verify(root_path, verbose, directory_hash, hash_format, packing_list, ignore_list, ignore_spec_file):
     """
     Verify a folder, single file(s), or a directory hash
 
@@ -275,25 +285,30 @@ def verify(root_path, verbose, directory_hash, hash_format, ignore_list, ignore_
     files in the file system are reported as errors. No new ASC MHL file /
     generation is created.
     """
+
+    if packing_list is not None:
+        verify_entire_folder(root_path, verbose, packing_list, ignore_list, ignore_spec_file)
+        return
+
     if directory_hash is True:
         verify_directory_hash_subcommand(root_path, verbose, hash_format, ignore_list, ignore_spec_file)
         return
 
-    verify_entire_folder_against_full_history_subcommand(root_path, verbose, ignore_list, ignore_spec_file)
+    verify_entire_folder(root_path, verbose, None, ignore_list, ignore_spec_file)
     return
 
 
-def verify_entire_folder_against_full_history_subcommand(root_path, verbose, ignore_list=None, ignore_spec_file=None):
-    # command formerly known as "check"
+def verify_entire_folder(root_path, verbose, packing_list_path, ignore_list=None, ignore_spec_file=None):
     """
-    Checks MHL hashes from all generations against all file hashes.
+    Checks MHL hashes from all generations / a packing list against all file hashes.
 
     ROOT_PATH: the root path to use for the asc mhl history
+    packing_list (opt): the path to the packing list
 
     Traverses through the content of a folder, hashes all found files and compares ("verifies") the hashes
-    against the records in the asc-mhl folder. The command finds all files that are existent in the file system
-    but are not registered in the `asc-mhl` folder yet, and all files that are registered in the `asc-mhl` folder
-    but that are missing in the file system.
+    against the records in the asc-mhl folder/packing list. The command finds all files that are existent in
+    the file system but are not registered in the `asc-mhl` folder/packing list yet, and all files that are
+    registered in the `asc-mhl` folder/packing list but that are missing in the file system.
     """
     logger.verbose_logging = verbose
 
@@ -302,7 +317,10 @@ def verify_entire_folder_against_full_history_subcommand(root_path, verbose, ign
 
     logger.verbose(f"check folder at path: {root_path}")
 
-    existing_history = MHLHistory.load_from_path(root_path)
+    if packing_list_path is not None:
+        existing_history = MHLHistory.load_from_packing_list_path(packing_list_path, root_path)
+    else:
+        existing_history = MHLHistory.load_from_path(root_path)
 
     if len(existing_history.hash_lists) == 0:
         raise errors.NoMHLHistoryException(root_path)
@@ -338,7 +356,7 @@ def verify_entire_folder_against_full_history_subcommand(root_path, verbose, ign
             # create a new hash and compare it against the original hash entry
             current_hash = create_filehash(original_hash_entry.hash_format, file_path)
             if original_hash_entry.hash_string == current_hash:
-                logger.verbose(f"verification of file {relative_path}: OK")
+                logger.verbose(f"verification ({original_hash_entry.hash_format}) of file {relative_path}: OK")
             else:
                 logger.error(
                     f"ERROR: hash mismatch        for {relative_path} "
@@ -632,6 +650,100 @@ def diff_entire_folder_against_full_history_subcommand(root_path, verbose, ignor
 
 
 @click.command()
+@click.argument("root_path", type=click.Path(exists=True))
+@click.argument("destination_path", type=click.Path())
+# general options
+@click.option("--verbose", "-v", default=False, is_flag=True, help="Verbose output")
+@click.option(
+    "--no_directory_hashes",
+    "-n",
+    default=False,
+    is_flag=True,
+    help="Skip creation of directory hashes, only reference directories without hash",
+)
+@click.option("ignore_list", "--ignore", "-i", multiple=True, help="A single file pattern to ignore.")
+@click.option(
+    "ignore_spec_file",
+    "--ignore_spec",
+    "-ii",
+    type=click.Path(exists=True),
+    help="A file containing multiple file patterns to ignore.",
+)
+def flatten(root_path, destination_path, verbose, no_directory_hashes, ignore_list, ignore_spec_file):
+    """
+    Flatten an MHL history into one external manifest
+
+    \b
+    The flatten command iterates through the mhl-history, collects all known files and
+    their hashes in multiple hash formats and writes them to a new mhl file outside of the
+    iterated history.
+    """
+    flatten_history(root_path, destination_path, verbose, no_directory_hashes, ignore_list, ignore_spec_file)
+    return
+
+
+def flatten_history(root_path, destination_path, verbose, no_directory_hashes, ignore_list=None, ignore_spec_file=None):
+    logger.verbose_logging = verbose
+
+    if not os.path.isabs(root_path):
+        root_path = os.path.join(os.getcwd(), root_path)
+
+    logger.verbose(f"Flattening folder at path: {root_path} ...")
+
+    existing_history = MHLHistory.load_from_path(root_path)
+
+    # create the ignore specification
+    ignore_spec = ignore.MHLIgnoreSpec(existing_history.latest_ignore_patterns(), ignore_list, ignore_spec_file)
+
+    # start a verification session on the existing history
+    collection_history = MHLHistory.create_collection_at_path(destination_path)
+    session = MHLGenerationCreationSession(collection_history, ignore_spec)
+
+    # store the directory hashes of sub folders so we can use it when calculating the hash of the parent folder
+    dir_hash_mappings = {}
+
+    if len(existing_history.hash_lists) == 0:
+        raise errors.NoMHLHistoryException(root_path)
+
+    for hash_list in existing_history.hash_lists:
+        for media_hash in hash_list.media_hashes:
+            if not media_hash.is_directory:
+                for hash_entry in media_hash.hash_entries:
+                    if hash_entry.action != "failed":
+                        # check if this entry is newer than the one already in there to avoid duplicate entries
+                        found_media_hash = session.new_hash_lists[collection_history].find_media_hash_for_path(
+                            media_hash.path
+                        )
+                        if found_media_hash == None:
+                            session.append_file_hash(
+                                media_hash.path,
+                                media_hash.file_size,
+                                media_hash.last_modification_date,
+                                hash_entry.hash_format,
+                                hash_entry.hash_string,
+                                action=hash_entry.action,
+                                hash_date=hash_entry.hash_date,
+                            )
+                        else:
+                            hashformat_is_already_there = False
+                            for found_hash_entry in found_media_hash.hash_entries:
+                                if found_hash_entry.hash_format == hash_entry.hash_format:
+                                    hashformat_is_already_there = True
+                            if not hashformat_is_already_there:
+                                # assuming that hash_entry of same type also has same hash_value ..
+                                session.append_file_hash(
+                                    media_hash.path,
+                                    media_hash.file_size,
+                                    media_hash.last_modification_date,
+                                    hash_entry.hash_format,
+                                    hash_entry.hash_string,
+                                    action=hash_entry.action,
+                                )
+
+    commit_session_for_collection(session, root_path)
+
+
+@click.command()
 @click.option(
     "--verbose",
     "-v",
@@ -832,6 +944,20 @@ def commit_session(session):
     creator_info.host_name = platform.node()
     process_info = MHLProcessInfo()
     process_info.process = MHLProcess("in-place")
+    session.commit(creator_info, process_info)
+
+
+def commit_session_for_collection(session, root_path):
+    creator_info = MHLCreatorInfo()
+    creator_info.tool = MHLTool(ascmhl_tool_name, ascmhl_tool_version)
+    creator_info.creation_date = utils.datetime_now_isostring()
+    creator_info.host_name = platform.node()
+    process_info = MHLProcessInfo()
+    process_info.process = MHLProcess("flatten")
+    root_hash = MHLMediaHash()
+    root_hash.path = root_path
+    process_info.root_media_hash = root_hash
+    process_info.hashlist_custom_basename = "packinglist_" + os.path.basename(root_path)
     session.commit(creator_info, process_info)
 
 

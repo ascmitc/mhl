@@ -6,11 +6,15 @@
     <tool version="0.3 alpha">ascmhl.py</tool>
   </creatorinfo>
   <processinfo>
-    <roothash directory="true">
-      <path lastmodificationdate="2020-01-15T13:00:00+00:00">/file_server/A002R2EC</path>
-      <md5 structure="b2ae676728fea69eb9f826defee34d07" hashdate="2020-01-17T14:30:00+00:00">ef2c1c34ebac7d493ffb0e79efaa0a1d</md5>
-    </roothash>
     <process>in-place</process>
+    <roothash>
+      <content>
+        <md5 hashdate="2020-01-17T14:30:00+00:00">ef2c1c34ebac7d493ffb0e79efaa0a1d</md5>
+      </content>
+      <structure>
+        <md5 hashdate="2020-01-17T14:30:00+00:00">b2ae676728fea69eb9f826defee34d07</md5>
+      </structure>
+    </roothash>
     <ignore>
       <pattern>.DS_Store</pattern>
       <pattern>ascmhl</pattern>
@@ -28,10 +32,15 @@
       <xxh64 action="verified" hashdate="2020-01-17T14:30:00+00:00">7680e5f98f4a80fd</xxh64>
       <md5 action="verified" hashdate="2020-01-17T14:30:00+00:00">614dd0e977becb4c6f7fa99e64549b12</md5>
     </hash>
-    <hash directory="true">
+    <directoryhash>
       <path lastmodificationdate="2020-01-15T13:00:00+00:00">Clips</path>
-      <md5 structure="a36f6434c9cb1f5fc44a7dc80aa6400a" hashdate="2020-01-17T14:30:00+00:00">5bfa20fc4fb2c4a8e6fafcd07b85061b</md5>
-    </hash>
+      <content>
+        <md5 hashdate="2020-01-17T14:30:00+00:00">5bfa20fc4fb2c4a8e6fafcd07b85061b</md5>
+      </content>
+      <structure>
+        <md5 hashdate="2020-01-17T14:30:00+00:00">a36f6434c9cb1f5fc44a7dc80aa6400a</md5>
+      </structure>
+    </directoryhash>
     <hash>
       <path size="58" lastmodificationdate="2020-01-15T13:00:00+00:00">Sidecar.txt</path>
       <xxh64 action="verified" hashdate="2020-01-17T14:30:00+00:00">3ab5a4166b9bde44</xxh64>

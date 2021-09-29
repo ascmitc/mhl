@@ -13,6 +13,9 @@
             <enumeration value="failed"/>
         </restriction>
     </simpleType>
+    <simpleType name="RelativePathType">
+        <restriction base="string"/>
+    </simpleType>
     <complexType name="HashListType">
         <sequence>
             <element name="creatorinfo" type="ascmhl:CreatorInfoType"/>
@@ -36,8 +39,8 @@
 
     <complexType name="ProcessInfoType">
         <sequence>
-            <element name="roothash" type="ascmhl:HashType"/>
             <element name="process" type="ascmhl:ProcessType"/>
+            <element name="roothash" type="ascmhl:RootDirectoryHashType" minOccurs="0"/>
             <element name="ignore" type="ascmhl:IgnoreType" minOccurs="0"/>
         </sequence>
     </complexType>
@@ -62,6 +65,7 @@
         <restriction base="string">
             <enumeration value="in-place"/>
             <enumeration value="transfer"/>
+            <enumeration value="flatten"/>
         </restriction>
     </simpleType>
     <complexType name="IgnoreType">
@@ -70,16 +74,17 @@
         </sequence>
     </complexType>
     <complexType name="HashesType">
-        <sequence>
+        <choice minOccurs="1" maxOccurs="unbounded">
             <element name="hash" type="ascmhl:HashType" maxOccurs="unbounded"/>
-        </sequence>
+            <element name="directoryhash" type="ascmhl:DirectoryHashType"/>
+        </choice>
     </complexType>
     <complexType name="HashType">
         <sequence>
             <element name="path">
                 <complexType>
                     <simpleContent>
-                        <extension base="string">
+                        <extension base="ascmhl:RelativePathType">
                             <attribute name="size" type="integer"/>
                             <attribute name="creationdate" type="dateTime"/>
                             <attribute name="lastmodificationdate" type="dateTime"/>
@@ -96,10 +101,33 @@
                 <element name="xxh3" type="ascmhl:HashFormatType" maxOccurs="1" minOccurs="0"/>
                 <element name="xxh128" type="ascmhl:HashFormatType" maxOccurs="1" minOccurs="0"/>
             </choice>
-            <element name="previousPath" type="string" minOccurs="0"/>
+            <element name="previousPath" type="ascmhl:RelativePathType" minOccurs="0"/>
             <element minOccurs="0" name="metadata" type="ascmhl:MetadataType"/>
         </sequence>
-        <attribute name="directory" type="boolean"/>
+    </complexType>
+    <complexType name="DirectoryHashType">
+        <sequence>
+            <element name="path">
+                <complexType>
+                    <simpleContent>
+                        <extension base="ascmhl:RelativePathType">
+                            <attribute name="creationdate" type="dateTime"/>
+                            <attribute name="lastmodificationdate" type="dateTime"/>
+                        </extension>
+                    </simpleContent>
+                </complexType>
+            </element>
+            <element name="content" type="ascmhl:DirectoryHashFormatContainerType"/>
+            <element name="structure" type="ascmhl:DirectoryHashFormatContainerType"/>
+            <element name="previousPath" type="ascmhl:RelativePathType" minOccurs="0"/>
+            <element name="metadata" type="ascmhl:MetadataType" minOccurs="0"/>
+        </sequence>
+    </complexType>
+        <complexType name="RootDirectoryHashType">
+        <sequence>
+            <element name="content" type="ascmhl:DirectoryHashFormatContainerType"/>
+            <element name="structure" type="ascmhl:DirectoryHashFormatContainerType"/>
+        </sequence>
     </complexType>
     <complexType name="HashFormatType">
         <simpleContent>
@@ -110,6 +138,16 @@
             </extension>
         </simpleContent>
     </complexType>
+    <complexType name="DirectoryHashFormatContainerType">
+		<choice minOccurs="1" maxOccurs="unbounded">
+            <element name="md5" type="ascmhl:HashFormatType"/>
+            <element name="sha1" type="ascmhl:HashFormatType"/>
+            <element name="c4" type="ascmhl:HashFormatType"/>
+            <element name="xxh3" type="ascmhl:HashFormatType"/>
+            <element name="xxh64" type="ascmhl:HashFormatType"/>
+            <element name="xxh128" type="ascmhl:HashFormatType"/>
+        </choice>
+    </complexType>
     <complexType name="ReferencesType">
         <sequence>
             <element maxOccurs="unbounded" name="hashlistreference"
@@ -118,7 +156,7 @@
     </complexType>
     <complexType name="HashListReferenceType">
         <sequence>
-            <element name="path" type="string"/>
+            <element name="path" type="ascmhl:RelativePathType"/>
             <element name="c4" type="ascmhl:HashFormatType"/>
         </sequence>
     </complexType>

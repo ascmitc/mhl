@@ -6,11 +6,15 @@
     <tool version="0.3 alpha">ascmhl.py</tool>
   </creatorinfo>
   <processinfo>
-    <roothash directory="true">
-      <path lastmodificationdate="2020-01-15T13:00:00+00:00">/file_server/A002R2EC</path>
-      <xxh64 structure="574ab2d2afc981cd" hashdate="2020-01-17T14:30:00+00:00">7e423206834bf81a</xxh64>
-    </roothash>
     <process>in-place</process>
+    <roothash>
+      <content>
+        <xxh64 hashdate="2020-01-17T14:30:00+00:00">7e423206834bf81a</xxh64>
+      </content>
+      <structure>
+        <xxh64 hashdate="2020-01-17T14:30:00+00:00">574ab2d2afc981cd</xxh64>
+      </structure>
+    </roothash>
     <ignore>
       <pattern>.DS_Store</pattern>
       <pattern>ascmhl</pattern>
@@ -26,10 +30,15 @@
       <path size="4" lastmodificationdate="2020-01-15T13:00:00+00:00">Clips/A002C007_141024_R2EC.mov</path>
       <xxh64 action="verified" hashdate="2020-01-17T14:30:00+00:00">7680e5f98f4a80fd</xxh64>
     </hash>
-    <hash directory="true">
+    <directoryhash>
       <path lastmodificationdate="2020-01-15T13:00:00+00:00">Clips</path>
-      <xxh64 structure="a27e08b77ae22c78" hashdate="2020-01-17T14:30:00+00:00">6d43a82e7a5d40f6</xxh64>
-    </hash>
+      <content>
+        <xxh64 hashdate="2020-01-17T14:30:00+00:00">6d43a82e7a5d40f6</xxh64>
+      </content>
+      <structure>
+        <xxh64 hashdate="2020-01-17T14:30:00+00:00">a27e08b77ae22c78</xxh64>
+      </structure>
+    </directoryhash>
     <hash>
       <path size="58" lastmodificationdate="2020-01-15T13:00:00+00:00">Sidecar.txt</path>
       <xxh64 action="verified" hashdate="2020-01-17T14:30:00+00:00">3ab5a4166b9bde44</xxh64>

@@ -117,8 +117,8 @@
                     </simpleContent>
                 </complexType>
             </element>
-            <element name="content" type="ascmhl:DirectoryHashFormatContainerType" minOccurs="0"/>
-            <element name="structure" type="ascmhl:DirectoryHashFormatContainerType" minOccurs="0"/>
+            <element name="content" type="ascmhl:DirectoryHashFormatContainerType"/>
+            <element name="structure" type="ascmhl:DirectoryHashFormatContainerType"/>
             <element name="previousPath" type="ascmhl:RelativePathType" minOccurs="0"/>
             <element name="metadata" type="ascmhl:MetadataType" minOccurs="0"/>
         </sequence>

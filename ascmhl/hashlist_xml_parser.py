@@ -41,75 +41,125 @@ def parse(file_path):
     hash_list.file_path = file_path
     object_stack = []
     current_object = None
+    is_directory_structure = False
+
     # use iterparse to prevent large memory usage when parsing large files
     # pass a file handle to iterparse instead of the path directly to support the fake filesystem used in the tests
     file = open(file_path, "rb")
     existing_ignore_patterns = []
     for event, element in etree.iterparse(file, events=("start", "end")):
-        if current_object and event == "end":
+
+        # check if we need to create a new container
+        if event == "start":
             # the tag might contain the namespace like {urn:ASC:MHL:v2.0}hash, so we need to strip the namespace part
             # doing it with split is faster than using the lxml QName method
             tag = element.tag.split("}", 1)[-1]
-            if type(current_object) is MHLCreatorInfo:
-                if tag == "creationdate":
-                    current_object.creation_date = element.text
-                elif tag == "tool":
-                    current_object.tool = MHLTool(element.text, element.attrib["version"])
-                elif tag == "hostname":
-                    current_object.host_name = element.text
-                elif tag == "creatorinfo":
-                    hash_list.creator_info = current_object
-                    current_object = None
-                # TODO: missing location, comment
-            elif type(current_object) is MHLProcessInfo:
-                if tag == "process":
-                    current_object.process = element.text
+
+            if not current_object and event == "start":
+                if tag == "creatorinfo":
+                    current_object = MHLCreatorInfo()
                 elif tag == "processinfo":
-                    hash_list.process_info = current_object
-                    current_object = None
-            elif type(current_object) is MHLIgnoreSpec:
-                if tag == "pattern":
-                    existing_ignore_patterns.append(element.text)
-                elif tag == "ignore":
-                    hash_list.process_info.ignore_spec = current_object
-                    current_object = object_stack.pop()
-                else:
-                    current_object = None
-            elif type(current_object) is MHLMediaHash:
-                if tag == "path":
-                    current_object.path = element.text
-                    file_size = element.attrib.get("size")
-                    current_object.file_size = int(file_size) if file_size else None
-                # TODO: parse date
-                # elif tag == 'lastmodificationdate':
-                # 	current_object.file_size = element.text
-                elif tag in ascmhl_supported_hashformats:
-                    hash_date = None
-                    hash_date_string = element.attrib.get("hashdate")
-                    if hash_date_string is not None:
-                        hash_date = dateutil.parser.parse(hash_date_string)
-                    entry = MHLHashEntry(tag, element.text, element.attrib.get("action"), hash_date)
-                    if element.attrib.get("structure") is not None:
-                        entry.structure_hash_string = element.attrib.get("structure")
-                    current_object.append_hash_entry(entry)
+                    current_object = MHLProcessInfo()
                 elif tag == "hash":
-                    if element.attrib.get("directory") == "true":
-                        current_object.is_directory = True
-                    hash_list.append_hash(current_object)
-                    current_object = None
-                elif tag == "roothash":
-                    root_media_hash = current_object
-                    root_media_hash.is_directory = True
-                    current_object = object_stack.pop()
-                    current_object.root_media_hash = root_media_hash
-            elif type(current_object) is MHLHashListReference:
-                if tag == "path":
-                    current_object.path = element.text
-                elif tag == "c4":
-                    current_object.reference_hash = element.text
+                    current_object = MHLMediaHash()
+                elif tag == "directoryhash":
+                    current_object = MHLMediaHash()
+                    current_object.is_directory = True
                 elif tag == "hashlistreference":
-                    hash_list.append_hash_list_reference(current_object)
-                    current_object = None
+                    current_object = MHLHashListReference()
+
+            # these are the only cases where we push to the object stack
+            if type(current_object) is MHLProcessInfo:
+                if tag == "ignore":
+                    object_stack.append(current_object)
+                    current_object = MHLIgnoreSpec()
+                elif tag == "roothash":
+                    object_stack.append(current_object)
+                    current_object = MHLMediaHash()
+                    current_object.is_directory = True
+
+            # take a note where we are ina <directoryhash>
+            elif type(current_object) is MHLMediaHash:
+                if tag == "structure":
+                    is_directory_structure = True
+                elif tag == "content":
+                    is_directory_structure = False
+
+        elif event == "end":
+
+            if current_object:
+                tag = element.tag.split("}", 1)[-1]
+
+                if type(current_object) is MHLCreatorInfo:
+                    if tag == "creationdate":
+                        current_object.creation_date = element.text
+                    elif tag == "tool":
+                        current_object.tool = MHLTool(element.text, element.attrib["version"])
+                    elif tag == "hostname":
+                        current_object.host_name = element.text
+                    elif tag == "creatorinfo":
+                        hash_list.creator_info = current_object
+                        current_object = None
+                    # TODO: missing location, comment
+
+                elif type(current_object) is MHLProcessInfo:
+                    if tag == "process":
+                        current_object.process = element.text
+                    elif tag == "processinfo":
+                        hash_list.process_info = current_object
+                        current_object = None
+                elif type(current_object) is MHLIgnoreSpec:
+                    if tag == "pattern":
+                        existing_ignore_patterns.append(element.text)
+                    elif tag == "ignore":
+                        hash_list.process_info.ignore_spec = current_object
+                        current_object = object_stack.pop()
+                    else:
+                        current_object = None
+
+                elif type(current_object) is MHLMediaHash:
+                    if tag == "path":
+                        current_object.path = element.text
+                        file_size = element.attrib.get("size")
+                        current_object.file_size = int(file_size) if file_size else None
+                    # TODO: parse date
+                    # elif tag == 'lastmodificationdate':
+                    # 	current_object.file_size = element.text
+                    elif tag in ascmhl_supported_hashformats:
+                        hash_date = None
+                        hash_date_string = element.attrib.get("hashdate")
+                        if hash_date_string is not None:
+                            hash_date = dateutil.parser.parse(hash_date_string)
+                        if current_object.is_directory:
+                            if is_directory_structure == False:
+                                entry = MHLHashEntry(tag, element.text, element.attrib.get("action"), hash_date)
+                                current_object.append_hash_entry(entry)
+                            else:
+                                # find right hash entry and set structure hash
+                                entry = current_object.find_hash_entry_for_format(tag)
+                                entry.structure_hash_string = element.text
+                        else:
+                            entry = MHLHashEntry(tag, element.text, element.attrib.get("action"), hash_date)
+                            current_object.append_hash_entry(entry)
+
+                    elif tag == "hash" or tag == "directoryhash":
+                        hash_list.append_hash(current_object)
+                        current_object = None
+
+                    elif tag == "roothash":
+                        root_media_hash = current_object
+                        root_media_hash.is_directory = True
+                        current_object = object_stack.pop()
+                        current_object.root_media_hash = root_media_hash
+
+                elif type(current_object) is MHLHashListReference:
+                    if tag == "path":
+                        current_object.path = element.text
+                    elif tag == "c4":
+                        current_object.reference_hash = element.text
+                    elif tag == "hashlistreference":
+                        hash_list.append_hash_list_reference(current_object)
+                        current_object = None
 
             # in order to keep memory usage low while parsing, we clear the finished element
             # and remove it from the parent element as well but since this is clearing the children anyways
@@ -118,28 +168,6 @@ def parse(file_path):
                 element.clear()
                 while element.getprevious() is not None:
                     del element.getparent()[0]
-
-        # check if we need to create a new container
-        elif not current_object and event == "start":
-            # remove namespace here again instead of outside of the if
-            # since we don't want to do it for tags we don't compare at all
-            tag = element.tag.split("}", 1)[-1]
-            if tag == "hash":
-                current_object = MHLMediaHash()
-            elif tag == "creatorinfo":
-                current_object = MHLCreatorInfo()
-            elif tag == "processinfo":
-                current_object = MHLProcessInfo()
-            elif tag == "hashlistreference":
-                current_object = MHLHashListReference()
-        elif type(current_object) is MHLProcessInfo and event == "start":
-            tag = element.tag.split("}", 1)[-1]
-            if tag == "ignore":
-                object_stack.append(current_object)
-                current_object = MHLIgnoreSpec()
-            elif tag == "roothash":
-                object_stack.append(current_object)
-                current_object = MHLMediaHash()
 
     hash_list.process_info.ignore_spec = MHLIgnoreSpec(existing_ignore_patterns)
     logger.debug(f"parsing took: {timer() - start}")

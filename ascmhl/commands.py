@@ -857,7 +857,7 @@ def xsd_schema_check(file_path, directory_file):
 
     xsd_path = "xsd/ASCMHL.xsd"
 
-    if (directory_file):
+    if directory_file:
         xsd_path = "xsd/ASCMHLDirectory__combined.xsd"
 
     xsd = etree.XMLSchema(etree.parse(xsd_path))

@@ -129,7 +129,7 @@ def _hashlist_xml_element_from_hashlist(hash_list: MHLHashList):
 def _hashlist_xml_element_from_chaingeneration(generation: MHLChainGeneration):
     """builds and returns one <hashlist> element for a given ChainGeneration object"""
 
-    if generation.hash_format == 'c4':
+    if generation.hash_format == "c4":
         hash_list_element = E.hashlist(
             E.path(generation.ascmhl_filename),
             E.c4(generation.hash_string),
@@ -140,4 +140,3 @@ def _hashlist_xml_element_from_chaingeneration(generation: MHLChainGeneration):
     else:
         logger.error("ERR: fixme: non-c4 hash in chain file, not implemented")
         return E.hashlist()
-

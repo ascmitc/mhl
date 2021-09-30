@@ -250,7 +250,7 @@ def test_scenario_02(fs, reference, card_a002):
         shutil.copytree("/travel_01/A002R2EC", "/file_server/A002R2EC")
 
         log_message("")
-        log_message("Sealing the folder A002R2EC again on the file server")
+        log_message("Creating new generation for the folder A002R2EC again on the file server")
         log_message("this will verify all hashes, check for completeness and create a second generation")
         result = execute_command(ascmhl.commands.create, ["-v", "/file_server/A002R2EC", "-h", "xxh64"])
         assert result.exit_code == 0
@@ -281,7 +281,7 @@ def test_scenario_03(fs, reference, card_a002):
         shutil.copytree("/travel_01/A002R2EC", "/file_server/A002R2EC")
 
         log_message("")
-        log_message("Sealing the folder A002R2EC again on the file server using MD5 hash format")
+        log_message("Creating new generation for the folder A002R2EC again on the file server using MD5 hash format")
         log_message("this will verify all existing xxHashes, check for completeness,")
         log_message("and create a second generation with additional (new) MD5 hashes.")
         result = execute_command(ascmhl.commands.create, ["-v", "-h", "md5", "/file_server/A002R2EC"])
@@ -317,7 +317,7 @@ def test_scenario_04(fs, reference, card_a002):
             file.write("!!")
 
         log_message("")
-        log_message("Sealing the folder A002R2EC again on the file server.")
+        log_message("Creating new generation for the folder A002R2EC again on the file server.")
         log_message("This will verify all existing hashes and fail because Sidecar.txt was altered.")
         log_message("An error is shown and create a new generation that documents the failed verification")
         result = execute_command(ascmhl.commands.create, ["-v", "/file_server/A002R2EC", "-h", "xxh64"])
@@ -368,7 +368,7 @@ def test_scenario_05(fs, reference, card_a002, card_a003):
         )
 
         log_message("")
-        log_message("Sealing the Reels folder on the file server.")
+        log_message("Creating new generation for the Reels folder on the file server.")
         log_message("This will verify all hashes, check for completeness and create two second generations")
         log_message("in the card sub folders A002R2EC and A003R2EC and an initial one for the Reels folder")
         log_message("with the original hash of the Summary.txt and references to the child histories")

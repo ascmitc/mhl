@@ -116,7 +116,7 @@ def create_for_folder_subcommand(
     if not os.path.isabs(root_path):
         root_path = os.path.join(os.getcwd(), root_path)
 
-    logger.verbose(f"Sealing folder at path: {root_path} ...")
+    logger.verbose(f"Creating new generation for folder at path: {root_path} ...")
 
     existing_history = MHLHistory.load_from_path(root_path)
 

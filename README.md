@@ -129,7 +129,7 @@ Additional utility commands:
 
 The most common commands when using the `ascmhl` in data management scenarios are the `create` and the `check` commands in their default behavior (without subcommand options). 
 
-Sealing a folder / drive with the `create` command traverses through a folder hierarchy, hashes all found files and compares the hashes against the records in the `ascmhl` folder (if present). The command creates a new generation (or an initial one) for the content of an entire folder at the given folder level. It can be used to document all files in a folder or drive with all verified or newly created file hashes of the moment the `create` command ran.
+Creating a new generation for a folder / drive with the `create` command traverses through a folder hierarchy, hashes all found files and compares the hashes against the records in the `ascmhl` folder (if present). The command creates a new generation (or an initial one) for the content of an entire folder at the given folder level. It can be used to document all files in a folder or drive with all verified or newly created file hashes of the moment the `create` command ran.
 
 Checking a folder / drive with the `verify` command traverses through the content of a folder, hashes all found files and compares the hashes against the records in the `ascmhl` folder. The `verify` command behaves like a `create` command (both without additional options), but doesn't write new generations. It can be used to verify the content of a received drive with existing ascmhl information.
 

@@ -220,6 +220,32 @@ for each file from input
 		add a new generation if necessary in appropriate `ascmhl` folder (mhllib)
 ```
 
+
+### The `flatten` command 
+
+_TBD_
+
+```
+% ascmhl flatten --help
+Usage: ascmhl flatten [OPTIONS] ROOT_PATH DESTINATION_PATH
+
+  Flatten an MHL history into one external manifest
+
+  The flatten command iterates through the mhl-history, collects all known files and
+  their hashes in multiple hash formats and writes them to a new mhl file outside of the
+  iterated history.
+
+Options:
+  -v, --verbose              Verbose output
+  -n, --no_directory_hashes  Skip creation of directory hashes, only reference
+                             directories without hash
+  -i, --ignore TEXT          A single file pattern to ignore.
+  -ii, --ignore_spec PATH    A file containing multiple file patterns to
+                             ignore.
+  --help                     Show this message and exit.
+```
+
+
 ### The `verify` command
 
 #### `verify` default behavior (for file hierarchy, with completeness check)
@@ -319,6 +345,13 @@ on error (including mismatching hash):
 	print error
 	end with exit !=0
 ```
+
+
+#### `verify` with `-pl` subcommand option (for packing lists)
+
+_TBD_
+
+
 
 ### The `diff` command
 
@@ -435,4 +468,15 @@ The `xsd-schema-check` command validates a given ASC MHL file against the XML XS
 $ ascmhl xsd-schema-check /path/to/ascmhl/XXXXX.mhl
 ```
 
+
+## Known issues
+
+The current state of the implementation is intended to give a good overview what can be done with ASC MHL. Nonetheless this is not yet a complete implementation of the ASC MHL specification:
+
+* Currently not all initially specified commands are implemented yet (see sections above)
+* Renaming of files is currently not implemented (neither as command, nor proper handling in histories and packing lists)
+* The chain file is currently not verified yet
+* Some secondary features of the ASC MHL specification are not implemented yet.
+
+_Also see the [GitHub issues](https://github.com/ascmitc/mhl/issues) page for more._
 

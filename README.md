@@ -151,8 +151,8 @@ The `info -sf` ("single file") command prints the known history of a single file
 
 _Implementation status 2020-09-08:_
 
-* __Implemented__: `create`, `verify` (partially), `diff`, `info` (partially), `xsd-schema-check`
-* __Not implemented yet__: some subcommands for `verify`, `info`
+* __Implemented__: `create`, `flatten` (partially), `verify` (partially), `diff`, `info` (partially), `xsd-schema-check`
+* __Not implemented yet__: some subcommands for `flatten`, `verify`, `info`
 
 _The commands are also marked below with their current implementation status._
 
@@ -461,11 +461,22 @@ print directory hash
 
 ### The `xsd-schema-check` command
 
-The `xsd-schema-check` command validates a given ASC MHL file against the XML XSD. This command can be used to ensure the creation of syntactically valid ASC MHL files, for example during  implementation of tools creating ASC MHL files.
+The `xsd-schema-check` command validates a given ASC MHL Manifest file against the XML XSD. This command can be used to ensure the creation of syntactically valid ASC MHL files, for example during  implementation of tools creating ASC MHL files.
 
+_Note: The `xsd-schema-check` command must be run from a directory with a `xsd` subfolder where the ASC MHL xsd files are located (for example it can be run from the root folder of the ASC MHL git repository)._
 
 ```
 $ ascmhl xsd-schema-check /path/to/ascmhl/XXXXX.mhl
+```
+
+#### `xsd-schema-check` with the `-df` subcommand option
+
+The `xsd-schema-check` command with the `-df` subcommand option can validates a ASC MHL Directory file instead of a manifest file.
+
+It is run with the path to a ASC MHL Directory file.
+
+```
+$ ascmhl xsd-schema-check -df /path/to/ascmhl/ascmhl_chain.xml
 ```
 
 

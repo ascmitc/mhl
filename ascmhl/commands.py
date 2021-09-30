@@ -836,7 +836,15 @@ def info_for_single_file(root_path, verbose, single_file):
 
 @click.command()
 @click.argument("file_path", type=click.Path(exists=True))
-def xsd_schema_check(file_path):
+# subcommands
+@click.option(
+    "--directory_file",
+    "-df",
+    default=False,
+    is_flag=True,
+    help="Check directory file (e.g. ascmhl_chain.xml) instead of manifest file",
+)
+def xsd_schema_check(file_path, directory_file):
     """
     Checks a .mhl file against the xsd schema definition
 
@@ -848,6 +856,10 @@ def xsd_schema_check(file_path):
     """
 
     xsd_path = "xsd/ASCMHL.xsd"
+
+    if (directory_file):
+        xsd_path = "xsd/ASCMHLDirectory__combined.xsd"
+
     xsd = etree.XMLSchema(etree.parse(xsd_path))
 
     # pass a file handle to support the fake file system used in the tests

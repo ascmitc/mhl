@@ -38,15 +38,43 @@ from .utils import datetime_isostring
 
 
 def parse(file_path):
-    """parsing the chain.txt file and building the MHLChain for the chain member variable"""
+    """parsing the MHL directory file and building the MHLChain for the chain member variable"""
     logger.debug(f'parsing "{os.path.basename(file_path)}"...')
 
     chain = MHLChain(file_path)
+    chain.file_path = file_path
+    current_object = None
 
-    # TODO
+    if not os.path.exists(file_path):
+        return chain
 
+    file = open(file_path, "rb")
+    for event, element in etree.iterparse(file, events=("start", "end")):
 
+        # check if we need to create a new container
+        if event == "start":
+            # the tag might contain the namespace like {urn:ASC:MHL:v2.0}hash, so we need to strip the namespace part
+            # doing it with split is faster than using the lxml QName method
+            tag = element.tag.split("}", 1)[-1]
 
+            if not current_object:
+                if tag == "hashlist":
+                    current_object = MHLChainGeneration()
+
+        elif event == "end":
+            if current_object:
+                tag = element.tag.split("}", 1)[-1]
+
+                if type(current_object) is MHLChainGeneration:
+                    if tag == "path":
+                        current_object.ascmhl_filename = element.text
+                    elif tag in ascmhl_supported_hashformats:
+                        current_object.hash_format = tag
+                        current_object.hash_string = element.text
+                    elif tag == "hashlist":
+                        current_object.generation_number = element.attrib.get("sequencenr")
+                        chain.append_generation(current_object)
+                        current_object = None
 
     return chain
 
@@ -65,12 +93,11 @@ def write_chain(chain: MHLChain, new_hash_list: MHLHashList):
     file.write(b'<?xml version="1.0" encoding="UTF-8"?>\n<ascmhldirectory xmlns="urn:ASC:MHL:DIRECTORY:v2.0">\n')
     current_indent = "  "
 
-    # TODO for hash_list in chain
-
-    # ...
+    for generation in chain.generations:
+        _write_xml_element_to_file(file, _hashlist_xml_element_from_chaingeneration(generation), "  ")
 
     # write new hashlist
-    _write_xml_element_to_file(file, _hashlist_xml_element(new_hash_list), "  ")
+    _write_xml_element_to_file(file, _hashlist_xml_element_from_hashlist(new_hash_list), "  ")
 
     current_indent = current_indent[:-2]
     _write_xml_string_to_file(file, "</ascmhldirectory>\n", current_indent)
@@ -87,14 +114,30 @@ def _write_xml_string_to_file(file, xml_string: str, indent: str):
     file.write(result.encode("utf-8"))
 
 
-def _hashlist_xml_element(hash_list: MHLHashList):
+def _hashlist_xml_element_from_hashlist(hash_list: MHLHashList):
     """builds and returns one <hashlist> element for a given HashList object"""
 
-    root_path = os.path.dirname(os.path.dirname(hash_list.file_path))
     hash_list_element = E.hashlist(
-        E.path(os.path.relpath(hash_list.file_path, root_path)),
+        E.path(os.path.basename(hash_list.file_path)),
         E.c4(hash_list.generate_reference_hash()),
     )
     hash_list_element.attrib["sequencenr"] = str(hash_list.generation_number)
 
     return hash_list_element
+
+
+def _hashlist_xml_element_from_chaingeneration(generation: MHLChainGeneration):
+    """builds and returns one <hashlist> element for a given ChainGeneration object"""
+
+    if generation.hash_format == 'c4':
+        hash_list_element = E.hashlist(
+            E.path(generation.ascmhl_filename),
+            E.c4(generation.hash_string),
+        )
+        hash_list_element.attrib["sequencenr"] = str(generation.generation_number)
+
+        return hash_list_element
+    else:
+        logger.error("ERR: fixme: non-c4 hash in chain file, not implemented")
+        return E.hashlist()
+

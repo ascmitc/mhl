@@ -12,7 +12,7 @@ import shutil
 
 import click
 from .history import MHLHistory
-from . import chain_txt_parser
+from . import chain_xml_parser
 from . import hashlist_xml_parser
 
 
@@ -24,7 +24,7 @@ def readchainfile(filepath, verbose):
     read an ASC-MHL file
     """
 
-    chain = chain_txt_parser.parse(filepath)
+    chain = chain_xml_parser.parse(filepath)
 
     if verbose:
         chain.log()

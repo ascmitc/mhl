@@ -69,7 +69,7 @@ class MHLChainGeneration:
     hash_format: str
     hash_string: str
 
-    def __init__(self, generation_number, ascmhl_filename, hash_format, hash_string):
+    def __init__(self, generation_number=-1, ascmhl_filename=None, hash_format=None, hash_string=None):
         # line string examples:
         # 0001 A002R2EC_2019-10-08_100916_0001.ascmhl SHA1: 9e9302b3d7572868859376f0e5802b87bab3199e
 

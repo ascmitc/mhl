@@ -55,7 +55,7 @@ def parse(file_path):
             # doing it with split is faster than using the lxml QName method
             tag = element.tag.split("}", 1)[-1]
 
-            if not current_object and event == "start":
+            if not current_object:
                 if tag == "creatorinfo":
                     current_object = MHLCreatorInfo()
                 elif tag == "processinfo":

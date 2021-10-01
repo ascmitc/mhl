@@ -10,7 +10,7 @@ __email__ = "opensource@pomfort.com"
 from collections import defaultdict
 from typing import Dict, List
 
-from . import chain_txt_parser
+from . import chain_xml_parser
 from . import logger
 from .ignore import MHLIgnoreSpec
 from .hashlist import MHLHashList, MHLHashEntry, MHLCreatorInfo, MHLProcessInfo
@@ -175,4 +175,4 @@ class MHLGenerationCreationSession:
             if history.parent_history is not None:
                 referenced_hash_lists[history.parent_history].append(new_hash_list)
 
-            chain_txt_parser.write_chain(history.chain, new_hash_list)
+            chain_xml_parser.write_chain(history.chain, new_hash_list)

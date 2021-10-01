@@ -29,7 +29,7 @@ def test_create_succeed(fs):
     assert os.path.exists("/root/ascmhl/0001_root_2020-01-16_091500.mhl")
     # with open('/root/ascmhl/0001_root_2020-01-16_091500.mhl', 'r') as fin:
     #     print(fin.read())
-    assert os.path.exists("/root/ascmhl/ascmhl_chain.txt")
+    assert os.path.exists("/root/ascmhl/ascmhl_chain.xml")
 
 
 @freeze_time("2020-01-16 09:15:00")
@@ -160,7 +160,7 @@ def test_create_no_directory_hashes(fs):
     # the empty folder is still referenced even if not creating directory hashes
     assert hash_list.find_media_hash_for_path("emptyFolder").is_directory
 
-    # removing an empty folder will cause sealing to fail
+    # removing an empty folder will cause creating a new generation to fail
     os.removedirs("/root/emptyFolder")
     runner = CliRunner()
     result = runner.invoke(ascmhl.commands.create, ["/root", "-v", "-n"])
@@ -196,7 +196,7 @@ def test_create_fail_altered_file(fs, simple_mhl_history):
     # and it contains NO new md5 hash value of the altered file
     assert len(stuff_txt_latest_media_hash.hash_entries) == 1
 
-    # since we didn't add a new md5 hash for the failing file before sealing will still fail for the altered file
+    # since we didn't add a new md5 hash for the failing file before creating a new generation will still fail for the altered file
     result = CliRunner().invoke(ascmhl.commands.create, ["/root", "-h", "md5"])
     assert result.exit_code == 12
     assert "Stuff.txt" in result.output
@@ -204,7 +204,7 @@ def test_create_fail_altered_file(fs, simple_mhl_history):
 
 def test_create_fail_missing_file(fs, nested_mhl_histories):
     """
-    test that sealing fails if there is a file missing on the file system that is referenced by one of the histories
+    test that creating a new generation fails if there is a file missing on the file system that is referenced by one of the histories
     """
 
     root_history = MHLHistory.load_from_path("/root")

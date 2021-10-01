@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:import
+    namespace="urn:ASC:MHL:v2.0"
+    schemaLocation="ASCMHL.xsd"/>
+  <xs:import
+    namespace="urn:ASC:MHL:DIRECTORY:v2.0"
+    schemaLocation="ASCMHLDirectory.xsd"/>
+</xs:schema>

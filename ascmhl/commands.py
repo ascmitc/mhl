@@ -116,7 +116,7 @@ def create_for_folder_subcommand(
     if not os.path.isabs(root_path):
         root_path = os.path.join(os.getcwd(), root_path)
 
-    logger.verbose(f"Sealing folder at path: {root_path} ...")
+    logger.verbose(f"Creating new generation for folder at path: {root_path} ...")
 
     existing_history = MHLHistory.load_from_path(root_path)
 
@@ -738,6 +738,7 @@ def flatten_history(root_path, destination_path, verbose, no_directory_hashes, i
                                     hash_entry.hash_format,
                                     hash_entry.hash_string,
                                     action=hash_entry.action,
+                                    hash_date=hash_entry.hash_date,
                                 )
 
     commit_session_for_collection(session, root_path)
@@ -835,7 +836,15 @@ def info_for_single_file(root_path, verbose, single_file):
 
 @click.command()
 @click.argument("file_path", type=click.Path(exists=True))
-def xsd_schema_check(file_path):
+# subcommands
+@click.option(
+    "--directory_file",
+    "-df",
+    default=False,
+    is_flag=True,
+    help="Check directory file (e.g. ascmhl_chain.xml) instead of manifest file",
+)
+def xsd_schema_check(file_path, directory_file):
     """
     Checks a .mhl file against the xsd schema definition
 
@@ -847,6 +856,10 @@ def xsd_schema_check(file_path):
     """
 
     xsd_path = "xsd/ASCMHL.xsd"
+
+    if directory_file:
+        xsd_path = "xsd/ASCMHLDirectory__combined.xsd"
+
     xsd = etree.XMLSchema(etree.parse(xsd_path))
 
     # pass a file handle to support the fake file system used in the tests

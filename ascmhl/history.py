@@ -14,7 +14,7 @@ import re
 from datetime import datetime, date, time
 
 from .__version__ import ascmhl_folder_name, ascmhl_file_extension, ascmhl_chainfile_name, ascmhl_collectionfile_name
-from . import hashlist_xml_parser, chain_txt_parser
+from . import hashlist_xml_parser, chain_xml_parser
 from .utils import datetime_now_filename_string
 from typing import Tuple, List, Dict, Optional, Set
 from . import logger
@@ -216,7 +216,7 @@ class MHLHistory:
         history.asc_mhl_path = asc_mhl_folder_path
 
         file_path = os.path.join(asc_mhl_folder_path, ascmhl_chainfile_name)
-        history.chain = chain_txt_parser.parse(file_path)
+        history.chain = chain_xml_parser.parse(file_path)
 
         hash_lists = []
         for root, directories, filenames in os.walk(asc_mhl_folder_path):
@@ -280,7 +280,7 @@ class MHLHistory:
         history.asc_mhl_path = collection_folder_path
 
         file_path = os.path.join(collection_folder_path, ascmhl_collectionfile_name)
-        history.chain = chain_txt_parser.parse(file_path)
+        history.chain = chain_xml_parser.parse(file_path)
 
         return history
 

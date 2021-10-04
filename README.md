@@ -129,7 +129,7 @@ Additional utility commands:
 
 The most common commands when using the `ascmhl` in data management scenarios are the `create` and the `check` commands in their default behavior (without subcommand options). 
 
-Sealing a folder / drive with the `create` command traverses through a folder hierarchy, hashes all found files and compares the hashes against the records in the `ascmhl` folder (if present). The command creates a new generation (or an initial one) for the content of an entire folder at the given folder level. It can be used to document all files in a folder or drive with all verified or newly created file hashes of the moment the `create` command ran.
+Creating a new generation for a folder / drive with the `create` command traverses through a folder hierarchy, hashes all found files and compares the hashes against the records in the `ascmhl` folder (if present). The command creates a new generation (or an initial one) for the content of an entire folder at the given folder level. It can be used to document all files in a folder or drive with all verified or newly created file hashes of the moment the `create` command ran.
 
 Checking a folder / drive with the `verify` command traverses through the content of a folder, hashes all found files and compares the hashes against the records in the `ascmhl` folder. The `verify` command behaves like a `create` command (both without additional options), but doesn't write new generations. It can be used to verify the content of a received drive with existing ascmhl information.
 
@@ -151,8 +151,8 @@ The `info -sf` ("single file") command prints the known history of a single file
 
 _Implementation status 2020-09-08:_
 
-* __Implemented__: `create`, `verify` (partially), `diff`, `info` (partially), `xsd-schema-check`
-* __Not implemented yet__: some subcommands for `verify`, `info`
+* __Implemented__: `create`, `flatten` (partially), `verify` (partially), `diff`, `info` (partially), `xsd-schema-check`
+* __Not implemented yet__: some subcommands for `flatten`, `verify`, `info`
 
 _The commands are also marked below with their current implementation status._
 
@@ -219,6 +219,32 @@ for each file from input
 	add record for file to new generation (mhllib)
 		add a new generation if necessary in appropriate `ascmhl` folder (mhllib)
 ```
+
+
+### The `flatten` command 
+
+_TBD_
+
+```
+% ascmhl flatten --help
+Usage: ascmhl flatten [OPTIONS] ROOT_PATH DESTINATION_PATH
+
+  Flatten an MHL history into one external manifest
+
+  The flatten command iterates through the mhl-history, collects all known files and
+  their hashes in multiple hash formats and writes them to a new mhl file outside of the
+  iterated history.
+
+Options:
+  -v, --verbose              Verbose output
+  -n, --no_directory_hashes  Skip creation of directory hashes, only reference
+                             directories without hash
+  -i, --ignore TEXT          A single file pattern to ignore.
+  -ii, --ignore_spec PATH    A file containing multiple file patterns to
+                             ignore.
+  --help                     Show this message and exit.
+```
+
 
 ### The `verify` command
 
@@ -319,6 +345,13 @@ on error (including mismatching hash):
 	print error
 	end with exit !=0
 ```
+
+
+#### `verify` with `-pl` subcommand option (for packing lists)
+
+_TBD_
+
+
 
 ### The `diff` command
 
@@ -428,11 +461,33 @@ print directory hash
 
 ### The `xsd-schema-check` command
 
-The `xsd-schema-check` command validates a given ASC MHL file against the XML XSD. This command can be used to ensure the creation of syntactically valid ASC MHL files, for example during  implementation of tools creating ASC MHL files.
+The `xsd-schema-check` command validates a given ASC MHL Manifest file against the XML XSD. This command can be used to ensure the creation of syntactically valid ASC MHL files, for example during  implementation of tools creating ASC MHL files.
 
+_Note: The `xsd-schema-check` command must be run from a directory with a `xsd` subfolder where the ASC MHL xsd files are located (for example it can be run from the root folder of the ASC MHL git repository)._
 
 ```
 $ ascmhl xsd-schema-check /path/to/ascmhl/XXXXX.mhl
 ```
 
+#### `xsd-schema-check` with the `-df` subcommand option
+
+The `xsd-schema-check` command with the `-df` subcommand option can validates a ASC MHL Directory file instead of a manifest file.
+
+It is run with the path to a ASC MHL Directory file.
+
+```
+$ ascmhl xsd-schema-check -df /path/to/ascmhl/ascmhl_chain.xml
+```
+
+
+## Known issues
+
+The current state of the implementation is intended to give a good overview what can be done with ASC MHL. Nonetheless this is not yet a complete implementation of the ASC MHL specification:
+
+* Currently not all initially specified commands are implemented yet (see sections above)
+* Renaming of files is currently not implemented (neither as command, nor proper handling in histories and packing lists)
+* The chain file is currently not verified yet
+* Some secondary features of the ASC MHL specification are not implemented yet.
+
+_Also see the [GitHub issues](https://github.com/ascmitc/mhl/issues) page for more._
 

@@ -16,7 +16,8 @@ ascmhl_tool_version = version("ascmhl")
 
 ascmhl_folder_name = "ascmhl"
 ascmhl_file_extension = ".mhl"
-ascmhl_chainfile_name = "chain.txt"
+ascmhl_chainfile_name = "ascmhl_chain.xml"
+ascmhl_collectionfile_name = "ascmhl_collection.xml"
 # decreasing priority list for verification
 ascmhl_supported_hashformats = [
     "md5",

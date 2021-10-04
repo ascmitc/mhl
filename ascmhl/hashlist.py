@@ -290,11 +290,13 @@ class MHLProcessInfo:
     process: Optional[MHLProcess]
     root_media_hash: Optional[MHLMediaHash]
     ignore_spec: MHLIgnoreSpec
+    hashlist_custom_basename: Optional[str]
 
     def __init__(self):
         self.process = None
         self.root_media_hash = None
         self.ignore_spec = MHLIgnoreSpec()
+        self.hashlist_custom_basename = None
 
     def log(self):
         logger.info("        process: {0}".format(self.process))

@@ -10,7 +10,7 @@ __email__ = "opensource@pomfort.com"
 from collections import defaultdict
 from typing import Dict, List
 
-from . import chain_txt_parser
+from . import chain_xml_parser
 from . import logger
 from .ignore import MHLIgnoreSpec
 from .hashlist import MHLHashList, MHLHashEntry, MHLCreatorInfo, MHLProcessInfo
@@ -41,17 +41,23 @@ class MHLGenerationCreationSession:
         self.new_hash_lists = defaultdict(MHLHashList)
         self.ignore_spec = ignore_spec
 
-    def append_file_hash(self, file_path, file_size, file_modification_date, hash_format, hash_string) -> bool:
+    def append_file_hash(
+        self, file_path, file_size, file_modification_date, hash_format, hash_string, action=None, hash_date=None
+    ) -> bool:
 
         relative_path = self.root_history.get_relative_file_path(file_path)
         # TODO: handle if path is outside of history root path
 
         history, history_relative_path = self.root_history.find_history_for_path(relative_path)
+        # for collections we cannot create a valid relative path (we are in the "wrong" history), but in that case
+        # the file_path is inputted already as the relative path (a bit of implicit functionality here)
+        if history_relative_path == None:
+            history_relative_path = file_path
 
         # check if there is an existing hash in the other generations and verify
         original_hash_entry = history.find_original_hash_entry_for_path(history_relative_path)
 
-        hash_entry = MHLHashEntry(hash_format, hash_string)
+        hash_entry = MHLHashEntry(hash_format, hash_string, hash_date=hash_date)
         if original_hash_entry is None:
             hash_entry.action = "original"
             logger.verbose(f"  created original hash for     {relative_path}  {hash_format}: {hash_string}")
@@ -80,6 +86,11 @@ class MHLGenerationCreationSession:
         media_hash = new_hash_list.find_or_create_media_hash_for_path(
             history_relative_path, file_size, file_modification_date
         )
+
+        # collection behavior: overwrite action with action from flattened history
+        if action != None:
+            hash_entry.action = action
+
         media_hash.append_hash_entry(hash_entry)
         return hash_entry.action != "failed"
 
@@ -148,6 +159,11 @@ class MHLGenerationCreationSession:
                 new_hash_list = self.new_hash_lists[history]
             new_hash_list.referenced_hash_lists = referenced_hash_lists[history]
             new_hash_list.creator_info = creator_info
+
+            # only for flattening we want to inject a custom root hash
+            if not new_hash_list.process_info.root_media_hash:
+                new_hash_list.process_info.root_media_hash = process_info.root_media_hash
+            new_hash_list.process_info.hashlist_custom_basename = process_info.hashlist_custom_basename
             new_hash_list.process_info.process = process_info.process
             new_hash_list.process_info.ignore_spec = MHLIgnoreSpec(
                 history.latest_ignore_patterns(), self.ignore_spec.get_pattern_list()
@@ -159,4 +175,4 @@ class MHLGenerationCreationSession:
             if history.parent_history is not None:
                 referenced_hash_lists[history.parent_history].append(new_hash_list)
 
-            chain_txt_parser.write_chain(history.chain, new_hash_list)
+            chain_xml_parser.write_chain(history.chain, new_hash_list)

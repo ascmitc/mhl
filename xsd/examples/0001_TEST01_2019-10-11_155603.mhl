@@ -38,8 +38,11 @@
     <directoryhash>
       <path lastmodificationdate="2019-10-11T15:56:01+02:00">Clips/</path>
       <content>
-        <xxh64>7680e5f98f4a80fd</xxh64>
-      </content>
+				<xxh64>7680e5f98f4a80fd</xxh64>
+			</content>
+			<structure>
+				<xxh64>8f4a80fd7680e5f9</xxh64>
+			</structure>
       <metadata>test2</metadata>
     </directoryhash>
     <hash>

@@ -10,3 +10,4 @@ requests-mock==1.9.2
 requests==2.25.1
 testfixtures==6.17.0
 xxhash==2.0.0
+python-dateutil==2.8.2

@@ -9,7 +9,7 @@ __email__ = "opensource@pomfort.com"
 import os
 import textwrap
 from timeit import default_timer as timer
-import dateutil.parser
+import dateutil
 
 from lxml import etree
 from lxml.builder import E

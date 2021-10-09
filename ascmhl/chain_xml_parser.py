@@ -14,27 +14,13 @@ from .hashlist import MHLHashList
 from .hasher import create_filehash
 import os
 import textwrap
-from timeit import default_timer as timer
-import dateutil.parser
 
 from lxml import etree
 from lxml.builder import E
 
-from . import logger
 from .hashlist import *
-from .utils import datetime_isostring
 from .__version__ import ascmhl_supported_hashformats
-from .hashlist import (
-    MHLCreatorInfo,
-    MHLHashEntry,
-    MHLHashList,
-    MHLHashListReference,
-    MHLMediaHash,
-    MHLProcessInfo,
-    MHLTool,
-)
-from .ignore import MHLIgnoreSpec
-from .utils import datetime_isostring
+from .hashlist import MHLHashList
 
 
 def parse(file_path):

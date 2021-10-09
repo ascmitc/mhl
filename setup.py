@@ -16,6 +16,7 @@ setup(
         "pathspec>=0.8.0",
         "requests>=2.25.1",
         "xxhash>=2.0.0",
+        "python-dateutil>=2.8.2",
         "importlib-metadata>=4.0.1; python_version < '3.8'",
     ],
     dependency_links=[],

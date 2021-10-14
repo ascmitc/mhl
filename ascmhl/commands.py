@@ -261,8 +261,27 @@ def create_for_single_files_subcommand(
     "-dh",
     default=False,
     is_flag=True,
-    help="Record single file, no completeness check (multiple occurrences possible for adding multiple files",
+    help="Just create and verify directory hashes.",
 )
+# options for directory_hash
+@click.option(
+    "--calculate_only",
+    "-co",
+    default=False,
+    is_flag=True,
+    help="Only calculate and print hashes, don't compare against history.",
+)
+@click.option(
+    "--root_only",
+    "-ro",
+    default=False,
+    is_flag=True,
+    help=(
+        "Only calculate and print root directory hash, don't compare against history (only applies to"
+        " --directory_hash)."
+    ),
+)
+# options
 @click.option(
     "--hash_format",
     "-h",
@@ -274,7 +293,17 @@ def create_for_single_files_subcommand(
 @click.option(
     "--packing_list", "-pl", default=None, type=click.Path(exists=True), help="Verify against an external packing list"
 )
-def verify(root_path, verbose, directory_hash, hash_format, packing_list, ignore_list, ignore_spec_file):
+def verify(
+    root_path,
+    verbose,
+    directory_hash,
+    hash_format,
+    packing_list,
+    ignore_list,
+    ignore_spec_file,
+    calculate_only,
+    root_only,
+):
     """
     Verify a folder, single file(s), or a directory hash
 
@@ -287,18 +316,22 @@ def verify(root_path, verbose, directory_hash, hash_format, packing_list, ignore
     """
 
     if packing_list is not None:
-        verify_entire_folder(root_path, verbose, packing_list, ignore_list, ignore_spec_file)
+        verify_entire_folder(root_path, verbose, packing_list, ignore_list, ignore_spec_file, calculate_only)
         return
 
     if directory_hash is True:
-        verify_directory_hash_subcommand(root_path, verbose, hash_format, ignore_list, ignore_spec_file)
+        verify_directory_hash_subcommand(
+            root_path, verbose, hash_format, ignore_list, ignore_spec_file, calculate_only, root_only
+        )
         return
 
     verify_entire_folder(root_path, verbose, None, ignore_list, ignore_spec_file)
     return
 
 
-def verify_entire_folder(root_path, verbose, packing_list_path, ignore_list=None, ignore_spec_file=None):
+def verify_entire_folder(
+    root_path, verbose, packing_list_path, ignore_list=None, ignore_spec_file=None, calculate_only=None
+):
     """
     Checks MHL hashes from all generations / a packing list against all file hashes.
 
@@ -375,7 +408,9 @@ def verify_entire_folder(root_path, verbose, packing_list_path, ignore_list=None
         raise exception
 
 
-def verify_directory_hash_subcommand(root_path, verbose, hash_format, ignore_list=None, ignore_spec_file=None):
+def verify_directory_hash_subcommand(
+    root_path, verbose, hash_format, ignore_list=None, ignore_spec_file=None, calculate_only=False, root_only=False
+):
     """
     Checks MHL directory hashes from all generations against computed directory hashes.
 
@@ -442,19 +477,25 @@ def verify_directory_hash_subcommand(root_path, verbose, hash_format, ignore_lis
                     if directory_hash_entry.hash_format != hash_format:
                         continue
                     found_hash_format = True
-                    num_current_successful_verifications = _compare_and_log_directory_hashes(
-                        relative_path, directory_hash_entry, content_hash, structure_hash
-                    )
+
+                    num_current_successful_verifications = -1
+                    if not root_only:
+                        num_current_successful_verifications = _compare_and_log_directory_hashes(
+                            relative_path, directory_hash_entry, content_hash, structure_hash
+                        )
+
                     if num_current_successful_verifications == 2:
                         num_successful_verifications += 1
                     if num_current_successful_verifications == 1:
                         num_failed_verifications += 1
 
-                if not found_hash_format:
-                    logger.error(
-                        f"ERROR: verification of folder {relative_path}: No directory hash of type {hash_format} found"
-                    )
-                    num_failed_verifications += 1
+                if not calculate_only:
+                    if not found_hash_format:
+                        logger.error(
+                            f"ERROR: verification of folder {relative_path}: No directory hash of type"
+                            f" {hash_format} found"
+                        )
+                        num_failed_verifications += 1
             else:
                 hash_string = hash_file_path(existing_history, file_path, hash_format, session)
                 dir_hash_context.append_file_hash(file_path, hash_string)
@@ -466,9 +507,15 @@ def verify_directory_hash_subcommand(root_path, verbose, hash_format, ignore_lis
             dir_content_hash_mappings[folder_path] = dir_content_hash
             dir_structure_hash_mappings[folder_path] = dir_structure_hash
         modification_date = datetime.datetime.fromtimestamp(os.path.getmtime(folder_path))
+
+        logger.verbose_logging = calculate_only
+        relative_path = session.root_history.get_relative_file_path(folder_path)
+        if root_only and relative_path != ".":
+            logger.verbose_logging = verbose
         session.append_directory_hashes(
             folder_path, modification_date, hash_format, dir_content_hash, dir_structure_hash
         )
+        logger.verbose_logging = verbose
 
         # compare root hashes, works differently
         if folder_path == root_path:
@@ -482,8 +529,9 @@ def verify_directory_hash_subcommand(root_path, verbose, hash_format, ignore_lis
                                 ".", root_hash_entry, dir_content_hash, dir_structure_hash
                             )
                             found_hash_format = True
-            if not found_hash_format:
-                logger.error(f"ERROR: verification of root folder: No directory hash of type {hash_format} found")
+            if not calculate_only:
+                if not found_hash_format:
+                    logger.error(f"ERROR: verification of root folder: No directory hash of type {hash_format} found")
 
     exception = None
     if num_failed_verifications > 0:
@@ -872,69 +920,6 @@ def xsd_schema_check(file_path, directory_file):
         logger.error(f"ERROR: {file_path} didn't validate against XSD!")
         logger.info(f"Issues:\n{xsd.error_log}")
         raise errors.VerificationFailedException
-
-
-# TODO should be part of the `verify -dh` subcommand
-@click.command()
-@click.argument("root_path", type=click.Path(exists=True))
-@click.option(
-    "--verbose",
-    "-v",
-    default=False,
-    is_flag=True,
-    help="Print all directory hashes of sub directories",
-)
-@click.option(
-    "--hash_format",
-    "-h",
-    type=click.Choice(ascmhl_supported_hashformats),
-    multiple=False,
-    default=ascmhl_default_hashformat,
-    help="Algorithm",
-)
-@click.option(
-    "ignore_list",
-    "--ignore",
-    "-i",
-    multiple=True,
-    help="A single file pattern to ignore.",
-)
-@click.option(
-    "ignore_spec_file",
-    "--ignore_spec",
-    "-ii",
-    type=click.Path(exists=True),
-    help="A file containing multiple file patterns to ignore.",
-)
-def directory_hash(root_path, verbose, hash_format, ignore_list, ignore_spec_file):
-    """
-    [TMP] Creates the directory hash of a given folder
-    """
-    if not os.path.isabs(root_path):
-        root_path = os.path.join(os.getcwd(), root_path)
-
-    # store the directory hashes of sub folders so we can use it when calculating the hash of the parent folder
-    dir_hash_mappings = {}
-
-    ignore_spec = ignore.MHLIgnoreSpec(None, ignore_list, ignore_spec_file)
-
-    for folder_path, children in post_order_lexicographic(root_path, ignore_spec.get_path_spec()):
-        dir_hash_context = DirectoryHashContext(hash_format)
-        for item_name, is_dir in children:
-            item_path = os.path.join(folder_path, item_name)
-            if is_dir:
-                if not dir_hash_context:
-                    continue
-                hash_string = dir_hash_mappings.pop(item_path)
-            else:
-                hash_string = create_filehash(hash_format, item_path)
-            dir_hash_context.append_hash(hash_string, item_name)
-        dir_hash = dir_hash_context.final_hash_str()
-        dir_hash_mappings[folder_path] = dir_hash
-        if folder_path == root_path:
-            logger.info(f"  calculated root hash: {hash_format}: {dir_hash}")
-        elif verbose:
-            logger.info(f"directory hash for: {folder_path} {hash_format}: {dir_hash}")
 
 
 def test_for_missing_files(not_found_paths, root_path, ignore_spec: MHLIgnoreSpec = MHLIgnoreSpec()):

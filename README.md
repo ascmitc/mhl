@@ -323,12 +323,16 @@ on error (including mismatching hashes):
 
 #### `verify` with `-dh` subcommand option (for directory hash)
 
-The `verify` command with the `-dh` subcommand option creates the directory hash by hashing the contained files of the given directory path (filtered by the ignore patterns from the `ascmhl` folder) and compares it with the to-be-expected directory hash calculated from the file hashes (same calculation as the `info` command with the `-dh` subcommand option).
+The `verify` command with the `-dh` subcommand (or `--directory_hash`) option creates the directory hash by hashing the contained files of the given directory path (filtered by the ignore patterns from the `ascmhl` folder) and compares it with the to-be-expected directory hash calculated from the file hashes (same calculation as the `info` command with the `-dh` subcommand option).
 
 
 ```
-$ ascmhl verify -dh /path/to/folder
+$ ascmhl verify -dh [-co [-ro]] /path/to/folder
 ```
+
+The `-co` option (or `--calculate_only`) only calculates and prints the directory hashes and doesn't verify them against an existing history. 
+This option also works when no history is present. The `-ro` option (or `--root_only`) only calculates and prints the root directory hash. This option is only in effect with the `-co` option.
+
 
 Implementation:
 

@@ -42,9 +42,6 @@ mhltool_cli.add_command(commands.flatten)
 mhltool_cli.add_command(commands.info)
 mhltool_cli.add_command(commands.xsd_schema_check)
 
-# old
-mhltool_cli.add_command(commands.directory_hash, "dirhash")
-
 
 if __name__ == "__main__":
     mhltool_cli()

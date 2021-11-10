@@ -7,7 +7,7 @@
 > The software in this repository aids the ongoing specification process of the ASC MHL format by the Advanced Data Management Subcommittee of the ASC Motion Imaging Technology Council at the [American Society of Cinematographers](https://theasc.com) (ASC). 
 >
 > Resources on [theasc.com](https://theasc.com):
-> * 📄 [ASC MHL Specification page](https://theasc.com/asc/asc-media-hash-list) (with committe draft for public review): 
+> * 📄 [ASC MHL Specification page](https://theasc.com/asc/asc-media-hash-list) (with committe draft for public review)
 > * 📄 [ASC MHL One-Sheet page](https://theasc.com/reports/asc-mhl-one-sheet)
 > 
 > This software is work-in-progress and not intended to be used in production (yet).

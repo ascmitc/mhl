@@ -19,108 +19,105 @@ class Hasher(ABC):
     Hasher is an abstract base class (ABC) that outlines the needed hash functionality by ascmhl.
     This abstraction is primarily necessary due to some discrepancies in the hash encoding of C4ID.
     """
-    @abstractmethod
     def __init__(self):
-        """
-        init requires a valid HashType to be instantiated.
-        raises ValueError if HashType is not valid.
-        """
-        self._internal_hash_type = None  # set in concrete subclass constructor
-        self._internal_hasher = None  # set in concrete subclass constructor
+        self.hasher = self.hashlib_type()()
 
-    def update(self, data: bytes):
+    def update(self, data: bytes) -> None:
         """
         writes data to the internal hasher.
         """
-        self._internal_hasher.update(data)
-
-    def reset(self):
-        """
-        resets the internal hasher to a new state.
-        """
-        self._internal_hasher = self._internal_hash_type()  # set _internal_hasher to fresh state.
+        self.hasher.update(data)
 
     @abstractmethod
-    def string_digest(self):
+    def string_digest(self) -> str:
         """
         get the string digest of the current state of the internal hasher
         """
         pass
 
-    # @abstractmethod
-    # def byte_digest(self):
-    #     pass
-
     @classmethod
     @abstractmethod
-    def bytes_from_string_digest(cls, hash_string: str):
+    def bytes_from_string_digest(cls, hash_string: str) -> bytes:
         """
         helper to convert a hash string to its underlying byte representation adhering to the encoding of the hash_type.
         """
         pass
 
-    # @abstractmethod
-    # def hash_for_hash_list(cls, digest: str):
-    #     pass
+    @staticmethod
+    @abstractmethod
+    def hashlib_type() -> type:
+        """
+        returns the underlying wrapped hasher type from either the hashlib or xxhash libraries.
+        such as: hashlib.md5 or xxhash.xxh64
+        """
+        pass
+
+    @classmethod
+    def hash_of_hash_list(cls, hash_list: [str]) -> str:
+        """
+        generates and returns a new hash string by hashing a list of existing hash strings.
+        """
+        hasher = cls()
+
+        # empty checksum for empty lists
+        if len(hash_list) == 0:
+            return hasher.string_digest()
+
+        # sort lexicographically
+        hash_list.sort()
+        for hash_string in hash_list:
+            hasher.update(cls.bytes_from_string_digest(hash_string))
+
+        return hasher.string_digest()
 
 
-# TODO: ensure i can't instantiate HexHasher or Hasher base classes directly - since they are abstract
-class HexHasher(Hasher):
+class HexHasher(Hasher, ABC):
     """
     HexHasher inherits from the base Hasher class to implement the hexadecimal encoding and decoding of hashes.
     """
-    @abstractmethod
-    def __init__(self):
-        super().__init__()
 
-    def string_digest(self):
-        return self._internal_hasher.hexdigest()
+    def string_digest(self) -> str:
+        return self.hasher.hexdigest()
 
     @classmethod
-    def bytes_from_string_digest(cls, hash_string: str):
+    def bytes_from_string_digest(cls, hash_string: str) -> bytes:
         return binascii.unhexlify(hash_string)
 
 
 class MD5(HexHasher):
-    def __init__(self):
-        super().__init__()
-        self._internal_hash_type = hashlib.md5
-        self._internal_hasher = self._internal_hash_type()
+    @staticmethod
+    def hashlib_type():
+        return hashlib.md5
 
 
 class SHA1(HexHasher):
-    def __init__(self):
-        super().__init__()
-        self._internal_hash_type = hashlib.sha1
-        self._internal_hasher = self._internal_hash_type()
+    @staticmethod
+    def hashlib_type():
+        return hashlib.sha1
 
 
 class XXH32(HexHasher):
-    def __init__(self):
-        super().__init__()
-        self._internal_hash_type = xxhash.xxh32
-        self._internal_hasher = self._internal_hash_type()
+    @staticmethod
+    def hashlib_type():
+        return xxhash.xxh32
 
 
 class XXH64(HexHasher):
-    def __init__(self):
-        super().__init__()
-        self._internal_hash_type = xxhash.xxh64
-        self._internal_hasher = self._internal_hash_type()
+    @staticmethod
+    def hashlib_type():
+        return xxhash.xxh64
 
 
 class XXH3(HexHasher):
-    def __init__(self):
-        super().__init__()
-        self._internal_hash_type = xxhash.xxh3_64
-        self._internal_hasher = self._internal_hash_type()
+    @staticmethod
+    def hashlib_type():
+        return xxhash.xxh3_64
 
 
 class XXH128(HexHasher):
-    def __init__(self):
-        super().__init__()
-        self._internal_hash_type = xxhash.xxh3_128
-        self._internal_hasher = self._internal_hash_type()
+    @staticmethod
+    def hashlib_type():
+        return xxhash.xxh3_128
 
 
 class C4(Hasher):
@@ -131,13 +128,12 @@ class C4(Hasher):
     # c4 has a different character set than the usual hex char set of other checksum types. encoding is different.
     charset = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"  # C4ID character set
 
-    def __init__(self):
-        super().__init__()
-        self._internal_hash_type = hashlib.sha512
-        self._internal_hasher = self._internal_hash_type()
+    @staticmethod
+    def hashlib_type():
+        return hashlib.sha512
 
     def string_digest(self):
-        sha512_string = self._internal_hasher.hexdigest()
+        sha512_string = self.hasher.hexdigest()
 
         base58 = 58  # the encoding basis
         c4id_length = 90  # the guaranteed length
@@ -185,7 +181,8 @@ class HashType(Enum):
 
 
 def new_hasher_for_hash_type(hash_format: str) -> Hasher:
-    """creates a new instance of the appropriate Hasher class based on the hash_format argument
+    """
+    creates a new instance of the appropriate Hasher class based on the hash_format argument
 
     arguments:
     hash_format -- string value, one of the supported hash formats, e.g. 'md5', 'xxh64'
@@ -216,7 +213,8 @@ class DirectoryHashContext:
         self.directory_paths.append(path)
 
     def final_content_hash_str(self):
-        return hash_for_hash_list(self.content_hash_strings, self.hash_format)
+        hasher = new_hasher_for_hash_type(self.hash_format)
+        return hasher.hash_of_hash_list(self.content_hash_strings)
 
     def final_structure_hash_str(self):
         # we need to mix file names and recursive directory structure here...
@@ -238,66 +236,30 @@ class DirectoryHashContext:
             )
             element_list.append(hash_data(element_data, self.hash_format))
         # at the end make a list-digest of all the collected and created digests
-        structure_hash = hash_for_hash_list(element_list, self.hash_format)
+        structure_hash = hash_of_hash_list(element_list, self.hash_format)
         return structure_hash
 
 
-def hash_for_hash_list(hash_list: [str], hash_format: str) -> str:
+def hash_of_hash_list(hash_list: [str], hash_format: str) -> str:
     """
     computes and returns a new hash string from a given list of hash strings.
-    """
-    # empty checksum for empty lists
-    if len(hash_list) == 0:
-        return hash_data(b'', hash_format)
-
-    # sort lexicographically
-    hash_list.sort()
-
-    hasher = new_hasher_for_hash_type(hash_format)
-    for hash_string in hash_list:
-        hasher.update(bytes_for_hash_string(hash_string, hash_format))
-
-    return hasher.string_digest()
-
-    # # DEPRECATED hash list algorithm:
-    # #
-    # digest_list_names = digest_list
-    # while len(digest_list_names) != 1:
-    #     last_digest = None
-    #     if (len(digest_list_names) % 2) == 1:
-    #         last_digest = digest_list_names[len(digest_list_names) - 1]
-    #
-    #     num_pairs = math.floor(len(digest_list_names) / 2)
-    #     i = 0
-    #     new_digest_list_names = []
-    #     while i < num_pairs:
-    #         digest_pair = []
-    #         digest_pair.append(digest_list_names[i * 2 + 0])
-    #         digest_pair.append(digest_list_names[i * 2 + 1])
-    #         pair_digest = digest_for_digest_pair(digest_pair, hash_format)
-    #         new_digest_list_names.append(pair_digest)
-    #         i = i + 1
-    #
-    #     if last_digest is not None:
-    #         new_digest_list_names.append(last_digest)
-    #
-    #     digest_list_names = new_digest_list_names
-    #
-    # return digest_list_names[0]
-
-
-# TODO: hash_format should be second argument here since it is second argument in all other funcs (for consistency sake)
-def create_filehash(hash_format: str, filepath: str) -> str:
-    """
-    creates a hash value for a file and returns the hash string
 
     arguments:
+    hash_list -- list of string hashes to compute a new single hash from
     hash_format -- string value, one of the supported hash formats, e.g. 'md5', 'xxh64'
-    filepath -- string value, the path to the file
     """
-    if not hash_format or not filepath:
-        raise TypeError
+    hasher = new_hasher_for_hash_type(hash_format)
+    return hasher.hash_of_hash_list(hash_list)
 
+
+def hash_file(filepath: str, hash_format: str) -> str:
+    """
+    computes and returns a new hash string for a file
+
+    arguments:
+    filepath -- string value, path of file to generate hash for.
+    hash_format -- string value, one of the supported hash formats, e.g. 'md5', 'xxh64'
+    """
     hasher = new_hasher_for_hash_type(hash_format)
     with open(filepath, "rb") as fd:
         # process files in chunks so that large files won't cause excessive memory consumption.
@@ -306,13 +268,12 @@ def create_filehash(hash_format: str, filepath: str) -> str:
         while chunk:
             hasher.update(chunk)
             chunk = fd.read(size)
-
     return hasher.string_digest()
 
 
 def hash_data(input_data: bytes, hash_format: str) -> str:
     """
-    creates and returns a new hash of the input data.
+    computes and returns a new hash string from the input data.
 
     arguments:
     input_data -- the bytes to compute the hash from
@@ -335,7 +296,6 @@ def digest_list_for_list(input_list, hash_format: str):
     digest_list = []
     for input_string in input_list:
         digest_list.append(hash_data(input_string.encode(), hash_format))
-
     return digest_list
 
 

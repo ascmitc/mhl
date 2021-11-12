@@ -11,7 +11,6 @@ from . import logger
 from .__version__ import ascmhl_reference_hash_format
 from .chain import MHLChain, MHLChainGeneration
 from .hashlist import MHLHashList
-from .hasher import create_filehash
 import os
 import textwrap
 

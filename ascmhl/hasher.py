@@ -8,6 +8,8 @@ __email__ = "opensource@pomfort.com"
 """
 import binascii
 import hashlib
+import logging
+
 import xxhash
 import os
 from enum import Enum, unique
@@ -20,6 +22,7 @@ class Hasher(ABC):
     This abstraction is primarily necessary due to some discrepancies in the hash encoding of C4ID.
     """
     def __init__(self):
+        # instantiate our internal hash generator. such as: hashlib.md5 or xxhash.xxh64
         self.hasher = self.hashlib_type()()
 
     def update(self, data: bytes) -> None:
@@ -45,7 +48,7 @@ class Hasher(ABC):
 
     @staticmethod
     @abstractmethod
-    def hashlib_type() -> type:
+    def hashlib_type():
         """
         returns the underlying wrapped hasher type from either the hashlib or xxhash libraries.
         such as: hashlib.md5 or xxhash.xxh64
@@ -70,10 +73,44 @@ class Hasher(ABC):
 
         return hasher.string_digest()
 
+    @classmethod
+    def hash_file(cls, filepath: str) -> str:
+        """
+        computes and returns a new hash string for a file
+
+        arguments:
+        filepath -- string value, path of file to generate hash for.
+        hash_format -- string value, one of the supported hash formats, e.g. 'md5', 'xxh64'
+        """
+        hasher = cls()
+        with open(filepath, "rb") as fd:
+            # process files in chunks so that large files won't cause excessive memory consumption.
+            size = 1024 * 1024  # chunk size 1MB
+            chunk = fd.read(size)
+            while chunk:
+                hasher.update(chunk)
+                chunk = fd.read(size)
+
+        return hasher.string_digest()
+
+    @classmethod
+    def hash_data(cls, input_data: bytes) -> str:
+        """
+        computes and returns a new hash string from the input data.
+
+        arguments:
+        input_data -- the bytes to compute the hash from
+        hash_format -- string value, one of the supported hash formats, e.g. 'md5', 'xxh64'
+        """
+        hasher = cls()
+        hasher.update(input_data)
+        return hasher.string_digest()
+
 
 class HexHasher(Hasher, ABC):
     """
     HexHasher inherits from the base Hasher class to implement the hexadecimal encoding and decoding of hashes.
+    Cannot be instantiated directly. Choose a subclass.
     """
 
     def string_digest(self) -> str:
@@ -132,7 +169,7 @@ class C4(Hasher):
     def hashlib_type():
         return hashlib.sha512
 
-    def string_digest(self):
+    def string_digest(self) -> str:
         sha512_string = self.hasher.hexdigest()
 
         base58 = 58  # the encoding basis
@@ -150,7 +187,7 @@ class C4(Hasher):
         return c4_string
 
     @classmethod
-    def bytes_from_string_digest(cls, hash_string: str):
+    def bytes_from_string_digest(cls, hash_string: str) -> bytes:
         base58 = 58  # the encoding basis
         c4id_length = 90  # the guaranteed length
         result = 0
@@ -187,57 +224,48 @@ def new_hasher_for_hash_type(hash_format: str) -> Hasher:
     arguments:
     hash_format -- string value, one of the supported hash formats, e.g. 'md5', 'xxh64'
     """
+    if not hash_format:
+        raise ValueError
     hash_type = HashType[hash_format]
     if not hash_type:
         raise ValueError
 
-    return hash_type.value()  # instantiate and return a new hasher of the specified HashType
+    return hash_type.value()  # instantiate and return a new Hasher of the specified HashType
 
 
 # TODO: DirectoryHashContext likely should be moved out of this file to where the directories are iterated. DirectoryHashContext isn't like anything else in this file.
 class DirectoryHashContext:
     def __init__(self, hash_format: str):
         self.hash_format = hash_format
+        self.hasher = new_hasher_for_hash_type(hash_format)
         self.content_hash_strings = []
         self.structure_hash_strings = []
-        self.directory_paths = []
-        self.file_paths = []
 
     def append_file_hash(self, path: str, content_hash_string: str):
         self.content_hash_strings.append(content_hash_string)
-        self.file_paths.append(path)
+        # TODO: convert to relative path
+
+        # structure hashes are computed from lists of children path+hash strings
+        path_bytes = os.path.normpath(path).encode("utf8")
+        hash_bytes = self.hasher.bytes_from_string_digest(content_hash_string)
+        # TODO: determine if we concat path+hash for files like we do directories in structure hashes
+        structure_hash = self.hasher.hash_data(path_bytes + hash_bytes)
+        self.structure_hash_strings.append(structure_hash)
 
     def append_directory_hashes(self, path: str, content_hash_string: str, structure_hash_string: str):
         self.content_hash_strings.append(content_hash_string)
-        self.structure_hash_strings.append(structure_hash_string)
-        self.directory_paths.append(path)
+
+        # structure hashes are computed from lists of children path+hash strings
+        path_bytes = os.path.normpath(path).encode("utf8")
+        hash_bytes = self.hasher.bytes_from_string_digest(structure_hash_string)
+        structure_hash = self.hasher.hash_data(path_bytes + hash_bytes)
+        self.structure_hash_strings.append(structure_hash)
 
     def final_content_hash_str(self):
-        hasher = new_hasher_for_hash_type(self.hash_format)
-        return hasher.hash_of_hash_list(self.content_hash_strings)
+        return self.hasher.hash_of_hash_list(self.content_hash_strings)
 
     def final_structure_hash_str(self):
-        # we need to mix file names and recursive directory structure here...
-        # .. so start with the file names themselves and hash those individually ..
-        file_names = []
-        for path in self.file_paths:
-            file_names.append(os.path.basename(os.path.normpath(path)))
-
-        # hash all filenames into a list
-        # e = [hash_data(fn.encode('utf-8'), self.hash_format) for fn in file_names]
-
-        element_list = digest_list_for_list(file_names, self.hash_format)
-        # .. and then add digests of concatenated directory names and structure digest
-        assert len(self.directory_paths) == len(self.structure_hash_strings)
-        for i in range(len(self.directory_paths)):
-            directory_name = os.path.basename(os.path.normpath(self.directory_paths[i]))
-            element_data = directory_name.encode("utf8") + bytes_for_hash_string(
-                self.structure_hash_strings[i], self.hash_format
-            )
-            element_list.append(hash_data(element_data, self.hash_format))
-        # at the end make a list-digest of all the collected and created digests
-        structure_hash = hash_of_hash_list(element_list, self.hash_format)
-        return structure_hash
+        return self.hasher.hash_of_hash_list(self.structure_hash_strings)
 
 
 def hash_of_hash_list(hash_list: [str], hash_format: str) -> str:
@@ -261,14 +289,7 @@ def hash_file(filepath: str, hash_format: str) -> str:
     hash_format -- string value, one of the supported hash formats, e.g. 'md5', 'xxh64'
     """
     hasher = new_hasher_for_hash_type(hash_format)
-    with open(filepath, "rb") as fd:
-        # process files in chunks so that large files won't cause excessive memory consumption.
-        size = 1024 * 1024  # chunk size 1MB
-        chunk = fd.read(size)
-        while chunk:
-            hasher.update(chunk)
-            chunk = fd.read(size)
-    return hasher.string_digest()
+    return hasher.hash_file(filepath)
 
 
 def hash_data(input_data: bytes, hash_format: str) -> str:
@@ -280,38 +301,16 @@ def hash_data(input_data: bytes, hash_format: str) -> str:
     hash_format -- string value, one of the supported hash formats, e.g. 'md5', 'xxh64'
     """
     hasher = new_hasher_for_hash_type(hash_format)
-    hasher.update(input_data)
-    return hasher.string_digest()
+    return hasher.hash_data(input_data)
 
 
-# TODO: remove bytes_for_hash_string in favor of HexHasher.bytes_from_hash_string & C4.bytes_for_hash_string methods
-def bytes_for_hash_string(digest_string, hash_format: str):
+def bytes_for_hash_string(hash_string: str, hash_format: str) -> bytes:
+    """
+    wraps the different Hasher string to byte conversions
+
+    arguments:
+    hash_string -- string value, the hash string to convert to bytes
+    hash_format -- string value, one of the supported hash formats, e.g. 'md5', 'xxh64'
+    """
     hasher = new_hasher_for_hash_type(hash_format)
-    return hasher.bytes_from_string_digest(digest_string)
-
-
-# TODO: remove digest_list_for_list in favor of a unified approach with the rest of this file.
-def digest_list_for_list(input_list, hash_format: str):
-    input_list = sorted_deduplicates(input_list)
-    digest_list = []
-    for input_string in input_list:
-        digest_list.append(hash_data(input_string.encode(), hash_format))
-    return digest_list
-
-
-# TODO: remove digest_for_digest_pair since it should no longer be needed given our update to Appendix G in the spec.
-def digest_for_digest_pair(input_pair, hash_format: str):
-    input_pair.sort()
-    input_data = bytearray(128)
-    input_data0 = bytes_for_hash_string(input_pair[0], hash_format)
-    input_data1 = bytes_for_hash_string(input_pair[1], hash_format)
-    input_data[0:64] = input_data0[:]
-    input_data[64:128] = input_data1[:]
-    return hash_data(input_data, hash_format)
-
-
-# TODO: remove sorted_deduplicates func - should no longer be needed given our update to Appendix G in the spec.
-def sorted_deduplicates(input_list):
-    input_list = list(set(input_list))  # remove duplicates
-    input_list.sort()  # sort
-    return input_list
+    return hasher.bytes_from_string_digest(hash_string)

@@ -8,7 +8,6 @@ __email__ = "opensource@pomfort.com"
 """
 import binascii
 import hashlib
-import logging
 
 import xxhash
 import os
@@ -122,36 +121,54 @@ class HexHasher(Hasher, ABC):
 
 
 class MD5(HexHasher):
+    """
+    md5 checksum generator.
+    """
     @staticmethod
     def hashlib_type():
         return hashlib.md5
 
 
 class SHA1(HexHasher):
+    """
+    sha1 checksum generator.
+    """
     @staticmethod
     def hashlib_type():
         return hashlib.sha1
 
 
 class XXH32(HexHasher):
+    """
+    xxh32 checksum generator.
+    """
     @staticmethod
     def hashlib_type():
         return xxhash.xxh32
 
 
 class XXH64(HexHasher):
+    """
+    xxh64 checksum generator.
+    """
     @staticmethod
     def hashlib_type():
         return xxhash.xxh64
 
 
 class XXH3(HexHasher):
+    """
+    xxh3 checksum generator.
+    """
     @staticmethod
     def hashlib_type():
         return xxhash.xxh3_64
 
 
 class XXH128(HexHasher):
+    """
+    xxh128 checksum generator.
+    """
     @staticmethod
     def hashlib_type():
         return xxhash.xxh3_128
@@ -159,6 +176,7 @@ class XXH128(HexHasher):
 
 class C4(Hasher):
     """
+    C4 checksum generator.
     C4 Hasher is different than the other supported hash algorithms in that it does not adhere to a hex char set.
     """
 
@@ -217,6 +235,42 @@ class HashType(Enum):
     c4 = C4
 
 
+# TODO: DirectoryHashContext likely should be moved out of this file to where the directories are iterated. DirectoryHashContext isn't like anything else in this file.
+class DirectoryHashContext:
+    def __init__(self, hash_format: str):
+        self.hash_format = hash_format
+        self.hasher = new_hasher_for_hash_type(hash_format)
+        self.content_hash_strings = []
+        self.structure_hash_strings = []
+
+    def append_file_hash(self, path: str, content_hash_string: str):
+        # TODO: convert to relative path
+        self.content_hash_strings.append(content_hash_string)
+
+        # structure hashes are computed from lists of children path+hash strings
+        path_bytes = os.path.normpath(path).encode("utf8")
+        hash_bytes = self.hasher.bytes_from_string_digest(content_hash_string)
+        # TODO: determine if we concat path+hash for files like we do directories in structure hashes
+        structure_hash = self.hasher.hash_data(path_bytes + hash_bytes)
+        self.structure_hash_strings.append(structure_hash)
+
+    def append_directory_hashes(self, path: str, content_hash_string: str, structure_hash_string: str):
+        # TODO: convert to relative path
+        self.content_hash_strings.append(content_hash_string)
+
+        # structure hashes are computed from lists of children path+hash strings
+        path_bytes = os.path.normpath(path).encode("utf8")
+        hash_bytes = self.hasher.bytes_from_string_digest(structure_hash_string)
+        structure_hash = self.hasher.hash_data(path_bytes + hash_bytes)
+        self.structure_hash_strings.append(structure_hash)
+
+    def final_content_hash_str(self):
+        return self.hasher.hash_of_hash_list(self.content_hash_strings)
+
+    def final_structure_hash_str(self):
+        return self.hasher.hash_of_hash_list(self.structure_hash_strings)
+
+
 def new_hasher_for_hash_type(hash_format: str) -> Hasher:
     """
     creates a new instance of the appropriate Hasher class based on the hash_format argument
@@ -231,41 +285,6 @@ def new_hasher_for_hash_type(hash_format: str) -> Hasher:
         raise ValueError
 
     return hash_type.value()  # instantiate and return a new Hasher of the specified HashType
-
-
-# TODO: DirectoryHashContext likely should be moved out of this file to where the directories are iterated. DirectoryHashContext isn't like anything else in this file.
-class DirectoryHashContext:
-    def __init__(self, hash_format: str):
-        self.hash_format = hash_format
-        self.hasher = new_hasher_for_hash_type(hash_format)
-        self.content_hash_strings = []
-        self.structure_hash_strings = []
-
-    def append_file_hash(self, path: str, content_hash_string: str):
-        self.content_hash_strings.append(content_hash_string)
-        # TODO: convert to relative path
-
-        # structure hashes are computed from lists of children path+hash strings
-        path_bytes = os.path.normpath(path).encode("utf8")
-        hash_bytes = self.hasher.bytes_from_string_digest(content_hash_string)
-        # TODO: determine if we concat path+hash for files like we do directories in structure hashes
-        structure_hash = self.hasher.hash_data(path_bytes + hash_bytes)
-        self.structure_hash_strings.append(structure_hash)
-
-    def append_directory_hashes(self, path: str, content_hash_string: str, structure_hash_string: str):
-        self.content_hash_strings.append(content_hash_string)
-
-        # structure hashes are computed from lists of children path+hash strings
-        path_bytes = os.path.normpath(path).encode("utf8")
-        hash_bytes = self.hasher.bytes_from_string_digest(structure_hash_string)
-        structure_hash = self.hasher.hash_data(path_bytes + hash_bytes)
-        self.structure_hash_strings.append(structure_hash)
-
-    def final_content_hash_str(self):
-        return self.hasher.hash_of_hash_list(self.content_hash_strings)
-
-    def final_structure_hash_str(self):
-        return self.hasher.hash_of_hash_list(self.structure_hash_strings)
 
 
 def hash_of_hash_list(hash_list: [str], hash_format: str) -> str:

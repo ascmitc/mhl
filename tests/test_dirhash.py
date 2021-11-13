@@ -19,16 +19,16 @@ def test_simple(fs, simple_mhl_history):
     runner = CliRunner()
     result = runner.invoke(ascmhl.commands.verify, ["-dh", "-co", "/root/"])
     assert (
-        "calculated directory hash for A  xxh64: 95e230e90be29dd6 (content), 997ef53a4365b87c (structure)"
+        "calculated directory hash for A  xxh64: d3904ee76bba3d2a (content), ac9bbef87384236f (structure)"
         in result.output
     )
-    assert "calculated root hash  xxh64: 36e824bc313f3b77 (content), 0b61ded93d2b71e6 (structure)" in result.output
+    assert "calculated root hash  xxh64: ca56d22f064fdf1b (content), 34a27e3231744c4a (structure)" in result.output
     assert result.exit_code == 0
 
     result = runner.invoke(ascmhl.commands.verify, ["-dh", "-co", "-ro", "/root/"])
     assert (
-        "calculated directory hash for A  xxh64: 95e230e90be29dd6 (content), 997ef53a4365b87c (structure)"
+        "calculated directory hash"
         not in result.output
     )
-    assert "calculated root hash  xxh64: 36e824bc313f3b77 (content), 0b61ded93d2b71e6 (structure)" in result.output
+    assert "calculated root hash  xxh64: ca56d22f064fdf1b (content), 34a27e3231744c4a (structure)" in result.output
     assert result.exit_code == 0

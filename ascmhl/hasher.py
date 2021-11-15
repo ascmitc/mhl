@@ -20,6 +20,7 @@ class Hasher(ABC):
     Hasher is an abstract base class (ABC) that outlines the needed hash functionality by ascmhl.
     This abstraction is primarily necessary due to some discrepancies in the hash encoding of C4ID.
     """
+
     def __init__(self):
         # instantiate our internal hash generator. such as: hashlib.md5 or xxhash.xxh64
         self.hasher = self.hashlib_type()()
@@ -124,6 +125,7 @@ class MD5(HexHasher):
     """
     md5 checksum generator.
     """
+
     @staticmethod
     def hashlib_type():
         return hashlib.md5
@@ -133,6 +135,7 @@ class SHA1(HexHasher):
     """
     sha1 checksum generator.
     """
+
     @staticmethod
     def hashlib_type():
         return hashlib.sha1
@@ -142,6 +145,7 @@ class XXH32(HexHasher):
     """
     xxh32 checksum generator.
     """
+
     @staticmethod
     def hashlib_type():
         return xxhash.xxh32
@@ -151,6 +155,7 @@ class XXH64(HexHasher):
     """
     xxh64 checksum generator.
     """
+
     @staticmethod
     def hashlib_type():
         return xxhash.xxh64
@@ -160,6 +165,7 @@ class XXH3(HexHasher):
     """
     xxh3 checksum generator.
     """
+
     @staticmethod
     def hashlib_type():
         return xxhash.xxh3_64
@@ -169,6 +175,7 @@ class XXH128(HexHasher):
     """
     xxh128 checksum generator.
     """
+
     @staticmethod
     def hashlib_type():
         return xxhash.xxh3_128
@@ -225,6 +232,7 @@ class HashType(Enum):
     """
     HashType wraps all ascmhl supported hash formats.
     """
+
     md5 = MD5
     sha1 = SHA1
     xxh32 = XXH32
@@ -238,6 +246,7 @@ class DirectoryHashContext:
     """
     DirectoryHashContext wraps the data necessary to compute directory checksums.
     """
+
     def __init__(self, hash_format: str):
         self.hash_format = hash_format
         self.hasher = new_hasher_for_hash_type(hash_format)

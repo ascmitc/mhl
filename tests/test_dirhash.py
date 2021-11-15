@@ -26,9 +26,6 @@ def test_simple(fs, simple_mhl_history):
     assert result.exit_code == 0
 
     result = runner.invoke(ascmhl.commands.verify, ["-dh", "-co", "-ro", "/root/"])
-    assert (
-        "calculated directory hash"
-        not in result.output
-    )
+    assert "calculated directory hash" not in result.output
     assert "calculated root hash  xxh64: ca56d22f064fdf1b (content), 2ccca3899111eabb (structure)" in result.output
     assert result.exit_code == 0

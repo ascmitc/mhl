@@ -69,18 +69,12 @@ def test_directory_verify_detect_changes(fs, simple_mhl_history):
         file.write("!!")
 
     result = runner.invoke(ascmhl.commands.verify, ["-v", "-dh", "/root/"])
-    assert (
-        "ERROR: content hash mismatch"
-        in result.output
-    )
+    assert "ERROR: content hash mismatch" in result.output
     assert result.exit_code == 15
 
     # rename one file
     os.rename("/root/B/B1.txt", "/root/B/B2.txt")
 
     result = runner.invoke(ascmhl.commands.verify, ["-v", "-dh", "/root/"])
-    assert (
-        "ERROR: structure hash mismatch"
-        in result.output
-    )
+    assert "ERROR: structure hash mismatch" in result.output
     assert result.exit_code == 15

@@ -220,7 +220,6 @@ class C4(Hasher):
         return data
 
 
-# TODO: swap magic strings of hash_format for HashType throughout the code (we pass hash_format as str args everywhere)
 @unique
 class HashType(Enum):
     """
@@ -235,8 +234,10 @@ class HashType(Enum):
     c4 = C4
 
 
-# TODO: DirectoryHashContext likely should be moved out of this file to where the directories are iterated. DirectoryHashContext isn't like anything else in this file.
 class DirectoryHashContext:
+    """
+    DirectoryHashContext wraps the data necessary to compute directory checksums.
+    """
     def __init__(self, hash_format: str):
         self.hash_format = hash_format
         self.hasher = new_hasher_for_hash_type(hash_format)
@@ -244,30 +245,39 @@ class DirectoryHashContext:
         self.structure_hash_strings = []
 
     def append_file_hash(self, path: str, content_hash_string: str):
-        # TODO: convert to relative path
+        """
+        append child file data to this directory context.
+        """
         self.content_hash_strings.append(content_hash_string)
 
-        # structure hashes are computed from lists of children path+hash strings
-        path_bytes = os.path.normpath(path).encode("utf8")
+        # structure hashes are computed from lists of children name+hash strings
+        path_bytes = os.path.basename(os.path.normpath(path)).encode("utf8")
         hash_bytes = self.hasher.bytes_from_string_digest(content_hash_string)
-        # TODO: determine if we concat path+hash for files like we do directories in structure hashes
         structure_hash = self.hasher.hash_data(path_bytes + hash_bytes)
         self.structure_hash_strings.append(structure_hash)
 
     def append_directory_hashes(self, path: str, content_hash_string: str, structure_hash_string: str):
-        # TODO: convert to relative path
+        """
+        append child directory data to this directory context.
+        """
         self.content_hash_strings.append(content_hash_string)
 
-        # structure hashes are computed from lists of children path+hash strings
-        path_bytes = os.path.normpath(path).encode("utf8")
+        # structure hashes are computed from lists of children name+hash strings
+        path_bytes = os.path.basename(os.path.normpath(path)).encode("utf8")
         hash_bytes = self.hasher.bytes_from_string_digest(structure_hash_string)
         structure_hash = self.hasher.hash_data(path_bytes + hash_bytes)
         self.structure_hash_strings.append(structure_hash)
 
     def final_content_hash_str(self):
+        """
+        compute and return the content hash of this directory context by hashing the child content hash list.
+        """
         return self.hasher.hash_of_hash_list(self.content_hash_strings)
 
     def final_structure_hash_str(self):
+        """
+        compute and return the structure hash of this directory context by hashing the child structure hash list.
+        """
         return self.hasher.hash_of_hash_list(self.structure_hash_strings)
 
 

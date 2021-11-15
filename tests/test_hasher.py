@@ -1,5 +1,5 @@
 """
-__author__ = "Patrick Renner"
+__author__ = "Jon Waggoner, Patrick Renner"
 __copyright__ = "Copyright 2020, Pomfort GmbH"
 
 __license__ = "MIT"
@@ -33,8 +33,7 @@ def test_hash_data():
     }
     # ensure all of our hash types produce the expected hash value for the data
     for k, v in hash_type_and_value.items():
-        hasher = new_hasher_for_hash_type(k)
-        h = hasher.hash_data(data)
+        h = hash_data(data, k)
         assert h == v  # assert our computed hash equals expected hash
 
 
@@ -54,41 +53,40 @@ def test_hash_file(fs):
     }
     # ensure all of our hash types produce the expected hash value for the file data
     for k, v in hash_type_and_value.items():
-        hasher = new_hasher_for_hash_type(k)
-        h = hasher.hash_file(file)
+        h = hash_file(file, k)
         assert h == v  # assert our computed hash equals expected hash
 
 
 def test_hash_of_hash_list():
-    # the hash list to hash
-    hash_list = ['aa', 'bb', 'cc', 'dd']  # valid chars in all of our hash algorithms
+    # the hash list to hash - purposefully in reverse order here to ensure data ends up sorted.
+    hash_list = ['bb', 'aa10', 'aa01', 'aa']
     # map of hash algorithm to expected hash string
     hash_type_and_value = {
-        'md5': 'ca6ffbf95b47864fd4e73f2601326304',
-        'sha1': 'a7b7e9592daa0896db0517bf8ad53e56b1246923',
-        'xxh32': '653fda5e',
-        'xxh64': '781c641b331c6481',
-        'xxh3': 'bfd691c4f6750254',
-        'xxh128': 'ab65044d6377f7528d403d7d59bb88f3',
-        # TODO: add c4 in here - it doesn't seem to like my hash list above due to decoder
+        'md5': '88abf5c156ff637c6380ae461fc50c3f',
+        'sha1': '22ad6b98111f6571c9ae1449988260b920960c16',
+        'xxh32': '48d7bd5a',
+        'xxh64': 'c4e803e454029ee4',
+        'xxh3': 'd908e88da5ad4928',
+        'xxh128': '9041108a28887a9d35b4eac5bbaa5794',
+        # TODO: add c4 in here - it doesn't like my hash list above due to c4 encoder requiring length
     }
     # ensure all of our hash types produce the expected hash value for the hash list
     for k, v in hash_type_and_value.items():
-        hasher = new_hasher_for_hash_type(k)
-        h = hasher.hash_of_hash_list(hash_list)
+        h = hash_of_hash_list(hash_list, k)
         assert h == v  # assert our computed hash equals expected hash
 
 
 def test_hash_list_concat_equals_chunking():
     # this is a test to prove that concatenating all strings then hashing is same as feeding them to hasher one by one
     # the hash list to hash
-    hash_list = ['aa', 'bb', 'cc', 'dd']  # valid chars in all of our hash algorithms
+    hash_list = ['bb', 'aa10', 'aa01', 'aa']
     # ensure all of our hash types produce the expected hash value for the hash list
     for ht in HashType:
         if ht == HashType.c4:
-            continue  # skipping c4 on this test since it has a length requirement.
+            continue  # skipping c4 on this test for same reason as test_hash_of_hash_list
         hasher = new_hasher_for_hash_type(ht.name)
         h1 = hasher.hash_of_hash_list(hash_list)
         concat = hasher.bytes_from_string_digest("".join(hash_list))
         h2 = hasher.hash_data(concat)
         assert h1 == h2  # assert that sequentially feeding hashes is same as concat then feeding hashes
+

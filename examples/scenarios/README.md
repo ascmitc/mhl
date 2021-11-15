@@ -15,9 +15,9 @@ $ ascmhl.py create -v /travel_01/A002R2EC -h xxh64
 Creating new generation for folder at path: /travel_01/A002R2EC ...
   created original hash for     Clips/A002C006_141024_R2EC.mov  xxh64: 0ea03b369a463d9d
   created original hash for     Clips/A002C007_141024_R2EC.mov  xxh64: 7680e5f98f4a80fd
-  calculated directory hash for Clips  xxh64: 4c226b42e27d7af3 (content), 2cfcef13c2ffc155 (structure)
+  calculated directory hash for Clips  xxh64: 4c226b42e27d7af3 (content), 906faa843d591a9f (structure)
   created original hash for     Sidecar.txt  xxh64: 3ab5a4166b9bde44
-  calculated root hash  xxh64: 8d02114c32e28cbe (content), 27183c4b33f434e4 (structure)
+  calculated root hash  xxh64: 8d02114c32e28cbe (content), f557f8ca8e5a88ef (structure)
 Created new generation ascmhl/0001_A002R2EC_2020-01-16_091500.mhl
 
 
@@ -37,9 +37,9 @@ $ ascmhl.py create -v /travel_01/A002R2EC -h xxh64
 Creating new generation for folder at path: /travel_01/A002R2EC ...
   created original hash for     Clips/A002C006_141024_R2EC.mov  xxh64: 0ea03b369a463d9d
   created original hash for     Clips/A002C007_141024_R2EC.mov  xxh64: 7680e5f98f4a80fd
-  calculated directory hash for Clips  xxh64: 4c226b42e27d7af3 (content), 2cfcef13c2ffc155 (structure)
+  calculated directory hash for Clips  xxh64: 4c226b42e27d7af3 (content), 906faa843d591a9f (structure)
   created original hash for     Sidecar.txt  xxh64: 3ab5a4166b9bde44
-  calculated root hash  xxh64: 8d02114c32e28cbe (content), 27183c4b33f434e4 (structure)
+  calculated root hash  xxh64: 8d02114c32e28cbe (content), f557f8ca8e5a88ef (structure)
 Created new generation ascmhl/0001_A002R2EC_2020-01-16_091500.mhl
 
 
@@ -54,9 +54,9 @@ $ ascmhl.py create -v /file_server/A002R2EC -h xxh64
 Creating new generation for folder at path: /file_server/A002R2EC ...
   verified                      Clips/A002C006_141024_R2EC.mov  OK
   verified                      Clips/A002C007_141024_R2EC.mov  OK
-  calculated directory hash for Clips  xxh64: 4c226b42e27d7af3 (content), ef23ac02467b1720 (structure)
+  calculated directory hash for Clips  xxh64: 4c226b42e27d7af3 (content), 906faa843d591a9f (structure)
   verified                      Sidecar.txt  OK
-  calculated root hash  xxh64: 8d02114c32e28cbe (content), 0c94849db4dbd1b2 (structure)
+  calculated root hash  xxh64: 8d02114c32e28cbe (content), f557f8ca8e5a88ef (structure)
 Created new generation ascmhl/0002_A002R2EC_2020-01-17_143000.mhl
 
 
@@ -78,9 +78,9 @@ $ ascmhl.py create -v /travel_01/A002R2EC -h xxh64
 Creating new generation for folder at path: /travel_01/A002R2EC ...
   created original hash for     Clips/A002C006_141024_R2EC.mov  xxh64: 0ea03b369a463d9d
   created original hash for     Clips/A002C007_141024_R2EC.mov  xxh64: 7680e5f98f4a80fd
-  calculated directory hash for Clips  xxh64: 4c226b42e27d7af3 (content), 2cfcef13c2ffc155 (structure)
+  calculated directory hash for Clips  xxh64: 4c226b42e27d7af3 (content), 906faa843d591a9f (structure)
   created original hash for     Sidecar.txt  xxh64: 3ab5a4166b9bde44
-  calculated root hash  xxh64: 8d02114c32e28cbe (content), 27183c4b33f434e4 (structure)
+  calculated root hash  xxh64: 8d02114c32e28cbe (content), f557f8ca8e5a88ef (structure)
 Created new generation ascmhl/0001_A002R2EC_2020-01-16_091500.mhl
 
 
@@ -98,10 +98,10 @@ Creating new generation for folder at path: /file_server/A002R2EC ...
   created new, verified hash for          Clips/A002C006_141024_R2EC.mov  md5: f5ac8127b3b6b85cdc13f237c6005d80
   verified                      Clips/A002C007_141024_R2EC.mov  OK
   created new, verified hash for          Clips/A002C007_141024_R2EC.mov  md5: 614dd0e977becb4c6f7fa99e64549b12
-  calculated directory hash for Clips  md5: 202a2d71b56b080d9b089c1f4f29a4ba (content), d32c0a263abf0e5b8c1d1cc698a0dc3b (structure)
+  calculated directory hash for Clips  md5: 202a2d71b56b080d9b089c1f4f29a4ba (content), 4a739024fd19d928e9dea6bb5c480200 (structure)
   verified                      Sidecar.txt  OK
   created new, verified hash for          Sidecar.txt  md5: 6425c5a180ca0f420dd2b25be4536a91
-  calculated root hash  md5: 6fae2da9bc6dca45486cb91bfea6db70 (content), 8b5d8dde66979852b09f8f8fbc23a525 (structure)
+  calculated root hash  md5: 6fae2da9bc6dca45486cb91bfea6db70 (content), be1f2eaed208efbed061845a64cacdfa (structure)
 Created new generation ascmhl/0002_A002R2EC_2020-01-17_143000.mhl
 
 
@@ -121,9 +121,9 @@ $ ascmhl.py create -v /travel_01/A002R2EC -h xxh64
 Creating new generation for folder at path: /travel_01/A002R2EC ...
   created original hash for     Clips/A002C006_141024_R2EC.mov  xxh64: 0ea03b369a463d9d
   created original hash for     Clips/A002C007_141024_R2EC.mov  xxh64: 7680e5f98f4a80fd
-  calculated directory hash for Clips  xxh64: 4c226b42e27d7af3 (content), 2cfcef13c2ffc155 (structure)
+  calculated directory hash for Clips  xxh64: 4c226b42e27d7af3 (content), 906faa843d591a9f (structure)
   created original hash for     Sidecar.txt  xxh64: 3ab5a4166b9bde44
-  calculated root hash  xxh64: 8d02114c32e28cbe (content), 27183c4b33f434e4 (structure)
+  calculated root hash  xxh64: 8d02114c32e28cbe (content), f557f8ca8e5a88ef (structure)
 Created new generation ascmhl/0001_A002R2EC_2020-01-16_091500.mhl
 
 
@@ -142,9 +142,9 @@ $ ascmhl.py create -v /file_server/A002R2EC -h xxh64
 Creating new generation for folder at path: /file_server/A002R2EC ...
   verified                      Clips/A002C006_141024_R2EC.mov  OK
   verified                      Clips/A002C007_141024_R2EC.mov  OK
-  calculated directory hash for Clips  xxh64: 4c226b42e27d7af3 (content), ef23ac02467b1720 (structure)
+  calculated directory hash for Clips  xxh64: 4c226b42e27d7af3 (content), 906faa843d591a9f (structure)
 ERROR: hash mismatch for        Sidecar.txt  xxh64 (old): 3ab5a4166b9bde44, xxh64 (new): 70d2cf31aaa3eac4
-  calculated root hash  xxh64: 8e52e9c3d15e055c (content), eacb8a6b1c8f5fc3 (structure)
+  calculated root hash  xxh64: 8e52e9c3d15e055c (content), 32706d5f4b48f047 (structure)
 Created new generation ascmhl/0002_A002R2EC_2020-01-17_143000.mhl
 Error: Verification of files referenced in the ASC MHL history failed
 
@@ -165,9 +165,9 @@ $ ascmhl.py create -v /travel_01/Reels/A002R2EC -h xxh64
 Creating new generation for folder at path: /travel_01/Reels/A002R2EC ...
   created original hash for     Clips/A002C006_141024_R2EC.mov  xxh64: 0ea03b369a463d9d
   created original hash for     Clips/A002C007_141024_R2EC.mov  xxh64: 7680e5f98f4a80fd
-  calculated directory hash for Clips  xxh64: 4c226b42e27d7af3 (content), 856780428beabeee (structure)
+  calculated directory hash for Clips  xxh64: 4c226b42e27d7af3 (content), 906faa843d591a9f (structure)
   created original hash for     Sidecar.txt  xxh64: 3ab5a4166b9bde44
-  calculated root hash  xxh64: 8d02114c32e28cbe (content), c9c8b67dcfd20742 (structure)
+  calculated root hash  xxh64: 8d02114c32e28cbe (content), f557f8ca8e5a88ef (structure)
 Created new generation ascmhl/0001_A002R2EC_2020-01-16_091500.mhl
 
 
@@ -180,9 +180,9 @@ $ ascmhl.py create -v /travel_01/Reels/A003R2EC -h xxh64
 Creating new generation for folder at path: /travel_01/Reels/A003R2EC ...
   created original hash for     Clips/A003C011_141024_R2EC.mov  xxh64: 52392f79a36d6571
   created original hash for     Clips/A003C012_141024_R2EC.mov  xxh64: 5dbca064ddddd6fc
-  calculated directory hash for Clips  xxh64: f2afc6434255a53d (content), ad218ef027222d7e (structure)
+  calculated directory hash for Clips  xxh64: f2afc6434255a53d (content), a25d5ca89c95f9e2 (structure)
   created original hash for     Sidecar.txt  xxh64: e5dda75a353d8b34
-  calculated root hash  xxh64: 7a82373c131cf40a (content), e9bb4b0df08ec69f (structure)
+  calculated root hash  xxh64: 7a82373c131cf40a (content), 1131a950fcc55e4b (structure)
 Created new generation ascmhl/0001_A003R2EC_2020-01-16_091500.mhl
 
 
@@ -202,16 +202,16 @@ $ ascmhl.py create -v /file_server/Reels -h xxh64
 Creating new generation for folder at path: /file_server/Reels ...
   verified                      A002R2EC/Clips/A002C006_141024_R2EC.mov  OK
   verified                      A002R2EC/Clips/A002C007_141024_R2EC.mov  OK
-  calculated directory hash for A002R2EC/Clips  xxh64: 4c226b42e27d7af3 (content), d689f1e9833aca31 (structure)
+  calculated directory hash for A002R2EC/Clips  xxh64: 4c226b42e27d7af3 (content), 906faa843d591a9f (structure)
   verified                      A002R2EC/Sidecar.txt  OK
-  calculated directory hash for A002R2EC  xxh64: 8d02114c32e28cbe (content), f99642bb81cae858 (structure)
+  calculated directory hash for A002R2EC  xxh64: 8d02114c32e28cbe (content), f557f8ca8e5a88ef (structure)
   verified                      A003R2EC/Clips/A003C011_141024_R2EC.mov  OK
   verified                      A003R2EC/Clips/A003C012_141024_R2EC.mov  OK
-  calculated directory hash for A003R2EC/Clips  xxh64: f2afc6434255a53d (content), 106324809e3fb0c5 (structure)
+  calculated directory hash for A003R2EC/Clips  xxh64: f2afc6434255a53d (content), a25d5ca89c95f9e2 (structure)
   verified                      A003R2EC/Sidecar.txt  OK
-  calculated directory hash for A003R2EC  xxh64: 7a82373c131cf40a (content), 3ac9377023f30edb (structure)
+  calculated directory hash for A003R2EC  xxh64: 7a82373c131cf40a (content), 1131a950fcc55e4b (structure)
   created original hash for     Summary.txt  xxh64: 0ac48e431d4538ba
-  calculated root hash  xxh64: 92950bc8fda076ec (content), 7e29417259f4929c (structure)
+  calculated root hash  xxh64: 92950bc8fda076ec (content), 2c2ce52605558158 (structure)
 Created new generation A002R2EC/ascmhl/0002_A002R2EC_2020-01-17_143000.mhl
 Created new generation A003R2EC/ascmhl/0002_A003R2EC_2020-01-17_143000.mhl
 Created new generation ascmhl/0001_Reels_2020-01-17_143000.mhl

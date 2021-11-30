@@ -35,6 +35,11 @@
       <path size="5" lastmodificationdate="2019-10-11T15:56:03+02:00">Clips/A002C007_141024_R2EC.mov</path>
       <xxh64 action="original">7680e5f98f4a80fd</xxh64>
     </hash>
+    <hash>
+      <path size="58" lastmodificationdate="2019-10-11T15:56:03+02:00">Sidecar.txt</path>
+      <xxh64 action="failed">3ab5a4166b9bde44</xxh64>
+      <metadata bar="Foo" />
+    </hash>
     <directoryhash>
       <path lastmodificationdate="2019-10-11T15:56:01+02:00">Clips/</path>
       <content>
@@ -45,11 +50,6 @@
 			</structure>
       <metadata>test2</metadata>
     </directoryhash>
-    <hash>
-      <path size="58" lastmodificationdate="2019-10-11T15:56:03+02:00">Sidecar.txt</path>
-      <xxh64 action="failed">3ab5a4166b9bde44</xxh64>
-      <metadata bar="Foo" />
-    </hash>
   </hashes>
   <metadata>
     test

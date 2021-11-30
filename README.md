@@ -5,10 +5,14 @@
 
 # ASC Media Hash List (ASC MHL)
 > The software in this repository aids the ongoing specification process of the ASC MHL format by the Advanced Data Management Subcommittee of the ASC Motion Imaging Technology Council at the [American Society of Cinematographers](https://theasc.com) (ASC). 
+>
+> Resources on [theasc.com](https://theasc.com):
+> * 📄 [ASC MHL Specification page](https://theasc.com/asc/asc-media-hash-list) (with committe draft for public review)
+> * 📄 [ASC MHL One-Sheet page](https://theasc.com/reports/asc-mhl-one-sheet)
 > 
-> This software is work in progress and is not intended to be used in production (yet).
+> This software is work-in-progress and not intended to be used in production (yet).
 > 
-> In case you are looking for the current, original specification of MHL, please take a look at [https://mediahashlist.org](https://mediahashlist.org).
+> In case you are looking for the original specification of MHL, please take a look at [https://mediahashlist.org](https://mediahashlist.org).
 
 Ensuring file integrity when backing up and verifying files during production and post production is of utmost importance. The ASC MHL is used to create a chain of custody by tracking each and every copy made between the media’s initial download on set, all the way through to final archival.
 
@@ -323,12 +327,16 @@ on error (including mismatching hashes):
 
 #### `verify` with `-dh` subcommand option (for directory hash)
 
-The `verify` command with the `-dh` subcommand option creates the directory hash by hashing the contained files of the given directory path (filtered by the ignore patterns from the `ascmhl` folder) and compares it with the to-be-expected directory hash calculated from the file hashes (same calculation as the `info` command with the `-dh` subcommand option).
+The `verify` command with the `-dh` subcommand (or `--directory_hash`) option creates the directory hash by hashing the contained files of the given directory path (filtered by the ignore patterns from the `ascmhl` folder) and compares it with the to-be-expected directory hash calculated from the file hashes (same calculation as the `info` command with the `-dh` subcommand option).
 
 
 ```
-$ ascmhl verify -dh /path/to/folder
+$ ascmhl verify -dh [-co [-ro]] /path/to/folder
 ```
+
+The `-co` option (or `--calculate_only`) only calculates and prints the directory hashes and doesn't verify them against an existing history. 
+This option also works when no history is present. The `-ro` option (or `--root_only`) only calculates and prints the root directory hash. This option is only in effect with the `-co` option.
+
 
 Implementation:
 

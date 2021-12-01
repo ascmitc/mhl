@@ -1,6 +1,6 @@
 Commands
 ============
 
-.. click:: ascmhl:mhltool_cli
+.. click:: ascmhl.cli.ascmhl:mhltool_cli
   :prog: ascmhl
   :show-nested:

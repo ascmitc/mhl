@@ -9,10 +9,10 @@
     <process>in-place</process>
     <roothash>
       <content>
-        <xxh64 hashdate="2020-01-17T14:30:00+00:00">f6c455e7941fe0f3</xxh64>
+        <xxh64 hashdate="2020-01-17T14:30:00+00:00">7a82373c131cf40a</xxh64>
       </content>
       <structure>
-        <xxh64 hashdate="2020-01-17T14:30:00+00:00">0729474d03751da0</xxh64>
+        <xxh64 hashdate="2020-01-17T14:30:00+00:00">1131a950fcc55e4b</xxh64>
       </structure>
     </roothash>
     <ignore>
@@ -33,10 +33,10 @@
     <directoryhash>
       <path lastmodificationdate="2020-01-15T13:30:00+00:00">Clips</path>
       <content>
-        <xxh64 hashdate="2020-01-17T14:30:00+00:00">8d220e119e7b3b04</xxh64>
+        <xxh64 hashdate="2020-01-17T14:30:00+00:00">f2afc6434255a53d</xxh64>
       </content>
       <structure>
-        <xxh64 hashdate="2020-01-17T14:30:00+00:00">2be728e9147a4b67</xxh64>
+        <xxh64 hashdate="2020-01-17T14:30:00+00:00">a25d5ca89c95f9e2</xxh64>
       </structure>
     </directoryhash>
     <hash>

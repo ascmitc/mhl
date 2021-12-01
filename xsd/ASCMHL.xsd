@@ -74,10 +74,10 @@
         </sequence>
     </complexType>
     <complexType name="HashesType">
-        <sequence>
-            <element name="hash" type="ascmhl:HashType" minOccurs="0" maxOccurs="unbounded"/>
-            <element name="directoryhash" type="ascmhl:DirectoryHashType" minOccurs="0" maxOccurs="unbounded"/>
-        </sequence>
+        <choice minOccurs="1" maxOccurs="unbounded">
+            <element name="hash" type="ascmhl:HashType"/>
+            <element name="directoryhash" type="ascmhl:DirectoryHashType"/>
+        </choice>
     </complexType>
     <complexType name="HashType">
         <sequence>

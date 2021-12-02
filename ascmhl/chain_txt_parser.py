@@ -11,7 +11,7 @@ from . import logger
 from .__version__ import ascmhl_reference_hash_format
 from .chain import MHLChain, MHLChainGeneration
 from .hashlist import MHLHashList
-from .hasher import create_filehash
+from .hasher import hash_file
 import os
 
 
@@ -91,7 +91,7 @@ def _append_new_generation_to_file(chain: MHLChain, hash_list: MHLHashList):
         hash_list.generation_number,
         hash_list.get_file_name(),
         ascmhl_reference_hash_format,
-        create_filehash(ascmhl_reference_hash_format, hash_list.file_path),
+        hash_file(hash_list.file_path, ascmhl_reference_hash_format),
     )
 
     # TODO sanity checks

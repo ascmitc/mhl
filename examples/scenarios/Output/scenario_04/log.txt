@@ -10,9 +10,9 @@ $ ascmhl.py create -v /travel_01/A002R2EC -h xxh64
 Creating new generation for folder at path: /travel_01/A002R2EC ...
   created original hash for     Clips/A002C006_141024_R2EC.mov  xxh64: 0ea03b369a463d9d
   created original hash for     Clips/A002C007_141024_R2EC.mov  xxh64: 7680e5f98f4a80fd
-  calculated directory hash for Clips  xxh64: 6d43a82e7a5d40f6 (content), a27e08b77ae22c78 (structure)
+  calculated directory hash for Clips  xxh64: 4c226b42e27d7af3 (content), 906faa843d591a9f (structure)
   created original hash for     Sidecar.txt  xxh64: 3ab5a4166b9bde44
-  calculated root hash  xxh64: 7e423206834bf81a (content), 574ab2d2afc981cd (structure)
+  calculated root hash  xxh64: 8d02114c32e28cbe (content), f557f8ca8e5a88ef (structure)
 Created new generation ascmhl/0001_A002R2EC_2020-01-16_091500.mhl
 
 
@@ -31,9 +31,9 @@ $ ascmhl.py create -v /file_server/A002R2EC -h xxh64
 Creating new generation for folder at path: /file_server/A002R2EC ...
   verified                      Clips/A002C006_141024_R2EC.mov  OK
   verified                      Clips/A002C007_141024_R2EC.mov  OK
-  calculated directory hash for Clips  xxh64: 6d43a82e7a5d40f6 (content), a27e08b77ae22c78 (structure)
+  calculated directory hash for Clips  xxh64: 4c226b42e27d7af3 (content), 906faa843d591a9f (structure)
 ERROR: hash mismatch for        Sidecar.txt  xxh64 (old): 3ab5a4166b9bde44, xxh64 (new): 70d2cf31aaa3eac4
-  calculated root hash  xxh64: 2ca8e358d014d65e (content), 574ab2d2afc981cd (structure)
+  calculated root hash  xxh64: 8e52e9c3d15e055c (content), 32706d5f4b48f047 (structure)
 Created new generation ascmhl/0002_A002R2EC_2020-01-17_143000.mhl
 Error: Verification of files referenced in the ASC MHL history failed
 

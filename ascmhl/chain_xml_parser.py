@@ -11,7 +11,6 @@ from . import logger
 from .__version__ import ascmhl_reference_hash_format
 from .chain import MHLChain, MHLChainGeneration
 from .hashlist import MHLHashList
-from .hasher import create_filehash
 import os
 import textwrap
 
@@ -58,7 +57,7 @@ def parse(file_path):
                         current_object.hash_format = tag
                         current_object.hash_string = element.text
                     elif tag == "hashlist":
-                        current_object.generation_number = element.attrib.get("sequencenr")
+                        current_object.generation_number = element.attrib.get("sequencer")
                         chain.append_generation(current_object)
                         current_object = None
 
@@ -107,7 +106,7 @@ def _hashlist_xml_element_from_hashlist(hash_list: MHLHashList):
         E.path(os.path.basename(hash_list.file_path)),
         E.c4(hash_list.generate_reference_hash()),
     )
-    hash_list_element.attrib["sequencenr"] = str(hash_list.generation_number)
+    hash_list_element.attrib["sequencer"] = str(hash_list.generation_number)
 
     return hash_list_element
 
@@ -120,7 +119,7 @@ def _hashlist_xml_element_from_chaingeneration(generation: MHLChainGeneration):
             E.path(generation.ascmhl_filename),
             E.c4(generation.hash_string),
         )
-        hash_list_element.attrib["sequencenr"] = str(generation.generation_number)
+        hash_list_element.attrib["sequencer"] = str(generation.generation_number)
 
         return hash_list_element
     else:

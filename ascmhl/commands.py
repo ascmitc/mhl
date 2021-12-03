@@ -27,7 +27,7 @@ from .__version__ import (
     ascmhl_default_hashformat,
 )
 from .generator import MHLGenerationCreationSession
-from .hasher import create_filehash, DirectoryHashContext
+from .hasher import hash_file, DirectoryHashContext
 from .hashlist import MHLMediaHash, MHLCreatorInfo, MHLProcessInfo, MHLTool, MHLProcess
 from .history import MHLHistory
 from .traverse import post_order_lexicographic
@@ -387,7 +387,7 @@ def verify_entire_folder(
                 continue
 
             # create a new hash and compare it against the original hash entry
-            current_hash = create_filehash(original_hash_entry.hash_format, file_path)
+            current_hash = hash_file(file_path, original_hash_entry.hash_format)
             if original_hash_entry.hash_string == current_hash:
                 logger.verbose(f"verification ({original_hash_entry.hash_format}) of file {relative_path}: OK")
             else:
@@ -497,7 +497,7 @@ def verify_directory_hash_subcommand(
                         )
                         num_failed_verifications += 1
             else:
-                hash_string = hash_file_path(existing_history, file_path, hash_format, session)
+                hash_string = hash_file(file_path, hash_format)
                 dir_hash_context.append_file_hash(file_path, hash_string)
         dir_content_hash = None
         dir_structure_hash = None
@@ -974,24 +974,16 @@ def seal_file_path(existing_history, file_path, hash_format, session) -> (str, b
     success = True
     if len(existing_hash_formats) > 0 and hash_format not in existing_hash_formats:
         existing_hash_format = existing_hash_formats[0]
-        hash_in_existing_format = create_filehash(existing_hash_format, file_path)
+        hash_in_existing_format = hash_file(file_path, existing_hash_format)
         # FIXME: test what happens if the existing hash verification fails in other format fails
         # should we then really create two entries
         success &= session.append_file_hash(
             file_path, file_size, file_modification_date, existing_hash_format, hash_in_existing_format
         )
-    current_format_hash = create_filehash(hash_format, file_path)
+    current_format_hash = hash_file(file_path, hash_format)
     # in case the existing hash verification failed we don't want to add the current format hash to the generation
     # but we need to return it for directory hash creation
     if not success:
         return current_format_hash, False
     success &= session.append_file_hash(file_path, file_size, file_modification_date, hash_format, current_format_hash)
     return current_format_hash, success
-
-
-def hash_file_path(existing_history, file_path, hash_format, session) -> (str):
-    current_format_hash = create_filehash(hash_format, file_path)
-    relative_path = session.root_history.get_relative_file_path(file_path)
-    logger.verbose(f"  created file hash for         {relative_path}")
-
-    return current_format_hash

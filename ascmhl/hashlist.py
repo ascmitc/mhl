@@ -15,7 +15,7 @@ import os
 from . import logger
 from .ignore import MHLIgnoreSpec
 from .__version__ import ascmhl_reference_hash_format
-from .hasher import create_filehash
+from .hasher import hash_file
 
 
 class MHLHashList:
@@ -89,7 +89,7 @@ class MHLHashList:
         return os.path.dirname(os.path.dirname(self.file_path))
 
     def generate_reference_hash(self):
-        return create_filehash(ascmhl_reference_hash_format, self.file_path)
+        return hash_file(self.file_path, ascmhl_reference_hash_format)
 
     # build
     def append_hash(self, media_hash: MHLMediaHash):

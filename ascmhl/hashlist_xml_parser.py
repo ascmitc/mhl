@@ -245,7 +245,8 @@ def _media_hash_xml_element(media_hash: MHLMediaHash):
         path_element.attrib["lastmodificationdate"] = datetime_isostring(media_hash.last_modification_date)
 
     hash_element = E.hash(path_element)
-    for hash_entry in media_hash.hash_entries:
+    sorted_hash_entries = sorted(media_hash.hash_entries, key=lambda hash_entry: hash_entry.hash_format)
+    for hash_entry in sorted_hash_entries:
         entry_element = E(hash_entry.hash_format)
         entry_element.text = hash_entry.hash_string
         if hash_entry.action:

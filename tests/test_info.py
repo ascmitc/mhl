@@ -43,11 +43,12 @@ def test_info(fs, simple_mhl_history):
     result = runner.invoke(ascmhl.commands.info, ["-sf", "/root/Stuff.txt"])
     assert (
         result.output
-        == "Info with history at path: /root\nStuff.txt:\n  Generation 1 (2020-01-15T13:00:00+00:00) xxh64:"
-        " 94c399c2a9a21f9a (original)\n  Generation 2 (2020-01-16T09:15:00+00:00) xxh64: 94c399c2a9a21f9a"
-        " (verified)\n  Generation 3 (2020-01-16T09:15:00+00:00) xxh64: 94c399c2a9a21f9a (verified)\n  Generation 3"
-        " (2020-01-16T09:15:00+00:00) md5: 9eb84090956c484e32cb6c08455a667b (verified)\n  Generation 4"
-        " (2020-01-16T09:15:00+00:00) xxh64: 94c399c2a9a21f9a (verified)\n"
+        == "Info with history at path: /root\nStuff.txt:\n"
+        "  Generation 1 (2020-01-15T13:00:00+00:00) xxh64: 94c399c2a9a21f9a (original)\n"
+        "  Generation 2 (2020-01-16T09:15:00+00:00) xxh64: 94c399c2a9a21f9a (verified)\n"
+        "  Generation 3 (2020-01-16T09:15:00+00:00) md5: 9eb84090956c484e32cb6c08455a667b (verified)\n"
+        "  Generation 3 (2020-01-16T09:15:00+00:00) xxh64: 94c399c2a9a21f9a (verified)\n"
+        "  Generation 4 (2020-01-16T09:15:00+00:00) xxh64: 94c399c2a9a21f9a (verified)\n"
     )
     assert result.exit_code == 0
 
@@ -80,9 +81,10 @@ def test_nested_info(fs, nested_mhl_histories):
     result = runner.invoke(ascmhl.commands.info, ["-sf", "/root/Stuff.txt"])
     assert (
         result.output
-        == "Info with history at path: /root\nStuff.txt:\n  Generation 1 (2020-01-15T13:00:00+00:00) xxh64:"
-        " 94c399c2a9a21f9a (original)\n  Generation 2 (2020-01-16T09:15:00+00:00) xxh64: 94c399c2a9a21f9a"
-        " (verified)\n  Generation 3 (2020-01-16T09:15:00+00:00) xxh64: 94c399c2a9a21f9a (verified)\n  Generation 3"
-        " (2020-01-16T09:15:00+00:00) md5: 9eb84090956c484e32cb6c08455a667b (verified)\n"
+        == "Info with history at path: /root\nStuff.txt:\n"
+        "  Generation 1 (2020-01-15T13:00:00+00:00) xxh64: 94c399c2a9a21f9a (original)\n"
+        "  Generation 2 (2020-01-16T09:15:00+00:00) xxh64: 94c399c2a9a21f9a (verified)\n"
+        "  Generation 3 (2020-01-16T09:15:00+00:00) md5: 9eb84090956c484e32cb6c08455a667b (verified)\n"
+        "  Generation 3 (2020-01-16T09:15:00+00:00) xxh64: 94c399c2a9a21f9a (verified)\n"
     )
     assert result.exit_code == 0

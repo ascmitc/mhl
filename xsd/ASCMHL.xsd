@@ -75,7 +75,7 @@
     </complexType>
     <complexType name="HashesType">
         <choice minOccurs="1" maxOccurs="unbounded">
-            <element name="hash" type="ascmhl:HashType" maxOccurs="unbounded"/>
+            <element name="hash" type="ascmhl:HashType"/>
             <element name="directoryhash" type="ascmhl:DirectoryHashType"/>
         </choice>
     </complexType>
@@ -92,15 +92,14 @@
                     </simpleContent>
                 </complexType>
             </element>
-            <choice maxOccurs="unbounded">
+            <sequence>
+                <element name="c4" type="ascmhl:HashFormatType" minOccurs="0"/>
                 <element name="md5" type="ascmhl:HashFormatType" minOccurs="0"/>
                 <element name="sha1" type="ascmhl:HashFormatType" minOccurs="0"/>
-                <element name="c4" type="ascmhl:HashFormatType" minOccurs="0"/>
-                <element name="xxh32" type="ascmhl:HashFormatType" maxOccurs="1" minOccurs="0"/>
-                <element name="xxh64" type="ascmhl:HashFormatType" maxOccurs="1" minOccurs="0"/>
-                <element name="xxh3" type="ascmhl:HashFormatType" maxOccurs="1" minOccurs="0"/>
-                <element name="xxh128" type="ascmhl:HashFormatType" maxOccurs="1" minOccurs="0"/>
-            </choice>
+                <element name="xxh128" type="ascmhl:HashFormatType" minOccurs="0"/>
+                <element name="xxh3" type="ascmhl:HashFormatType" minOccurs="0"/>
+                <element name="xxh64" type="ascmhl:HashFormatType" minOccurs="0"/>
+            </sequence>
             <element name="previousPath" type="ascmhl:RelativePathType" minOccurs="0"/>
             <element minOccurs="0" name="metadata" type="ascmhl:MetadataType"/>
         </sequence>
@@ -139,14 +138,14 @@
         </simpleContent>
     </complexType>
     <complexType name="DirectoryHashFormatContainerType">
-		<choice minOccurs="1" maxOccurs="unbounded">
-            <element name="md5" type="ascmhl:HashFormatType"/>
-            <element name="sha1" type="ascmhl:HashFormatType"/>
-            <element name="c4" type="ascmhl:HashFormatType"/>
-            <element name="xxh3" type="ascmhl:HashFormatType"/>
-            <element name="xxh64" type="ascmhl:HashFormatType"/>
-            <element name="xxh128" type="ascmhl:HashFormatType"/>
-        </choice>
+		<sequence>
+            <element name="c4" type="ascmhl:HashFormatType" minOccurs="0"/>
+            <element name="md5" type="ascmhl:HashFormatType" minOccurs="0"/>
+            <element name="sha1" type="ascmhl:HashFormatType" minOccurs="0"/>
+            <element name="xxh128" type="ascmhl:HashFormatType" minOccurs="0"/>
+            <element name="xxh3" type="ascmhl:HashFormatType" minOccurs="0"/>
+            <element name="xxh64" type="ascmhl:HashFormatType" minOccurs="0"/>
+        </sequence>
     </complexType>
     <complexType name="ReferencesType">
         <sequence>

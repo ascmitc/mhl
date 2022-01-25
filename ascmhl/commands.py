@@ -289,7 +289,14 @@ def create_for_single_files_subcommand(
     multiple=False,
     help="Algorithm for directory hashes",
 )
-# subcommand
+# subcommands
+@click.option(
+    "--single_file",
+    "-sf",
+    multiple=False,
+    type=click.Path(),
+    help="Verify a single file",
+)
 @click.option(
     "--packing_list", "-pl", default=None, type=click.Path(exists=True), help="Verify against an external packing list"
 )
@@ -298,6 +305,7 @@ def verify(
     verbose,
     directory_hash,
     hash_format,
+    single_file,
     packing_list,
     ignore_list,
     ignore_spec_file,
@@ -316,7 +324,9 @@ def verify(
     """
 
     if packing_list is not None:
-        verify_entire_folder(root_path, verbose, packing_list, ignore_list, ignore_spec_file, calculate_only)
+        verify_entire_folder(
+            root_path, verbose, single_file, packing_list, ignore_list, ignore_spec_file, calculate_only
+        )
         return
 
     if directory_hash is True:
@@ -325,12 +335,12 @@ def verify(
         )
         return
 
-    verify_entire_folder(root_path, verbose, None, ignore_list, ignore_spec_file)
+    verify_entire_folder(root_path, verbose, single_file, None, ignore_list, ignore_spec_file)
     return
 
 
 def verify_entire_folder(
-    root_path, verbose, packing_list_path, ignore_list=None, ignore_spec_file=None, calculate_only=None
+    root_path, verbose, single_file, packing_list_path, ignore_list=None, ignore_spec_file=None, calculate_only=None
 ):
     """
     Checks MHL hashes from all generations / a packing list against all file hashes.
@@ -347,6 +357,9 @@ def verify_entire_folder(
 
     if not os.path.isabs(root_path):
         root_path = os.path.join(os.getcwd(), root_path)
+
+    if single_file is not None and not os.path.isabs(single_file):
+        single_file = os.path.join(root_path, single_file)
 
     logger.verbose(f"check folder at path: {root_path}")
 
@@ -367,6 +380,8 @@ def verify_entire_folder(
 
     ignore_spec = ignore.MHLIgnoreSpec(existing_history.latest_ignore_patterns(), ignore_list, ignore_spec_file)
 
+    found_single_file = False
+
     for folder_path, children in post_order_lexicographic(root_path, ignore_spec.get_path_spec()):
         for item_name, is_dir in children:
             file_path = os.path.join(folder_path, item_name)
@@ -377,28 +392,36 @@ def verify_entire_folder(
                 # TODO: find new directories here
                 continue
 
-            # check if there is an existing hash in the other generations and verify
-            original_hash_entry = history.find_original_hash_entry_for_path(history_relative_path)
+            if single_file is None or os.path.realpath(single_file) == os.path.realpath(file_path):
 
-            # in case there is no original hash entry continue
-            if original_hash_entry is None:
-                logger.error(f"found new file {relative_path}")
-                num_new_files += 1
-                continue
+                # check if there is an existing hash in the other generations and verify
+                original_hash_entry = history.find_original_hash_entry_for_path(history_relative_path)
 
-            # create a new hash and compare it against the original hash entry
-            current_hash = hash_file(file_path, original_hash_entry.hash_format)
-            if original_hash_entry.hash_string == current_hash:
-                logger.verbose(f"verification ({original_hash_entry.hash_format}) of file {relative_path}: OK")
-            else:
-                logger.error(
-                    f"ERROR: hash mismatch        for {relative_path} "
-                    f"old {original_hash_entry.hash_format}: {original_hash_entry.hash_string}, "
-                    f"new {original_hash_entry.hash_format}: {current_hash}"
-                )
-                num_failed_verifications += 1
+                # in case there is no original hash entry continue
+                if original_hash_entry is None:
+                    logger.error(f"found new file {relative_path}")
+                    num_new_files += 1
+                    continue
+
+                # create a new hash and compare it against the original hash entry
+                current_hash = hash_file(file_path, original_hash_entry.hash_format)
+                if original_hash_entry.hash_string == current_hash:
+                    logger.verbose(f"verification ({original_hash_entry.hash_format}) of file {relative_path}: OK")
+                else:
+                    logger.error(
+                        f"ERROR: hash mismatch        for {relative_path} "
+                        f"old {original_hash_entry.hash_format}: {original_hash_entry.hash_string}, "
+                        f"new {original_hash_entry.hash_format}: {current_hash}"
+                    )
+                    num_failed_verifications += 1
+
+                found_single_file = True
 
     exception = test_for_missing_files(not_found_paths, root_path, ignore_spec)
+
+    if found_single_file == False:
+        exception = errors.SingelFileNotFoundException()
+
     if num_new_files > 0:
         exception = errors.NewFilesFoundException()
     if num_failed_verifications > 0:

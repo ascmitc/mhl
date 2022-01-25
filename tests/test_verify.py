@@ -78,3 +78,33 @@ def test_directory_verify_detect_changes(fs, simple_mhl_history):
     result = runner.invoke(ascmhl.commands.verify, ["-v", "-dh", "/root/"])
     assert "ERROR: structure hash mismatch" in result.output
     assert result.exit_code == 15
+
+
+@freeze_time("2020-01-16 09:15:00")
+def test_verify_single_file(fs, simple_mhl_history):
+
+    runner = CliRunner()
+
+    # verify relative path
+    result = runner.invoke(ascmhl.commands.verify, ["-v", "-sf", "A/A1.txt", "/root/"])
+    assert result.exit_code == 0
+
+    # verify absolute path
+    result = runner.invoke(ascmhl.commands.verify, ["-v", "-sf", "/root/A/A1.txt", "/root/"])
+    assert result.exit_code == 0
+
+    # verify existing, but not listed file
+    fs.create_file("/root/B/B1.txt", contents="B1\n")
+    result = runner.invoke(ascmhl.commands.verify, ["-v", "-sf", "B/B1.txt", "/root/"])
+    assert result.exit_code == 13
+
+    # verify non existing file
+    result = runner.invoke(ascmhl.commands.verify, ["-v", "-sf", "B/B2.txt", "/root/"])
+    assert result.exit_code == 15
+
+    # altering the content of one file
+    with open("/root/A/A1.txt", "a") as file:
+        file.write("!!")
+    # verify
+    result = runner.invoke(ascmhl.commands.verify, ["-v", "-sf", "A/A1.txt", "/root/"])
+    assert result.exit_code == 12

@@ -155,7 +155,7 @@ The `info -sf` ("single file") command prints the known history of a single file
 
 _Implementation status 2020-09-08:_
 
-* __Implemented__: `create`, `flatten` (partially), `verify` (partially), `diff`, `info` (partially), `xsd-schema-check`
+* __Implemented__: `create`, `flatten` (partially), `verify`, `diff`, `info` (partially), `xsd-schema-check`
 * __Not implemented yet__: some subcommands for `flatten`, `verify`, `info`
 
 _The commands are also marked below with their current implementation status._

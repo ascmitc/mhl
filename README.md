@@ -176,8 +176,16 @@ Files that are existent in the file system but are not registered in the `ascmhl
 The `create` command takes the root path of the file hierarchy as the parameter:
 
 ```
-$ ascmhl create [-i ignore pattern|-ii /path/to/ignore-file.txt] /path/to/folder/
+$ ascmhl create [-i ignore pattern|-ii /path/to/ignore-file.txt] [creator-info options] /path/to/folder/
 ```
+
+Creator-info options:
+* `--location`: Location value of the `<creatorinfo>`element.
+* `--comment`: Comment value of the `<creatorinfo>`element.
+* `--author_name`: Name value of the `<author>` element in the `<creatorinfo>`element.
+* `--author_email`: Email value of the `<author>` element in the `<creatorinfo>`element (`--author_name` must also be set for this option).
+* `--author_phone`: Phone value of the `<author>` element in the `<creatorinfo>`element (`--author_name` must also be set for this option).
+* `--author_role`: Role value of the `<author>` element in the `<creatorinfo>`element (`--author_name` must also be set for this option).
 
 It works on folders with or without an `ascmhl` folder within the given folder hierarchy, and creates a new `ascmhl` folder at the given folder level if none is present before.
 
@@ -227,6 +235,20 @@ for each file from input
 
 ### The `flatten` command 
 
+The `flatten` command takes the root path of the file hierarchy and the destination path for the flattened manifest as the parameter:
+
+```
+$ ascmhl flatten [-i ignore pattern|-ii /path/to/ignore-file.txt] [creator-info options] /path/to/folder/ /destination/path/
+```
+
+Creator-info options:
+* `--location`: Location value of the `<creatorinfo>`element.
+* `--comment`: Comment value of the `<creatorinfo>`element.
+* `--author_name`: Name value of the `<author>` element in the `<creatorinfo>`element.
+* `--author_email`: Email value of the `<author>` element in the `<creatorinfo>`element (`--author_name` must also be set for this option).
+* `--author_phone`: Phone value of the `<author>` element in the `<creatorinfo>`element (`--author_name` must also be set for this option).
+* `--author_role`: Role value of the `<author>` element in the `<creatorinfo>`element (`--author_name` must also be set for this option).
+
 _TBD_
 
 ```
@@ -246,7 +268,20 @@ Options:
   -i, --ignore TEXT          A single file pattern to ignore.
   -ii, --ignore_spec PATH    A file containing multiple file patterns to
                              ignore.
+  --author_name TEXT         Name value for the <author> element in the
+                             <creatorinfo> element
+  --author_email TEXT        Email value for the <author> element in the
+                             <creatorinfo> element
+  --author_phone TEXT        Phone value for the <author> element in the
+                             <creatorinfo> element
+  --author_role TEXT         Role value for the <author> element in the
+                             <creatorinfo> element
+  --location TEXT            Value for the <location> element in the
+                             <creatorinfo> element
+  --comment TEXT             Value for the <comment> element in the
+                             <creatorinfo> element
   --help                     Show this message and exit.
+
 ```
 
 

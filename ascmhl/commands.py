@@ -28,7 +28,7 @@ from .__version__ import (
 )
 from .generator import MHLGenerationCreationSession
 from .hasher import hash_file, DirectoryHashContext
-from .hashlist import MHLMediaHash, MHLCreatorInfo, MHLProcessInfo, MHLTool, MHLProcess
+from .hashlist import MHLMediaHash, MHLCreatorInfo, MHLProcessInfo, MHLTool, MHLProcess, MHLAuthor
 from .history import MHLHistory
 from .traverse import post_order_lexicographic
 
@@ -58,6 +58,37 @@ from .traverse import post_order_lexicographic
     is_flag=True,
     help="Skip creation of directory hashes, only reference directories without hash",
 )
+# creatorinfo values
+@click.option(
+    "--author_name",
+    default=None,
+    help="Name value for the <author> element in the <creatorinfo> element",
+)
+@click.option(
+    "--author_email",
+    default=None,
+    help="Email value for the <author> element in the <creatorinfo> element",
+)
+@click.option(
+    "--author_phone",
+    default=None,
+    help="Phone value for the <author> element in the <creatorinfo> element",
+)
+@click.option(
+    "--author_role",
+    default=None,
+    help="Role value for the <author> element in the <creatorinfo> element",
+)
+@click.option(
+    "--location",
+    default=None,
+    help="Value for the <location> element in the <creatorinfo> element",
+)
+@click.option(
+    "--comment",
+    default=None,
+    help="Value for the <comment> element in the <creatorinfo> element",
+)
 # subcommands
 @click.option(
     "--single_file",
@@ -80,7 +111,21 @@ from .traverse import post_order_lexicographic
     type=click.Path(exists=True),
     help="A file containing multiple file patterns to ignore.",
 )
-def create(root_path, verbose, hash_format, no_directory_hashes, single_file, ignore_list, ignore_spec_file):
+def create(
+    root_path,
+    verbose,
+    hash_format,
+    no_directory_hashes,
+    single_file,
+    ignore_list,
+    ignore_spec_file,
+    author_name,
+    author_email,
+    author_phone,
+    author_role,
+    location,
+    comment,
+):
     """
     Create a new generation for a folder or file(s)
 
@@ -91,14 +136,51 @@ def create(root_path, verbose, hash_format, no_directory_hashes, single_file, ig
     """
     # distinguish different behavior for entire folder vs single files
     if single_file is not None and len(single_file) > 0:
-        create_for_single_files_subcommand(root_path, verbose, hash_format, single_file, ignore_list, ignore_spec_file)
+        create_for_single_files_subcommand(
+            root_path,
+            verbose,
+            hash_format,
+            single_file,
+            author_name,
+            author_email,
+            author_phone,
+            author_role,
+            location,
+            comment,
+            ignore_list,
+            ignore_spec_file,
+        )
         return
-    create_for_folder_subcommand(root_path, verbose, hash_format, no_directory_hashes, ignore_list, ignore_spec_file)
+    create_for_folder_subcommand(
+        root_path,
+        verbose,
+        hash_format,
+        no_directory_hashes,
+        author_name,
+        author_email,
+        author_phone,
+        author_role,
+        location,
+        comment,
+        ignore_list,
+        ignore_spec_file,
+    )
     return
 
 
 def create_for_folder_subcommand(
-    root_path, verbose, hash_format, no_directory_hashes, ignore_list=None, ignore_spec_file=None
+    root_path,
+    verbose,
+    hash_format,
+    no_directory_hashes,
+    author_name,
+    author_email,
+    author_phone,
+    author_role,
+    location,
+    comment,
+    ignore_list=None,
+    ignore_spec_file=None,
 ):
     # command formerly known as "seal"
     """
@@ -167,7 +249,7 @@ def create_for_folder_subcommand(
             folder_path, modification_date, hash_format, dir_content_hash, dir_structure_hash
         )
 
-    commit_session(session)
+    commit_session(session, author_name, author_email, author_phone, author_role, location, comment)
 
     exception = test_for_missing_files(not_found_paths, root_path, ignore_spec)
     if num_failed_verifications > 0:
@@ -178,7 +260,18 @@ def create_for_folder_subcommand(
 
 
 def create_for_single_files_subcommand(
-    root_path, verbose, hash_format, single_file, ignore_list=None, ignore_spec_file=None
+    root_path,
+    verbose,
+    hash_format,
+    single_file,
+    author_name,
+    author_email,
+    author_phone,
+    author_role,
+    location,
+    comment,
+    ignore_list=None,
+    ignore_spec_file=None,
 ):
     # command formerly known as "record"
     """
@@ -226,7 +319,7 @@ def create_for_single_files_subcommand(
             if not success:
                 num_failed_verifications += 1
 
-    commit_session(session)
+    commit_session(session, author_name, author_email, author_phone, author_role, location, comment)
 
     if num_failed_verifications > 0:
         raise errors.VerificationFailedException()
@@ -717,7 +810,51 @@ def diff_entire_folder_against_full_history_subcommand(root_path, verbose, ignor
     type=click.Path(exists=True),
     help="A file containing multiple file patterns to ignore.",
 )
-def flatten(root_path, destination_path, verbose, no_directory_hashes, ignore_list, ignore_spec_file):
+# creatorinfo values
+@click.option(
+    "--author_name",
+    default=None,
+    help="Name value for the <author> element in the <creatorinfo> element",
+)
+@click.option(
+    "--author_email",
+    default=None,
+    help="Email value for the <author> element in the <creatorinfo> element",
+)
+@click.option(
+    "--author_phone",
+    default=None,
+    help="Phone value for the <author> element in the <creatorinfo> element",
+)
+@click.option(
+    "--author_role",
+    default=None,
+    help="Role value for the <author> element in the <creatorinfo> element",
+)
+@click.option(
+    "--location",
+    default=None,
+    help="Value for the <location> element in the <creatorinfo> element",
+)
+@click.option(
+    "--comment",
+    default=None,
+    help="Value for the <comment> element in the <creatorinfo> element",
+)
+def flatten(
+    root_path,
+    destination_path,
+    verbose,
+    no_directory_hashes,
+    ignore_list,
+    ignore_spec_file,
+    author_name,
+    author_email,
+    author_phone,
+    author_role,
+    location,
+    comment,
+):
     """
     Flatten an MHL history into one external manifest
 
@@ -726,11 +863,37 @@ def flatten(root_path, destination_path, verbose, no_directory_hashes, ignore_li
     their hashes in multiple hash formats and writes them to a new mhl file outside of the
     iterated history.
     """
-    flatten_history(root_path, destination_path, verbose, no_directory_hashes, ignore_list, ignore_spec_file)
+    flatten_history(
+        root_path,
+        destination_path,
+        verbose,
+        no_directory_hashes,
+        author_name,
+        author_email,
+        author_phone,
+        author_role,
+        location,
+        comment,
+        ignore_list,
+        ignore_spec_file,
+    )
     return
 
 
-def flatten_history(root_path, destination_path, verbose, no_directory_hashes, ignore_list=None, ignore_spec_file=None):
+def flatten_history(
+    root_path,
+    destination_path,
+    verbose,
+    no_directory_hashes,
+    author_name,
+    author_email,
+    author_phone,
+    author_role,
+    location,
+    comment,
+    ignore_list=None,
+    ignore_spec_file=None,
+):
     logger.verbose_logging = verbose
 
     if not os.path.isabs(root_path):
@@ -789,7 +952,9 @@ def flatten_history(root_path, destination_path, verbose, no_directory_hashes, i
                                     hash_date=hash_entry.hash_date,
                                 )
 
-    commit_session_for_collection(session, root_path)
+    commit_session_for_collection(
+        session, root_path, author_name, author_email, author_phone, author_role, location, comment
+    )
 
 
 @click.command()
@@ -935,27 +1100,43 @@ def test_for_missing_files(not_found_paths, root_path, ignore_spec: MHLIgnoreSpe
     return errors.CompletenessCheckFailedException()
 
 
-def commit_session(session):
+def commit_session(session, author_name, author_email, author_phone, author_role, location, comment):
     creator_info = MHLCreatorInfo()
     creator_info.tool = MHLTool(ascmhl_tool_name, ascmhl_tool_version)
     creator_info.creation_date = utils.datetime_now_isostring()
     creator_info.host_name = platform.node()
+    creator_info.location = location
+    creator_info.comment = comment
+    if author_name is not None:
+        author_object = MHLAuthor(author_name, author_email, author_phone, author_role)
+        creator_info.authors.append(author_object)
+
     process_info = MHLProcessInfo()
     process_info.process = MHLProcess("in-place")
+
     session.commit(creator_info, process_info)
 
 
-def commit_session_for_collection(session, root_path):
+def commit_session_for_collection(
+    session, root_path, author_name, author_email, author_phone, author_role, location, comment
+):
     creator_info = MHLCreatorInfo()
     creator_info.tool = MHLTool(ascmhl_tool_name, ascmhl_tool_version)
     creator_info.creation_date = utils.datetime_now_isostring()
     creator_info.host_name = platform.node()
+    creator_info.location = location
+    creator_info.comment = comment
+    if author_name is not None:
+        author_object = MHLAuthor(author_name, author_email, author_phone, author_role)
+        creator_info.authors.append(author_object)
+
     process_info = MHLProcessInfo()
     process_info.process = MHLProcess("flatten")
     root_hash = MHLMediaHash()
     root_hash.path = root_path
     process_info.root_media_hash = root_hash
     process_info.hashlist_custom_basename = "packinglist_" + os.path.basename(root_path)
+
     session.commit(creator_info, process_info)
 
 

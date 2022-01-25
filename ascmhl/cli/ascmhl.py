@@ -27,7 +27,7 @@ def mhltool_cli():
     pass
 
 
-@mhltool_cli.resultcallback()
+@mhltool_cli.result_callback()
 def update(*args, **kwargs):
     updater.join(timeout=1)
     if updater.needs_update:

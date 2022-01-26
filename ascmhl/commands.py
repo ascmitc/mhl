@@ -1050,11 +1050,10 @@ def info_for_entire_history(root_path, verbose):
                             )
                         else:
                             logger.info(
-                                f"  Generation {hash_list.generation_number} ({hash_list.creator_info.creation_date})")
+                                f"  Generation {hash_list.generation_number} ({hash_list.creator_info.creation_date})"
+                            )
             else:
                 logger.info(f"  Child Histories: {len(existing_history.child_histories)}")
-
-
 
 
 def info_for_single_file(root_path, verbose, single_file):

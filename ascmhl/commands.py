@@ -1035,6 +1035,27 @@ def info_for_entire_history(root_path, verbose):
         else:
             logger.info(f"  Generation {hash_list.generation_number} ({hash_list.creator_info.creation_date})")
 
+        if len(existing_history.child_histories) > 0:
+            if logger.verbose_logging == True:
+                for child_history in existing_history.child_histories:
+                    logger.info(f"\nChild History at {child_history.get_root_path()}:")
+                    for hash_list in child_history.hash_lists:
+                        if logger.verbose_logging == True:
+                            creatorInfo = hash_list.creator_info.summary()
+                            processInfo = hash_list.process_info.summary()
+                            logger.info(
+                                f"  Generation {hash_list.generation_number} ({hash_list.creator_info.creation_date})\n"
+                                f"     CreatorInfo: {creatorInfo}\n"
+                                f"     ProcessInfo: {processInfo}"
+                            )
+                        else:
+                            logger.info(
+                                f"  Generation {hash_list.generation_number} ({hash_list.creator_info.creation_date})")
+            else:
+                logger.info(f"  Child Histories: {len(existing_history.child_histories)}")
+
+
+
 
 def info_for_single_file(root_path, verbose, single_file):
     """

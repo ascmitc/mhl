@@ -958,6 +958,8 @@ def flatten_history(
 
 
 @click.command()
+@click.argument("root_path", required=False, type=click.Path(exists=True))
+# options
 @click.option(
     "--verbose",
     "-v",
@@ -973,14 +975,6 @@ def flatten_history(
     type=click.Path(exists=True),
     help="Info for single file",
 )
-# options
-@click.option(
-    "--root_path",
-    "-rp",
-    default="",
-    type=click.STRING,
-    help="Root path for history",
-)
 def info(verbose, single_file, root_path):
     """
     Prints information from the ASC MHL history
@@ -988,7 +982,7 @@ def info(verbose, single_file, root_path):
     \b
     """
     if single_file is not None and len(single_file) > 0:
-        if root_path == "":
+        if root_path == None:
             current_dir = os.path.dirname(os.path.abspath(single_file[0]))
             while current_dir != "/" and current_dir != "":
                 asc_mhl_folder_path = os.path.join(current_dir, ascmhl_folder_name)
@@ -996,7 +990,7 @@ def info(verbose, single_file, root_path):
                     root_path = current_dir
                     break
                 current_dir = os.path.dirname(current_dir)
-        if root_path == "":
+        if root_path == None:
             raise errors.NoMHLHistoryExceptionForPath(single_file[0])
         else:
             info_for_single_file(root_path, verbose, single_file)

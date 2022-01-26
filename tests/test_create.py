@@ -277,14 +277,14 @@ def test_creator_info(fs, simple_mhl_history):
     # test comment
     result = CliRunner().invoke(ascmhl.commands.create, ["/root", "--comment", "a super comment"])
     assert result.exit_code == 0
-    result = CliRunner().invoke(ascmhl.commands.info, ["-v", "-rp", "/root"])
+    result = CliRunner().invoke(ascmhl.commands.info, ["-v", "/root"])
     assert result.exit_code == 0
     assert "a super comment" in result.output
 
     # test location
     result = CliRunner().invoke(ascmhl.commands.create, ["/root", "--location", "Munich"])
     assert result.exit_code == 0
-    result = CliRunner().invoke(ascmhl.commands.info, ["-v", "-rp", "/root"])
+    result = CliRunner().invoke(ascmhl.commands.info, ["-v", "/root"])
     assert result.exit_code == 0
     assert "Munich" in result.output
 
@@ -304,7 +304,7 @@ def test_creator_info(fs, simple_mhl_history):
         ],
     )
     assert result.exit_code == 0
-    result = CliRunner().invoke(ascmhl.commands.info, ["-v", "-rp", "/root"])
+    result = CliRunner().invoke(ascmhl.commands.info, ["-v", "/root"])
     assert result.exit_code == 0
     assert "Franz" in result.output
     assert "franz@example.com" in result.output

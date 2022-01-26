@@ -452,10 +452,10 @@ The `info` command prints
 * _[not implemented yet]_ a summary (with the `-s` subcommand option) of the information in an ascmhl folder, such as number of recorded files, and a list of the generations with their creator info, and/or
 * _[not implemented yet]_ a list (with the `-l` option) of all file (and folder) records stored in an ascmhl folder, together with relative file paths, file size, and known file hashes.
 
-It is run with the path to a specific `ascmhl`folder as the `-rp` paramter.
+It is run with the path to a specific `ascmhl` folder as the parameter.
 
 ```
-$ ascmhl info [-s|-l] [-v] -rp /path/to/ascmhl/ 
+$ ascmhl info [-s|-l] [-v] /path/to/ascmhl/ 
 ```
 
 Implementation:
@@ -476,10 +476,10 @@ if list option:
 The `info` command with the `-sf` subcommand option outputs information about the full and detailed history information about one file.
 
 ```
-$ ascmhl info -sf /path/to/file [-sf /path/to/other/file] [-rp /root/path]
+$ ascmhl info -sf /path/to/file [-sf /path/to/other/file] [/root/path]
 ```
 
-The command outputs each generation where the file has been handled, including date, hash, and activity (and creator info and absolute path with the `-v` option). The history information is read from the "next" ASC MHL history found in the path, of at the fiven root path (`-rp` option).
+The command outputs each generation where the file has been handled, including date, hash, and activity (and creator info and absolute path with the `-v` option). The history information is read from the "next" ASC MHL history found in the path, of at the given root path.
 
 Implementation:
 

@@ -48,7 +48,7 @@ ASC MHL supports the hash formats
 * SHA1, SHA256
 * C4
 
-The source code for `mhllib` can be found in the `./mhl` folder.
+The source code for `mhllib` can be found in the `./ascmhl` folder.
 
 ## The `ascmhl` Tool
 
@@ -63,6 +63,14 @@ The ASC MHL tool implementation can
 Typical scenarios, sample CLI output, and generated ASC MHL files can be found in the [README.md](https://github.com/ascmitc/mhl/blob/master/examples/scenarios/) file in the ``examples/scenarios`` folder of the git repository.
 
 The documentation can also be found at [https://ascmhl.readthedocs.io/](https://ascmhl.readthedocs.io/)
+
+Jump directly to the commands:
+
+* [The `create`command](#createcommand)
+* [The `flatten`command](#flattencommand)
+* [The `verify`command](#verifycommand)
+* [The `diff`command](#diffcommand)
+* [The `info`command](#infocommand)
 
 
 ## Getting started
@@ -161,6 +169,7 @@ _Implementation status 2020-09-08:_
 _The commands are also marked below with their current implementation status._
 
 
+<a name="createcommand"></a>
 ### The `create` command
 
 The `create` command hashes all files given with the different options and creates a new generation in the mhl-history with records for all hashed files. The command compares the hashes against the hashes stored in previous generations if available.
@@ -232,7 +241,7 @@ for each file from input
 		add a new generation if necessary in appropriate `ascmhl` folder (mhllib)
 ```
 
-
+<a name="flattencommand"></a>
 ### The `flatten` command 
 
 The `flatten` command takes the root path of the file hierarchy and the destination path for the flattened manifest as the parameter:
@@ -284,7 +293,7 @@ Options:
 
 ```
 
-
+<a name="verifycommand"></a>
 ### The `verify` command
 
 #### `verify` default behavior (for file hierarchy, with completeness check)
@@ -395,7 +404,7 @@ on error (including mismatching hash):
 _TBD_
 
 
-
+<a name="diffcommand"></a>
 ### The `diff` command
 
 The `diff` command is very similar to the `verify` command in the default behavior, only that it doesn't create hashes and doesn't verify them. It can be used to quickly check if a folder structure has new files that have not been recorded yet, or if files are missing.
@@ -431,6 +440,7 @@ end with exit !=0 if at least one of the files has failed, a file was \
 ```
 
 
+<a name="infocommand"></a>
 ### The `info` command 
 
 #### `info` default behavior

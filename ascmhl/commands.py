@@ -1001,7 +1001,39 @@ def info(verbose, single_file, root_path):
         else:
             info_for_single_file(root_path, verbose, single_file)
         return
+    else:
+        info_for_entire_history(root_path, verbose)
     return
+
+
+def info_for_entire_history(root_path, verbose):
+    """
+    ROOT_PATH: the root path to use for the asc mhl history
+    """
+
+    logger.verbose_logging = verbose
+
+    if not os.path.isabs(root_path):
+        root_path = os.path.join(os.getcwd(), root_path)
+
+    logger.info(f"Info with history at path: {root_path}")
+
+    existing_history = MHLHistory.load_from_path(root_path)
+
+    if len(existing_history.hash_lists) == 0:
+        raise errors.NoMHLHistoryException(root_path)
+
+    for hash_list in existing_history.hash_lists:
+        if logger.verbose_logging == True:
+            creatorInfo = hash_list.creator_info.summary()
+            processInfo = hash_list.process_info.summary()
+            logger.info(
+                f"  Generation {hash_list.generation_number} ({hash_list.creator_info.creation_date})\n"
+                f"     CreatorInfo: {creatorInfo}\n"
+                f"     ProcessInfo: {processInfo}"
+            )
+        else:
+            logger.info(f"  Generation {hash_list.generation_number} ({hash_list.creator_info.creation_date})")
 
 
 def info_for_single_file(root_path, verbose, single_file):
@@ -1037,8 +1069,8 @@ def info_for_single_file(root_path, verbose, single_file):
                         f"  Generation {hash_list.generation_number} ({hash_list.creator_info.creation_date})"
                         f" {hash_entry.hash_format}: {hash_entry.hash_string} ({hash_entry.action}) \n"
                         f"    {absolutePath}\n"
-                        f"    {creatorInfo}\n"
-                        f"    {processInfo}"
+                        f"     CreatorInfo: {creatorInfo}\n"
+                        f"     ProcessInfo: {processInfo}"
                     )
                 else:
                     logger.info(

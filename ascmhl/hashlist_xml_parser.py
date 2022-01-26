@@ -78,6 +78,10 @@ def parse(file_path):
                     current_object = MHLMediaHash()
                     current_object.is_directory = True
 
+            elif type(current_object) is MHLCreatorInfo:
+                if tag == "author":
+                    current_object.authors.append(MHLAuthor("-"))
+
             # take a note where we are ina <directoryhash>
             elif type(current_object) is MHLMediaHash:
                 if tag == "structure":
@@ -104,6 +108,16 @@ def parse(file_path):
                     elif tag == "creatorinfo":
                         hash_list.creator_info = current_object
                         current_object = None
+
+                    # author
+                    elif tag == "name":
+                        current_object.authors[-1].name = element.text
+                    elif tag == "role":
+                        current_object.authors[-1].role = element.text
+                    elif tag == "email":
+                        current_object.authors[-1].email = element.text
+                    elif tag == "phone":
+                        current_object.authors[-1].phone = element.text
 
                 elif type(current_object) is MHLProcessInfo:
                     if tag == "process":
@@ -330,6 +344,8 @@ def _creator_info_xml_element(hash_list: MHLHashList):
         author_element = E.author()
         if author.name is not None:
             author_element.append(E.name(author.name))
+        if author.role is not None:
+            author_element.append(E.role(author.role))
         if author.email is not None:
             author_element.append(E.email(author.email))
         if author.phone is not None:

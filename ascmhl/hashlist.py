@@ -280,9 +280,19 @@ class MHLCreatorInfo:
                 summary += " " + str(self.tool.version)
         for author in self.authors:
             summary += ", " + str(author.name)
-            summary += " (" + str(author.email)
-            summary += " " + str(author.phone)
-            summary += ")"
+            if author.role is not None:
+                summary += " [" + str(author.role) + "]"
+            author_infos = []
+            if author.email is not None:
+                author_infos.append(author.email)
+            if author.phone is not None:
+                author_infos.append(author.phone)
+            if len(author_infos) > 0:
+                summary += " (" + ", ".join(author_infos) + ")"
+        if self.location is not None:
+            summary += ", at/in " + self.location
+        if self.comment is not None:
+            summary += ', "' + self.comment + '"'
         return summary
 
 
@@ -308,8 +318,8 @@ class MHLProcessInfo:
     def summary(self):
         summary = ""
         if self.process is not None:
-            summary += ", " + str(self.process)
-        # TODO: ignore
+            summary += str(self.process)
+        # TODO: ignore, root hash, ..
         return summary
 
 

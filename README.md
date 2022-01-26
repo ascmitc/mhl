@@ -433,18 +433,19 @@ end with exit !=0 if at least one of the files has failed, a file was \
 
 ### The `info` command 
 
-#### `info` default behavior _[not implemented yet]_
+#### `info` default behavior
 
 The `ascmhl` folder contains well readable XML files, but the number of recorded files, generations, hash entries, verification info and so forth adds up to an amount of information that cannot be quickly understood. The `info` command helps to get a quick overview of the contents of the stored information in an `ascmhl` folder. 
 
 The `info` command prints
-* a summary (with the `-s` subcommand option) of the information in an ascmhl folder, such as number of recorded files, and a list of the generations with their creator info, and/or
-* a list (with the `-l` option) of all file (and folder) records stored in an ascmhl folder, together with relative file paths, file size, and known file hashes.
+* a list of generations (with the `-v` option also with creator info and process info)
+* _[not implemented yet]_ a summary (with the `-s` subcommand option) of the information in an ascmhl folder, such as number of recorded files, and a list of the generations with their creator info, and/or
+* _[not implemented yet]_ a list (with the `-l` option) of all file (and folder) records stored in an ascmhl folder, together with relative file paths, file size, and known file hashes.
 
-It is run with the path to a specific `ascmhl`folder.
+It is run with the path to a specific `ascmhl`folder as the `-rp` paramter.
 
 ```
-$ ascmhl info [-s|-l] /path/to/ascmhl/ 
+$ ascmhl info [-s|-l] [-v] -rp /path/to/ascmhl/ 
 ```
 
 Implementation:

@@ -271,3 +271,42 @@ def test_create_nested_new_format(fs, nested_mhl_histories):
 
     assert media_hash.hash_entries[1].action == "verified"
     assert media_hash.hash_entries[1].hash_format == "xxh64"
+
+
+def test_creator_info(fs, simple_mhl_history):
+    # test comment
+    result = CliRunner().invoke(ascmhl.commands.create, ["/root", "--comment", "a super comment"])
+    assert result.exit_code == 0
+    result = CliRunner().invoke(ascmhl.commands.info, ["-v", "/root"])
+    assert result.exit_code == 0
+    assert "a super comment" in result.output
+
+    # test location
+    result = CliRunner().invoke(ascmhl.commands.create, ["/root", "--location", "Munich"])
+    assert result.exit_code == 0
+    result = CliRunner().invoke(ascmhl.commands.info, ["-v", "/root"])
+    assert result.exit_code == 0
+    assert "Munich" in result.output
+
+    # test author
+    result = CliRunner().invoke(
+        ascmhl.commands.create,
+        [
+            "/root",
+            "--author_name",
+            "Franz",
+            "--author_email",
+            "franz@example.com",
+            "--author_phone",
+            "123-4567",
+            "--author_role",
+            "Data Manager",
+        ],
+    )
+    assert result.exit_code == 0
+    result = CliRunner().invoke(ascmhl.commands.info, ["-v", "/root"])
+    assert result.exit_code == 0
+    assert "Franz" in result.output
+    assert "franz@example.com" in result.output
+    assert "123-4567" in result.output
+    assert "Data Manager" in result.output

@@ -250,18 +250,23 @@ class MHLCreatorInfo:
     tool: Optional[MHLTool]
     creation_date: Optional[datetime]
     authors: List[MHLAuthor]
+    location: Optional[str]
+    comment: Optional[str]
 
     def __init__(self):
         self.host_name = None
         self.tool = None
         self.creation_date = None
         self.authors = []
-        # TODO: missing location, comment, ignore
+        self.location = None
+        self.comment = None
 
     def log(self):
         logger.info("      host_name: {0}".format(self.host_name))
         logger.info("           tool: {0} {1}".format(self.tool.name, self.tool.version))
         logger.info("  creation_date: {0}".format(self.creation_date))
+        logger.info("       location: {0}".format(self.location))
+        logger.info("        comment: {0}".format(self.comment))
 
     def summary(self):
         summary = ""
@@ -275,10 +280,19 @@ class MHLCreatorInfo:
                 summary += " " + str(self.tool.version)
         for author in self.authors:
             summary += ", " + str(author.name)
-            summary += " (" + str(author.email)
-            summary += " " + str(author.phone)
-            summary += ")"
-        # TODO: missing location, comment, ignore
+            if author.role is not None:
+                summary += " [" + str(author.role) + "]"
+            author_infos = []
+            if author.email is not None:
+                author_infos.append(author.email)
+            if author.phone is not None:
+                author_infos.append(author.phone)
+            if len(author_infos) > 0:
+                summary += " (" + ", ".join(author_infos) + ")"
+        if self.location is not None:
+            summary += ", at/in " + self.location
+        if self.comment is not None:
+            summary += ', "' + self.comment + '"'
         return summary
 
 
@@ -304,8 +318,8 @@ class MHLProcessInfo:
     def summary(self):
         summary = ""
         if self.process is not None:
-            summary += ", " + str(self.process)
-        # TODO: missing location, comment, ignore
+            summary += str(self.process)
+        # TODO: ignore, root hash, ..
         return summary
 
 
@@ -331,8 +345,10 @@ class MHLAuthor:
     name: str
     email: Optional[str]
     phone: Optional[str]
+    role: Optional[str]
 
-    def __init__(self, name: str, email: str = None, phone: str = None):
+    def __init__(self, name: str, email: str = None, phone: str = None, role: str = None):
         self.name = name
         self.email = email
         self.phone = phone
+        self.role = role

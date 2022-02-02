@@ -48,7 +48,7 @@ ASC MHL supports the hash formats
 * SHA1, SHA256
 * C4
 
-The source code for `mhllib` can be found in the `./mhl` folder.
+The source code for `mhllib` can be found in the `./ascmhl` folder.
 
 ## The `ascmhl` Tool
 
@@ -63,6 +63,14 @@ The ASC MHL tool implementation can
 Typical scenarios, sample CLI output, and generated ASC MHL files can be found in the [README.md](https://github.com/ascmitc/mhl/blob/master/examples/scenarios/) file in the ``examples/scenarios`` folder of the git repository.
 
 The documentation can also be found at [https://ascmhl.readthedocs.io/](https://ascmhl.readthedocs.io/)
+
+Jump directly to the commands:
+
+* [The `create`command](#createcommand)
+* [The `flatten`command](#flattencommand)
+* [The `verify`command](#verifycommand)
+* [The `diff`command](#diffcommand)
+* [The `info`command](#infocommand)
 
 
 ## Getting started
@@ -161,6 +169,7 @@ _Implementation status 2020-09-08:_
 _The commands are also marked below with their current implementation status._
 
 
+<a name="createcommand"></a>
 ### The `create` command
 
 The `create` command hashes all files given with the different options and creates a new generation in the mhl-history with records for all hashed files. The command compares the hashes against the hashes stored in previous generations if available.
@@ -176,8 +185,16 @@ Files that are existent in the file system but are not registered in the `ascmhl
 The `create` command takes the root path of the file hierarchy as the parameter:
 
 ```
-$ ascmhl create [-i ignore pattern|-ii /path/to/ignore-file.txt] /path/to/folder/
+$ ascmhl create [-i ignore pattern|-ii /path/to/ignore-file.txt] [creator-info options] /path/to/folder/
 ```
+
+Creator-info options:
+* `--location`: Location value of the `<creatorinfo>`element.
+* `--comment`: Comment value of the `<creatorinfo>`element.
+* `--author_name`: Name value of the `<author>` element in the `<creatorinfo>`element.
+* `--author_email`: Email value of the `<author>` element in the `<creatorinfo>`element (`--author_name` must also be set for this option).
+* `--author_phone`: Phone value of the `<author>` element in the `<creatorinfo>`element (`--author_name` must also be set for this option).
+* `--author_role`: Role value of the `<author>` element in the `<creatorinfo>`element (`--author_name` must also be set for this option).
 
 It works on folders with or without an `ascmhl` folder within the given folder hierarchy, and creates a new `ascmhl` folder at the given folder level if none is present before.
 
@@ -224,8 +241,22 @@ for each file from input
 		add a new generation if necessary in appropriate `ascmhl` folder (mhllib)
 ```
 
-
+<a name="flattencommand"></a>
 ### The `flatten` command 
+
+The `flatten` command takes the root path of the file hierarchy and the destination path for the flattened manifest as the parameter:
+
+```
+$ ascmhl flatten [-i ignore pattern|-ii /path/to/ignore-file.txt] [creator-info options] /path/to/folder/ /destination/path/
+```
+
+Creator-info options:
+* `--location`: Location value of the `<creatorinfo>`element.
+* `--comment`: Comment value of the `<creatorinfo>`element.
+* `--author_name`: Name value of the `<author>` element in the `<creatorinfo>`element.
+* `--author_email`: Email value of the `<author>` element in the `<creatorinfo>`element (`--author_name` must also be set for this option).
+* `--author_phone`: Phone value of the `<author>` element in the `<creatorinfo>`element (`--author_name` must also be set for this option).
+* `--author_role`: Role value of the `<author>` element in the `<creatorinfo>`element (`--author_name` must also be set for this option).
 
 _TBD_
 
@@ -246,10 +277,23 @@ Options:
   -i, --ignore TEXT          A single file pattern to ignore.
   -ii, --ignore_spec PATH    A file containing multiple file patterns to
                              ignore.
+  --author_name TEXT         Name value for the <author> element in the
+                             <creatorinfo> element
+  --author_email TEXT        Email value for the <author> element in the
+                             <creatorinfo> element
+  --author_phone TEXT        Phone value for the <author> element in the
+                             <creatorinfo> element
+  --author_role TEXT         Role value for the <author> element in the
+                             <creatorinfo> element
+  --location TEXT            Value for the <location> element in the
+                             <creatorinfo> element
+  --comment TEXT             Value for the <comment> element in the
+                             <creatorinfo> element
   --help                     Show this message and exit.
+
 ```
 
-
+<a name="verifycommand"></a>
 ### The `verify` command
 
 #### `verify` default behavior (for file hierarchy, with completeness check)
@@ -360,7 +404,7 @@ on error (including mismatching hash):
 _TBD_
 
 
-
+<a name="diffcommand"></a>
 ### The `diff` command
 
 The `diff` command is very similar to the `verify` command in the default behavior, only that it doesn't create hashes and doesn't verify them. It can be used to quickly check if a folder structure has new files that have not been recorded yet, or if files are missing.
@@ -396,20 +440,22 @@ end with exit !=0 if at least one of the files has failed, a file was \
 ```
 
 
+<a name="infocommand"></a>
 ### The `info` command 
 
-#### `info` default behavior _[not implemented yet]_
+#### `info` default behavior
 
 The `ascmhl` folder contains well readable XML files, but the number of recorded files, generations, hash entries, verification info and so forth adds up to an amount of information that cannot be quickly understood. The `info` command helps to get a quick overview of the contents of the stored information in an `ascmhl` folder. 
 
 The `info` command prints
-* a summary (with the `-s` subcommand option) of the information in an ascmhl folder, such as number of recorded files, and a list of the generations with their creator info, and/or
-* a list (with the `-l` option) of all file (and folder) records stored in an ascmhl folder, together with relative file paths, file size, and known file hashes.
+* a list of generations (with the `-v` option also with creator info and process info)
+* _[not implemented yet]_ a summary (with the `-s` subcommand option) of the information in an ascmhl folder, such as number of recorded files, and a list of the generations with their creator info, and/or
+* _[not implemented yet]_ a list (with the `-l` option) of all file (and folder) records stored in an ascmhl folder, together with relative file paths, file size, and known file hashes.
 
-It is run with the path to a specific `ascmhl`folder.
+It is run with the path to a specific `ascmhl` folder as the parameter.
 
 ```
-$ ascmhl info [-s|-l] /path/to/ascmhl/ 
+$ ascmhl info [-s|-l] [-v] /path/to/ascmhl/ 
 ```
 
 Implementation:
@@ -430,10 +476,10 @@ if list option:
 The `info` command with the `-sf` subcommand option outputs information about the full and detailed history information about one file.
 
 ```
-$ ascmhl info -sf /path/to/file [-sf /path/to/other/file] [-rp /root/path]
+$ ascmhl info -sf /path/to/file [-sf /path/to/other/file] [/root/path]
 ```
 
-The command outputs each generation where the file has been handled, including date, hash, and activity (and creator info and absolute path with the `-v` option). The history information is read from the "next" ASC MHL history found in the path, of at the fiven root path (`-rp` option).
+The command outputs each generation where the file has been handled, including date, hash, and activity (and creator info and absolute path with the `-v` option). The history information is read from the "next" ASC MHL history found in the path, of at the given root path.
 
 Implementation:
 

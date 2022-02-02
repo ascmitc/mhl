@@ -78,6 +78,10 @@ def parse(file_path):
                     current_object = MHLMediaHash()
                     current_object.is_directory = True
 
+            elif type(current_object) is MHLCreatorInfo:
+                if tag == "author":
+                    current_object.authors.append(MHLAuthor("-"))
+
             # take a note where we are ina <directoryhash>
             elif type(current_object) is MHLMediaHash:
                 if tag == "structure":
@@ -97,10 +101,23 @@ def parse(file_path):
                         current_object.tool = MHLTool(element.text, element.attrib["version"])
                     elif tag == "hostname":
                         current_object.host_name = element.text
+                    elif tag == "location":
+                        current_object.location = element.text
+                    elif tag == "comment":
+                        current_object.comment = element.text
                     elif tag == "creatorinfo":
                         hash_list.creator_info = current_object
                         current_object = None
-                    # TODO: missing location, comment
+
+                    # author
+                    elif tag == "name":
+                        current_object.authors[-1].name = element.text
+                    elif tag == "role":
+                        current_object.authors[-1].role = element.text
+                    elif tag == "email":
+                        current_object.authors[-1].email = element.text
+                    elif tag == "phone":
+                        current_object.authors[-1].phone = element.text
 
                 elif type(current_object) is MHLProcessInfo:
                     if tag == "process":
@@ -317,7 +334,24 @@ def _creator_info_xml_element(hash_list: MHLHashList):
         E.hostname(creator_info.host_name),
         E.tool(creator_info.tool.name, version=creator_info.tool.version),
     )
-    # TODO: missing location, comment, ignore
+    if creator_info.location is not None:
+        info_element.append(E.location(creator_info.location))
+
+    if creator_info.comment is not None:
+        info_element.append(E.comment(creator_info.comment))
+
+    for author in creator_info.authors:
+        author_element = E.author()
+        if author.name is not None:
+            author_element.append(E.name(author.name))
+        if author.role is not None:
+            author_element.append(E.role(author.role))
+        if author.email is not None:
+            author_element.append(E.email(author.email))
+        if author.phone is not None:
+            author_element.append(E.phone(author.phone))
+        info_element.append(author_element)
+
     return info_element
 
 

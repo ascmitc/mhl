@@ -163,7 +163,7 @@ The `info -sf` ("single file") command prints the known history of a single file
 
 _Implementation status 2020-09-08:_
 
-* __Implemented__: `create`, `flatten` (partially), `verify` (partially), `diff`, `info` (partially), `xsd-schema-check`
+* __Implemented__: `create`, `flatten` (partially), `verify`, `diff`, `info` (partially), `xsd-schema-check`
 * __Not implemented yet__: some subcommands for `flatten`, `verify`, `info`
 
 _The commands are also marked below with their current implementation status._
@@ -333,39 +333,35 @@ end with exit !=0 if at least one of the files has failed, a file was \
 ```
 
 
-#### `verify` with `-sf` option (for single files, no completeness check) _[not implemented yet]_
+#### `verify` with `-sf` option (for single file, no completeness check)
 
-The `verify` command can be used to verify a single or multiple files. It is run with either 
+The `verify` command can be used to verify a single file. It is run with the path to a single file as the parameter.
 
-* the path to a single file, or
-* a text file with paths to multiple files
-
-as the parameter.
+The path can be
+* the relative path to the file starting from the root folder of the history, or
+* the absolute path to the file.
 
 ```
-$ ascmhl verify -sf /path/to/single/file
-$ ascmhl verify -sf -l list/of/files.txt
+$ ascmhl verify -sf /absolute/path/to/single/file
+$ ascmhl verify -sf realtive/path/to/single/file
 ```
 
 The command looks for an `ascmhl` folder in the folders above the given files. If no mhl-history is present yet, an error is thrown.
 
-If used with the `-l` option, all files in the list must be contained in the same (recursive) mhl-history. 
-
 Implementation:
 
 ```
-if input is `-l`: create a list of files from input
 find mhl-history information in the path above (mhllib)
 	error of no `ascmhl` folder is found
 read (recursive) mhl-history (mhllib)
-for each file from input
-	hash each file
-	compare hashes (mhllib)
+for file from input
+	hash file
+	compare hash (mhllib)
 if file is not found in mhl-history, throw error
 on error (including mismatching hashes):
 	don't break
 	print error
-	end with exit !=0 if at least one of the files has failed
+	end with exit !=0 if the verification has failed
 ```
 
 
@@ -400,6 +396,15 @@ on error (including mismatching hash):
 
 
 #### `verify` with `-pl` subcommand option (for packing lists)
+
+The `verify` command with the `-pl` subcommand (or `--packing_list`) option can be used to verify a folder structure with a given packing list. 
+
+It is run with the path to the packing list manifest file as the parameter.
+
+```
+$ ascmhl verify -pl /path/to/packing-list.mhl
+```
+
 
 _TBD_
 

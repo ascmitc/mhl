@@ -43,6 +43,7 @@ from .traverse import post_order_lexicographic
     is_flag=True,
     help="Verbose output",
 )
+# FIXME: refactor to allow for multiple hash formats
 @click.option(
     "--hash_format",
     "-h",
@@ -220,6 +221,7 @@ def create_for_folder_subcommand(
         # generate directory hashes
         dir_hash_context = None
         if not no_directory_hashes:
+            # FIXME: refactor to allow for multiple hash formats
             dir_hash_context = DirectoryHashContext(hash_format)
         for item_name, is_dir in children:
             file_path = os.path.join(folder_path, item_name)
@@ -232,6 +234,7 @@ def create_for_folder_subcommand(
                         file_path, dir_content_hash_mappings.pop(file_path), dir_structure_hash_mappings.pop(file_path)
                     )
             else:
+                # FIXME: refactor to allow for multiple hash formats
                 hash_string, success = seal_file_path(existing_history, file_path, hash_format, session)
                 if not success:
                     num_failed_verifications += 1
@@ -245,6 +248,7 @@ def create_for_folder_subcommand(
             dir_content_hash_mappings[folder_path] = dir_content_hash
             dir_structure_hash_mappings[folder_path] = dir_structure_hash
         modification_date = datetime.datetime.fromtimestamp(os.path.getmtime(folder_path))
+        # FIXME: refactor to allow for multiple hash formats
         session.append_directory_hashes(
             folder_path, modification_date, hash_format, dir_content_hash, dir_structure_hash
         )
@@ -311,10 +315,12 @@ def create_for_single_files_subcommand(
                     file_path = os.path.join(folder_path, item_name)
                     if is_dir:
                         continue
+                    # FIXME: refactor to allow for multiple hash formats
                     _, success = seal_file_path(existing_history, file_path, hash_format, session)
                     if not success:
                         num_failed_verifications += 1
         else:
+            # FIXME: refactor to allow for multiple hash formats
             _, success = seal_file_path(existing_history, path, hash_format, session)
             if not success:
                 num_failed_verifications += 1
@@ -549,6 +555,7 @@ def verify_directory_hash_subcommand(
 
     # choose the hash format of the latest root directory hash
     if hash_format is None:
+        # FIXME: refactor to allow for multiple hash formats
         generation = -1
         for hash_list in existing_history.hash_lists:
             if hash_list.generation_number > generation:
@@ -573,6 +580,7 @@ def verify_directory_hash_subcommand(
     for folder_path, children in post_order_lexicographic(root_path, ignore_spec.get_path_spec()):
         # generate directory hashes
         dir_hash_context = None
+        # FIXME: refactor to allow for multiple hash formats
         dir_hash_context = DirectoryHashContext(hash_format)
         for item_name, is_dir in children:
             file_path = os.path.join(folder_path, item_name)
@@ -589,6 +597,7 @@ def verify_directory_hash_subcommand(
 
                 num_successful_verifications = 0
                 found_hash_format = False
+                # FIXME: refactor to allow for multiple hash formats
                 for directory_hash_entry in directory_hash_entries:
                     if directory_hash_entry.hash_format != hash_format:
                         continue
@@ -1208,7 +1217,7 @@ def commit_session_for_collection(
 
     session.commit(creator_info, process_info)
 
-
+# FIXME: refactor to allow for multiple hash formats
 def seal_file_path(existing_history, file_path, hash_format, session) -> (str, bool):
     relative_path = existing_history.get_relative_file_path(file_path)
     file_size = os.path.getsize(file_path)

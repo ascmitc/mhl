@@ -13,6 +13,27 @@ import xxhash
 import os
 from enum import Enum, unique
 from abc import ABC, abstractmethod
+from typing import Dict
+
+
+class HashPair:
+    """
+    HashPair is an explict coupling of a hash value to a defined hash format
+    """
+    def __init__(self, hash_format: str, hash_string: str):
+        """
+        Initializes the pair
+        :param hash_format: string value, one of the supported hash formats, e.g. 'md5', 'xxh64'
+        :param hash_string: A hash string computed from the supplied format
+        """
+        if not hash_format:
+            raise ValueError
+        hash_type = HashType[hash_format]
+        if not hash_type:
+            raise ValueError
+
+        self.hash_format = hash_format
+        self.hash_value = hash_string
 
 
 class Hasher(ABC):
@@ -226,7 +247,6 @@ class C4(Hasher):
         data = result.to_bytes(64, byteorder="big")
         return data
 
-
 @unique
 class HashType(Enum):
     """
@@ -240,6 +260,71 @@ class HashType(Enum):
     xxh3 = XXH3
     xxh128 = XXH128
     c4 = C4
+
+
+class AggregateHasher():
+    """
+    Handles multiple hashing to facilitate a read-once create-many hashing paradigm
+    """
+    @classmethod
+    def hash_file(cls, 
+                  file_path: str,
+                  hash_formats: [str]) -> [HashPair]:
+        """
+        computes and returns new hash strings for a file
+
+        arguments:
+        file_path -- string value, path of file to generate hash for.
+        hash_formats -- array string values, each entry should be one of the supported hash formats, e.g. 'md5', 'xxh64'
+        """
+
+        # Build a hasher for each supplied format
+        hasher_lookup = {}
+        for hash_format in hash_formats:
+            hasher = new_hasher_for_hash_type(hash_format)
+            hasher_lookup[hash_format] = hasher
+
+        # Open the file
+        with open(file_path, "rb") as fd:
+            # process files in chunks so that large files won't cause excessive memory consumption.
+            size = 1024 * 1024  # chunk size 1MB
+            chunk = fd.read(size)
+            while chunk:
+                # Update each stored hasher with the read chunk
+                for hash_format in hasher_lookup:
+                    hasher_lookup[hash_format].update(chunk)
+
+                chunk = fd.read(size)
+
+        # Get the digest from each hasher
+        hash_pairs = []
+        for hash_format in hasher_lookup:
+            computed_hash = hasher_lookup[hash_format].string_digest()
+            hash_pairs.append(HashPair(hash_format, computed_hash))
+
+        return hash_pairs
+
+    @classmethod
+    def hash_data(cls, 
+                  input_data: bytes, 
+                  hash_formats: [str]) -> [HashPair]:
+        """
+        computes and returns new hash strings for a file
+
+        arguments:
+        input_data -- the bytes to compute the hash from.
+        hash_formats -- array string values, each entry should be one of the supported hash formats, e.g. 'md5', 'xxh64'
+        """
+
+        # Build a hash for each supplied format
+        hash_pairs = []
+        for hash_format in hash_formats:
+            hash_generator = new_hasher_for_hash_type(hash_format)
+            hash_generator.update(input_data)
+            computed_hash = hash_generator.string_digest()
+            hash_pairs.append(HashPair(hash_format, computed_hash))
+
+        return hash_pairs
 
 
 class DirectoryHashContext:
@@ -318,6 +403,19 @@ def hash_of_hash_list(hash_list: [str], hash_format: str) -> str:
     return hasher.hash_of_hash_list(hash_list)
 
 
+def hash_file(file_path: str,
+              hash_formats: [str]) -> [HashPair]:
+    """
+     computes and returns a new hash strings for a file
+
+     arguments:
+     file_path -- string value, path of file to generate hash for.
+     hash_formats -- string values, each entry is one of the supported hash formats, e.g. 'md5', 'xxh64'
+     """
+    hash_aggregate = AggregateHasher()
+    return hash_aggregate.hash_file(file_path, hash_formats)
+
+
 def hash_file(filepath: str, hash_format: str) -> str:
     """
     computes and returns a new hash string for a file
@@ -340,6 +438,18 @@ def hash_data(input_data: bytes, hash_format: str) -> str:
     """
     hasher = new_hasher_for_hash_type(hash_format)
     return hasher.hash_data(input_data)
+
+
+def hash_data(input_data: bytes,
+              hash_formats: [str]) -> [HashPair]:
+    """
+    computes and returns new hash strings from the input data
+    arguments:
+    input_data -- the bytes to compute the hash from
+    hash_formats -- string values, each entry is one of the supported hash formats, e.g. 'md5', 'xxh64'
+    """
+    hash_aggregate = AggregateHasher()
+    return hash_aggregate.hash_data(bytes, hash_formats)
 
 
 def bytes_for_hash_string(hash_string: str, hash_format: str) -> bytes:

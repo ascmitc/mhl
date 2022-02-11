@@ -449,7 +449,7 @@ def multiple_format_hash_data(input_data: bytes,
     hash_formats -- string values, each entry is one of the supported hash formats, e.g. 'md5', 'xxh64'
     """
     hash_aggregate = AggregateHasher()
-    return hash_aggregate.hash_data(bytes, hash_formats)
+    return hash_aggregate.hash_data(input_data, hash_formats)
 
 
 def bytes_for_hash_string(hash_string: str, hash_format: str) -> bytes:

@@ -37,6 +37,42 @@ def test_hash_data():
         assert h == v  # assert our computed hash equals expected hash
 
 
+def test_aggregate_hashing_of_data(fs):
+    # the data to hash
+    data = b"media-hash-list"
+
+    # map of hash algorithm to expected hash value
+    hash_type_and_value = {
+        "md5": "9db0fc9f30f5ee70041a7538809e2858",
+        "sha1": "7b57673ac5633937a55b59009ad0c57ee08188b7",
+        "xxh32": "f67c5a4f",
+        "xxh64": "584b2ea1974f2b7c",
+        "xxh3": "6d4cbd75905c81aa",
+        "xxh128": "61a67c014f703a456ee7a776fd8c06bd",
+        "c4": "c456LycWwpMMS7VDZEKvYv2L1uJS6s4qAFnaJdnQiy5JVbBFZMA8aLDS6SPaJjLqxXH4qZdnbuktopMt9frtC2qL1R",
+    }
+
+    # Get a list of all the hash formats
+    hash_formats = []
+
+    for k in hash_type_and_value:
+        hash_formats.append(k)
+
+    # Generate the hash pairings for the file and specified formats
+    hash_pairs = multiple_format_hash_data(data, hash_formats)
+
+    # Make sure each pair's value matches the known hash value
+    evaluated_formats = []
+    for pair in hash_pairs:
+        known_hash = hash_type_and_value[pair.hash_format]
+        evaluated_formats.append(pair.hash_format)
+        assert pair.hash_value == known_hash
+
+    # Make sure each stored format was represented in the hash pairings
+    for k in hash_type_and_value:
+        assert k in evaluated_formats
+
+
 def test_hash_file(fs):
     # write some data to a file so we can hash it.
     file, data = "/data-file.txt", "media-hash-list"
@@ -55,6 +91,42 @@ def test_hash_file(fs):
     for k, v in hash_type_and_value.items():
         h = hash_file(file, k)
         assert h == v  # assert our computed hash equals expected hash
+
+
+def test_aggregate_hashing_of_file(fs):
+    # write some data to a file so we can hash it.
+    file, data = "/data-file.txt", "media-hash-list"
+    fs.create_file(file, contents=data)
+    # map of hash algorithm to expected hash value
+    hash_type_and_value = {
+        "md5": "9db0fc9f30f5ee70041a7538809e2858",
+        "sha1": "7b57673ac5633937a55b59009ad0c57ee08188b7",
+        "xxh32": "f67c5a4f",
+        "xxh64": "584b2ea1974f2b7c",
+        "xxh3": "6d4cbd75905c81aa",
+        "xxh128": "61a67c014f703a456ee7a776fd8c06bd",
+        "c4": "c456LycWwpMMS7VDZEKvYv2L1uJS6s4qAFnaJdnQiy5JVbBFZMA8aLDS6SPaJjLqxXH4qZdnbuktopMt9frtC2qL1R",
+    }
+
+    # Get a list of all the hash formats
+    hash_formats = []
+
+    for k in hash_type_and_value:
+        hash_formats.append(k)
+
+    # Generate the hash pairings for the file and specified formats
+    hash_pairs = multiple_format_hash_file(file, hash_formats)
+
+    # Make sure each pair's value matches the known hash value
+    evaluated_formats = []
+    for pair in hash_pairs:
+        known_hash = hash_type_and_value[pair.hash_format]
+        evaluated_formats.append(pair.hash_format)
+        assert pair.hash_value == known_hash
+
+    # Make sure each stored format was represented in the hash pairings
+    for k in hash_type_and_value:
+        assert k in evaluated_formats
 
 
 def test_hash_of_hash_list():

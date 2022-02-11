@@ -403,8 +403,8 @@ def hash_of_hash_list(hash_list: [str], hash_format: str) -> str:
     return hasher.hash_of_hash_list(hash_list)
 
 
-def hash_file(file_path: str,
-              hash_formats: [str]) -> [HashPair]:
+def multiple_format_hash_file(file_path: str,
+                              hash_formats: [str]) -> [HashPair]:
     """
      computes and returns a new hash strings for a file
 
@@ -440,8 +440,8 @@ def hash_data(input_data: bytes, hash_format: str) -> str:
     return hasher.hash_data(input_data)
 
 
-def hash_data(input_data: bytes,
-              hash_formats: [str]) -> [HashPair]:
+def multiple_format_hash_data(input_data: bytes,
+                              hash_formats: [str]) -> [HashPair]:
     """
     computes and returns new hash strings from the input data
     arguments:

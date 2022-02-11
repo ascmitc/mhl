@@ -52,14 +52,8 @@ def test_aggregate_hashing_of_data(fs):
         "c4": "c456LycWwpMMS7VDZEKvYv2L1uJS6s4qAFnaJdnQiy5JVbBFZMA8aLDS6SPaJjLqxXH4qZdnbuktopMt9frtC2qL1R",
     }
 
-    # Get a list of all the hash formats
-    hash_formats = []
-
-    for k in hash_type_and_value:
-        hash_formats.append(k)
-
     # Generate the hash pairings for the file and specified formats
-    hash_pairs = multiple_format_hash_data(data, hash_formats)
+    hash_pairs = multiple_format_hash_data(data, hash_type_and_value.keys())
 
     # Make sure each pair's value matches the known hash value
     evaluated_formats = []
@@ -108,14 +102,8 @@ def test_aggregate_hashing_of_file(fs):
         "c4": "c456LycWwpMMS7VDZEKvYv2L1uJS6s4qAFnaJdnQiy5JVbBFZMA8aLDS6SPaJjLqxXH4qZdnbuktopMt9frtC2qL1R",
     }
 
-    # Get a list of all the hash formats
-    hash_formats = []
-
-    for k in hash_type_and_value:
-        hash_formats.append(k)
-
     # Generate the hash pairings for the file and specified formats
-    hash_pairs = multiple_format_hash_file(file, hash_formats)
+    hash_pairs = multiple_format_hash_file(file, hash_type_and_value.keys())
 
     # Make sure each pair's value matches the known hash value
     evaluated_formats = []

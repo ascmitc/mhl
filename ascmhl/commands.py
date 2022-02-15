@@ -728,7 +728,7 @@ def _compare_and_log_directory_hashes(
 )
 def hash(file_path, hash_format):
     """
-    Create the c4 hash of a file
+    Create and print a hash value for a file
     """
     result = hash_file(file_path, hash_format)
     logger.info(hash_format + " (" + file_path + ") = " + result)

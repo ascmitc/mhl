@@ -53,14 +53,14 @@ def test_aggregate_hashing_of_data(fs):
     }
 
     # Generate the hash pairings for the file and specified formats
-    hash_pairs = multiple_format_hash_data(data, hash_type_and_value.keys())
+    hash_lookup = multiple_format_hash_data(data, hash_type_and_value.keys())
 
     # Make sure each pair's value matches the known hash value
     evaluated_formats = []
-    for pair in hash_pairs:
-        known_hash = hash_type_and_value[pair.hash_format]
-        evaluated_formats.append(pair.hash_format)
-        assert pair.hash_value == known_hash
+    for hash_format, hash_value in hash_lookup.items():
+        known_hash = hash_type_and_value[hash_format]
+        evaluated_formats.append(hash_format)
+        assert hash_value == known_hash
 
     # Make sure each stored format was represented in the hash pairings
     for k in hash_type_and_value:
@@ -103,14 +103,14 @@ def test_aggregate_hashing_of_file(fs):
     }
 
     # Generate the hash pairings for the file and specified formats
-    hash_pairs = multiple_format_hash_file(file, hash_type_and_value.keys())
+    hash_lookup = multiple_format_hash_file(file, hash_type_and_value.keys())
 
     # Make sure each pair's value matches the known hash value
     evaluated_formats = []
-    for pair in hash_pairs:
-        known_hash = hash_type_and_value[pair.hash_format]
-        evaluated_formats.append(pair.hash_format)
-        assert pair.hash_value == known_hash
+    for hash_format, hash_value in hash_lookup.items():
+        known_hash = hash_type_and_value[hash_format]
+        evaluated_formats.append(hash_format)
+        assert hash_value == known_hash
 
     # Make sure each stored format was represented in the hash pairings
     for k in hash_type_and_value:

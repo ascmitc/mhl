@@ -717,6 +717,13 @@ def _compare_and_log_directory_hashes(
 
 
 @click.command()
+@click.argument("file_path", type=click.Path(exists=True))
+def c4(file_path):
+    result = hash_file(file_path, "c4")
+    logger.info("c4 (" + file_path + ") = " + result)
+
+
+@click.command()
 @click.argument("root_path", type=click.Path(exists=True))
 @click.option(
     "--verbose",

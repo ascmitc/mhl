@@ -719,6 +719,9 @@ def _compare_and_log_directory_hashes(
 @click.command()
 @click.argument("file_path", type=click.Path(exists=True))
 def c4(file_path):
+    """
+    Create the c4 hash of a file
+    """
     result = hash_file(file_path, "c4")
     logger.info("c4 (" + file_path + ") = " + result)
 

@@ -41,7 +41,7 @@ mhltool_cli.add_command(commands.diff)
 mhltool_cli.add_command(commands.flatten)
 mhltool_cli.add_command(commands.info)
 mhltool_cli.add_command(commands.xsd_schema_check)
-mhltool_cli.add_command(commands.c4)
+mhltool_cli.add_command(commands.hash)
 
 
 if __name__ == "__main__":

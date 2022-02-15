@@ -718,12 +718,20 @@ def _compare_and_log_directory_hashes(
 
 @click.command()
 @click.argument("file_path", type=click.Path(exists=True))
-def c4(file_path):
+@click.option(
+    "--hash_format",
+    "-h",
+    type=click.Choice(ascmhl_supported_hashformats),
+    multiple=False,
+    required=True,
+    help="Algorithm",
+)
+def hash(file_path, hash_format):
     """
     Create the c4 hash of a file
     """
-    result = hash_file(file_path, "c4")
-    logger.info("c4 (" + file_path + ") = " + result)
+    result = hash_file(file_path, hash_format)
+    logger.info(hash_format + " (" + file_path + ") = " + result)
 
 
 @click.command()

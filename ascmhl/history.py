@@ -326,7 +326,13 @@ class MHLHistory:
                 history = self.child_history_mappings[reference_path]
                 referenced_hash_list = history.hash_list_with_file_name(os.path.basename(reference.path))
                 assert referenced_hash_list is not None
-                assert referenced_hash_list.generate_reference_hash() == reference.reference_hash
+                generated_hash = referenced_hash_list.generate_reference_hash()
+                if generated_hash != reference.reference_hash:
+                    logger.error("ASC MHL file: " + hash_list.file_path)
+                    logger.error('  referenced manifest file "' + referenced_hash_list.file_path + '"')
+                    logger.error("  should have hash:  " + reference.reference_hash)
+                    logger.error("  but file has hash: " + generated_hash)
+
                 hash_list.referenced_hash_lists.append(referenced_hash_list)
 
     # writing new generations

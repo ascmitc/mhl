@@ -726,6 +726,24 @@ def _compare_and_log_directory_hashes(
 
 
 @click.command()
+@click.argument("file_path", type=click.Path(exists=True))
+@click.option(
+    "--hash_format",
+    "-h",
+    type=click.Choice(ascmhl_supported_hashformats),
+    multiple=False,
+    required=True,
+    help="Algorithm",
+)
+def hash(file_path, hash_format):
+    """
+    Create and print a hash value for a file
+    """
+    result = hash_file(file_path, hash_format)
+    logger.info(hash_format + " (" + file_path + ") = " + result)
+
+
+@click.command()
 @click.argument("root_path", type=click.Path(exists=True))
 @click.option(
     "--verbose",

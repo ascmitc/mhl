@@ -27,11 +27,12 @@ from .__version__ import (
     ascmhl_default_hashformat,
 )
 from .generator import MHLGenerationCreationSession
-from .hasher import hash_file, DirectoryHashContext
+from .hasher import hash_file, DirectoryHashContext, multiple_format_hash_file
 from .hashlist import MHLMediaHash, MHLCreatorInfo, MHLProcessInfo, MHLTool, MHLProcess, MHLAuthor
 from .history import MHLHistory
 from .traverse import post_order_lexicographic
-
+from typing import Dict
+from collections import namedtuple
 
 @click.command()
 @click.argument("root_path", type=click.Path(exists=True))
@@ -234,8 +235,11 @@ def create_for_folder_subcommand(
                         file_path, dir_content_hash_mappings.pop(file_path), dir_structure_hash_mappings.pop(file_path)
                     )
             else:
-                # FIXME: refactor to allow for multiple hash formats
-                hash_string, success = seal_file_path(existing_history, file_path, hash_format, session)
+                seal_result = updated_seal_file_path(existing_history, file_path, [hash_format], session)
+                result_tuple = seal_result[hash_format]
+                hash_string = result_tuple.hash_value
+                success = result_tuple.success
+
                 if not success:
                     num_failed_verifications += 1
                 if not no_directory_hashes:
@@ -315,13 +319,13 @@ def create_for_single_files_subcommand(
                     file_path = os.path.join(folder_path, item_name)
                     if is_dir:
                         continue
-                    # FIXME: refactor to allow for multiple hash formats
-                    _, success = seal_file_path(existing_history, file_path, hash_format, session)
+                    seal_result = updated_seal_file_path(existing_history, file_path, [hash_format], session)
+                    success = seal_result[hash_format].success
                     if not success:
                         num_failed_verifications += 1
         else:
-            # FIXME: refactor to allow for multiple hash formats
-            _, success = seal_file_path(existing_history, path, hash_format, session)
+            seal_result = updated_seal_file_path(existing_history, file_path, [hash_format], session)
+            success = seal_result[hash_format].success
             if not success:
                 num_failed_verifications += 1
 
@@ -1235,6 +1239,7 @@ def commit_session_for_collection(
 
     session.commit(creator_info, process_info)
 
+
 # FIXME: refactor to allow for multiple hash formats
 def seal_file_path(existing_history, file_path, hash_format, session) -> (str, bool):
     relative_path = existing_history.get_relative_file_path(file_path)
@@ -1264,3 +1269,53 @@ def seal_file_path(existing_history, file_path, hash_format, session) -> (str, b
         return current_format_hash, False
     success &= session.append_file_hash(file_path, file_size, file_modification_date, hash_format, current_format_hash)
     return current_format_hash, success
+
+
+"""
+A tuple for returning the result of a seal file path operation
+attributes:
+hash_value -- string value, a hash
+success -- boolean value, indicates if the update was successful
+"""
+SealPathResult = namedtuple('SealPathResult', ['hash_value', 'success'])
+
+
+def updated_seal_file_path(existing_history,
+                           file_path,
+                           hash_formats: [str],
+                           session) -> Dict[str, SealPathResult]:
+    relative_path = existing_history.get_relative_file_path(file_path)
+    file_size = os.path.getsize(file_path)
+    file_modification_date = datetime.datetime.fromtimestamp(os.path.getmtime(file_path))
+
+    # find in the according child history the already available hash formats
+    existing_child_history, existing_history_relative_path = existing_history.find_history_for_path(relative_path)
+    existing_hash_formats = existing_child_history.find_existing_hash_formats_for_path(existing_history_relative_path)
+
+    current_hash_lookup = multiple_format_hash_file(file_path, hash_formats)
+    # in case there is no hash in the required format to use yet, we need to verify also against
+    # one of the existing hash formats, we for simplicity use always the first hash format in this example
+    # but one could also use a different one if desired
+    hash_result_lookup = {}
+    for hash_format in hash_formats:
+        success = True
+        if len(existing_hash_formats) > 0 and hash_format not in existing_hash_formats:
+            existing_hash_format = existing_hash_formats[0]
+            hash_in_existing_format = hash_file(file_path, existing_hash_format)
+            # FIXME: test what happens if the existing hash verification fails in other format fails
+            # should we then really create two entries
+            success &= session.append_file_hash(
+                file_path, file_size, file_modification_date, existing_hash_format, hash_in_existing_format
+            )
+        current_format_hash = current_hash_lookup[hash_format]
+        # in case the existing hash verification failed we don't want to add the current format hash to the generation
+        # but we need to return it for directory hash creation
+        if success:
+            success &= session.append_file_hash(file_path,
+                                                file_size,
+                                                file_modification_date,
+                                                hash_format,
+                                                current_format_hash)
+        hash_result_lookup[hash_format] = SealPathResult(current_format_hash, success)
+
+    return hash_result_lookup

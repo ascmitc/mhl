@@ -220,46 +220,59 @@ def create_for_folder_subcommand(
     dir_structure_hash_mappings = {}
 
     # TODO: Remove once the function signature is updated to supply a hash format list instead of a single format
+    # TODO: sort the format keys into a standard order for consistent output
     hash_format_list = [hash_format]
 
     for folder_path, children in post_order_lexicographic(root_path, session.ignore_spec.get_path_spec()):
         # generate directory hashes
-        dir_hash_context = None
+        dir_hash_context_lookup = {}
+
         if not no_directory_hashes:
-            # FIXME: refactor to allow for multiple hash formats
-            dir_hash_context = DirectoryHashContext(hash_format)
+            for hash_format in hash_format_list:
+                dir_hash_context_lookup[hash_format] = DirectoryHashContext(hash_format)
         for item_name, is_dir in children:
             file_path = os.path.join(folder_path, item_name)
             not_found_paths.discard(file_path)
             if is_dir:
-                if not dir_hash_context:
-                    continue
-                if dir_hash_context:
-                    dir_hash_context.append_directory_hashes(
-                        file_path, dir_content_hash_mappings.pop(file_path), dir_structure_hash_mappings.pop(file_path)
-                    )
-            else:
-                seal_result = seal_file_path(existing_history, file_path, [hash_format], session)
-                result_tuple = seal_result[hash_format]
-                hash_string = result_tuple.hash_value
-                success = result_tuple.success
-
-                if not success:
-                    num_failed_verifications += 1
                 if not no_directory_hashes:
-                    dir_hash_context.append_file_hash(file_path, hash_string)
-        dir_content_hash = None
-        dir_structure_hash = None
-        if dir_hash_context:
-            dir_content_hash = dir_hash_context.final_content_hash_str()
-            dir_structure_hash = dir_hash_context.final_structure_hash_str()
-            dir_content_hash_mappings[folder_path] = dir_content_hash
-            dir_structure_hash_mappings[folder_path] = dir_structure_hash
+                    for hash_format, dir_hash_context in dir_hash_context_lookup.items():
+                        dir_hash_context.append_directory_hashes(file_path, dir_content_hash_mappings.pop(file_path), dir_structure_hash_mappings.pop(file_path))
+            else:
+                seal_result = seal_file_path(existing_history, file_path, hash_format_list, session)
+
+                for hash_format, result_tuple in seal_result.items():
+                    dir_hash_context = None
+
+                    if not no_directory_hashes:
+                        dir_hash_context = dir_hash_context_lookup[hash_format]
+
+                    hash_string = result_tuple.hash_value
+                    success = result_tuple.success
+                    if not success:
+                        num_failed_verifications += 1
+                    if dir_hash_context is not None:
+                        dir_hash_context.append_file_hash(file_path, hash_string)
+
+        # Calculate the directory hashes for each format
+        dir_content_hash_lookup = {}
+        dir_structure_hash_lookup = {}
+
+        if not no_directory_hashes:
+            for hash_format, dir_hash_context in dir_hash_context_lookup.items():
+                dir_content_hash = dir_hash_context.final_content_hash_str()
+                dir_structure_hash = dir_hash_context.final_structure_hash_str()
+                dir_content_hash_mappings[folder_path] = dir_content_hash
+                dir_structure_hash_mappings[folder_path] = dir_structure_hash
+
+                dir_content_hash_lookup[hash_format] = dir_content_hash
+                dir_structure_hash_lookup[hash_format] = dir_structure_hash
+
         modification_date = datetime.datetime.fromtimestamp(os.path.getmtime(folder_path))
         # FIXME: refactor to allow for multiple hash formats
-        session.append_directory_hashes(
-            folder_path, modification_date, hash_format, dir_content_hash, dir_structure_hash
-        )
+        session.append_multiple_format_directory_hashes(folder_path,
+                                                        modification_date,
+                                                        dir_content_hash_lookup,
+                                                        dir_structure_hash_lookup)
 
     commit_session(session, author_name, author_email, author_phone, author_role, location, comment)
 

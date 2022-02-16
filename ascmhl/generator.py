@@ -15,7 +15,6 @@ from . import logger
 from .ignore import MHLIgnoreSpec
 from .hashlist import MHLHashList, MHLHashEntry, MHLCreatorInfo, MHLProcessInfo
 from .history import MHLHistory
-from .hasher import HashPair
 
 
 class MHLGenerationCreationSession:
@@ -42,18 +41,18 @@ class MHLGenerationCreationSession:
         self.new_hash_lists = defaultdict(MHLHashList)
         self.ignore_spec = ignore_spec
 
-    def append_file_hashes(self,
-                           file_path,
-                           file_size,
-                           hash_pairs: [HashPair],
-                           file_modification_date,
-                           action=None,
-                           hash_date=None) -> bool:
+    def append_multiple_format_file_hashes(self,
+                                           file_path,
+                                           file_size,
+                                           hash_lookup: Dict[str, str],
+                                           file_modification_date,
+                                           action=None,
+                                           hash_date=None) -> bool:
         """
         Adds file hashes to the history
         :param file_path: a string value representing the path to a file
         :param file_size: size of the file path in bytes
-        :param hash_pairs: an array of hash values
+        :param hash_lookup: a dictionary of hash values keyed by the respective hash format
         :param file_modification_date: date the file was last modified
         :param action: a predetermined action for the entry.  defaults to none
         :param hash_date: date the hashes were generated
@@ -73,11 +72,8 @@ class MHLGenerationCreationSession:
         original_hash_entry = history.find_original_hash_entry_for_path(history_relative_path)
 
         hash_entries = [MHLHashEntry]
-
-        for pair in hash_pairs:
-            hash_format = pair.hash_format
-            hash_string = pair.hash_string
-
+        # TODO: sort the format keys into a standard order for consistent output
+        for hash_format, hash_string in hash_lookup.items():
             hash_entry = MHLHashEntry(hash_format, hash_string, hash_date=hash_date)
             if original_hash_entry is None:
                 hash_entry.action = "original"
@@ -174,17 +170,17 @@ class MHLGenerationCreationSession:
         media_hash.append_hash_entry(hash_entry)
         return hash_entry.action != "failed"
 
-    def append_directory_hashes(self,
-                                path,
-                                modification_date,
-                                content_hashes: [HashPair],
-                                structure_hashes: [HashPair]) -> None:
+    def append_multiple_format_directory_hashes(self,
+                                                path,
+                                                modification_date,
+                                                content_hash_lookup: Dict[str, str],
+                                                structure_hash_lookup: Dict[str, str]) -> None:
         """
         Adds directory hashes to the history
         :param path: a string value representing the path to a file
         :param modification_date: date the file was last modified
-        :param content_hashes: an array of content hash pairs
-        :param structure_hashes: an array of structure hash pairs
+        :param content_hash_lookup: a dictionary of content hash values keyed by the respective hash format
+        :param structure_hash_lookup: a dictionary of structure hash values keyed by the respective hash format
         :return: none
         """
         relative_path = self.root_history.get_relative_file_path(path)
@@ -197,19 +193,11 @@ class MHLGenerationCreationSession:
         media_hash = new_hash_list.find_or_create_media_hash_for_path(history_relative_path, None, modification_date)
         media_hash.is_directory = True
 
-        # Break the structure hashes down into a lookup
-        structure_lookup = dict[str, str]
-        if structure_hashes:
-            for structure_pair in structure_hashes:
-                structure_lookup[structure_pair.hash_format] = structure_pair.hash_value
-
         # Add the content entries
-        if content_hashes:
-            for hash_pair in content_hashes:
-                # Add the content entry
-                hash_format = hash_pair.hash_format
-                content_hash_string = hash_pair.hash_string
-                structure_hash_string = structure_lookup[hash_format]
+        if content_hash_lookup:
+            for hash_format, content_hash_string in content_hash_lookup.items():
+                # Find the structure hash string
+                structure_hash_string = structure_hash_lookup[hash_format]
 
                 hash_entry = MHLHashEntry(hash_format, content_hash_string)
                 # Attempt to add the structure, if available
@@ -240,11 +228,9 @@ class MHLGenerationCreationSession:
                 parent_relative_path, None, modification_date
             )
             parent_media_hash.is_directory = True
-            if content_hashes:
-                for hash_pair in content_hashes:
-                    hash_format = hash_pair.hash_format
-                    content_hash_string = hash_pair.hash_string
-                    structure_hash_string = structure_lookup[hash_format]
+            if content_hash_lookup:
+                for hash_format, content_hash_string in content_hash_lookup.items():
+                    structure_hash_string = structure_hash_lookup[hash_format]
                     hash_entry = MHLHashEntry(hash_format, content_hash_string)
                     hash_entry.structure_hash_string = structure_hash_string
                     parent_media_hash.append_hash_entry(hash_entry)

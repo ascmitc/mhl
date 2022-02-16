@@ -16,26 +16,6 @@ from abc import ABC, abstractmethod
 from typing import Dict
 
 
-class HashPair:
-    """
-    HashPair is an explict coupling of a hash value to a defined hash format
-    """
-    def __init__(self, hash_format: str, hash_string: str):
-        """
-        Initializes the pair
-        :param hash_format: string value, one of the supported hash formats, e.g. 'md5', 'xxh64'
-        :param hash_string: A hash string computed from the supplied format
-        """
-        if not hash_format:
-            raise ValueError
-        hash_type = HashType[hash_format]
-        if not hash_type:
-            raise ValueError
-
-        self.hash_format = hash_format
-        self.hash_value = hash_string
-
-
 class Hasher(ABC):
     """
     Hasher is an abstract base class (ABC) that outlines the needed hash functionality by ascmhl.

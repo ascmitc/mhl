@@ -218,6 +218,10 @@ def create_for_folder_subcommand(
     # store the directory hashes of sub folders so we can use it when calculating the hash of the parent folder
     dir_content_hash_mappings = {}
     dir_structure_hash_mappings = {}
+
+    # TODO: Remove once the function signature is updated to supply a hash format list instead of a single format
+    hash_format_list = [hash_format]
+
     for folder_path, children in post_order_lexicographic(root_path, session.ignore_spec.get_path_spec()):
         # generate directory hashes
         dir_hash_context = None
@@ -310,6 +314,9 @@ def create_for_single_files_subcommand(
     session = MHLGenerationCreationSession(existing_history)
 
     num_failed_verifications = 0
+    # TODO: Remove once the function signature is updated to supply a hash format list instead of a single format
+    hash_format_list = [hash_format]
+
     for path in single_file:
         if not os.path.isabs(path):
             path = os.path.join(os.getcwd(), path)
@@ -319,12 +326,12 @@ def create_for_single_files_subcommand(
                     file_path = os.path.join(folder_path, item_name)
                     if is_dir:
                         continue
-                    seal_result = seal_file_path(existing_history, file_path, [hash_format], session)
+                    seal_result = seal_file_path(existing_history, file_path, hash_format_list, session)
                     success = seal_result[hash_format].success
                     if not success:
                         num_failed_verifications += 1
         else:
-            seal_result = seal_file_path(existing_history, file_path, [hash_format], session)
+            seal_result = seal_file_path(existing_history, file_path, hash_format_list, session)
             success = seal_result[hash_format].success
             if not success:
                 num_failed_verifications += 1

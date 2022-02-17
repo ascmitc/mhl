@@ -34,6 +34,7 @@ from .traverse import post_order_lexicographic
 from typing import Dict
 from collections import namedtuple
 
+
 @click.command()
 @click.argument("root_path", type=click.Path(exists=True))
 # general options
@@ -236,7 +237,11 @@ def create_for_folder_subcommand(
             if is_dir:
                 if not no_directory_hashes:
                     for hash_format, dir_hash_context in dir_hash_context_lookup.items():
-                        dir_hash_context.append_directory_hashes(file_path, dir_content_hash_mappings.pop(file_path), dir_structure_hash_mappings.pop(file_path))
+                        dir_hash_context.append_directory_hashes(
+                            file_path,
+                            dir_content_hash_mappings.pop(file_path),
+                            dir_structure_hash_mappings.pop(file_path),
+                        )
             else:
                 seal_result = seal_file_path(existing_history, file_path, hash_format_list, session)
 
@@ -269,10 +274,9 @@ def create_for_folder_subcommand(
 
         modification_date = datetime.datetime.fromtimestamp(os.path.getmtime(folder_path))
         # FIXME: refactor to allow for multiple hash formats
-        session.append_multiple_format_directory_hashes(folder_path,
-                                                        modification_date,
-                                                        dir_content_hash_lookup,
-                                                        dir_structure_hash_lookup)
+        session.append_multiple_format_directory_hashes(
+            folder_path, modification_date, dir_content_hash_lookup, dir_structure_hash_lookup
+        )
 
     commit_session(session, author_name, author_email, author_phone, author_role, location, comment)
 
@@ -1266,13 +1270,10 @@ attributes:
 hash_value -- string value, a hash
 success -- boolean value, indicates if the update was successful
 """
-SealPathResult = namedtuple('SealPathResult', ['hash_value', 'success'])
+SealPathResult = namedtuple("SealPathResult", ["hash_value", "success"])
 
 
-def seal_file_path(existing_history,
-                   file_path,
-                   hash_formats: [str],
-                   session) -> Dict[str, SealPathResult]:
+def seal_file_path(existing_history, file_path, hash_formats: [str], session) -> Dict[str, SealPathResult]:
     """
     Generates hashes for a file path.
     Compares the generated hashes to any existing hash records
@@ -1311,11 +1312,9 @@ def seal_file_path(existing_history,
         # in case the existing hash verification failed we don't want to add the current format hash to the generation
         # but we need to return it for directory hash creation
         if success:
-            success &= session.append_file_hash(file_path,
-                                                file_size,
-                                                file_modification_date,
-                                                hash_format,
-                                                current_format_hash)
+            success &= session.append_file_hash(
+                file_path, file_size, file_modification_date, hash_format, current_format_hash
+            )
         hash_result_lookup[hash_format] = SealPathResult(current_format_hash, success)
 
     return hash_result_lookup

@@ -41,13 +41,9 @@ class MHLGenerationCreationSession:
         self.new_hash_lists = defaultdict(MHLHashList)
         self.ignore_spec = ignore_spec
 
-    def append_multiple_format_file_hashes(self,
-                                           file_path,
-                                           file_size,
-                                           hash_lookup: Dict[str, str],
-                                           file_modification_date,
-                                           action=None,
-                                           hash_date=None) -> bool:
+    def append_multiple_format_file_hashes(
+        self, file_path, file_size, hash_lookup: Dict[str, str], file_modification_date, action=None, hash_date=None
+    ) -> bool:
         """
         Adds file hashes to the history
         :param file_path: a string value representing the path to a file
@@ -94,7 +90,9 @@ class MHLGenerationCreationSession:
                         )
                 else:
                     # in case there is no hash entry for this hash format yet
-                    hash_entry.action = "new"  # mark as 'new' here, will be changed to verified in _validate_new_hash_list
+                    hash_entry.action = (  # mark as 'new' here, will be changed to verified in _validate_new_hash_list
+                        "new"
+                    )
                     logger.verbose(
                         f"  created new, verified hash for          {relative_path}  {hash_format}: {hash_string}"
                     )
@@ -170,11 +168,9 @@ class MHLGenerationCreationSession:
         media_hash.append_hash_entry(hash_entry)
         return hash_entry.action != "failed"
 
-    def append_multiple_format_directory_hashes(self,
-                                                path,
-                                                modification_date,
-                                                content_hash_lookup: Dict[str, str],
-                                                structure_hash_lookup: Dict[str, str]) -> None:
+    def append_multiple_format_directory_hashes(
+        self, path, modification_date, content_hash_lookup: Dict[str, str], structure_hash_lookup: Dict[str, str]
+    ) -> None:
         """
         Adds directory hashes to the history
         :param path: a string value representing the path to a file

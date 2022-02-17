@@ -227,6 +227,7 @@ class C4(Hasher):
         data = result.to_bytes(64, byteorder="big")
         return data
 
+
 @unique
 class HashType(Enum):
     """
@@ -243,7 +244,6 @@ class HashType(Enum):
 
 
 class AggregateHasher:
-
     def __init__(self, hash_formats: [str]):
 
         # Build a hasher for each format
@@ -257,10 +257,9 @@ class AggregateHasher:
     """
     Handles multiple hashing to facilitate a read-once create-many hashing paradigm
     """
+
     @classmethod
-    def hash_file(cls, 
-                  file_path: str,
-                  hash_formats: [str]) -> Dict[str, str]:
+    def hash_file(cls, file_path: str, hash_formats: [str]) -> Dict[str, str]:
         """
         computes and returns new hash strings for a file
 
@@ -295,9 +294,7 @@ class AggregateHasher:
         return hash_output_lookup
 
     @classmethod
-    def hash_data(cls, 
-                  input_data: bytes, 
-                  hash_formats: [str]) -> Dict[str, str]:
+    def hash_data(cls, input_data: bytes, hash_formats: [str]) -> Dict[str, str]:
         """
         computes and returns new hash strings for a file
 
@@ -394,15 +391,14 @@ def hash_of_hash_list(hash_list: [str], hash_format: str) -> str:
     return hasher.hash_of_hash_list(hash_list)
 
 
-def multiple_format_hash_file(file_path: str,
-                              hash_formats: [str]) -> Dict[str, str]:
+def multiple_format_hash_file(file_path: str, hash_formats: [str]) -> Dict[str, str]:
     """
-     computes and returns a new hash strings for a file
+    computes and returns a new hash strings for a file
 
-     arguments:
-     file_path -- string value, path of file to generate hash for.
-     hash_formats -- string values, each entry is one of the supported hash formats, e.g. 'md5', 'xxh64'
-     """
+    arguments:
+    file_path -- string value, path of file to generate hash for.
+    hash_formats -- string values, each entry is one of the supported hash formats, e.g. 'md5', 'xxh64'
+    """
     return AggregateHasher.hash_file(file_path, hash_formats)
 
 
@@ -430,8 +426,7 @@ def hash_data(input_data: bytes, hash_format: str) -> str:
     return hasher.hash_data(input_data)
 
 
-def multiple_format_hash_data(input_data: bytes,
-                              hash_formats: [str]) -> Dict[str, str]:
+def multiple_format_hash_data(input_data: bytes, hash_formats: [str]) -> Dict[str, str]:
     """
     computes and returns new hash strings from the input data
     arguments:

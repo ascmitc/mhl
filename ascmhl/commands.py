@@ -49,8 +49,8 @@ from collections import namedtuple
     "--hash_format",
     "-h",
     type=click.Choice(ascmhl_supported_hashformats),
-    multiple=False,
-    default=ascmhl_default_hashformat,
+    multiple=True,
+    default=[ascmhl_default_hashformat],
     help="Algorithm",
 )
 @click.option(
@@ -173,7 +173,7 @@ def create(
 def create_for_folder_subcommand(
     root_path,
     verbose,
-    hash_format,
+    hash_formats,
     no_directory_hashes,
     author_name,
     author_email,
@@ -219,9 +219,7 @@ def create_for_folder_subcommand(
     dir_content_hash_mappings = {}
     dir_structure_hash_mappings = {}
 
-    # TODO: Remove once the function signature is updated to supply a hash format list instead of a single format
-    # TODO: sort the format keys into a standard order for consistent output
-    hash_format_list = [hash_format]
+    hash_format_list = sorted(hash_formats)
 
     for folder_path, children in post_order_lexicographic(root_path, session.ignore_spec.get_path_spec()):
         # generate directory hashes
@@ -229,6 +227,8 @@ def create_for_folder_subcommand(
 
         if not no_directory_hashes:
             for hash_format in hash_format_list:
+                # FIXME: with multiple hash formats we need to make the DirectoryHashContext also aware of multiple
+                #  hash formats (or alternatively create multiple DirectoryHashContexts (one for each hash format)
                 dir_hash_context_lookup[hash_format] = DirectoryHashContext(hash_format)
         for item_name, is_dir in children:
             file_path = os.path.join(folder_path, item_name)
@@ -287,7 +287,7 @@ def create_for_folder_subcommand(
 def create_for_single_files_subcommand(
     root_path,
     verbose,
-    hash_format,
+    hash_formats,
     single_file,
     author_name,
     author_email,
@@ -327,8 +327,8 @@ def create_for_single_files_subcommand(
     session = MHLGenerationCreationSession(existing_history)
 
     num_failed_verifications = 0
-    # TODO: Remove once the function signature is updated to supply a hash format list instead of a single format
-    hash_format_list = [hash_format]
+
+    hash_format_list = sorted(hash_formats)
 
     for path in single_file:
         if not os.path.isabs(path):
@@ -340,12 +340,12 @@ def create_for_single_files_subcommand(
                     if is_dir:
                         continue
                     seal_result = seal_file_path(existing_history, file_path, hash_format_list, session)
-                    success = seal_result[hash_format].success
+                    success = seal_result[hash_format_list[0]].success
                     if not success:
                         num_failed_verifications += 1
         else:
-            seal_result = seal_file_path(existing_history, file_path, hash_format_list, session)
-            success = seal_result[hash_format].success
+            seal_result = seal_file_path(existing_history, path, hash_format_list, session)
+            success = seal_result[hash_format_list[0]].success
             if not success:
                 num_failed_verifications += 1
 

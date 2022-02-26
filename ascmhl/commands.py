@@ -560,8 +560,9 @@ def verify_entire_folder(
     if exception:
         raise exception
 
+
 def verify_directory_hash_subcommand(
-        root_path, verbose, hash_format, ignore_list=None, ignore_spec_file=None, calculate_only=False, root_only=False
+    root_path, verbose, hash_format, ignore_list=None, ignore_spec_file=None, calculate_only=False, root_only=False
 ):
     """
     Checks MHL directory hashes from all generations against computed directory hashes.
@@ -692,8 +693,8 @@ def verify_directory_hash_subcommand(
                         if not found_hash_format:
                             logger.error(
                                 f"ERROR: verification of folder {relative_path}: No directory hash of type"
-                             f" {hash_format} found"
-                             )
+                                f" {hash_format} found"
+                            )
                             num_failed_verifications += 1
                             add_detected_failure_for_format(directory_hash_entry.hash_format)
             else:
@@ -727,8 +728,9 @@ def verify_directory_hash_subcommand(
         if root_only and relative_path != ".":
             logger.verbose_logging = verbose
 
-        session.append_multiple_format_directory_hashes(folder_path, modification_date, dir_content_hash_lookup,
-                                                        dir_structure_hash_lookup)
+        session.append_multiple_format_directory_hashes(
+            folder_path, modification_date, dir_content_hash_lookup, dir_structure_hash_lookup
+        )
         logger.verbose_logging = verbose
 
         # compare root hashes, works differently
@@ -757,8 +759,8 @@ def verify_directory_hash_subcommand(
                         if not calculate_only:
                             if not found_hash_format:
                                 logger.error(
-                                    f"ERROR: verification of root folder: No directory hash of type {hash_format} "
-                                    f"found")
+                                    f"ERROR: verification of root folder: No directory hash of type {hash_format} found"
+                                )
     exception = None
 
     # check the failure lookup.  if even one format verified, consider the entire process verified
@@ -832,7 +834,7 @@ def _compare_and_log_directory_hashes(
 @click.command()
 @click.argument("file_path", type=click.Path(exists=True))
 @click.option(
-# FIXME: Update to permit multiple hash formats
+    # FIXME: Update to permit multiple hash formats
     "--hash_format",
     "-h",
     type=click.Choice(ascmhl_supported_hashformats),

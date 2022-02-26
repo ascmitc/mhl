@@ -611,8 +611,8 @@ def verify_directory_hash_subcommand(
 
     # start a verification session on the existing history
     hash_format_list = sorted(hash_formats)
-    # a lookup containing the number of failures detected per hash format
-    failures_per_format_lookup = dict[str, int]()
+    # a lookup containing the number of failures detected per hash format - will match the format Dict[str, int]
+    failures_per_format_lookup = {}
 
     # an inner function responsible for adding format failures to the lookup
     def add_detected_failure_for_format(failed_hash_format):
@@ -632,8 +632,8 @@ def verify_directory_hash_subcommand(
     dir_content_hash_mappings = {}
     dir_structure_hash_mappings = {}
     for folder_path, children in post_order_lexicographic(root_path, ignore_spec.get_path_spec()):
-        # generate directory hashes
-        dir_hash_context_lookup = dict[str, DirectoryHashContext]()
+        # generate directory hashes - will match the format dict[str, DirectoryHashContext]
+        dir_hash_context_lookup = {}
 
         # create a DirectoryHashContext for each hash format and store in the lookup
         for hash_format in hash_format_list:

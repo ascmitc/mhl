@@ -217,9 +217,10 @@ def create_for_folder_subcommand(
 
     num_failed_verifications = 0
     # store the directory hashes of sub folders so we can use it when calculating the hash of the parent folder
-    dir_content_hash_mappings = {}
-    dir_structure_hash_mappings = {}
-
+    # the mapping lookups will follow the dictionary format of [string: [hash_format: hash_value]] where string
+    # is a file sub-path
+    dir_content_hash_mapping_lookup = {}
+    dir_structure_hash_mapping_lookup = {}
     hash_format_list = sorted(hash_formats)
 
     for folder_path, children in post_order_lexicographic(root_path, session.ignore_spec.get_path_spec()):
@@ -235,11 +236,14 @@ def create_for_folder_subcommand(
             not_found_paths.discard(file_path)
             if is_dir:
                 if not no_directory_hashes:
+                    path_content_hash_lookup = dir_content_hash_mapping_lookup.pop(file_path)
+                    path_structure_hash_lookup = dir_structure_hash_mapping_lookup.pop(file_path)
+
                     for hash_format, dir_hash_context in dir_hash_context_lookup.items():
                         dir_hash_context.append_directory_hashes(
                             file_path,
-                            dir_content_hash_mappings.pop(file_path),
-                            dir_structure_hash_mappings.pop(file_path),
+                            path_content_hash_lookup[hash_format],
+                            path_structure_hash_lookup[hash_format],
                         )
             else:
                 seal_result = seal_file_path(existing_history, file_path, hash_format_list, session)
@@ -265,8 +269,16 @@ def create_for_folder_subcommand(
             for hash_format, dir_hash_context in dir_hash_context_lookup.items():
                 dir_content_hash = dir_hash_context.final_content_hash_str()
                 dir_structure_hash = dir_hash_context.final_structure_hash_str()
-                dir_content_hash_mappings[folder_path] = dir_content_hash
-                dir_structure_hash_mappings[folder_path] = dir_structure_hash
+
+                if dir_content_hash_mapping_lookup and folder_path in dir_content_hash_mapping_lookup.keys():
+                    dir_content_hash_mapping_lookup[folder_path][hash_format] = dir_content_hash
+                else:
+                    dir_content_hash_mapping_lookup[folder_path] = {hash_format: dir_content_hash}
+
+                if dir_structure_hash_mapping_lookup and folder_path in dir_structure_hash_mapping_lookup.keys():
+                    dir_structure_hash_mapping_lookup[folder_path][hash_format] = dir_structure_hash
+                else:
+                    dir_structure_hash_mapping_lookup[folder_path] = {hash_format: dir_structure_hash}
 
                 dir_content_hash_lookup[hash_format] = dir_content_hash
                 dir_structure_hash_lookup[hash_format] = dir_structure_hash

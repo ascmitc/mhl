@@ -343,3 +343,21 @@ def test_create_mulitple_hashformats_no_dash_n(fs, simple_mhl_history):
 
     assert "A/A1.txt  md5: fe6975a937016c20b43b17540e6c6246" in result.output
     assert "A/A1.txt  sha1: 4a5b95edbea7de5ed2367432645df88cd4f1d1b6" in result.output
+
+
+@freeze_time("2020-01-16 09:15:00")
+def test_create_mulitple_hashformats_double_hashformat(fs, simple_mhl_history):
+    runner = CliRunner()
+    result = runner.invoke(ascmhl.commands.create, ["/root", "-v", "-h", "c4"])
+    result = runner.invoke(ascmhl.commands.create, ["/root", "-v", "-h", "md5", "-h", "sha1"])
+
+    # check if mhl file exists
+    mhlfilepath = "/root/ascmhl/0003_root_2020-01-16_091500.mhl"
+    assert os.path.isfile(mhlfilepath)
+
+    # check if mhl file validates
+    result = runner.invoke(ascmhl.commands.xsd_schema_check, [mhlfilepath])
+    if result.exit_code != 0:
+        print(result.output)
+
+    assert result.exit_code == 0

@@ -1384,14 +1384,11 @@ def seal_file_path(existing_history, file_path, hash_formats: [str], session) ->
     existing_child_history, existing_history_relative_path = existing_history.find_history_for_path(relative_path)
     existing_hash_formats = existing_child_history.find_existing_hash_formats_for_path(existing_history_relative_path)
 
+    # create a separate list of hash formats for which hashes will be generated
     hash_formats_to_generate = hash_formats.copy()
-    newly_added_hash_formats = hash_formats.copy()
 
-    # if there are existing entries for this path, the recorded formats must also be generated even if they were not
-    # explicitly specified
+    # if there are existing entries for this path, the recorded formats must also be generated
     if existing_hash_formats and len(existing_hash_formats) > 0:
-        newly_added_hash_formats = list(set(hash_formats_to_generate) - set(existing_hash_formats))
-
         for hash_format in existing_hash_formats:
             if hash_format not in hash_formats_to_generate:
                 hash_formats_to_generate.append(hash_format)
@@ -1399,12 +1396,10 @@ def seal_file_path(existing_history, file_path, hash_formats: [str], session) ->
     # generate the file hashes
     current_hash_lookup = multiple_format_hash_file(file_path, hash_formats_to_generate)
 
-    # in case there is no hash in the required format to use yet, we need to verify also against
-    # one of the existing hash formats, we for simplicity use always the first hash format in this example
-    # but one could also use a different one if desired
+    # the lookup where the results will be stored
     hash_result_lookup = {}
 
-    # each generated hash value must be added to the session.
+    # each generated hash value must be added to the session for verification purposes.
     # however, only the hash formats requested should be included in the returned hash lookup
     for hash_format in hash_formats_to_generate:
         success = True
@@ -1415,44 +1410,5 @@ def seal_file_path(existing_history, file_path, hash_formats: [str], session) ->
         # If the existing hash was requested by the caller it needs to be added to the lookup
         if hash_format in hash_formats:
             hash_result_lookup[hash_format] = SealPathResult(current_hash_lookup[hash_format], success)
-
-    #if existing_hash_formats:
-    #    for hash_format in existing_hash_formats:
-    #        success = True
-    #        success &= session.append_file_hash(
-    #            file_path, file_size, file_modification_date, hash_format, current_hash_lookup[hash_format]
-    #        )
-    #
-    #        # If the existing hash was requested by the caller it needs to be added to the lookup
-    #        if hash_format in hash_formats:
-    #            hash_result_lookup[hash_format] = SealPathResult(current_hash_lookup[hash_format], success)
-    #if newly_added_hash_formats:
-    #    for hash_format in newly_added_hash_formats:
-    #        success = True
-    #        success &= session.append_file_hash(
-    #            file_path, file_size, file_modification_date, hash_format, current_hash_lookup[hash_format]
-    #        )
-    #        hash_result_lookup[hash_format] = SealPathResult(current_hash_lookup[hash_format], success)
-
-    #for hash_format in hash_formats:
-    #    success = True
-    #
-    #    #  If previous hashes were made and this format WAS NOT a part of the previous calculation
-    #    if len(existing_hash_formats) > 0 and hash_format not in existing_hash_formats:
-    #        existing_hash_format = existing_hash_formats[0]
-    #        hash_in_existing_format = hash_file(file_path, existing_hash_format)
-    #        # FIXME: test what happens if the existing hash verification fails in other format fails
-    #        # should we then really create two entries
-    #        success &= session.append_file_hash(
-    #            file_path, file_size, file_modification_date, existing_hash_format, hash_in_existing_format
-    #        )
-    #    current_format_hash = current_hash_lookup[hash_format]
-    #    # in case the existing hash verification failed we don't want to add the current format hash to the generation
-    #    # but we need to return it for directory hash creation
-    #    if success:
-    #        success &= session.append_file_hash(
-    #            file_path, file_size, file_modification_date, hash_format, current_format_hash
-    #        )
-    #    hash_result_lookup[hash_format] = SealPathResult(current_format_hash, success)
 
     return hash_result_lookup

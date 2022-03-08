@@ -98,13 +98,13 @@ def test_create_directory_hashes(fs):
         file.write("!!")
 
     runner = CliRunner()
-    result = runner.invoke(ascmhl.commands.create, ["/root", "-v", "-h", "xxh64"])
+    result = runner.invoke(ascmhl.commands.create, ["/root", "-v", "-h", "xxh64", "-h", "md5"])
     assert "ERROR: hash mismatch for        A/A2.txt" in result.output
     hash_list = MHLHistory.load_from_path("/root").hash_lists[-1]
     # an altered file leads to a different root directory hash
-    assert hash_list.process_info.root_media_hash.hash_entries[0].hash_string == "28ed09733f793dfc"
+    assert hash_list.process_info.root_media_hash.hash_entries[1].hash_string == "28ed09733f793dfc"
     # structure hash stays the same
-    assert hash_list.process_info.root_media_hash.hash_entries[0].structure_hash_string == "89e4debdb80cc068"
+    assert hash_list.process_info.root_media_hash.hash_entries[1].structure_hash_string == "89e4debdb80cc068"
 
     # test that the directory-hash command creates the same root hash
     # FIXME: command doesn't exist any more, replace with tests of verify directory hashes command?
@@ -112,29 +112,44 @@ def test_create_directory_hashes(fs):
     #    assert result.exit_code == 0
     #    assert "root hash: xxh64: adf18c910489663c" in result.output
 
-    assert hash_list.find_media_hash_for_path("B").hash_entries[0].hash_string == "aab0eba57cd1aca9"
-    assert hash_list.find_media_hash_for_path("B").hash_entries[0].structure_hash_string == "fac2a2ceb0fa0c0b"
-    assert hash_list.process_info.root_media_hash.hash_entries[0].hash_string == "28ed09733f793dfc"
-    assert hash_list.process_info.root_media_hash.hash_entries[0].structure_hash_string == "89e4debdb80cc068"
+    assert hash_list.find_media_hash_for_path("B").hash_entries[0].hash_string == "d6df246725efff6ceaee31f663a32cf8"
+    assert hash_list.find_media_hash_for_path("B").hash_entries[1].hash_string == "aab0eba57cd1aca9"
+
+    assert (
+        hash_list.find_media_hash_for_path("B").hash_entries[0].structure_hash_string
+        == "a21e164c1df944733e5e3d4e4ed64f90"
+    )
+    assert hash_list.find_media_hash_for_path("B").hash_entries[1].structure_hash_string == "fac2a2ceb0fa0c0b"
+
+    assert hash_list.process_info.root_media_hash.hash_entries[1].hash_string == "28ed09733f793dfc"
+    assert hash_list.process_info.root_media_hash.hash_entries[1].structure_hash_string == "89e4debdb80cc068"
 
     # rename one file
     os.rename("/root/B/B1.txt", "/root/B/B2.txt")
 
     runner = CliRunner()
-    result = runner.invoke(ascmhl.commands.create, ["/root", "-v", "-h", "xxh64"])
+    result = runner.invoke(ascmhl.commands.create, ["/root", "-v", "-h", "xxh64", "-h", "c4"])
     assert "ERROR: hash mismatch for        A/A2.txt" in result.output
     # in addition to the failing verification we also have a missing file B1/B1.txt
     assert "missing file(s):\n  B/B1.txt" in result.output
     hash_list = MHLHistory.load_from_path("/root").hash_lists[-1]
     # the file name is part of the structure directory hash of the containing directory so it's hash changes
-    assert hash_list.find_media_hash_for_path("B").hash_entries[0].structure_hash_string == "7ae620e883160eb3"
+    assert (
+        hash_list.find_media_hash_for_path("B").hash_entries[0].structure_hash_string
+        == "c42qegPDBxh16Vqi4qFGh1EQv39nEbVmZ9R1LGkaVr1dEBRcD69pH3r5vdGDSwceQLEZc872kQho5Cforb95s2wjH8"
+    )
+    assert hash_list.find_media_hash_for_path("B").hash_entries[1].structure_hash_string == "7ae620e883160eb3"
     # .. and the content hash stays the same
-    assert hash_list.find_media_hash_for_path("B").hash_entries[0].hash_string == "aab0eba57cd1aca9"
+    assert (
+        hash_list.find_media_hash_for_path("B").hash_entries[0].hash_string
+        == "c43X1ve8nmicwGit4fnhs428pTCV6ZjXQsorxPLNx3396oRuQFaq79iLR2ZsPoWN8yckFzZdkqZ21igH8K7rWAoDMa"
+    )
+    assert hash_list.find_media_hash_for_path("B").hash_entries[1].hash_string == "aab0eba57cd1aca9"
 
     # a renamed file also leads to a different root structure directory hash
-    assert hash_list.process_info.root_media_hash.hash_entries[0].structure_hash_string == "0bba67923d19d36b"
+    assert hash_list.process_info.root_media_hash.hash_entries[1].structure_hash_string == "0bba67923d19d36b"
     # and an unchanged content hash
-    assert hash_list.process_info.root_media_hash.hash_entries[0].hash_string == "28ed09733f793dfc"
+    assert hash_list.process_info.root_media_hash.hash_entries[1].hash_string == "28ed09733f793dfc"
 
     # test that the directory-hash command creates the same root hash
     # FIXME: command doesn't exist any more, replace with tests of verify directory hashes command?

@@ -1399,13 +1399,39 @@ def seal_file_path(existing_history, file_path, hash_formats: [str], session) ->
     # the lookup where the results will be stored
     hash_result_lookup = {}
 
-    # each generated hash value must be added to the session for verification purposes.
-    # however, only the hash formats requested should be included in the returned hash lookup
+    # any newly generated hash will require any previous hashes to be verified
+    existing_hashes_verified = True
+
+    # verify the existing hash entries first
+    if existing_hash_formats:
+        for hash_format in existing_hash_formats:
+            success = True
+            success &= session.append_file_hash(
+                file_path, file_size, file_modification_date, hash_format, current_hash_lookup[hash_format]
+            )
+
+            # if even one existing hash failed to verify existing hashes will be deemed corrupt
+            if not success:
+                existing_hashes_verified = False
+
+            # if the existing format was requested add it to the results lookup
+            if hash_format in hash_formats:
+                hash_result_lookup[hash_format] = SealPathResult(current_hash_lookup[hash_format], success)
+
+    # add the new hash formats
     for hash_format in hash_formats_to_generate:
-        success = True
-        success &= session.append_file_hash(
-            file_path, file_size, file_modification_date, hash_format, current_hash_lookup[hash_format]
-        )
+        # existing hashes have already been handled
+        if existing_hash_formats and hash_format in existing_hash_formats:
+            continue
+
+        # if this format has never been recorded the previous hashes must be verified for this hash to be verified
+        success = existing_hashes_verified
+
+        # only add the new hash format to the session if the previous hashes are verified
+        if success:
+            success &= session.append_file_hash(
+                file_path, file_size, file_modification_date, hash_format, current_hash_lookup[hash_format]
+            )
 
         # If the existing hash was requested by the caller it needs to be added to the lookup
         if hash_format in hash_formats:

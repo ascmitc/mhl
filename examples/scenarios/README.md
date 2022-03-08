@@ -52,10 +52,10 @@ this will verify all hashes, check for completeness and create a second generati
 
 $ ascmhl.py create -v /file_server/A002R2EC -h xxh64
 Creating new generation for folder at path: /file_server/A002R2EC ...
-  verified                      Clips/A002C006_141024_R2EC.mov  OK
-  verified                      Clips/A002C007_141024_R2EC.mov  OK
+  verified                      Clips/A002C006_141024_R2EC.mov  xxh64: OK
+  verified                      Clips/A002C007_141024_R2EC.mov  xxh64: OK
   calculated directory hash for Clips  xxh64: 4c226b42e27d7af3 (content), 906faa843d591a9f (structure)
-  verified                      Sidecar.txt  OK
+  verified                      Sidecar.txt  xxh64: OK
   calculated root hash  xxh64: 8d02114c32e28cbe (content), f557f8ca8e5a88ef (structure)
 Created new generation ascmhl/0002_A002R2EC_2020-01-17_143000.mhl
 
@@ -94,13 +94,13 @@ and create a second generation with additional (new) MD5 hashes.
 
 $ ascmhl.py create -v -h md5 /file_server/A002R2EC
 Creating new generation for folder at path: /file_server/A002R2EC ...
-  verified                      Clips/A002C006_141024_R2EC.mov  OK
-  created new, verified hash for          Clips/A002C006_141024_R2EC.mov  md5: f5ac8127b3b6b85cdc13f237c6005d80
-  verified                      Clips/A002C007_141024_R2EC.mov  OK
-  created new, verified hash for          Clips/A002C007_141024_R2EC.mov  md5: 614dd0e977becb4c6f7fa99e64549b12
+  verified                      Clips/A002C006_141024_R2EC.mov  xxh64: OK
+  created new (verif.) hash for Clips/A002C006_141024_R2EC.mov  md5: f5ac8127b3b6b85cdc13f237c6005d80
+  verified                      Clips/A002C007_141024_R2EC.mov  xxh64: OK
+  created new (verif.) hash for Clips/A002C007_141024_R2EC.mov  md5: 614dd0e977becb4c6f7fa99e64549b12
   calculated directory hash for Clips  md5: 202a2d71b56b080d9b089c1f4f29a4ba (content), 4a739024fd19d928e9dea6bb5c480200 (structure)
-  verified                      Sidecar.txt  OK
-  created new, verified hash for          Sidecar.txt  md5: 6425c5a180ca0f420dd2b25be4536a91
+  verified                      Sidecar.txt  xxh64: OK
+  created new (verif.) hash for Sidecar.txt  md5: 6425c5a180ca0f420dd2b25be4536a91
   calculated root hash  md5: 6fae2da9bc6dca45486cb91bfea6db70 (content), be1f2eaed208efbed061845a64cacdfa (structure)
 Created new generation ascmhl/0002_A002R2EC_2020-01-17_143000.mhl
 
@@ -140,8 +140,8 @@ An error is shown and create a new generation that documents the failed verifica
 
 $ ascmhl.py create -v /file_server/A002R2EC -h xxh64
 Creating new generation for folder at path: /file_server/A002R2EC ...
-  verified                      Clips/A002C006_141024_R2EC.mov  OK
-  verified                      Clips/A002C007_141024_R2EC.mov  OK
+  verified                      Clips/A002C006_141024_R2EC.mov  xxh64: OK
+  verified                      Clips/A002C007_141024_R2EC.mov  xxh64: OK
   calculated directory hash for Clips  xxh64: 4c226b42e27d7af3 (content), 906faa843d591a9f (structure)
 ERROR: hash mismatch for        Sidecar.txt  xxh64 (old): 3ab5a4166b9bde44, xxh64 (new): 70d2cf31aaa3eac4
   calculated root hash  xxh64: 8e52e9c3d15e055c (content), 32706d5f4b48f047 (structure)
@@ -200,15 +200,15 @@ of the card sub folders.
 
 $ ascmhl.py create -v /file_server/Reels -h xxh64
 Creating new generation for folder at path: /file_server/Reels ...
-  verified                      A002R2EC/Clips/A002C006_141024_R2EC.mov  OK
-  verified                      A002R2EC/Clips/A002C007_141024_R2EC.mov  OK
+  verified                      A002R2EC/Clips/A002C006_141024_R2EC.mov  xxh64: OK
+  verified                      A002R2EC/Clips/A002C007_141024_R2EC.mov  xxh64: OK
   calculated directory hash for A002R2EC/Clips  xxh64: 4c226b42e27d7af3 (content), 906faa843d591a9f (structure)
-  verified                      A002R2EC/Sidecar.txt  OK
+  verified                      A002R2EC/Sidecar.txt  xxh64: OK
   calculated directory hash for A002R2EC  xxh64: 8d02114c32e28cbe (content), f557f8ca8e5a88ef (structure)
-  verified                      A003R2EC/Clips/A003C011_141024_R2EC.mov  OK
-  verified                      A003R2EC/Clips/A003C012_141024_R2EC.mov  OK
+  verified                      A003R2EC/Clips/A003C011_141024_R2EC.mov  xxh64: OK
+  verified                      A003R2EC/Clips/A003C012_141024_R2EC.mov  xxh64: OK
   calculated directory hash for A003R2EC/Clips  xxh64: f2afc6434255a53d (content), a25d5ca89c95f9e2 (structure)
-  verified                      A003R2EC/Sidecar.txt  OK
+  verified                      A003R2EC/Sidecar.txt  xxh64: OK
   calculated directory hash for A003R2EC  xxh64: 7a82373c131cf40a (content), 1131a950fcc55e4b (structure)
   created original hash for     Summary.txt  xxh64: 0ac48e431d4538ba
   calculated root hash  xxh64: 92950bc8fda076ec (content), 2c2ce52605558158 (structure)

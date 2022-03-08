@@ -45,15 +45,15 @@ of the card sub folders.
 
 $ ascmhl.py create -v /file_server/Reels -h xxh64
 Creating new generation for folder at path: /file_server/Reels ...
-  verified                      A002R2EC/Clips/A002C006_141024_R2EC.mov  OK
-  verified                      A002R2EC/Clips/A002C007_141024_R2EC.mov  OK
+  verified                      A002R2EC/Clips/A002C006_141024_R2EC.mov  xxh64: OK
+  verified                      A002R2EC/Clips/A002C007_141024_R2EC.mov  xxh64: OK
   calculated directory hash for A002R2EC/Clips  xxh64: 4c226b42e27d7af3 (content), 906faa843d591a9f (structure)
-  verified                      A002R2EC/Sidecar.txt  OK
+  verified                      A002R2EC/Sidecar.txt  xxh64: OK
   calculated directory hash for A002R2EC  xxh64: 8d02114c32e28cbe (content), f557f8ca8e5a88ef (structure)
-  verified                      A003R2EC/Clips/A003C011_141024_R2EC.mov  OK
-  verified                      A003R2EC/Clips/A003C012_141024_R2EC.mov  OK
+  verified                      A003R2EC/Clips/A003C011_141024_R2EC.mov  xxh64: OK
+  verified                      A003R2EC/Clips/A003C012_141024_R2EC.mov  xxh64: OK
   calculated directory hash for A003R2EC/Clips  xxh64: f2afc6434255a53d (content), a25d5ca89c95f9e2 (structure)
-  verified                      A003R2EC/Sidecar.txt  OK
+  verified                      A003R2EC/Sidecar.txt  xxh64: OK
   calculated directory hash for A003R2EC  xxh64: 7a82373c131cf40a (content), 1131a950fcc55e4b (structure)
   created original hash for     Summary.txt  xxh64: 0ac48e431d4538ba
   calculated root hash  xxh64: 92950bc8fda076ec (content), 2c2ce52605558158 (structure)

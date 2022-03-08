@@ -25,10 +25,10 @@ this will verify all hashes, check for completeness and create a second generati
 
 $ ascmhl.py create -v /file_server/A002R2EC -h xxh64
 Creating new generation for folder at path: /file_server/A002R2EC ...
-  verified                      Clips/A002C006_141024_R2EC.mov  OK
-  verified                      Clips/A002C007_141024_R2EC.mov  OK
+  verified                      Clips/A002C006_141024_R2EC.mov  xxh64: OK
+  verified                      Clips/A002C007_141024_R2EC.mov  xxh64: OK
   calculated directory hash for Clips  xxh64: 4c226b42e27d7af3 (content), 906faa843d591a9f (structure)
-  verified                      Sidecar.txt  OK
+  verified                      Sidecar.txt  xxh64: OK
   calculated root hash  xxh64: 8d02114c32e28cbe (content), f557f8ca8e5a88ef (structure)
 Created new generation ascmhl/0002_A002R2EC_2020-01-17_143000.mhl
 

@@ -79,7 +79,7 @@ class MHLGenerationCreationSession:
                 if existing_hash_entry is not None:
                     if existing_hash_entry.hash_string == hash_string:
                         hash_entry.action = "verified"
-                        logger.verbose(f"  verified                      {relative_path}  OK")
+                        logger.verbose(f"  verified                      {relative_path} {hash_format}: OK")
                     else:
                         hash_entry.action = "failed"
                         failures += 1
@@ -93,9 +93,7 @@ class MHLGenerationCreationSession:
                     hash_entry.action = (  # mark as 'new' here, will be changed to verified in _validate_new_hash_list
                         "new"
                     )
-                    logger.verbose(
-                        f"  created new, verified hash for          {relative_path}  {hash_format}: {hash_string}"
-                    )
+                    logger.verbose(f"  created new (verif.) hash for {relative_path}  {hash_format}: {hash_string}")
             # collection behavior: overwrite action with action from flattened history
             if action != None:
                 hash_entry.action = action
@@ -140,7 +138,7 @@ class MHLGenerationCreationSession:
             if existing_hash_entry is not None:
                 if existing_hash_entry.hash_string == hash_string:
                     hash_entry.action = "verified"
-                    logger.verbose(f"  verified                      {relative_path}  OK")
+                    logger.verbose(f"  verified                      {relative_path}  {hash_format}: OK")
                 else:
                     hash_entry.action = "failed"
                     logger.error(
@@ -151,9 +149,7 @@ class MHLGenerationCreationSession:
             else:
                 # in case there is no hash entry for this hash format yet
                 hash_entry.action = "new"  # mark as 'new' here, will be changed to verified in _validate_new_hash_list
-                logger.verbose(
-                    f"  created new, verified hash for          {relative_path}  {hash_format}: {hash_string}"
-                )
+                logger.verbose(f"  created new (verif.) hash for {relative_path}  {hash_format}: {hash_string}")
 
         # in case the same file is hashes multiple times we want to add all hash entries
         new_hash_list = self.new_hash_lists[history]

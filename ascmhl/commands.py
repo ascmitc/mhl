@@ -1385,13 +1385,24 @@ def seal_file_path(existing_history, file_path, hash_formats: [str], session) ->
     existing_hash_formats = existing_child_history.find_existing_hash_formats_for_path(existing_history_relative_path)
 
     # create a separate list of hash formats for which hashes will be generated
-    hash_formats_to_generate = hash_formats.copy()
+    hash_formats_to_generate = []
 
     # if there are existing entries for this path, the recorded formats must also be generated
     if existing_hash_formats and len(existing_hash_formats) > 0:
+        # existing hash formats should be verified prior to any new formats
         for hash_format in existing_hash_formats:
-            if hash_format not in hash_formats_to_generate:
+            if hash_format in hash_formats:
                 hash_formats_to_generate.append(hash_format)
+        # if no formats are being carried over from the previous generation to this one, at least
+        # one of the previous generation hashes needs to at least be verified as correct
+        # TODO: Consider making the selection of the previous generation bench mark format less arbitrary
+        # TODO: Instead of selecting the first format, perhaps choose the most efficient or robust format
+        if not hash_formats_to_generate or len(hash_formats_to_generate) == 0:
+            hash_formats_to_generate.append(existing_hash_formats[0])
+
+    for hash_format in hash_formats:
+        if hash_format not in hash_formats_to_generate:
+            hash_formats_to_generate.append(hash_format)
 
     # generate the file hashes
     current_hash_lookup = multiple_format_hash_file(file_path, hash_formats_to_generate)
@@ -1405,6 +1416,10 @@ def seal_file_path(existing_history, file_path, hash_formats: [str], session) ->
     # verify the existing hash entries first
     if existing_hash_formats:
         for hash_format in existing_hash_formats:
+            # make sure the existing format was included in the hashes which were generated
+            if hash_format not in hash_formats_to_generate:
+                continue
+
             success = True
             success &= session.append_file_hash(
                 file_path, file_size, file_modification_date, hash_format, current_hash_lookup[hash_format]

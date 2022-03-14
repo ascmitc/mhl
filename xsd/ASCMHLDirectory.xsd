@@ -17,7 +17,7 @@
 			<element name="path" type="ascmhl:RelativePathType"/>
 			<element name="c4" type="ascmhl:HashFormatType"/>
 		</sequence>
-		<attribute name="sequencer" type="integer"/>
+		<attribute name="sequencenr" type="integer"/>
 	</complexType>
 	<element name="ascmhldirectory" type="ascmhldirectory:DirectoryType"/>
 </schema>

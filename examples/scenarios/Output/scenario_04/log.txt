@@ -29,8 +29,8 @@ An error is shown and create a new generation that documents the failed verifica
 
 $ ascmhl.py create -v /file_server/A002R2EC -h xxh64
 Creating new generation for folder at path: /file_server/A002R2EC ...
-  verified                      Clips/A002C006_141024_R2EC.mov  OK
-  verified                      Clips/A002C007_141024_R2EC.mov  OK
+  verified                      Clips/A002C006_141024_R2EC.mov  xxh64: OK
+  verified                      Clips/A002C007_141024_R2EC.mov  xxh64: OK
   calculated directory hash for Clips  xxh64: 4c226b42e27d7af3 (content), 906faa843d591a9f (structure)
 ERROR: hash mismatch for        Sidecar.txt  xxh64 (old): 3ab5a4166b9bde44, xxh64 (new): 70d2cf31aaa3eac4
   calculated root hash  xxh64: 8e52e9c3d15e055c (content), 32706d5f4b48f047 (structure)

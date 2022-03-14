@@ -13,6 +13,7 @@ import xxhash
 import os
 from enum import Enum, unique
 from abc import ABC, abstractmethod
+from typing import Dict
 
 
 class Hasher(ABC):
@@ -242,12 +243,84 @@ class HashType(Enum):
     c4 = C4
 
 
+class AggregateHasher:
+    def __init__(self, hash_formats: [str]):
+
+        # Build a hasher for each format
+        hasher_lookup = Dict[str, str]
+        for hash_format in hash_formats:
+            hasher_lookup[hash_format] = new_hasher_for_hash_type(hash_format)
+
+        self.hash_formats = hash_formats
+        self.hasher_lookup = hasher_lookup
+
+    """
+    Handles multiple hashing to facilitate a read-once create-many hashing paradigm
+    """
+
+    @classmethod
+    def hash_file(cls, file_path: str, hash_formats: [str]) -> Dict[str, str]:
+        """
+        computes and returns new hash strings for a file
+
+        arguments:
+        file_path -- string value, path of file to generate hash for.
+        hash_formats -- array string values, each entry should be one of the supported hash formats, e.g. 'md5', 'xxh64'
+        """
+
+        # Build a hasher for each supplied format
+        hasher_lookup = {}
+        for hash_format in hash_formats:
+            hasher = new_hasher_for_hash_type(hash_format)
+            hasher_lookup[hash_format] = hasher
+
+        # Open the file
+        with open(file_path, "rb") as fd:
+            # process files in chunks so that large files won't cause excessive memory consumption.
+            size = 1024 * 1024  # chunk size 1MB
+            chunk = fd.read(size)
+            while chunk:
+                # Update each stored hasher with the read chunk
+                for hash_format in hasher_lookup:
+                    hasher_lookup[hash_format].update(chunk)
+
+                chunk = fd.read(size)
+
+        # Get the digest from each hasher
+        hash_output_lookup = {}
+        for hash_format in hasher_lookup:
+            hash_output_lookup[hash_format] = hasher_lookup[hash_format].string_digest()
+
+        return hash_output_lookup
+
+    @classmethod
+    def hash_data(cls, input_data: bytes, hash_formats: [str]) -> Dict[str, str]:
+        """
+        computes and returns new hash strings for a file
+
+        arguments:
+        input_data -- the bytes to compute the hash from.
+        hash_formats -- array string values, each entry should be one of the supported hash formats, e.g. 'md5', 'xxh64'
+        """
+
+        # Build a hash for each supplied format
+        hash_output_lookup = {}
+        for hash_format in hash_formats:
+            hash_generator = new_hasher_for_hash_type(hash_format)
+            hash_generator.update(input_data)
+            computed_hash = hash_generator.string_digest()
+            hash_output_lookup[hash_format] = computed_hash
+
+        return hash_output_lookup
+
+
 class DirectoryHashContext:
     """
     DirectoryHashContext wraps the data necessary to compute directory checksums.
     """
 
     def __init__(self, hash_format: str):
+
         self.hash_format = hash_format
         self.hasher = new_hasher_for_hash_type(hash_format)
         self.content_hash_strings = []
@@ -318,6 +391,17 @@ def hash_of_hash_list(hash_list: [str], hash_format: str) -> str:
     return hasher.hash_of_hash_list(hash_list)
 
 
+def multiple_format_hash_file(file_path: str, hash_formats: [str]) -> Dict[str, str]:
+    """
+    computes and returns a new hash strings for a file
+
+    arguments:
+    file_path -- string value, path of file to generate hash for.
+    hash_formats -- string values, each entry is one of the supported hash formats, e.g. 'md5', 'xxh64'
+    """
+    return AggregateHasher.hash_file(file_path, hash_formats)
+
+
 def hash_file(filepath: str, hash_format: str) -> str:
     """
     computes and returns a new hash string for a file
@@ -340,6 +424,16 @@ def hash_data(input_data: bytes, hash_format: str) -> str:
     """
     hasher = new_hasher_for_hash_type(hash_format)
     return hasher.hash_data(input_data)
+
+
+def multiple_format_hash_data(input_data: bytes, hash_formats: [str]) -> Dict[str, str]:
+    """
+    computes and returns new hash strings from the input data
+    arguments:
+    input_data -- the bytes to compute the hash from
+    hash_formats -- string values, each entry is one of the supported hash formats, e.g. 'md5', 'xxh64'
+    """
+    return AggregateHasher.hash_data(input_data, hash_formats)
 
 
 def bytes_for_hash_string(hash_string: str, hash_format: str) -> bytes:

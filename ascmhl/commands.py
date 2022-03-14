@@ -27,10 +27,12 @@ from .__version__ import (
     ascmhl_default_hashformat,
 )
 from .generator import MHLGenerationCreationSession
-from .hasher import hash_file, DirectoryHashContext
+from .hasher import hash_file, DirectoryHashContext, multiple_format_hash_file
 from .hashlist import MHLMediaHash, MHLCreatorInfo, MHLProcessInfo, MHLTool, MHLProcess, MHLAuthor
 from .history import MHLHistory
 from .traverse import post_order_lexicographic
+from typing import Dict
+from collections import namedtuple
 
 
 @click.command()
@@ -43,12 +45,13 @@ from .traverse import post_order_lexicographic
     is_flag=True,
     help="Verbose output",
 )
+# FIXME: refactor to allow for multiple hash formats
 @click.option(
     "--hash_format",
     "-h",
     type=click.Choice(ascmhl_supported_hashformats),
-    multiple=False,
-    default=ascmhl_default_hashformat,
+    multiple=True,
+    default=[ascmhl_default_hashformat],
     help="Algorithm",
 )
 @click.option(
@@ -171,7 +174,7 @@ def create(
 def create_for_folder_subcommand(
     root_path,
     verbose,
-    hash_format,
+    hash_formats,
     no_directory_hashes,
     author_name,
     author_email,
@@ -214,39 +217,76 @@ def create_for_folder_subcommand(
 
     num_failed_verifications = 0
     # store the directory hashes of sub folders so we can use it when calculating the hash of the parent folder
-    dir_content_hash_mappings = {}
-    dir_structure_hash_mappings = {}
+    # the mapping lookups will follow the dictionary format of [string: [hash_format: hash_value]] where string
+    # is a file sub-path
+    dir_content_hash_mapping_lookup = {}
+    dir_structure_hash_mapping_lookup = {}
+    hash_format_list = sorted(hash_formats)
+
     for folder_path, children in post_order_lexicographic(root_path, session.ignore_spec.get_path_spec()):
         # generate directory hashes
-        dir_hash_context = None
+        dir_hash_context_lookup = {}
+
         if not no_directory_hashes:
-            dir_hash_context = DirectoryHashContext(hash_format)
+            # Create a DirectoryHashContext for each hash format and store in the lookup
+            for hash_format in hash_format_list:
+                dir_hash_context_lookup[hash_format] = DirectoryHashContext(hash_format)
         for item_name, is_dir in children:
             file_path = os.path.join(folder_path, item_name)
             not_found_paths.discard(file_path)
             if is_dir:
-                if not dir_hash_context:
-                    continue
-                if dir_hash_context:
-                    dir_hash_context.append_directory_hashes(
-                        file_path, dir_content_hash_mappings.pop(file_path), dir_structure_hash_mappings.pop(file_path)
-                    )
-            else:
-                hash_string, success = seal_file_path(existing_history, file_path, hash_format, session)
-                if not success:
-                    num_failed_verifications += 1
                 if not no_directory_hashes:
-                    dir_hash_context.append_file_hash(file_path, hash_string)
-        dir_content_hash = None
-        dir_structure_hash = None
-        if dir_hash_context:
-            dir_content_hash = dir_hash_context.final_content_hash_str()
-            dir_structure_hash = dir_hash_context.final_structure_hash_str()
-            dir_content_hash_mappings[folder_path] = dir_content_hash
-            dir_structure_hash_mappings[folder_path] = dir_structure_hash
+                    path_content_hash_lookup = dir_content_hash_mapping_lookup.pop(file_path)
+                    path_structure_hash_lookup = dir_structure_hash_mapping_lookup.pop(file_path)
+
+                    for hash_format, dir_hash_context in dir_hash_context_lookup.items():
+                        dir_hash_context.append_directory_hashes(
+                            file_path,
+                            path_content_hash_lookup[hash_format],
+                            path_structure_hash_lookup[hash_format],
+                        )
+            else:
+                seal_result = seal_file_path(existing_history, file_path, hash_format_list, session)
+
+                for hash_format, result_tuple in seal_result.items():
+                    dir_hash_context = None
+
+                    if not no_directory_hashes:
+                        dir_hash_context = dir_hash_context_lookup[hash_format]
+
+                    hash_string = result_tuple.hash_value
+                    success = result_tuple.success
+                    if not success:
+                        num_failed_verifications += 1
+                    if dir_hash_context is not None:
+                        dir_hash_context.append_file_hash(file_path, hash_string)
+
+        # Calculate the directory hashes for each format
+        dir_content_hash_lookup = {}
+        dir_structure_hash_lookup = {}
+
+        if not no_directory_hashes:
+            for hash_format, dir_hash_context in dir_hash_context_lookup.items():
+                dir_content_hash = dir_hash_context.final_content_hash_str()
+                dir_structure_hash = dir_hash_context.final_structure_hash_str()
+
+                if dir_content_hash_mapping_lookup and folder_path in dir_content_hash_mapping_lookup.keys():
+                    dir_content_hash_mapping_lookup[folder_path][hash_format] = dir_content_hash
+                else:
+                    dir_content_hash_mapping_lookup[folder_path] = {hash_format: dir_content_hash}
+
+                if dir_structure_hash_mapping_lookup and folder_path in dir_structure_hash_mapping_lookup.keys():
+                    dir_structure_hash_mapping_lookup[folder_path][hash_format] = dir_structure_hash
+                else:
+                    dir_structure_hash_mapping_lookup[folder_path] = {hash_format: dir_structure_hash}
+
+                dir_content_hash_lookup[hash_format] = dir_content_hash
+                dir_structure_hash_lookup[hash_format] = dir_structure_hash
+
         modification_date = datetime.datetime.fromtimestamp(os.path.getmtime(folder_path))
-        session.append_directory_hashes(
-            folder_path, modification_date, hash_format, dir_content_hash, dir_structure_hash
+
+        session.append_multiple_format_directory_hashes(
+            folder_path, modification_date, dir_content_hash_lookup, dir_structure_hash_lookup
         )
 
     commit_session(session, author_name, author_email, author_phone, author_role, location, comment)
@@ -262,7 +302,7 @@ def create_for_folder_subcommand(
 def create_for_single_files_subcommand(
     root_path,
     verbose,
-    hash_format,
+    hash_formats,
     single_file,
     author_name,
     author_email,
@@ -302,6 +342,9 @@ def create_for_single_files_subcommand(
     session = MHLGenerationCreationSession(existing_history)
 
     num_failed_verifications = 0
+
+    hash_format_list = sorted(hash_formats)
+
     for path in single_file:
         if not os.path.isabs(path):
             path = os.path.join(os.getcwd(), path)
@@ -311,11 +354,16 @@ def create_for_single_files_subcommand(
                     file_path = os.path.join(folder_path, item_name)
                     if is_dir:
                         continue
-                    _, success = seal_file_path(existing_history, file_path, hash_format, session)
+                    seal_result = seal_file_path(existing_history, file_path, hash_format_list, session)
+                    # Determine success based on the first format in the list
+                    # TODO: Consider checking all results.  Would it be practical to do so?
+                    # For instance, are we concerned about one format failing while another one succeeds?
+                    success = seal_result[hash_format_list[0]].success
                     if not success:
                         num_failed_verifications += 1
         else:
-            _, success = seal_file_path(existing_history, path, hash_format, session)
+            seal_result = seal_file_path(existing_history, path, hash_format_list, session)
+            success = seal_result[hash_format_list[0]].success
             if not success:
                 num_failed_verifications += 1
 
@@ -376,6 +424,7 @@ def create_for_single_files_subcommand(
 )
 # options
 @click.option(
+    # FIXME: Update to permit multiple hash formats
     "--hash_format",
     "-h",
     type=click.Choice(ascmhl_supported_hashformats),
@@ -547,23 +596,47 @@ def verify_directory_hash_subcommand(
 
     ignore_spec = ignore.MHLIgnoreSpec(existing_history.latest_ignore_patterns(), ignore_list, ignore_spec_file)
 
+    # FIXME: Update once argument signature has been modified to supply a list of formats
+    hash_formats = []
+
     # choose the hash format of the latest root directory hash
     if hash_format is None:
         generation = -1
+        # inspect the history and use all documented algorithms as the basis of verification
         for hash_list in existing_history.hash_lists:
             if hash_list.generation_number > generation:
+                # add each hash entry's format to the list of formats
                 if len(hash_list.process_info.root_media_hash.hash_entries) > 0:
-                    hash_format = hash_list.process_info.root_media_hash.hash_entries[0].hash_format
-
-        if hash_format is None:
+                    for entry in hash_list.process_info.root_media_hash.hash_entries:
+                        entry_hash_format = entry.hash_format
+                        # do not permit duplicate entries in the list
+                        if entry_hash_format not in hash_formats:
+                            hash_formats.append(entry_hash_format)
+        if not hash_formats:
+            hash_formats.append("c4")
             logger.verbose(f"default hash format: c4")
-            hash_format = "c4"
         else:
             logger.verbose(f"hash format from latest generation with directory hashes: {hash_format}")
     else:
+        hash_formats.append(hash_format)
         logger.verbose(f"hash format: {hash_format}")
 
     # start a verification session on the existing history
+    hash_format_list = sorted(hash_formats)
+    # a lookup containing the number of failures detected per hash format - will match the format Dict[str, int]
+    failures_per_format_lookup = {}
+
+    # an inner function responsible for adding format failures to the lookup
+    def add_detected_failure_for_format(failed_hash_format):
+        nonlocal failures_per_format_lookup
+        if failures_per_format_lookup:
+            if failed_hash_format in failures_per_format_lookup.keys():
+                failures_per_format_lookup[failed_hash_format] = failures_per_format_lookup[failed_hash_format] + 1
+            else:
+                failures_per_format_lookup[failed_hash_format] = 1
+        else:
+            failures_per_format_lookup = {failed_hash_format: 1}
+
     session = MHLGenerationCreationSession(existing_history)
 
     num_failed_verifications = 0
@@ -571,87 +644,141 @@ def verify_directory_hash_subcommand(
     dir_content_hash_mappings = {}
     dir_structure_hash_mappings = {}
     for folder_path, children in post_order_lexicographic(root_path, ignore_spec.get_path_spec()):
-        # generate directory hashes
-        dir_hash_context = None
-        dir_hash_context = DirectoryHashContext(hash_format)
+        # generate directory hashes - will match the format dict[str, DirectoryHashContext]
+        dir_hash_context_lookup = {}
+
+        # create a DirectoryHashContext for each hash format and store in the lookup
+        for hash_format in hash_format_list:
+            dir_hash_context_lookup[hash_format] = DirectoryHashContext(hash_format)
+
         for item_name, is_dir in children:
             file_path = os.path.join(folder_path, item_name)
             if is_dir:
-                file_path = os.path.join(folder_path, item_name)
                 relative_path = existing_history.get_relative_file_path(file_path)
                 history, history_relative_path = existing_history.find_history_for_path(relative_path)
                 # check if there are directory hashes in the generations
                 directory_hash_entries = history.find_directory_hash_entries_for_path(history_relative_path)
 
-                content_hash = dir_content_hash_mappings.pop(file_path)
-                structure_hash = dir_structure_hash_mappings.pop(file_path)
-                dir_hash_context.append_directory_hashes(file_path, content_hash, structure_hash)
+                content_hash_lookup = dir_content_hash_mappings.pop(file_path)
+                structure_hash_lookup = dir_structure_hash_mappings.pop(file_path)
+
+                # Add the content and hash values to the appropriate context
+                if dir_hash_context_lookup:
+                    for hash_format, dir_hash_context in dir_hash_context_lookup.items():
+                        content_hash = None
+                        structure_hash = None
+                        if content_hash_lookup:
+                            content_hash = content_hash_lookup[hash_format]
+                        if structure_hash_lookup:
+                            structure_hash = structure_hash_lookup[hash_format]
+
+                        dir_hash_context.append_directory_hashes(file_path, content_hash, structure_hash)
 
                 num_successful_verifications = 0
-                found_hash_format = False
                 for directory_hash_entry in directory_hash_entries:
-                    if directory_hash_entry.hash_format != hash_format:
-                        continue
-                    found_hash_format = True
+                    content_hash = None
+                    structure_hash = None
 
-                    num_current_successful_verifications = -1
-                    if not root_only:
-                        num_current_successful_verifications = _compare_and_log_directory_hashes(
-                            relative_path, directory_hash_entry, content_hash, structure_hash
-                        )
+                    if content_hash_lookup:
+                        content_hash = content_hash_lookup[directory_hash_entry.hash_format]
+                    if structure_hash_lookup:
+                        structure_hash = structure_hash_lookup[directory_hash_entry.hash_format]
 
-                    if num_current_successful_verifications == 2:
-                        num_successful_verifications += 1
-                    if num_current_successful_verifications == 1:
-                        num_failed_verifications += 1
+                    found_hash_format = False
 
-                if not calculate_only:
-                    if not found_hash_format:
-                        logger.error(
-                            f"ERROR: verification of folder {relative_path}: No directory hash of type"
-                            f" {hash_format} found"
-                        )
-                        num_failed_verifications += 1
+                    if content_hash:
+                        found_hash_format = True
+
+                        num_current_successful_verifications = -1
+                        if not root_only:
+                            num_current_successful_verifications = _compare_and_log_directory_hashes(
+                                relative_path, directory_hash_entry, content_hash, structure_hash
+                            )
+
+                        if num_current_successful_verifications == 2:
+                            num_successful_verifications += 1
+                        if num_current_successful_verifications == 1:
+                            num_failed_verifications += 1
+                            add_detected_failure_for_format(directory_hash_entry.hash_format)
+
+                    if not calculate_only:
+                        if not found_hash_format:
+                            logger.error(
+                                f"ERROR: verification of folder {relative_path}: No directory hash of type"
+                                f" {hash_format} found"
+                            )
+                            num_failed_verifications += 1
+                            add_detected_failure_for_format(directory_hash_entry.hash_format)
             else:
-                hash_string = hash_file(file_path, hash_format)
-                dir_hash_context.append_file_hash(file_path, hash_string)
-        dir_content_hash = None
-        dir_structure_hash = None
-        if dir_hash_context:
-            dir_content_hash = dir_hash_context.final_content_hash_str()
-            dir_structure_hash = dir_hash_context.final_structure_hash_str()
-            dir_content_hash_mappings[folder_path] = dir_content_hash
-            dir_structure_hash_mappings[folder_path] = dir_structure_hash
+                # generate the hashes for the file
+                file_hash_lookup = multiple_format_hash_file(file_path, hash_format_list)
+                # add each hash to the appropriate context
+                for hash_format, hash_value in file_hash_lookup.items():
+                    dir_hash_context_lookup[hash_format].append_file_hash(file_path, hash_value)
+
+        # all children have been handled.  create the directory hashes
+        dir_content_hash_lookup = {}
+        dir_structure_hash_lookup = {}
+
+        if dir_hash_context_lookup:
+            for hash_format, dir_hash_context in dir_hash_context_lookup.items():
+                dir_content_hash = dir_hash_context.final_content_hash_str()
+                dir_structure_hash = dir_hash_context.final_structure_hash_str()
+                # add the hashes to the appropriate hash lookups to be added to the session
+                dir_content_hash_lookup[hash_format] = dir_content_hash
+                dir_structure_hash_lookup[hash_format] = dir_structure_hash
+            # add the hash lookups to the appropriate mappings for the folder
+            if dir_content_hash_lookup:
+                dir_content_hash_mappings[folder_path] = dir_content_hash_lookup
+            if dir_structure_hash_lookup:
+                dir_structure_hash_mappings[folder_path] = dir_structure_hash_lookup
+
         modification_date = datetime.datetime.fromtimestamp(os.path.getmtime(folder_path))
 
         logger.verbose_logging = calculate_only
         relative_path = session.root_history.get_relative_file_path(folder_path)
         if root_only and relative_path != ".":
             logger.verbose_logging = verbose
-        session.append_directory_hashes(
-            folder_path, modification_date, hash_format, dir_content_hash, dir_structure_hash
+
+        session.append_multiple_format_directory_hashes(
+            folder_path, modification_date, dir_content_hash_lookup, dir_structure_hash_lookup
         )
         logger.verbose_logging = verbose
 
         # compare root hashes, works differently
         if folder_path == root_path:
-            found_hash_format = False
+
             for hash_list in existing_history.hash_lists:
                 root_hash_entries = hash_list.process_info.root_media_hash.hash_entries
                 if len(root_hash_entries) > 0:
                     for root_hash_entry in root_hash_entries:
-                        if root_hash_entry.hash_format == hash_format:
+                        hash_format = root_hash_entry.hash_format
+                        found_hash_format = False
+                        dir_content_hash = None
+                        dir_structure_hash = None
+
+                        if dir_content_hash_lookup:
+                            dir_content_hash = dir_content_hash_lookup[hash_format]
+                        if dir_structure_hash_lookup:
+                            dir_structure_hash = dir_structure_hash_lookup[hash_format]
+
+                        if dir_content_hash:
+                            found_hash_format = True
                             _compare_and_log_directory_hashes(
                                 ".", root_hash_entry, dir_content_hash, dir_structure_hash
                             )
-                            found_hash_format = True
-            if not calculate_only:
-                if not found_hash_format:
-                    logger.error(f"ERROR: verification of root folder: No directory hash of type {hash_format} found")
 
+                        if not calculate_only:
+                            if not found_hash_format:
+                                logger.error(
+                                    f"ERROR: verification of root folder: No directory hash of type {hash_format} found"
+                                )
     exception = None
-    if num_failed_verifications > 0:
-        exception = errors.VerificationDirectoriesFailedException()
+
+    # check the failure lookup.  if even one format verified, consider the entire process verified
+    if failures_per_format_lookup:
+        if len(failures_per_format_lookup.keys()) == len(hash_format_list):
+            exception = errors.VerificationDirectoriesFailedException()
 
     if exception:
         raise exception
@@ -719,6 +846,7 @@ def _compare_and_log_directory_hashes(
 @click.command()
 @click.argument("file_path", type=click.Path(exists=True))
 @click.option(
+    # FIXME: Update to permit multiple hash formats
     "--hash_format",
     "-h",
     type=click.Choice(ascmhl_supported_hashformats),
@@ -1227,7 +1355,27 @@ def commit_session_for_collection(
     session.commit(creator_info, process_info)
 
 
-def seal_file_path(existing_history, file_path, hash_format, session) -> (str, bool):
+"""
+A tuple for returning the result of a seal file path operation
+attributes:
+hash_value -- string value, a hash
+success -- boolean value, indicates if the update was successful
+"""
+SealPathResult = namedtuple("SealPathResult", ["hash_value", "success"])
+
+
+def seal_file_path(existing_history, file_path, hash_formats: [str], session) -> Dict[str, SealPathResult]:
+    """
+    Generates hashes for a file path.
+    Compares the generated hashes to any existing hash records
+    Adds the generated hashes to the hash history of the file path
+    :param existing_history: The existing hash record
+    :param file_path: The path for which to generate hashes
+    :param hash_formats: The hash formats to generate
+    :param session: The session to which the generated hashes will be added
+    :return: A dictionary keyed by hash_format strings.
+    Each entry contains the hash value and a boolean indicating if updating was successful
+    """
     relative_path = existing_history.get_relative_file_path(file_path)
     file_size = os.path.getsize(file_path)
     file_modification_date = datetime.datetime.fromtimestamp(os.path.getmtime(file_path))
@@ -1236,22 +1384,72 @@ def seal_file_path(existing_history, file_path, hash_format, session) -> (str, b
     existing_child_history, existing_history_relative_path = existing_history.find_history_for_path(relative_path)
     existing_hash_formats = existing_child_history.find_existing_hash_formats_for_path(existing_history_relative_path)
 
-    # in case there is no hash in the required format to use yet, we need to verify also against
-    # one of the existing hash formats, we for simplicity use always the first hash format in this example
-    # but one could also use a different one if desired
-    success = True
-    if len(existing_hash_formats) > 0 and hash_format not in existing_hash_formats:
-        existing_hash_format = existing_hash_formats[0]
-        hash_in_existing_format = hash_file(file_path, existing_hash_format)
-        # FIXME: test what happens if the existing hash verification fails in other format fails
-        # should we then really create two entries
-        success &= session.append_file_hash(
-            file_path, file_size, file_modification_date, existing_hash_format, hash_in_existing_format
-        )
-    current_format_hash = hash_file(file_path, hash_format)
-    # in case the existing hash verification failed we don't want to add the current format hash to the generation
-    # but we need to return it for directory hash creation
-    if not success:
-        return current_format_hash, False
-    success &= session.append_file_hash(file_path, file_size, file_modification_date, hash_format, current_format_hash)
-    return current_format_hash, success
+    # create a separate list of hash formats for which hashes will be generated
+    hash_formats_to_generate = []
+
+    # if there are existing entries for this path, the recorded formats must also be generated
+    if existing_hash_formats and len(existing_hash_formats) > 0:
+        # existing hash formats should be verified prior to any new formats
+        for hash_format in existing_hash_formats:
+            if hash_format in hash_formats:
+                hash_formats_to_generate.append(hash_format)
+        # if no formats are being carried over from the previous generation to this one, at least
+        # one of the previous generation hashes needs to at least be verified as correct
+        # TODO: Consider making the selection of the previous generation bench mark format less arbitrary
+        # TODO: Instead of selecting the first format, perhaps choose the most efficient or robust format
+        if not hash_formats_to_generate or len(hash_formats_to_generate) == 0:
+            hash_formats_to_generate.append(existing_hash_formats[0])
+
+    for hash_format in hash_formats:
+        if hash_format not in hash_formats_to_generate:
+            hash_formats_to_generate.append(hash_format)
+
+    # generate the file hashes
+    current_hash_lookup = multiple_format_hash_file(file_path, hash_formats_to_generate)
+
+    # the lookup where the results will be stored
+    hash_result_lookup = {}
+
+    # any newly generated hash will require any previous hashes to be verified
+    existing_hashes_verified = True
+
+    # verify the existing hash entries first
+    if existing_hash_formats:
+        for hash_format in existing_hash_formats:
+            # make sure the existing format was included in the hashes which were generated
+            if hash_format not in hash_formats_to_generate:
+                continue
+
+            success = True
+            success &= session.append_file_hash(
+                file_path, file_size, file_modification_date, hash_format, current_hash_lookup[hash_format]
+            )
+
+            # if even one existing hash failed to verify existing hashes will be deemed corrupt
+            if not success:
+                existing_hashes_verified = False
+
+            # if the existing format was requested add it to the results lookup
+            if hash_format in hash_formats:
+                hash_result_lookup[hash_format] = SealPathResult(current_hash_lookup[hash_format], success)
+
+    # add the new hash formats
+    for hash_format in hash_formats_to_generate:
+        # existing hashes have already been handled
+        if existing_hash_formats and hash_format in existing_hash_formats:
+            continue
+
+        # if this format has never been recorded the previous hashes must be verified for this hash to be verified
+        success = existing_hashes_verified
+
+        # only add the new hash format to the session if the previous hashes are verified
+        if success:
+            success &= session.append_file_hash(
+                file_path, file_size, file_modification_date, hash_format, current_hash_lookup[hash_format]
+            )
+
+        # If the existing hash was requested by the caller it needs to be added to the lookup
+        if hash_format in hash_formats:
+            hash_result_lookup[hash_format] = SealPathResult(current_hash_lookup[hash_format], success)
+
+    return hash_result_lookup

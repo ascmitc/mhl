@@ -41,6 +41,78 @@ class MHLGenerationCreationSession:
         self.new_hash_lists = defaultdict(MHLHashList)
         self.ignore_spec = ignore_spec
 
+    def append_multiple_format_file_hashes(
+        self, file_path, file_size, hash_lookup: Dict[str, str], file_modification_date, action=None, hash_date=None
+    ) -> bool:
+        """
+        Adds file hashes to the history
+        :param file_path: a string value representing the path to a file
+        :param file_size: size of the file path in bytes
+        :param hash_lookup: a dictionary of hash values keyed by the respective hash format
+        :param file_modification_date: date the file was last modified
+        :param action: a predetermined action for the entry.  defaults to none
+        :param hash_date: date the hashes were generated
+        :return a bool indicating if the hashes were successfully appended.  returns false if any failures occur
+        """
+        relative_path = self.root_history.get_relative_file_path(file_path)
+        # TODO: handle if path is outside of history root path
+        # Keep track of the number of failures
+        failures = 0
+        history, history_relative_path = self.root_history.find_history_for_path(relative_path)
+        # for collections we cannot create a valid relative path (we are in the "wrong" history), but in that case
+        # the file_path is inputted already as the relative path (a bit of implicit functionality here)
+        if history_relative_path == None:
+            history_relative_path = file_path
+
+        # check if there is an existing hash in the other generations and verify
+        original_hash_entry = history.find_original_hash_entry_for_path(history_relative_path)
+
+        hash_entries = [MHLHashEntry]
+        # TODO: sort the format keys into a standard order for consistent output
+        for hash_format, hash_string in hash_lookup.items():
+            hash_entry = MHLHashEntry(hash_format, hash_string, hash_date=hash_date)
+            if original_hash_entry is None:
+                hash_entry.action = "original"
+                logger.verbose(f"  created original hash for     {relative_path}  {hash_format}: {hash_string}")
+            else:
+                existing_hash_entry = history.find_first_hash_entry_for_path(history_relative_path, hash_format)
+                if existing_hash_entry is not None:
+                    if existing_hash_entry.hash_string == hash_string:
+                        hash_entry.action = "verified"
+                        logger.verbose(f"  verified                      {relative_path} {hash_format}: OK")
+                    else:
+                        hash_entry.action = "failed"
+                        failures += 1
+                        logger.error(
+                            f"ERROR: hash mismatch for        {relative_path}  "
+                            f"{hash_format} (old): {existing_hash_entry.hash_string}, "
+                            f"{hash_format} (new): {hash_string}"
+                        )
+                else:
+                    # in case there is no hash entry for this hash format yet
+                    hash_entry.action = (  # mark as 'new' here, will be changed to verified in _validate_new_hash_list
+                        "new"
+                    )
+                    logger.verbose(f"  created new (verif.) hash for {relative_path}  {hash_format}: {hash_string}")
+            # collection behavior: overwrite action with action from flattened history
+            if action != None:
+                hash_entry.action = action
+
+            # Add the generated entry to the list
+            hash_entries.append(hash_entry)
+
+        # in case the same file is hashes multiple times we want to add all hash entries
+        new_hash_list = self.new_hash_lists[history]
+        media_hash = new_hash_list.find_or_create_media_hash_for_path(
+            history_relative_path, file_size, file_modification_date
+        )
+
+        # Add the new hash entries
+        for hash_entry in hash_entries:
+            media_hash.append_hash_entry(hash_entry)
+
+        return failures == 0
+
     def append_file_hash(
         self, file_path, file_size, file_modification_date, hash_format, hash_string, action=None, hash_date=None
     ) -> bool:
@@ -66,7 +138,7 @@ class MHLGenerationCreationSession:
             if existing_hash_entry is not None:
                 if existing_hash_entry.hash_string == hash_string:
                     hash_entry.action = "verified"
-                    logger.verbose(f"  verified                      {relative_path}  OK")
+                    logger.verbose(f"  verified                      {relative_path}  {hash_format}: OK")
                 else:
                     hash_entry.action = "failed"
                     logger.error(
@@ -77,9 +149,7 @@ class MHLGenerationCreationSession:
             else:
                 # in case there is no hash entry for this hash format yet
                 hash_entry.action = "new"  # mark as 'new' here, will be changed to verified in _validate_new_hash_list
-                logger.verbose(
-                    f"  created new, verified hash for          {relative_path}  {hash_format}: {hash_string}"
-                )
+                logger.verbose(f"  created new (verif.) hash for {relative_path}  {hash_format}: {hash_string}")
 
         # in case the same file is hashes multiple times we want to add all hash entries
         new_hash_list = self.new_hash_lists[history]
@@ -93,6 +163,69 @@ class MHLGenerationCreationSession:
 
         media_hash.append_hash_entry(hash_entry)
         return hash_entry.action != "failed"
+
+    def append_multiple_format_directory_hashes(
+        self, path, modification_date, content_hash_lookup: Dict[str, str], structure_hash_lookup: Dict[str, str]
+    ) -> None:
+        """
+        Adds directory hashes to the history
+        :param path: a string value representing the path to a file
+        :param modification_date: date the file was last modified
+        :param content_hash_lookup: a dictionary of content hash values keyed by the respective hash format
+        :param structure_hash_lookup: a dictionary of structure hash values keyed by the respective hash format
+        :return: none
+        """
+        relative_path = self.root_history.get_relative_file_path(path)
+        # TODO: handle if path is outside of history root path
+
+        history, history_relative_path = self.root_history.find_history_for_path(relative_path)
+
+        # in case the same file is hashes multiple times we want to add all hash entries
+        new_hash_list = self.new_hash_lists[history]
+        media_hash = new_hash_list.find_or_create_media_hash_for_path(history_relative_path, None, modification_date)
+        media_hash.is_directory = True
+
+        # Add the content entries
+        if content_hash_lookup:
+            for hash_format, content_hash_string in content_hash_lookup.items():
+                # Find the structure hash string
+                structure_hash_string = structure_hash_lookup[hash_format]
+
+                hash_entry = MHLHashEntry(hash_format, content_hash_string)
+                # Attempt to add the structure, if available
+                hash_entry.structure_hash_string = structure_hash_string
+                media_hash.append_hash_entry(hash_entry)
+
+                if relative_path == ".":
+                    logger.verbose(
+                        f"  calculated root hash  {hash_format}: "
+                        f"{content_hash_string} (content), "
+                        f"{structure_hash_string} (structure)"
+                    )
+                else:
+                    logger.verbose(
+                        f"  calculated directory hash for {relative_path}  {hash_format}: "
+                        f"{content_hash_string} (content), "
+                        f"{structure_hash_string} (structure)"
+                    )
+        else:
+            logger.verbose(f"  added directory entry for     {relative_path}")
+
+        # in case we just created the root media hash of the current hash list we also add it one history level above
+        if new_hash_list.process_info.root_media_hash is media_hash and history.parent_history:
+            parent_history = history.parent_history
+            parent_relative_path = parent_history.get_relative_file_path(path)
+            parent_hash_list = self.new_hash_lists[parent_history]
+            parent_media_hash = parent_hash_list.find_or_create_media_hash_for_path(
+                parent_relative_path, None, modification_date
+            )
+            parent_media_hash.is_directory = True
+            if content_hash_lookup:
+                for hash_format, content_hash_string in content_hash_lookup.items():
+                    structure_hash_string = structure_hash_lookup[hash_format]
+                    hash_entry = MHLHashEntry(hash_format, content_hash_string)
+                    hash_entry.structure_hash_string = structure_hash_string
+                    parent_media_hash.append_hash_entry(hash_entry)
 
     def append_directory_hashes(
         self, path, modification_date, hash_format, content_hash_string, structure_hash_string

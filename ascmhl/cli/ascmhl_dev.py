@@ -15,15 +15,15 @@ from ascmhl import _debug_commands
 
 
 @click.group()
-def debug_cli():
+def mhldevtool_cli():
     pass
 
 
-debug_cli.add_command(_debug_commands.readmhlfile)
-debug_cli.add_command(_debug_commands.readchainfile)
-debug_cli.add_command(_debug_commands.readmhlhistory)
-debug_cli.add_command(_debug_commands.create_dummy_file_structure, "create_dummy_file_structure")
+mhldevtool_cli.add_command(_debug_commands.readmhlfile)
+mhldevtool_cli.add_command(_debug_commands.readchainfile)
+mhldevtool_cli.add_command(_debug_commands.readmhlhistory)
+mhldevtool_cli.add_command(_debug_commands.create_dummy_file_structure, "create_dummy_file_structure")
 
 
 if __name__ == "__main__":
-    debug_cli()
+    mhldevtool_cli()

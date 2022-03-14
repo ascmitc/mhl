@@ -23,11 +23,11 @@ class NaturalOrderGroup(click.Group):
 
 @click.group(cls=NaturalOrderGroup)
 @click.version_option()
-def mhltool_cli():
+def mhldebugtool_cli():
     pass
 
 
-@mhltool_cli.resultcallback()
+@mhldebugtool_cli.resultcallback()
 def update(*args, **kwargs):
     updater.join(timeout=1)
     if updater.needs_update:
@@ -35,11 +35,10 @@ def update(*args, **kwargs):
 
 
 # new
-mhltool_cli.add_command(commands.create)
-mhltool_cli.add_command(commands.diff)
-mhltool_cli.add_command(commands.flatten)
-mhltool_cli.add_command(commands.info)
+mhldebugtool_cli.add_command(commands.verify)
+mhldebugtool_cli.add_command(commands.xsd_schema_check)
+mhldebugtool_cli.add_command(commands.hash)
 
 
 if __name__ == "__main__":
-    mhltool_cli()
+    mhldebugtool_cli()

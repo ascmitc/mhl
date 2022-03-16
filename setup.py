@@ -4,10 +4,16 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setup(
-    author="Patrick Renner, Alexander Sahm",
+    author="The ASC MHL Working Group (Alex Sahm, Ben Hagen, Jon Waggoner, Mark Hudgins, Patrick Renner, and others.)",
     author_email="opensource@pomfort.com",
     description="ASC Media Hash List (ASC MHL)",
-    entry_points={"console_scripts": ["ascmhl = ascmhl.cli.ascmhl:mhltool_cli"]},
+    entry_points={
+        "console_scripts": [
+            "ascmhl = ascmhl.cli.ascmhl:mhltool_cli",
+            "ascmhl-debug = ascmhl.cli.ascmhl_debug:mhldebugtool_cli",
+            # "ascmhl-dev = ascmhl.cli.ascmhl_dev:mhldevtool_cli",
+        ]
+    },
     include_package_data=True,
     install_requires=[
         "Click>=7.0",

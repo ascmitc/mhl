@@ -4,21 +4,26 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 # ASC Media Hash List (ASC MHL)
-> The software in this repository aids the ongoing specification process of the ASC MHL format by the Advanced Data Management Subcommittee of the ASC Motion Imaging Technology Council at the [American Society of Cinematographers](https://theasc.com) (ASC). 
+> The software in this repository is the reference implementation for the ASC Media Hash List (ASC MHL) format 
+> specification by the Advanced Data Management Subcommittee of the ASC Motion Imaging Technology Council (MITC) at 
+> the [American Society of Cinematographers](https://theasc.com) (ASC). 
 >
-> Resources on [theasc.com](https://theasc.com):
-> * 📄 [ASC MHL Specification page](https://theasc.com/asc/asc-media-hash-list) (with committe draft for public review)
-> * 📄 [ASC MHL One-Sheet page](https://theasc.com/reports/asc-mhl-one-sheet)
+> Resources:
+> * 🌎 [ASC MHL Homepage](https://ascmhl.com/) (at [https://ascmhl.com/](https://ascmhl.com/))
+> * 📄 [ASC MHL Specification page](https://theasc.com/asc/asc-media-hash-list) (at [theasc.com](https://theasc.com))
 > 
-> This software is work-in-progress and not intended to be used in production (yet).
-> 
-> In case you are looking for the original specification of MHL, please take a look at [https://mediahashlist.org](https://mediahashlist.org).
+> In case you are looking for the original specification of MHL, please take a look at 
+> [https://mediahashlist.org](https://mediahashlist.org).
 
-Ensuring file integrity when backing up and verifying files during production and post production is of utmost importance. The ASC MHL is used to create a chain of custody by tracking each and every copy made between the media’s initial download on set, all the way through to final archival.
+Ensuring file integrity when backing up and verifying files during production and post-production is of utmost 
+importance. The ASC MHL is used to create a chain of custody by tracking each and every copy made between the 
+media’s initial download on set, all the way through to final archival.
 
-The ASC MHL uses common checksum methods for hashing files and folders, specifies what information is gathered, where the checksum is placed, and documents these hashes together with essential file metadata in an XML format that is human readable.
+The ASC MHL uses common checksum methods for hashing files and folders, specifies what information is gathered, where 
+the checksum is placed, and documents these hashes together with essential file metadata in an XML format that is 
+human-readable.
 
-This repository holds all information about the document format,  a reference implementation, and tools.
+This repository holds all information about the document format, a reference implementation, and tools.
 
 ## ASC MHL Format Specification
 
@@ -32,13 +37,14 @@ The schema definition can be found in the `./xsd` folder.
 
 ## `mhllib` Reference Implementation 
 
-The implementation of a reference library aims to be used in applications and tools dealing with ASC MHL files. The library takes responsibility of dealing with complex use cases of nesting and assembling of information.
+The implementation of a reference library aims to be used in applications and tools dealing with ASC MHL files. The 
+library takes responsibility of dealing with complex use cases of nesting and assembling of information.
 
 The reference library covers
 
 * reading ascmhl folders and their contents
 * parsing and writing of ASC MHL XML files
-* parsing and writing ASC MHL chain files
+* parsing and writing ASC MHL chain and collection files
 * dealing with nested mhl folders
 
 ASC MHL supports the hash formats
@@ -52,30 +58,34 @@ The source code for `mhllib` can be found in the `./ascmhl` folder.
 
 ## The `ascmhl` Tool
 
-The `ascmhl` tool is a command line tool based on `mhllib` that allows to perform typical activities for the use cases of ASC MHL.
+The `ascmhl` tool is a command line tool based on `mhllib` that allows to perform typical activities for the use 
+cases of ASC MHL.
 
-The ASC MHL tool implementation can
+* [The `create`command](#createcommand): Create a new generation for a folder or file(s)
+* [The `diff`command](#diffcommand): Diff an entire folder structure
+* [The `flatten`command](#flattencommand): Flatten an MHL history into one external manifest
+* [The `info`command](#infocommand): Prints information from the ASC MHL history
 
-* create and extend ASC MHL history for given files and entire file hierarchies in a file system,
-* output information about recorded history (summary of history or detailed information about single files), and
-* verify files and entire file hierarchies.
-
-Typical scenarios, sample CLI output, and generated ASC MHL files can be found in the [README.md](https://github.com/ascmitc/mhl/blob/master/examples/scenarios/) file in the ``examples/scenarios`` folder of the git repository.
+Typical scenarios, sample CLI output, and generated ASC MHL files can be found in the 
+[README.md](https://github.com/ascmitc/mhl/blob/master/examples/scenarios/) file in the ``examples/scenarios`` folder 
+of the git repository.
 
 The documentation can also be found at [https://ascmhl.readthedocs.io/](https://ascmhl.readthedocs.io/)
 
-Jump directly to the commands:
+## The `ascmhl-debug` Tool
 
-* [The `create`command](#createcommand)
-* [The `flatten`command](#flattencommand)
-* [The `verify`command](#verifycommand)
-* [The `diff`command](#diffcommand)
-* [The `info`command](#infocommand)
+The `ascmhl-debug` tool is a command line tool with additional operations and commands that might come in handy during
+ implementation or testing.
 
+* [The `verify`command](#verifycommand): Verify a folder, single file(s), or a directory hash (without writing a 
+new generation)
+* [The `xsd-schema-check`command](#xsdschemacheckcommand): Checks a .mhl file against the xsd schema definition
+* [The `hash`command](#hashcommand): Create and print a hash value for a file
 
 ## Getting started
 
-The `mhllib` as well as the `ascmhl` tool require a few dependencies that need to be installed first. 
+The `mhllib` as well as the `ascmhl` and `ascmhl-degug` tools require a few dependencies that need to be installed 
+first. 
 
 For installing system dependencies on macOS [Homebrew](https://brew.sh) is recommended.
 
@@ -111,18 +121,19 @@ $ source env/bin/activate
 $ pip3 install --editable .
 ```
 
-This will install a wrapper script for `ascmhl` to be available on your `$PATH`. Inside the virtualenv, this wrapper 
-will be installed as `env/bin/ascmhl`. Regular users might have it in 
+This will install the wrapper scripts `ascmhl` and `ascmhl-debug` to be available on your `$PATH`. Inside the 
+virtualenv, this wrapper will be installed as `env/bin/ascmhl`. Regular users might have it in 
 `/Library/Frameworks/Python.framework/Versions/3.9/bin/ascmhl` or `/usr/local/bin`. For Windows users, pip will 
-create an `ascmhl.exe`.
+create an `ascmhl.exe` and an `ascmhl-debug.exe`.
 
 More information on installing Python commandline tools using `entry_points` can be found here:
 * https://setuptools.readthedocs.io/en/latest/userguide/entry_point.html
 * https://packaging.python.org/specifications/entry-points/#use-for-scripts
 * https://click.palletsprojects.com/en/master/setuptools/
 
-Adding the `-e / --editable` flag installs a linked version to your `site-packages` directory to allow editing the source 
-files in your working directory as usual.
+Adding the `-e / --editable` flag installs a linked version to your `site-packages` directory to allow editing the 
+source files in your working directory as usual.
+
 
 ## Common Scenarios for `ascmhl`
 
@@ -139,48 +150,68 @@ Additional utility commands:
 
 ### Working with file hierarchies (with completeness check)
 
-The most common commands when using the `ascmhl` in data management scenarios are the `create` and the `check` commands in their default behavior (without subcommand options). 
+The most common commands when using the `ascmhl` in data management scenarios are the `create` and the `check` 
+commands in their default behavior (without subcommand options). 
 
-Creating a new generation for a folder / drive with the `create` command traverses through a folder hierarchy, hashes all found files and compares the hashes against the records in the `ascmhl` folder (if present). The command creates a new generation (or an initial one) for the content of an entire folder at the given folder level. It can be used to document all files in a folder or drive with all verified or newly created file hashes of the moment the `create` command ran.
+Creating a new generation for a folder / drive with the `create` command traverses through a folder hierarchy, hashes 
+all found files and compares the hashes against the records in the `ascmhl` folder (if present). The command creates 
+a new generation (or an initial one) for the content of an entire folder at the given folder level. It can be used to 
+document all files in a folder or drive with all verified or newly created file hashes of the moment the `create` 
+command ran.
 
-Checking a folder / drive with the `verify` command traverses through the content of a folder, hashes all found files and compares the hashes against the records in the `ascmhl` folder. The `verify` command behaves like a `create` command (both without additional options), but doesn't write new generations. It can be used to verify the content of a received drive with existing ascmhl information.
+Checking a folder / drive with the `verify` command traverses through the content of a folder, hashes all found files 
+and compares the hashes against the records in the `ascmhl` folder. The `verify` command behaves like a `create` 
+command (both without additional options), but doesn't write new generations. It can be used to verify the content of 
+a received drive with existing ascmhl information.
 
-The `diff` command also traverses through the content of a folder / drive.  The `diff` command thus behaves like the `verify` command, but the `diff` command does not hash any files (e.g. doesn't do file verification) and thus is much faster in execution. It can be used to print all files that are existent in the file system and are not registered in the `ascmhl` folder yet, and all files that are registered in the `ascmhl` folder but that are missing in the file system.
+The `diff` command also traverses through the content of a folder / drive.  The `diff` command thus behaves like the 
+`verify` command, but the `diff` command does not hash any files (e.g. doesn't do file verification) and thus is much 
+faster in execution. It can be used to print all files that are existent in the file system and are not registered in 
+the `ascmhl` folder yet, and all files that are registered in the `ascmhl` folder but that are missing in the file 
+system.
 
 
 ### Working with single files (without completeness check)
 
-In some scenarios working with an entire folder structure is not adequate, and finer control of the processes files is needed. For those scenarios the `create` and `verify` commands are used with additional subcommand options.
+In some scenarios working with an entire folder structure is not adequate, and finer control of the processes files 
+is needed. For those scenarios the `create` and `verify` commands are used with additional subcommand options.
 
-Adding single files in a new generation with the `create -sf` ("single files, no completeness check") command allows to add single files to an existing folder structure and create new generations only with records of these files.
+Adding single files in a new generation with the `create -sf` ("single files, no completeness check") command allows 
+to add single files to an existing folder structure and create new generations only with records of these files.
 
-Hashing and verifying single files against hash information stored in the `ascmhl` folder with the `verify -sf` ("single files") command allows to "check" single files without the need for a (probably much longer running) check of the integrity of the entire folder structure. 
+Hashing and verifying single files against hash information stored in the `ascmhl` folder with the `verify -sf` 
+("single files") command allows to "check" single files without the need for a (probably much longer running) check 
+of the integrity of the entire folder structure. 
 
 The `info -sf` ("single file") command prints the known history of a single file with details about all generations.
 
 
 ## Commands of `ascmhl`
 
-_Implementation status 2020-09-08:_
+_Implementation status 2022-03-14:_
 
-* __Implemented__: `create`, `flatten` (partially), `verify`, `diff`, `info` (partially), `xsd-schema-check`
-* __Not implemented yet__: some subcommands for `flatten`, `verify`, `info`
-
-_The commands are also marked below with their current implementation status._
+* __Implemented__: `create`, `flatten` (partially), `diff`, `info` (partially)
 
 
 <a name="createcommand"></a>
 ### The `create` command
 
-The `create` command hashes all files given with the different options and creates a new generation in the mhl-history with records for all hashed files. The command compares the hashes against the hashes stored in previous generations if available.
+The `create` command hashes all files given with the different options and creates a new generation in the mhl-history 
+with records for all hashed files. The command compares the hashes against the hashes stored in previous generations 
+if available.
 
 #### `create` default behavior (for file hierarchy, with completeness check)
 
-The `create` command traverses through a folder hierarchy (such as a folder with media files, a camera card, or an entire drive). The command hashes all files (not ignored by the given ignore patterns given with the `-i` or `-ii` options) and the hashes are compared against records in the `ascmhl` folder. It records all hashed files in the new generation. Directory hashes are computed and also recorded in the new generation.
+The `create` command traverses through a folder hierarchy (such as a folder with media files, a camera card, or an 
+entire drive). The command hashes all files (not ignored by the given ignore patterns given with the `-i` or `-ii` 
+options) and the hashes are compared against records in the `ascmhl` folder. It records all hashed files in the new 
+generation. Directory hashes are computed and also recorded in the new generation.
 
-The command detects, prints error, and exits with a non-0 exit code if it finds files that are registered in the `ascmhl` folder but that are missing in the file system. 
+The command detects, prints error, and exits with a non-0 exit code if it finds files that are registered in the 
+`ascmhl` folder but that are missing in the file system. 
 
-Files that are existent in the file system but are not registered in the `ascmhl` folder yet, are registered as new entries in the newly created generation(s).
+Files that are existent in the file system but are not registered in the `ascmhl` folder yet, are registered as new 
+entries in the newly created generation(s).
 
 The `create` command takes the root path of the file hierarchy as the parameter:
 
@@ -192,13 +223,18 @@ Creator-info options:
 * `--location`: Location value of the `<creatorinfo>`element.
 * `--comment`: Comment value of the `<creatorinfo>`element.
 * `--author_name`: Name value of the `<author>` element in the `<creatorinfo>`element.
-* `--author_email`: Email value of the `<author>` element in the `<creatorinfo>`element (`--author_name` must also be set for this option).
-* `--author_phone`: Phone value of the `<author>` element in the `<creatorinfo>`element (`--author_name` must also be set for this option).
-* `--author_role`: Role value of the `<author>` element in the `<creatorinfo>`element (`--author_name` must also be set for this option).
+* `--author_email`: Email value of the `<author>` element in the `<creatorinfo>`element (`--author_name` must also be 
+set for this option).
+* `--author_phone`: Phone value of the `<author>` element in the `<creatorinfo>`element (`--author_name` must also be 
+set for this option).
+* `--author_role`: Role value of the `<author>` element in the `<creatorinfo>`element (`--author_name` must also be 
+set for this option).
 
-It works on folders with or without an `ascmhl` folder within the given folder hierarchy, and creates a new `ascmhl` folder at the given folder level if none is present before.
+It works on folders with or without an `ascmhl` folder within the given folder hierarchy, and creates a new `ascmhl` 
+folder at the given folder level if none is present before.
 
-`ascmhl` folders further down the file hierarchy are read, handled, and referenced in top-level `ascmhl` folders. Existing `ascmhl` folders further down the folder structure will also get a new generation added.
+`ascmhl` folders further down the file hierarchy are read, handled, and referenced in top-level `ascmhl` folders. 
+Existing `ascmhl` folders further down the folder structure will also get a new generation added.
 
 Implementation:
 
@@ -218,7 +254,8 @@ create new generation(s) (mhllib)
 
 #### `create` with `-sf` option(s) (for single file(s), no completeness check)
 
-The `create` command with `-sf` option is run with the root path of the file hierarchy as well as one or multiple paths to the individual files to be recorded as the parameters.
+The `create` command with `-sf` option is run with the root path of the file hierarchy as well as one or multiple 
+paths to the individual files to be recorded as the parameters.
 
 This command can be used for instance when adding single files to an already mhl-managed file hierarchy.
 
@@ -226,7 +263,8 @@ This command can be used for instance when adding single files to an already mhl
 $ ascmhl create /path/to/root/folder -sf /path/to/single/file1 [-sf /path/to/single/file2 ..]
 ```
 
-A new generation is created in all `ascmhl` folders below the given root path (e.g. in a nested mhl-history). If no mhl-history is present yet, an error is thrown.
+A new generation is created in all `ascmhl` folders below the given root path (e.g. in a nested mhl-history). If no 
+mhl-history is present yet, an error is thrown.
 
 No other files than the ones specified as `-sf` options are handled by this command.
 
@@ -244,7 +282,8 @@ for each file from input
 <a name="flattencommand"></a>
 ### The `flatten` command 
 
-The `flatten` command takes the root path of the file hierarchy and the destination path for the flattened manifest as the parameter:
+The `flatten` command takes the root path of the file hierarchy and the destination path for the flattened manifest as 
+the parameter:
 
 ```
 $ ascmhl flatten [-i ignore pattern|-ii /path/to/ignore-file.txt] [creator-info options] /path/to/folder/ /destination/path/
@@ -254,9 +293,12 @@ Creator-info options:
 * `--location`: Location value of the `<creatorinfo>`element.
 * `--comment`: Comment value of the `<creatorinfo>`element.
 * `--author_name`: Name value of the `<author>` element in the `<creatorinfo>`element.
-* `--author_email`: Email value of the `<author>` element in the `<creatorinfo>`element (`--author_name` must also be set for this option).
-* `--author_phone`: Phone value of the `<author>` element in the `<creatorinfo>`element (`--author_name` must also be set for this option).
-* `--author_role`: Role value of the `<author>` element in the `<creatorinfo>`element (`--author_name` must also be set for this option).
+* `--author_email`: Email value of the `<author>` element in the `<creatorinfo>`element (`--author_name` must also be 
+set for this option).
+* `--author_phone`: Phone value of the `<author>` element in the `<creatorinfo>`element (`--author_name` must also be 
+set for this option).
+* `--author_role`: Role value of the `<author>` element in the `<creatorinfo>`element (`--author_name` must also be 
+set for this option).
 
 _TBD_
 
@@ -293,12 +335,102 @@ Options:
 
 ```
 
+
+
+
+<a name="infocommand"></a>
+### The `info` command 
+
+#### `info` default behavior
+
+The `ascmhl` folder contains well readable XML files, but the number of recorded files, generations, hash entries, 
+verification info and so forth adds up to an amount of information that cannot be quickly understood. The `info` 
+command helps to get a quick overview of the contents of the stored information in an `ascmhl` folder. 
+
+The `info` command prints
+* a list of generations (with the `-v` option also with creator info and process info)
+* _[not implemented yet]_ a summary (with the `-s` subcommand option) of the information in an ascmhl folder, such as 
+* number of recorded files, and a list of the generations with their creator info, and/or
+* _[not implemented yet]_ a list (with the `-l` option) of all file (and folder) records stored in an ascmhl folder, 
+* together with relative file paths, file size, and known file hashes.
+
+It is run with the path to a specific `ascmhl` folder as the parameter.
+
+```
+$ ascmhl info [-s|-l] [-v] /path/to/ascmhl/ 
+```
+
+Implementation:
+
+```
+error if no mhl folder found on root level
+read (recursive) mhl history (mhllib)
+if summary option:
+	print summary
+if list option:
+	for each file record
+		print file info, hashes, etc.
+```
+
+
+#### `info` with the `-sf` subcommand option 
+
+The `info` command with the `-sf` subcommand option outputs information about the full and detailed history 
+information about one file.
+
+```
+$ ascmhl info -sf /path/to/file [-sf /path/to/other/file] [/root/path]
+```
+
+The command outputs each generation where the file has been handled, including date, hash, and activity (and creator 
+info and absolute path with the `-v` option). The history information is read from the "next" ASC MHL history found in 
+the path, of at the given root path.
+
+Implementation:
+
+```
+find mhl-history information in the path above (mhllib)
+	error of no `ascmhl` folder is found
+print detailed info for file
+```
+
+
+#### `info` with the `-dh` subcommand option _[not implemented yet]_
+
+The `info` command with the `-dh` subcommand option prints
+* the directory hash of a folder computed from stored file hashes of an `ascmhl` folder (with the `-dh` option).
+
+The directory hash can be used to quickly verify if the state of a folder structure is still the same compared to the 
+last generation created with a `create` command (manually compare with the hash in the `<root>` tag in the ASC MHL 
+file).
+
+It is run with the path to a specific `ascmhl`folder and the path to the desired folder for the computed directory 
+hash.
+
+```
+$ ascmhl info -dh /path/to/ascmhl/ /path/to/sub/folder 
+```
+
+Implementation:
+
+```
+error if no mhl folder found on root level
+read (recursive) mhl history (mhllib)
+calculate directory hash from file hashes
+print directory hash
+```
+
+
+
+## Commands of `ascmhl-debug`
+
 <a name="verifycommand"></a>
 ### The `verify` command
 
 #### `verify` default behavior (for file hierarchy, with completeness check)
 
-The `verify` command traverses through the content of a folder, hashes all found files  (filtered by the ignore patterns from the `ascmhl` folder) and compares the hashes against the records in the `ascmhl` folder.
+The `verify` command traverses through the content of a folder, hashes all found files  (filtered by the ignore 
+patterns from the `ascmhl` folder) and compares the hashes against the records in the `ascmhl` folder.
 
 The command detects, prints errors, and exits with a non-0 exit code for
 
@@ -346,7 +478,8 @@ $ ascmhl verify -sf /absolute/path/to/single/file
 $ ascmhl verify -sf realtive/path/to/single/file
 ```
 
-The command looks for an `ascmhl` folder in the folders above the given files. If no mhl-history is present yet, an error is thrown.
+The command looks for an `ascmhl` folder in the folders above the given files. If no mhl-history is present yet, an 
+error is thrown.
 
 Implementation:
 
@@ -367,15 +500,20 @@ on error (including mismatching hashes):
 
 #### `verify` with `-dh` subcommand option (for directory hash)
 
-The `verify` command with the `-dh` subcommand (or `--directory_hash`) option creates the directory hash by hashing the contained files of the given directory path (filtered by the ignore patterns from the `ascmhl` folder) and compares it with the to-be-expected directory hash calculated from the file hashes (same calculation as the `info` command with the `-dh` subcommand option).
+The `verify` command with the `-dh` subcommand (or `--directory_hash`) option creates the directory hash by hashing 
+the contained files of the given directory path (filtered by the ignore patterns from the `ascmhl` folder) and compares
+it with the to-be-expected directory hash calculated from the file hashes (same calculation as the `info` command with 
+the `-dh` subcommand option).
 
 
 ```
 $ ascmhl verify -dh [-co [-ro]] /path/to/folder
 ```
 
-The `-co` option (or `--calculate_only`) only calculates and prints the directory hashes and doesn't verify them against an existing history. 
-This option also works when no history is present. The `-ro` option (or `--root_only`) only calculates and prints the root directory hash. This option is only in effect with the `-co` option.
+The `-co` option (or `--calculate_only`) only calculates and prints the directory hashes and doesn't verify them 
+against an existing history. 
+This option also works when no history is present. The `-ro` option (or `--root_only`) only calculates and prints the 
+root directory hash. This option is only in effect with the `-co` option.
 
 
 Implementation:
@@ -397,7 +535,8 @@ on error (including mismatching hash):
 
 #### `verify` with `-pl` subcommand option (for packing lists)
 
-The `verify` command with the `-pl` subcommand (or `--packing_list`) option can be used to verify a folder structure with a given packing list. 
+The `verify` command with the `-pl` subcommand (or `--packing_list`) option can be used to verify a folder structure 
+with a given packing list. 
 
 It is run with the path to the packing list manifest file as the parameter.
 
@@ -412,7 +551,9 @@ _TBD_
 <a name="diffcommand"></a>
 ### The `diff` command
 
-The `diff` command is very similar to the `verify` command in the default behavior, only that it doesn't create hashes and doesn't verify them. It can be used to quickly check if a folder structure has new files that have not been recorded yet, or if files are missing.
+The `diff` command is very similar to the `verify` command in the default behavior, only that it doesn't create hashes 
+and doesn't verify them. It can be used to quickly check if a folder structure has new files that have not been 
+recorded yet, or if files are missing.
 
 The command detects, prints errors, and exits with a non-0 exit code for
 
@@ -445,84 +586,14 @@ end with exit !=0 if at least one of the files has failed, a file was \
 ```
 
 
-<a name="infocommand"></a>
-### The `info` command 
-
-#### `info` default behavior
-
-The `ascmhl` folder contains well readable XML files, but the number of recorded files, generations, hash entries, verification info and so forth adds up to an amount of information that cannot be quickly understood. The `info` command helps to get a quick overview of the contents of the stored information in an `ascmhl` folder. 
-
-The `info` command prints
-* a list of generations (with the `-v` option also with creator info and process info)
-* _[not implemented yet]_ a summary (with the `-s` subcommand option) of the information in an ascmhl folder, such as number of recorded files, and a list of the generations with their creator info, and/or
-* _[not implemented yet]_ a list (with the `-l` option) of all file (and folder) records stored in an ascmhl folder, together with relative file paths, file size, and known file hashes.
-
-It is run with the path to a specific `ascmhl` folder as the parameter.
-
-```
-$ ascmhl info [-s|-l] [-v] /path/to/ascmhl/ 
-```
-
-Implementation:
-
-```
-error if no mhl folder found on root level
-read (recursive) mhl history (mhllib)
-if summary option:
-	print summary
-if list option:
-	for each file record
-		print file info, hashes, etc.
-```
-
-
-#### `info` with the `-sf` subcommand option 
-
-The `info` command with the `-sf` subcommand option outputs information about the full and detailed history information about one file.
-
-```
-$ ascmhl info -sf /path/to/file [-sf /path/to/other/file] [/root/path]
-```
-
-The command outputs each generation where the file has been handled, including date, hash, and activity (and creator info and absolute path with the `-v` option). The history information is read from the "next" ASC MHL history found in the path, of at the given root path.
-
-Implementation:
-
-```
-find mhl-history information in the path above (mhllib)
-	error of no `ascmhl` folder is found
-print detailed info for file
-```
-
-
-#### `info` with the `-dh` subcommand option _[not implemented yet]_
-
-The `info` command with the `-dh` subcommand option prints
-* the directory hash of a folder computed from stored file hashes of an `ascmhl` folder (with the `-dh` option).
-
-The directory hash can be used to quickly verify if the state of a folder structure is still the same compared to the last generation created with a `create` command (manually compare with the hash in the `<root>` tag in the ASC MHL file).
-
-It is run with the path to a specific `ascmhl`folder and the path to the desired folder for the computed directory hash.
-
-```
-$ ascmhl info -dh /path/to/ascmhl/ /path/to/sub/folder 
-```
-
-Implementation:
-
-```
-error if no mhl folder found on root level
-read (recursive) mhl history (mhllib)
-calculate directory hash from file hashes
-print directory hash
-```
-
-
 ### The `xsd-schema-check` command
 
-The `xsd-schema-check` command validates a given ASC MHL Manifest file against the XML XSD. This command can be used to ensure the creation of syntactically valid ASC MHL files, for example during  implementation of tools creating ASC MHL files.
+The `xsd-schema-check` command validates a given ASC MHL Manifest file against the XML XSD. This command can be used 
+to ensure the creation of syntactically valid ASC MHL files, for example during  implementation of tools creating 
+ASC MHL files.
 
-_Note: The `xsd-schema-check` command must be run from a directory with a `xsd` subfolder where the ASC MHL xsd files are located (for example it can be run from the root folder of the ASC MHL git repository)._
+_Note: The `xsd-schema-check` command must be run from a directory with a `xsd` subfolder where the ASC MHL xsd files 
+are located (for example it can be run from the root folder of the ASC MHL git repository)._
 
 ```
 $ ascmhl xsd-schema-check /path/to/ascmhl/XXXXX.mhl
@@ -530,7 +601,8 @@ $ ascmhl xsd-schema-check /path/to/ascmhl/XXXXX.mhl
 
 #### `xsd-schema-check` with the `-df` subcommand option
 
-The `xsd-schema-check` command with the `-df` subcommand option can validates a ASC MHL Directory file instead of a manifest file.
+The `xsd-schema-check` command with the `-df` subcommand option can validates a ASC MHL Directory file instead of a 
+manifest file.
 
 It is run with the path to a ASC MHL Directory file.
 
@@ -541,12 +613,13 @@ $ ascmhl xsd-schema-check -df /path/to/ascmhl/ascmhl_chain.xml
 
 ## Known issues
 
-The current state of the implementation is intended to give a good overview what can be done with ASC MHL. Nonetheless this is not yet a complete implementation of the ASC MHL specification:
+The current state of the implementation is intended to give a good overview what can be done with ASC MHL. Nonetheless 
+this is not yet a complete implementation of the ASC MHL specification:
 
 * Currently not all initially specified commands are implemented yet (see sections above)
-* Renaming of files is currently not implemented (neither as command, nor proper handling in histories and packing lists)
+* Renaming of files is currently not implemented (neither as command, nor proper handling in histories and packing 
+* lists)
 * The chain file is currently not verified yet
-* Some secondary features of the ASC MHL specification are not implemented yet.
 
 _Also see the [GitHub issues](https://github.com/ascmitc/mhl/issues) page for more._
 

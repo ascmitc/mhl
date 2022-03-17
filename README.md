@@ -9,7 +9,7 @@
 > the [American Society of Cinematographers](https://theasc.com) (ASC). 
 >
 > Resources:
-> * 🌎 [ASC MHL Homepage](https://ascmhl.com/) (at [https://ascmhl.com/](https://ascmhl.com/))
+> * 🌎 [ASC MHL Homepage](http://ascmhl.com/) (at [http://ascmhl.com/](http://ascmhl.com/))
 > * 📄 [ASC MHL Specification page](https://theasc.com/asc/asc-media-hash-list) (at [theasc.com](https://theasc.com))
 > 
 > In case you are looking for the original specification of MHL, please take a look at 

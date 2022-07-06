@@ -175,7 +175,7 @@ def test_create_no_directory_hashes(fs):
     assert hash_list.find_media_hash_for_path("A").is_directory
     assert len(hash_list.find_media_hash_for_path("A").hash_entries) == 0
     # and no directory hash of the root folder is set in the header
-    assert len(hash_list.process_info.root_media_hash.hash_entries) == 0
+    assert hash_list.process_info.root_media_hash == None
     # the empty folder is still referenced even if not creating directory hashes
     assert hash_list.find_media_hash_for_path("emptyFolder").is_directory
 

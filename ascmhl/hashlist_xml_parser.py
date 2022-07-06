@@ -366,11 +366,18 @@ def _process_info_xml_element(hash_list: MHLHashList):
     if root_hash.path == ".":  # TODO: can we find out if this is a non-flattened history further up?
         root_hash.path = hash_list.get_root_path()
 
-    info_element = E.processinfo(
-        E.process(process_info.process.process_type),
-        _root_media_hash_xml_element(root_hash),
-        _ignorespec_xml_element(hash_list.process_info.ignore_spec),
-    )
+    if root_hash is not None and len(root_hash.hash_entries) > 0:
+        info_element = E.processinfo(
+            E.process(process_info.process.process_type),
+            _root_media_hash_xml_element(root_hash),
+            _ignorespec_xml_element(hash_list.process_info.ignore_spec),
+        )
+    else:
+        info_element = E.processinfo(
+            E.process(process_info.process.process_type),
+            _ignorespec_xml_element(hash_list.process_info.ignore_spec),
+        )
+
     return info_element
 
 

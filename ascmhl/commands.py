@@ -1272,7 +1272,13 @@ def info_for_single_file(root_path, verbose, single_file):
     is_flag=True,
     help="Check directory file (e.g. ascmhl_chain.xml) instead of manifest file",
 )
-def xsd_schema_check(file_path, directory_file):
+@click.option(
+    "--xsd_file",
+    "-xsd",
+    default=None,
+    help="Path to the xsd file",
+)
+def xsd_schema_check(file_path, directory_file, xsd_file):
     """
     Checks a .mhl file against the xsd schema definition
 
@@ -1287,6 +1293,9 @@ def xsd_schema_check(file_path, directory_file):
 
     if directory_file:
         xsd_path = "xsd/ASCMHLDirectory__combined.xsd"
+
+    if xsd_file != None:
+        xsd_path = xsd_file
 
     xsd = etree.XMLSchema(etree.parse(xsd_path))
 

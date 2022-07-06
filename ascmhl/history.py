@@ -231,8 +231,9 @@ class MHLHistory:
                         generation_number = int(parts[0][0])
                         hash_list.generation_number = generation_number
                         # FIXME is there a better way of accessing the generation from a hash entry?
-                        for hash_entry in hash_list.process_info.root_media_hash.hash_entries:
-                            hash_entry.temp_generation_number = hash_list.generation_number
+                        if hash_list.process_info.root_media_hash is not None:
+                            for hash_entry in hash_list.process_info.root_media_hash.hash_entries:
+                                hash_entry.temp_generation_number = hash_list.generation_number
                         hash_lists.append(hash_list)
                     else:
                         logger.error(f"name of ascmhl file {filename} does not conform to naming convention")

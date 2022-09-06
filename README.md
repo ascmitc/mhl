@@ -138,14 +138,10 @@ source files in your working directory as usual.
 
 The `ascmhl` tool can be used to 
 
-* create new MHL generations for given files and folders (command `create`), 
-* verify the state of files and folders against the MHL history (command `verify`),
-* print differences between the records in the MHL history and given files and folders (command `diff`), and
+* verify and create new MHL generations for given files and folders (command `create`), 
+* print differences between the records in the MHL history and given files and folders (command `diff`), 
+* create one "flattened" manifest file from a history (command `flatten`), and
 * print information about an MHL history (command `info`).
-
-Additional utility commands:
-* for validating MHL (command `xsd-schema-check`)
-
 
 ### Working with file hierarchies (with completeness check)
 
@@ -277,6 +273,46 @@ for each file from input
 	add record for file to new generation (mhllib)
 		add a new generation if necessary in appropriate `ascmhl` folder (mhllib)
 ```
+
+
+
+<a name="diffcommand"></a>
+### The `diff` command
+
+The `diff` command is very similar to the `verify` command in the default behavior, only that it doesn't create hashes 
+and doesn't verify them. It can be used to quickly check if a folder structure has new files that have not been 
+recorded yet, or if files are missing.
+
+The command detects, prints errors, and exits with a non-0 exit code for
+
+* all files that existent in the file system but not registered in the `ascmhl` folder yet, and
+* all files that are registered in the `ascmhl` folder but that are missing in the file system. 
+
+It is run with the root path of the file hierarchy as the parameter.
+
+```
+$ ascmhl diff /path/to/folder/ 
+```
+
+If no `ascmhl` folder is found on the root level, an error is thrown.
+
+`ascmhl` folders are read recursively. 
+
+Implementation:
+
+```
+error if no mhl folder found on root level
+read (recursive) mhl history (mhllib)
+traverse folder
+	on missing file:
+		print error
+	 	continue
+compare found files in file system with records in ascmhl folder \
+  and warn if files are missing that are recorded in the ascmhl folder
+end with exit !=0 if at least one of the files has failed, a file was \
+  missing, or new files have been found
+```
+
 
 <a name="flattencommand"></a>
 ### The `flatten` command 
@@ -547,44 +583,8 @@ $ ascmhl verify -pl /path/to/packing-list.mhl
 _TBD_
 
 
-<a name="diffcommand"></a>
-### The `diff` command
 
-The `diff` command is very similar to the `verify` command in the default behavior, only that it doesn't create hashes 
-and doesn't verify them. It can be used to quickly check if a folder structure has new files that have not been 
-recorded yet, or if files are missing.
-
-The command detects, prints errors, and exits with a non-0 exit code for
-
-* all files that existent in the file system but not registered in the `ascmhl` folder yet, and
-* all files that are registered in the `ascmhl` folder but that are missing in the file system. 
-
-It is run with the root path of the file hierarchy as the parameter.
-
-```
-$ ascmhl diff /path/to/folder/ 
-```
-
-If no `ascmhl` folder is found on the root level, an error is thrown.
-
-`ascmhl` folders are read recursively. 
-
-Implementation:
-
-```
-error if no mhl folder found on root level
-read (recursive) mhl history (mhllib)
-traverse folder
-	on missing file:
-		print error
-	 	continue
-compare found files in file system with records in ascmhl folder \
-  and warn if files are missing that are recorded in the ascmhl folder
-end with exit !=0 if at least one of the files has failed, a file was \
-  missing, or new files have been found
-```
-
-
+<a name="xsdschemacheckcommand"></a>
 ### The `xsd-schema-check` command
 
 The `xsd-schema-check` command validates a given ASC MHL Manifest file against the XML XSD. This command can be used 
@@ -607,6 +607,25 @@ It is run with the path to a ASC MHL Directory file.
 
 ```
 $ ascmhl xsd-schema-check -df /path/to/ascmhl/ascmhl_chain.xml
+```
+
+
+<a name="hashcommand"></a>
+### The `hash` command
+
+The `hash` command hashes an individual file with the given hash algorithm (via `-h` or `--hash_format`) and prints the hash value.
+
+```
+$ ascmhl-debug hash --help
+Usage: ascmhl-debug hash [OPTIONS] FILE_PATH
+
+  Create and print a hash value for a file
+
+Options:
+  -h, --hash_format [md5|sha1|xxh128|xxh3|xxh64|c4]
+                                  Algorithm  [required]
+  --help                          Show this message and exit.
+
 ```
 
 

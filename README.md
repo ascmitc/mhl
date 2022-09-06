@@ -591,7 +591,9 @@ to ensure the creation of syntactically valid ASC MHL files, for example during 
 ASC MHL files.
 
 _Note: The `xsd-schema-check` command must be run from a directory with a `xsd` subfolder where the ASC MHL xsd files 
-are located (for example it can be run from the root folder of the ASC MHL git repository)._
+are located (for example it can be run from the root folder of the ASC MHL git repository). Alternatively you can pass 
+the local path to the XSD file (available [here](https://raw.githubusercontent.com/ascmitc/mhl/master/xsd/ASCMHL.xsd)) 
+with the `-xsd` or `--xsd_file` option._
 
 ```
 $ ascmhl xsd-schema-check /path/to/ascmhl/XXXXX.mhl

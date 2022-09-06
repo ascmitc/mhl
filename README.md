@@ -154,36 +154,36 @@ a new generation (or an initial one) for the content of an entire folder at the 
 document all files in a folder or drive with all verified or newly created file hashes of the moment the `create` 
 command ran.
 
-Checking a folder / drive with the `verify` command traverses through the content of a folder, hashes all found files 
-and compares the hashes against the records in the `ascmhl` folder. The `verify` command behaves like a `create` 
-command (both without additional options), but doesn't write new generations. It can be used to verify the content of 
-a received drive with existing ascmhl information.
-
 The `diff` command also traverses through the content of a folder / drive.  The `diff` command thus behaves like the 
 `verify` command, but the `diff` command does not hash any files (e.g. doesn't do file verification) and thus is much 
 faster in execution. It can be used to print all files that are existent in the file system and are not registered in 
 the `ascmhl` folder yet, and all files that are registered in the `ascmhl` folder but that are missing in the file 
 system.
 
+Checking a folder / drive with the `verify` command (of the `ascmhl-debug` tool) traverses through the content of a folder, 
+hashes all found files and compares the hashes against the records in the `ascmhl` folder. The `verify` command behaves 
+like a `create` command (both without additional options), but doesn't write new generations. It can be used to verify 
+the content of a received drive with existing ascmhl information.
+
 
 ### Working with single files (without completeness check)
 
 In some scenarios working with an entire folder structure is not adequate, and finer control of the processes files 
-is needed. For those scenarios the `create` and `verify` commands are used with additional subcommand options.
+is needed. For those scenarios the `create` command is used with additional subcommand options.
 
 Adding single files in a new generation with the `create -sf` ("single files, no completeness check") command allows 
 to add single files to an existing folder structure and create new generations only with records of these files.
 
-Hashing and verifying single files against hash information stored in the `ascmhl` folder with the `verify -sf` 
-("single files") command allows to "check" single files without the need for a (probably much longer running) check 
-of the integrity of the entire folder structure. 
-
 The `info -sf` ("single file") command prints the known history of a single file with details about all generations.
+
+Hashing and verifying single files against hash information stored in the `ascmhl` folder with the `verify -sf` 
+("single files") command (of the `ascmhl-debug` tool) allows to "check" single files without the need for a (probably 
+much longer running) check of the integrity of the entire folder structure. 
 
 
 ## Commands of `ascmhl`
 
-_Implementation status 2022-03-14:_
+_Implementation status 2022-09:_
 
 * __Implemented__: `create`, `flatten` (partially), `diff`, `info` (partially)
 
@@ -276,44 +276,6 @@ for each file from input
 
 
 
-<a name="diffcommand"></a>
-### The `diff` command
-
-The `diff` command is very similar to the `verify` command in the default behavior, only that it doesn't create hashes 
-and doesn't verify them. It can be used to quickly check if a folder structure has new files that have not been 
-recorded yet, or if files are missing.
-
-The command detects, prints errors, and exits with a non-0 exit code for
-
-* all files that existent in the file system but not registered in the `ascmhl` folder yet, and
-* all files that are registered in the `ascmhl` folder but that are missing in the file system. 
-
-It is run with the root path of the file hierarchy as the parameter.
-
-```
-$ ascmhl diff /path/to/folder/ 
-```
-
-If no `ascmhl` folder is found on the root level, an error is thrown.
-
-`ascmhl` folders are read recursively. 
-
-Implementation:
-
-```
-error if no mhl folder found on root level
-read (recursive) mhl history (mhllib)
-traverse folder
-	on missing file:
-		print error
-	 	continue
-compare found files in file system with records in ascmhl folder \
-  and warn if files are missing that are recorded in the ascmhl folder
-end with exit !=0 if at least one of the files has failed, a file was \
-  missing, or new files have been found
-```
-
-
 <a name="flattencommand"></a>
 ### The `flatten` command 
 
@@ -370,6 +332,43 @@ Options:
 
 ```
 
+
+<a name="diffcommand"></a>
+### The `diff` command
+
+The `diff` command is very similar to the `verify` command in the default behavior, only that it doesn't create hashes 
+and doesn't verify them. It can be used to quickly check if a folder structure has new files that have not been 
+recorded yet, or if files are missing.
+
+The command detects, prints errors, and exits with a non-0 exit code for
+
+* all files that existent in the file system but not registered in the `ascmhl` folder yet, and
+* all files that are registered in the `ascmhl` folder but that are missing in the file system. 
+
+It is run with the root path of the file hierarchy as the parameter.
+
+```
+$ ascmhl diff /path/to/folder/ 
+```
+
+If no `ascmhl` folder is found on the root level, an error is thrown.
+
+`ascmhl` folders are read recursively. 
+
+Implementation:
+
+```
+error if no mhl folder found on root level
+read (recursive) mhl history (mhllib)
+traverse folder
+	on missing file:
+		print error
+	 	continue
+compare found files in file system with records in ascmhl folder \
+  and warn if files are missing that are recorded in the ascmhl folder
+end with exit !=0 if at least one of the files has failed, a file was \
+  missing, or new files have been found
+```
 
 
 

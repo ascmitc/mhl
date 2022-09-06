@@ -98,7 +98,7 @@ def parse(file_path):
                     if tag == "creationdate":
                         current_object.creation_date = element.text
                     elif tag == "tool":
-                        current_object.tool = MHLTool(element.text, element.attrib["version"])
+                        current_object.tool = MHLTool(element.text, element.attrib.get("version"))
                     elif tag == "hostname":
                         current_object.host_name = element.text
                     elif tag == "location":

@@ -116,7 +116,6 @@ class MHLGenerationCreationSession:
     def append_file_hash(
         self, file_path, file_size, file_modification_date, hash_format, hash_string, action=None, hash_date=None
     ) -> bool:
-
         relative_path = self.root_history.get_relative_file_path(file_path)
         # TODO: handle if path is outside of history root path
 
@@ -230,7 +229,6 @@ class MHLGenerationCreationSession:
     def append_directory_hashes(
         self, path, modification_date, hash_format, content_hash_string, structure_hash_string
     ) -> None:
-
         relative_path = self.root_history.get_relative_file_path(path)
         # TODO: handle if path is outside of history root path
 

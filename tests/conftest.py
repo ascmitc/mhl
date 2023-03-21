@@ -41,7 +41,6 @@ def setup_environment(monkeypatch):
 @pytest.fixture
 @freeze_time("2020-01-15 13:00:00")
 def nested_mhl_histories(fs):
-
     # create mhl histories on different directly levels
     fs.create_file("/root/Stuff.txt", contents="stuff\n")
     runner = CliRunner()
@@ -66,7 +65,6 @@ def nested_mhl_histories(fs):
 @pytest.fixture
 @freeze_time("2020-01-15 13:00:00")
 def simple_mhl_history(fs):
-
     # create a simple mhl history with two files in one generation
     fs.create_file("/root/Stuff.txt", contents="stuff\n")
     fs.create_file("/root/A/A1.txt", contents="A1\n")
@@ -79,7 +77,6 @@ def simple_mhl_history(fs):
 @pytest.fixture
 @freeze_time("2020-01-15 13:00:00")
 def simple_mhl_folder(fs):
-
     # create a simple folder structure with two files
     fs.create_file("/root/Stuff.txt", contents="stuff\n")
     fs.create_file("/root/A/A1.txt", contents="A1\n")

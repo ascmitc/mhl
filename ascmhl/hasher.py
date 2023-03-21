@@ -245,7 +245,6 @@ class HashType(Enum):
 
 class AggregateHasher:
     def __init__(self, hash_formats: [str]):
-
         # Build a hasher for each format
         hasher_lookup = Dict[str, str]
         for hash_format in hash_formats:
@@ -320,7 +319,6 @@ class DirectoryHashContext:
     """
 
     def __init__(self, hash_format: str):
-
         self.hash_format = hash_format
         self.hasher = new_hasher_for_hash_type(hash_format)
         self.content_hash_strings = []

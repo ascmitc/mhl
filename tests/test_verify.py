@@ -45,7 +45,6 @@ def test_directory_verify(fs, simple_mhl_history):
 
 @freeze_time("2020-01-16 09:15:00")
 def test_directory_verify_detect_changes(fs, simple_mhl_history):
-
     # add some more files and folders
     fs.create_file("/root/B/B1.txt", contents="B1\n")
     fs.create_file("/root/A/A2.txt", contents="A2\n")
@@ -82,7 +81,6 @@ def test_directory_verify_detect_changes(fs, simple_mhl_history):
 
 @freeze_time("2020-01-16 09:15:00")
 def test_verify_single_file(fs, simple_mhl_history):
-
     runner = CliRunner()
 
     # verify relative path

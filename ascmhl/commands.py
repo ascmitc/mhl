@@ -535,7 +535,6 @@ def verify_entire_folder(
                 continue
 
             if single_file is None or os.path.realpath(single_file) == os.path.realpath(file_path):
-
                 # check if there is an existing hash in the other generations and verify
                 original_hash_entry = history.find_original_hash_entry_for_path(history_relative_path)
 
@@ -747,7 +746,6 @@ def verify_directory_hash_subcommand(
 
         # compare root hashes, works differently
         if folder_path == root_path:
-
             for hash_list in existing_history.hash_lists:
                 root_hash_entries = hash_list.process_info.root_media_hash.hash_entries
                 if len(root_hash_entries) > 0:

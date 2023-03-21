@@ -48,7 +48,6 @@ def parse(file_path):
     file = open(file_path, "rb")
     existing_ignore_patterns = []
     for event, element in etree.iterparse(file, events=("start", "end")):
-
         # check if we need to create a new container
         if event == "start":
             # the tag might contain the namespace like {urn:ASC:MHL:v2.0}hash, so we need to strip the namespace part
@@ -90,7 +89,6 @@ def parse(file_path):
                     is_directory_structure = False
 
         elif event == "end":
-
             if current_object:
                 tag = element.tag.split("}", 1)[-1]
 

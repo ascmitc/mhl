@@ -4,15 +4,11 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 # ASC Media Hash List (ASC MHL)
-> The software in this repository is the reference implementation for the ASC Media Hash List (ASC MHL) format 
-> specification by the Advanced Data Management Subcommittee of the ASC Motion Imaging Technology Council (MITC) at 
-> the [American Society of Cinematographers](https://theasc.com) (ASC). 
+
+> The software in this repository is the home of the reference implementation for the ASC Media Hash List (ASC MHL) format. 
 >
 > Resources:
-> * 📄 [ASC MHL Specification page](https://theasc.com/asc/asc-media-hash-list) (at [theasc.com](https://theasc.com))
-> 
-> In case you are looking for the original specification of MHL, please take a look at 
-> [https://mediahashlist.org](https://mediahashlist.org).
+> * 📄 [ASC MHL Specification](https://github.com/ascmitc/mhl-specification/tree/master/Specification) (in the [`mhl-specification`](https://github.com/ascmitc/mhl-specification)  repository at github)
 
 Ensuring file integrity when backing up and verifying files during production and post-production is of utmost 
 importance. The ASC MHL is used to create a chain of custody by tracking each and every copy made between the 

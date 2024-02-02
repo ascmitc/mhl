@@ -7,7 +7,6 @@ __maintainer__ = "Patrick Renner, Alexander Sahm"
 __email__ = "opensource@pomfort.com"
 """
 
-
 from __future__ import annotations
 import os
 import re

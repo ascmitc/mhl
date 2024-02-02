@@ -6,6 +6,7 @@ __license__ = "MIT"
 __maintainer__ = "Patrick Renner, Alexander Sahm"
 __email__ = "opensource@pomfort.com"
 """
+
 import os
 import textwrap
 from timeit import default_timer as timer

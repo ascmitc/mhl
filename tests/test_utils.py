@@ -7,7 +7,9 @@ import os, time
 
 def test_time():
     datetime_now_filename = datetime_now_filename_string()
-    datetime_now_filename_reference = datetime.datetime.strftime(datetime.datetime.utcnow(), "%Y-%m-%d_%H%M%S")
+    datetime_now_filename_reference = datetime.datetime.strftime(
+        datetime.datetime.now(datetime.UTC), "%Y-%m-%d_%H%M%SZ"
+    )
 
     print("datetime_now_filename:           " + datetime_now_filename)
     print("datetime_now_filename_reference: " + datetime_now_filename_reference)

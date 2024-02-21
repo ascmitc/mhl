@@ -57,6 +57,7 @@ def test_child_history_parsing(fs, nested_mhl_histories):
     assert root_history.find_history_for_path("B/B1.txt")[0] == b_history
     assert root_history.find_history_for_path("B/BA/BA1.txt")[0] == b_history
     assert root_history.find_history_for_path("B/BB/BB1.txt")[0] == bb_history
+    assert root_history.find_history_for_path("B")[0] == b_history
 
     # the history object should only return the media hashes and hash entries it contains directly
     # if we need th entries from child histories we have to ask them directly

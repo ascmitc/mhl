@@ -18,6 +18,7 @@ from . import logger
 from . import errors
 from . import ignore
 from . import utils
+from . import hasher
 from .ignore import MHLIgnoreSpec
 from .__version__ import (
     ascmhl_supported_hashformats,
@@ -60,6 +61,13 @@ from collections import namedtuple
     default=False,
     is_flag=True,
     help="Skip creation of directory hashes, only reference directories without hash",
+)
+@click.option(
+    "--detect-renaming",
+    "-dr",
+    default=False,
+    is_flag=True,
+    help="Detect automatically renamed files",
 )
 # creatorinfo values
 @click.option(
@@ -119,6 +127,7 @@ def create(
     verbose,
     hash_format,
     no_directory_hashes,
+    detect_renaming,
     single_file,
     ignore_list,
     ignore_spec_file,
@@ -142,6 +151,7 @@ def create(
         create_for_single_files_subcommand(
             root_path,
             verbose,
+            detect_renaming,
             hash_format,
             single_file,
             author_name,
@@ -157,6 +167,7 @@ def create(
     create_for_folder_subcommand(
         root_path,
         verbose,
+        detect_renaming,
         hash_format,
         no_directory_hashes,
         author_name,
@@ -174,6 +185,7 @@ def create(
 def create_for_folder_subcommand(
     root_path,
     verbose,
+    detect_renaming,
     hash_formats,
     no_directory_hashes,
     author_name,
@@ -208,6 +220,9 @@ def create_for_folder_subcommand(
     # we collect all paths we expect to find first and remove every path that we actually found while
     # traversing the file system, so this set will at the end contain the file paths not found in the file system
     not_found_paths = existing_history.set_of_file_paths()
+    renamed_files = existing_history.renamed_path_with_previous_path()
+    not_found_paths = {p if renamed_files.get(p, None) is None else renamed_files[p] for p in not_found_paths}
+    new_paths = set()
 
     # create the ignore specification
     ignore_spec = ignore.MHLIgnoreSpec(existing_history.latest_ignore_patterns(), ignore_list, ignore_spec_file)
@@ -234,6 +249,12 @@ def create_for_folder_subcommand(
         for item_name, is_dir in children:
             file_path = os.path.join(folder_path, item_name)
             not_found_paths.discard(file_path)
+            for hash_list in existing_history.hash_lists:
+                for media_hash in hash_list.media_hashes:
+                    if media_hash.path == existing_history.get_relative_file_path(file_path):
+                        break
+                else:
+                    new_paths.add(file_path)
             if is_dir:
                 if not no_directory_hashes:
                     path_content_hash_lookup = dir_content_hash_mapping_lookup.pop(file_path)
@@ -289,6 +310,42 @@ def create_for_folder_subcommand(
             folder_path, modification_date, dir_content_hash_lookup, dir_structure_hash_lookup
         )
 
+    if detect_renaming:
+        found_file_paths = set()
+        for new_path in new_paths:
+            for not_found_path in not_found_paths:
+                not_found_path_hash = existing_history.find_first_hash_entry_for_path(
+                    existing_history.get_relative_file_path(not_found_path)
+                )
+                new_path_hash = None
+                for hash_list in list(session.new_hash_lists.values()):
+                    new_path_hash = hash_list.media_hashes_path_map.get(
+                        existing_history.get_relative_file_path(new_path), None
+                    )
+                    if new_path_hash is not None:
+                        break
+                if new_path_hash.hash_entries[0].hash_format == not_found_path_hash.hash_format:
+                    if new_path_hash.hash_entries[0].hash_string == not_found_path_hash.hash_string:
+                        logger.info(
+                            "a renamed file was detected: from {} to {}".format(
+                                existing_history.get_relative_file_path(not_found_path), new_path_hash.path
+                            )
+                        )
+                        new_path_hash.previous_path = existing_history.get_relative_file_path(not_found_path)
+                        found_file_paths.add(not_found_path)
+                else:
+                    old_hash_for_new_path = hasher.hash_file(
+                        os.path.join(root_path, new_path_hash.path), not_found_path_hash.hash_format
+                    )
+                    if old_hash_for_new_path == not_found_path_hash.hash_string:
+                        logger.info(
+                            "a renamed file was detected: from {} to {}".format(
+                                existing_history.get_relative_file_path(not_found_path), new_path_hash.path
+                            )
+                        )
+                        new_path_hash.previous_path = existing_history.get_relative_file_path(not_found_path)
+                        found_file_paths.add(not_found_path)
+        not_found_paths = not_found_paths - found_file_paths
     commit_session(session, author_name, author_email, author_phone, author_role, location, comment)
 
     exception = test_for_missing_files(not_found_paths, root_path, ignore_spec)
@@ -302,6 +359,7 @@ def create_for_folder_subcommand(
 def create_for_single_files_subcommand(
     root_path,
     verbose,
+    detect_renaming,
     hash_formats,
     single_file,
     author_name,
@@ -516,6 +574,8 @@ def verify_entire_folder(
     # we collect all paths we expect to find first and remove every path that we actually found while
     # traversing the file system, so this set will at the end contain the file paths not found in the file system
     not_found_paths = existing_history.set_of_file_paths()
+    renamed_files = existing_history.renamed_path_with_previous_path()
+    not_found_paths = {p if renamed_files.get(p, None) is None else renamed_files[p] for p in not_found_paths}
 
     num_failed_verifications = 0
     num_new_files = 0
@@ -533,6 +593,13 @@ def verify_entire_folder(
             if is_dir:
                 # TODO: find new directories here
                 continue
+
+            for hash_list in existing_history.hash_lists:
+                for media_hash in hash_list.media_hashes:
+                    if media_hash.path != history_relative_path:
+                        continue
+                    history_relative_path = media_hash.previous_path or history_relative_path
+                    break
 
             if single_file is None or os.path.realpath(single_file) == os.path.realpath(file_path):
                 # check if there is an existing hash in the other generations and verify
@@ -923,6 +990,9 @@ def diff_entire_folder_against_full_history_subcommand(root_path, verbose, ignor
     # we collect all paths we expect to find first and remove every path that we actually found while
     # traversing the file system, so this set will at the end contain the file paths not found in the file system
     not_found_paths = existing_history.set_of_file_paths()
+    renamed_files = existing_history.renamed_path_with_previous_path()
+    not_found_paths = {p if renamed_files.get(p, None) is None else renamed_files[p] for p in not_found_paths}
+
     num_failed_verifications = 0
     num_new_files = 0
 
@@ -937,6 +1007,13 @@ def diff_entire_folder_against_full_history_subcommand(root_path, verbose, ignor
             if is_dir:
                 # TODO: find new directories here
                 continue
+
+            for hash_list in existing_history.hash_lists:
+                for media_hash in hash_list.media_hashes:
+                    if media_hash.path != history_relative_path:
+                        continue
+                    history_relative_path = media_hash.previous_path or history_relative_path
+                    break
 
             # check if there is an existing hash in the other generations and verify
             original_hash_entry = history.find_original_hash_entry_for_path(history_relative_path)
@@ -1241,6 +1318,11 @@ def info_for_single_file(root_path, verbose, single_file):
                         f"     CreatorInfo: {creatorInfo}\n"
                         f"     ProcessInfo: {processInfo}"
                     )
+                    if media_hash.previous_path and relative_path == media_hash.path:
+                        logger.info(
+                            " In previous generations the file was named: {}\n\n".format(media_hash.previous_path)
+                        )
+                        info_for_single_file(root_path, verbose, [os.path.join(root_path, media_hash.previous_path)])
                 else:
                     logger.info(
                         f"  Generation {hash_list.generation_number} ({hash_list.creator_info.creation_date})"

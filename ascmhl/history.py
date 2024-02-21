@@ -195,6 +195,15 @@ class MHLHistory:
             all_paths.update(hash_list.set_of_file_paths(self.get_root_path()))
         for child_history in self.child_histories:
             all_paths.update(child_history.set_of_file_paths())
+
+        return all_paths
+
+    def renamed_path_with_previous_path(self):
+        all_paths = {}
+        for hash_list in self.hash_lists:
+            all_paths.update(hash_list.renamed_path_with_previous_path(self.get_root_path()))
+        for child_history in self.child_histories:
+            all_paths.update(child_history.renamed_path_with_previous_path())
         return all_paths
 
     def hash_list_with_file_name(self, file_name) -> Optional[MHLHashList]:

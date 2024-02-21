@@ -57,3 +57,17 @@ class SingelFileNotFoundException(click.ClickException):
 
     def __init__(self):
         super().__init__("Could not find single file.")
+
+
+class ModifiedMHLHistoryFile(click.ClickException):
+    exit_code = 16
+
+    def __init__(self, path):
+        super().__init__(f"Modified ASC MHL history at path {path}")
+
+
+class NoMHLChainExceptionForPath(click.ClickException):
+    exit_code = 17
+
+    def __init__(self, path):
+        super().__init__(f"Missing ASC MHL history for path {path}")

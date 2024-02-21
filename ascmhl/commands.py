@@ -1025,10 +1025,10 @@ def diff_entire_folder_against_full_history_subcommand(root_path, verbose, ignor
                 continue
 
     exception = test_for_missing_files(not_found_paths, root_path, ignore_spec)
-    if num_new_files > 0:
-        exception = errors.NewFilesFoundException()
     if num_failed_verifications > 0:
         exception = errors.VerificationFailedException()
+    if not exception and num_new_files > 0:
+        exception = errors.NewFilesFoundException()
 
     if exception:
         raise exception

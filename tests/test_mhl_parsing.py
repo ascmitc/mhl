@@ -19,7 +19,7 @@ import ascmhl.commands
 
 
 def test_simple_parsing():
-    path = "examples/scenarios/Output/scenario_01/travel_01/A002R2EC/ascmhl/0001_A002R2EC_2020-01-16_091500.mhl"
+    path = "examples/scenarios/Output/scenario_01/travel_01/A002R2EC/ascmhl/0001_A002R2EC_2020-01-16_091500Z.mhl"
     hash_list = hashlist_xml_parser.parse(path)
     assert len(hash_list.media_hashes) > 0
 
@@ -73,10 +73,10 @@ def test_child_history_verify(fs, nested_mhl_histories):
     result = runner.invoke(ascmhl.commands.create, ["/root"], catch_exceptions=False)
     assert result.exit_code == 0
 
-    assert os.path.isfile("/root/ascmhl/0002_root_2020-01-16_091500.mhl")
-    assert os.path.isfile("/root/A/AA/ascmhl/0002_AA_2020-01-16_091500.mhl")
-    assert os.path.isfile("/root/B/ascmhl/0002_B_2020-01-16_091500.mhl")
-    assert os.path.isfile("/root/B/BB/ascmhl/0002_BB_2020-01-16_091500.mhl")
+    assert os.path.isfile("/root/ascmhl/0002_root_2020-01-16_091500Z.mhl")
+    assert os.path.isfile("/root/A/AA/ascmhl/0002_AA_2020-01-16_091500Z.mhl")
+    assert os.path.isfile("/root/B/ascmhl/0002_B_2020-01-16_091500Z.mhl")
+    assert os.path.isfile("/root/B/BB/ascmhl/0002_BB_2020-01-16_091500Z.mhl")
 
     root_history = MHLHistory.load_from_path("/root")
     assert len(root_history.hash_lists) == 2
@@ -130,8 +130,8 @@ def test_child_history_partial_verification_ba_1_file(fs, nested_mhl_histories):
     assert result.exit_code == 0
 
     # two new generations have been written
-    assert os.path.isfile("/root/ascmhl/0002_root_2020-01-16_091500.mhl")
-    assert os.path.isfile("/root/B/ascmhl/0002_B_2020-01-16_091500.mhl")
+    assert os.path.isfile("/root/ascmhl/0002_root_2020-01-16_091500Z.mhl")
+    assert os.path.isfile("/root/B/ascmhl/0002_B_2020-01-16_091500Z.mhl")
 
     root_history = MHLHistory.load_from_path("/root")
     assert len(root_history.hash_lists) == 2
@@ -150,8 +150,8 @@ def test_child_history_partial_verification_ba_1_file(fs, nested_mhl_histories):
     assert len(b_history.hash_lists[1].media_hashes) == 1
 
     # the other histories don't have a new generation
-    assert not os.path.isfile("/root/A/AA/ascmhl/0002_AA_2020-01-16_091500.mhl")
-    assert not os.path.isfile("/root/B/BB/ascmhl/0002_BB_2020-01-16_091500.mhl")
+    assert not os.path.isfile("/root/A/AA/ascmhl/0002_AA_2020-01-16_091500Z.mhl")
+    assert not os.path.isfile("/root/B/BB/ascmhl/0002_BB_2020-01-16_091500Z.mhl")
     assert aa_history.latest_generation_number() == 1
     assert bb_history.latest_generation_number() == 1
 
@@ -166,9 +166,9 @@ def test_child_history_partial_verification_bb_folder(fs, nested_mhl_histories):
     result = runner.invoke(ascmhl.commands.create, ["/root", "-sf", "/root/B/BB"])
     assert result.exit_code == 0
 
-    assert os.path.isfile("/root/ascmhl/0002_root_2020-01-16_091500.mhl")
-    assert os.path.isfile("/root/B/ascmhl/0002_B_2020-01-16_091500.mhl")
-    assert os.path.isfile("/root/B/BB/ascmhl/0002_BB_2020-01-16_091500.mhl")
+    assert os.path.isfile("/root/ascmhl/0002_root_2020-01-16_091500Z.mhl")
+    assert os.path.isfile("/root/B/ascmhl/0002_B_2020-01-16_091500Z.mhl")
+    assert os.path.isfile("/root/B/BB/ascmhl/0002_BB_2020-01-16_091500Z.mhl")
 
     root_history = MHLHistory.load_from_path("/root")
     assert len(root_history.hash_lists) == 2
@@ -191,7 +191,7 @@ def test_child_history_partial_verification_bb_folder(fs, nested_mhl_histories):
     assert bb_history.hash_lists[1].media_hashes[1].hash_entries[0].action == "original"
 
     # the other histories don't have a new generation
-    assert not os.path.isfile("/root/A/AA/ascmhl/0002_AA_2020-01-16_091500.mhl")
+    assert not os.path.isfile("/root/A/AA/ascmhl/0002_AA_2020-01-16_091500Z.mhl")
     assert aa_history.latest_generation_number() == 1
 
 
@@ -207,12 +207,12 @@ def test_hash_list_name_parsing():
         else:
             assert not should_match
 
-    _test_regex("0001_AA_2020-01-16_091500.mhl", True)
-    _test_regex("10001_AA_2020-01-16_091500.mhl", True)
+    _test_regex("0001_AA_2020-01-16_091500Z.mhl", True)
+    _test_regex("10001_AA_2020-01-16_091500Z.mhl", True)
     _test_regex("0002.mhl", True)
     _test_regex("0004_myCustomString_123.mhl", True)
 
-    _test_regex("001_AA_2020-01-16_091500.mhl", False)
+    _test_regex("001_AA_2020-01-16_091500Z.mhl", False)
     _test_regex("0001_AA_2020-01-16_091500.xml", False)
     _test_regex("AA_2020-01-16_091500_0002.mhl", False)
     _test_regex("0003_.mhl", False)

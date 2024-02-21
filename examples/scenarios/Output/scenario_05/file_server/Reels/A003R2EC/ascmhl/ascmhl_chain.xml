@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ascmhldirectory xmlns="urn:ASC:MHL:DIRECTORY:v2.0">
   <hashlist sequencenr="1">
-    <path>0001_A003R2EC_2020-01-16_091500.mhl</path>
+    <path>0001_A003R2EC_2020-01-16_091500Z.mhl</path>
     <c4>c45zb4dbxTLtvaLg3hZX1ds9fc7RjKoi5UtQ4N9oFHo51v7mrhUJR8Kn5uY7aBjmkYwRN9bgF57A4LJM3nrN1dT5hQ</c4>
   </hashlist>
   <hashlist sequencenr="2">
-    <path>0002_A003R2EC_2020-01-17_143000.mhl</path>
+    <path>0002_A003R2EC_2020-01-17_143000Z.mhl</path>
     <c4>c42zP4mMY3CEpYEM9F9xde62ZbdmwRBc5gne7basp6RfZ11tZQxwcS95Gyhbrpea76em3aPE3Q823657oT27rrFYhB</c4>
   </hashlist>
 </ascmhldirectory>

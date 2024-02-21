@@ -13,7 +13,7 @@ Creating new generation for folder at path: /travel_01/A002R2EC ...
   calculated directory hash for Clips  xxh64: 4c226b42e27d7af3 (content), 906faa843d591a9f (structure)
   created original hash for     Sidecar.txt  xxh64: 3ab5a4166b9bde44
   calculated root hash  xxh64: 8d02114c32e28cbe (content), f557f8ca8e5a88ef (structure)
-Created new generation ascmhl/0001_A002R2EC_2020-01-16_091500.mhl
+Created new generation ascmhl/0001_A002R2EC_2020-01-16_091500Z.mhl
 
 
 
@@ -30,6 +30,6 @@ Creating new generation for folder at path: /file_server/A002R2EC ...
   calculated directory hash for Clips  xxh64: 4c226b42e27d7af3 (content), 906faa843d591a9f (structure)
   verified                      Sidecar.txt  xxh64: OK
   calculated root hash  xxh64: 8d02114c32e28cbe (content), f557f8ca8e5a88ef (structure)
-Created new generation ascmhl/0002_A002R2EC_2020-01-17_143000.mhl
+Created new generation ascmhl/0002_A002R2EC_2020-01-17_143000Z.mhl
 
 

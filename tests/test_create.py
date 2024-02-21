@@ -26,8 +26,8 @@ def test_create_succeed(fs):
     runner = CliRunner()
     result = runner.invoke(ascmhl.commands.create, ["/root", "-h", "xxh64", "-v"])
     assert not result.exception
-    assert os.path.exists("/root/ascmhl/0001_root_2020-01-16_091500.mhl")
-    # with open('/root/ascmhl/0001_root_2020-01-16_091500.mhl', 'r') as fin:
+    assert os.path.exists("/root/ascmhl/0001_root_2020-01-16_091500Z.mhl")
+    # with open('/root/ascmhl/0001_root_2020-01-16_091500Z.mhl', 'r') as fin:
     #     print(fin.read())
     assert os.path.exists("/root/ascmhl/ascmhl_chain.xml")
 
@@ -352,7 +352,7 @@ def test_create_mulitple_hashformats_double_hashformat(fs, simple_mhl_history):
     result = runner.invoke(ascmhl.commands.create, ["/root", "-v", "-h", "md5", "-h", "sha1"])
 
     # check if mhl file exists
-    mhlfilepath = "/root/ascmhl/0003_root_2020-01-16_091500.mhl"
+    mhlfilepath = "/root/ascmhl/0003_root_2020-01-16_091500Z.mhl"
     assert os.path.isfile(mhlfilepath)
 
     # check if mhl file validates

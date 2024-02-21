@@ -10,13 +10,15 @@ __email__ = "opensource@pomfort.com"
 from __future__ import annotations
 import os
 import re
+import glob
 from datetime import datetime, date, time
 
+from . import hasher
 from .__version__ import ascmhl_folder_name, ascmhl_file_extension, ascmhl_chainfile_name, ascmhl_collectionfile_name
 from . import hashlist_xml_parser, chain_xml_parser
 from .utils import datetime_now_filename_string
 from typing import Tuple, List, Dict, Optional, Set
-from . import logger
+from . import logger, errors
 from .chain import MHLChain
 from .hashlist import MHLHashList, MHLHashEntry
 
@@ -215,7 +217,18 @@ class MHLHistory:
         history.asc_mhl_path = asc_mhl_folder_path
 
         file_path = os.path.join(asc_mhl_folder_path, ascmhl_chainfile_name)
+        if os.path.exists(asc_mhl_folder_path) and not os.path.exists(file_path):
+            raise errors.NoMHLChainExceptionForPath(file_path)
         history.chain = chain_xml_parser.parse(file_path)
+        if history.chain.generations:
+            for generation in history.chain.generations:
+                for fname in glob.glob("{}/**/{}".format(root_path, generation.ascmhl_filename), recursive=True):
+                    hash = hasher.hash_file(fname, generation.hash_format)
+                    if hash == generation.hash_string:
+                        break
+                    raise errors.ModifiedMHLHistoryFile(fname)
+                else:
+                    raise errors.NoMHLHistoryException(generation.ascmhl_filename)
 
         hash_lists = []
         for root, directories, filenames in os.walk(asc_mhl_folder_path):

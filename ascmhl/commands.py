@@ -63,7 +63,7 @@ from collections import namedtuple
     help="Skip creation of directory hashes, only reference directories without hash",
 )
 @click.option(
-    "--detect-renaming",
+    "--detect_renaming",
     "-dr",
     default=False,
     is_flag=True,

@@ -191,6 +191,14 @@ The `create` command hashes all files given with the different options and creat
 with records for all hashed files. The command compares the hashes against the hashes stored in previous generations 
 if available.
 
+In general, the following options can be added to the command:
+- v, --verbose: this option should be set in order to obtain a verbose output. Otherwise there will be no output with 
+information about the MHL file creation process
+- h, --hash_format: Specifies the algorithm with which the hash is to be generated. The following values are allowed: 
+md5, sha1, xxh128, xxh3, xxh64, c4
+- n, --no_directory_hashes: Skip creation of directory hashes, only reference directories without hash
+- dr, --detect_renaming: enables the detection of renamed files based on their hash value
+
 #### `create` default behavior (for file hierarchy, with completeness check)
 
 The `create` command traverses through a folder hierarchy (such as a folder with media files, a camera card, or an 

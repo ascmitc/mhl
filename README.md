@@ -46,7 +46,7 @@ ASC MHL supports the hash formats
 
 * xxHash (64-bit, and latest XXH3 with 64-bit and 128-bit)
 * MD5
-* SHA1, SHA256
+* SHA1
 * C4
 
 The source code for `mhllib` can be found in the `./ascmhl` folder.

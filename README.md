@@ -619,7 +619,7 @@ Usage: ascmhl-debug hash [OPTIONS] FILE_PATH
   Create and print a hash value for a file
 
 Options:
-  -h, --hash_format [md5|sha1|xxh128|xxh3|xxh64|c4]
+  -h, --hash_format [md5|sha1|sha256|xxh128|xxh3|xxh64|c4]
                                   Algorithm  [required]
   --help                          Show this message and exit.
 

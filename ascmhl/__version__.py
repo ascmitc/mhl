@@ -6,6 +6,7 @@ __license__ = "MIT"
 __maintainer__ = "Patrick Renner, Alexander Sahm"
 __email__ = "opensource@pomfort.com"
 """
+
 try:
     from importlib.metadata import version
 except ImportError:
@@ -22,6 +23,7 @@ ascmhl_collectionfile_name = "ascmhl_collection.xml"
 ascmhl_supported_hashformats = [
     "md5",
     "sha1",
+    "sha256",
     "xxh128",
     "xxh3",
     "xxh64",

@@ -6,6 +6,7 @@ __license__ = "MIT"
 __maintainer__ = "Patrick Renner"
 __email__ = "opensource@pomfort.com"
 """
+
 import binascii
 import hashlib
 
@@ -142,6 +143,16 @@ class SHA1(HexHasher):
         return hashlib.sha1
 
 
+class SHA256(HexHasher):
+    """
+    sha256 checksum generator.
+    """
+
+    @staticmethod
+    def hashlib_type():
+        return hashlib.sha256
+
+
 class XXH32(HexHasher):
     """
     xxh32 checksum generator.
@@ -236,6 +247,7 @@ class HashType(Enum):
 
     md5 = MD5
     sha1 = SHA1
+    sha256 = SHA256
     xxh32 = XXH32
     xxh64 = XXH64
     xxh3 = XXH3

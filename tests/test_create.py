@@ -336,6 +336,15 @@ def test_create_mulitple_hashformats(fs, simple_mhl_history):
     assert "A/A1.txt  sha1: 4a5b95edbea7de5ed2367432645df88cd4f1d1b6" in result.output
 
 
+def test_create_mulitple_hashformats2(fs, simple_mhl_history):
+    runner = CliRunner()
+    result = runner.invoke(ascmhl.commands.create, ["/root", "-v", "-n", "-h", "xxh128", "-h", "sha256"])
+    assert result.exit_code == 0
+
+    assert "A/A1.txt  sha256: 4fc93a7e3b47e4212e938e7565c56b87fea6951468f59b1fd19cc4c1d8343f22" in result.output
+    assert "A/A1.txt  xxh128: f50890cfaaec8a14d8a611f11484ec72" in result.output
+
+
 def test_create_mulitple_hashformats_no_dash_n(fs, simple_mhl_history):
     runner = CliRunner()
     result = runner.invoke(ascmhl.commands.create, ["/root", "-v", "-h", "md5", "-h", "sha1"])

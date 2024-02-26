@@ -12,6 +12,7 @@ from click.testing import CliRunner
 from freezegun import freeze_time
 
 import ascmhl
+from ascmhl import hasher
 
 
 @freeze_time("2020-01-16 09:15:00")
@@ -49,12 +50,10 @@ def test_verify_renamed_files(fs):
         for index, line in enumerate(contents):
             if "0002" in line:
                 hash_line = contents.pop(index + 1)
+                new_line = "    <c4>{}</c4>\n".format(hasher.hash_file("/root/ascmhl/0002_root_2020-01-16_091500Z.mhl", "c4"))
                 contents.insert(
                     index + 1,
-                    hash_line.replace(
-                        "c45azZxqkrhs2TgYjDAB5k7zPYJNytvtsdgSuUtkNa4cRb9YJhvcR7zmfRM5avixb1tw9xrURQh477Ht4J8byfAUQu",
-                        "c441eqmCwPf2QS3yCJAGAcV9kB8WiKCMGoVVWvPv834q4HUpNZkMnti9yPuMKzQgMmEVFNEV84vJtHCZaoWJfU6qqq",
-                    ),
+                    new_line
                 )
         f.seek(0)
         f.writelines(contents)

@@ -50,11 +50,10 @@ def test_verify_renamed_files(fs):
         for index, line in enumerate(contents):
             if "0002" in line:
                 hash_line = contents.pop(index + 1)
-                new_line = "    <c4>{}</c4>\n".format(hasher.hash_file("/root/ascmhl/0002_root_2020-01-16_091500Z.mhl", "c4"))
-                contents.insert(
-                    index + 1,
-                    new_line
+                new_line = "    <c4>{}</c4>\n".format(
+                    hasher.hash_file("/root/ascmhl/0002_root_2020-01-16_091500Z.mhl", "c4")
                 )
+                contents.insert(index + 1, new_line)
         f.seek(0)
         f.writelines(contents)
 

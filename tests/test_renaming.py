@@ -52,8 +52,8 @@ def test_verify_renamed_files(fs):
                 contents.insert(
                     index + 1,
                     hash_line.replace(
-                        "c42xmpxzN6GXzwzD8JeVogvPXiC2KN6hLM4rDbivgsSzM5jfnVdKR2kF2foA3imP5deeW6Au66MB2cHZN46YENUp8Y",
-                        "c457eSMkPbVTpUsrjDqjNVEterVbPs65Z2qpnuzb8v8EGHBqtXZ5rjmqZUKHdaicaZgTkN3SbrWjUT2jRYyQT1gtqn",
+                        "c45azZxqkrhs2TgYjDAB5k7zPYJNytvtsdgSuUtkNa4cRb9YJhvcR7zmfRM5avixb1tw9xrURQh477Ht4J8byfAUQu",
+                        "c441eqmCwPf2QS3yCJAGAcV9kB8WiKCMGoVVWvPv834q4HUpNZkMnti9yPuMKzQgMmEVFNEV84vJtHCZaoWJfU6qqq",
                     ),
                 )
         f.seek(0)

@@ -10,7 +10,6 @@ __email__ = "opensource@pomfort.com"
 from __future__ import annotations
 import os
 import re
-import glob
 from datetime import datetime, date, time
 
 from . import hasher
@@ -231,13 +230,13 @@ class MHLHistory:
         history.chain = chain_xml_parser.parse(file_path)
         if history.chain.generations:
             for generation in history.chain.generations:
-                for fname in glob.glob("{}/**/{}".format(root_path, generation.ascmhl_filename), recursive=True):
-                    hash = hasher.hash_file(fname, generation.hash_format)
-                    if hash == generation.hash_string:
-                        break
-                    raise errors.ModifiedMHLHistoryFile(fname)
+                expected_file = os.path.join(asc_mhl_folder_path, generation.ascmhl_filename)
+                if os.path.exists(expected_file):
+                    hash = hasher.hash_file(expected_file, generation.hash_format)
+                    if hash != generation.hash_string:
+                        raise errors.ModifiedMHLHistoryFile(expected_file)
                 else:
-                    raise errors.NoMHLHistoryException(generation.ascmhl_filename)
+                    raise errors.NoMHLHistoryException(expected_file)
 
         hash_lists = []
         for root, directories, filenames in os.walk(asc_mhl_folder_path):

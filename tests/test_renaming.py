@@ -219,3 +219,33 @@ def test_do_not_detect_renamed_files(fs):
 
     result = runner.invoke(ascmhl.commands.create, ["/root", "-h", "xxh64", "-v"])
     assert result.exception
+
+
+@freeze_time("2020-01-16 09:15:00")
+def test_detect_renamed_folders(fs):
+    fs.create_file("/root/Stuff.txt", contents="stuff\n")
+    fs.create_file("/root/A/A1.txt", contents="A1\n")
+    fs.create_file("/root/B/B1.txt", contents="B1\n")
+    fs.create_file("/root/A/AA/AA1.txt", contents="AA1\n")
+
+    runner = CliRunner()
+    result = runner.invoke(ascmhl.commands.create, ["/root/A/AA", "-h", "xxh64", "-v"])
+    result = runner.invoke(ascmhl.commands.create, ["/root", "-h", "xxh64", "-v"])
+    assert not result.exception
+    assert os.path.exists("/root/ascmhl/0001_root_2020-01-16_091500Z.mhl")
+    assert os.path.exists("/root/ascmhl/ascmhl_chain.xml")
+    result = runner.invoke(ascmhl.commands.verify, ["/root"])
+    assert not result.exception
+
+    os.rename("/root/A/AA", "/root/A/AB")
+    os.rename("/root/A/AB/AA1.txt", "/root/A/AB/AA2.txt")
+
+    result = runner.invoke(ascmhl.commands.create, ["/root", "-h", "xxh64", "-v", "-dr"])
+    assert not result.exception
+
+    with open("/root/A/AB/ascmhl/0003_AB_2020-01-16_091500Z.mhl", "r") as fin:
+        fileContents = fin.read()
+        assert fileContents.count("previousPath") == 2
+
+    result = runner.invoke(ascmhl.commands.verify, ["/root", "-h", "xxh64"])
+    assert not result.exception

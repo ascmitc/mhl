@@ -345,7 +345,9 @@ class MHLHistory:
         for hash_list in self.hash_lists:
             for reference in hash_list.hash_list_references:
                 reference_path = os.path.dirname(os.path.dirname(reference.path))
-                history = self.child_history_mappings[reference_path]
+                history = self.child_history_mappings.get(reference_path, None)
+                if history is None:
+                    return
                 referenced_hash_list = history.hash_list_with_file_name(os.path.basename(reference.path))
                 assert referenced_hash_list is not None
                 generated_hash = referenced_hash_list.generate_reference_hash()

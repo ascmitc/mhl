@@ -320,6 +320,11 @@ def _directory_hash_xml_element(media_hash: MHLMediaHash, skipPath=False):
     hash_element.append(content_element)
     hash_element.append(structure_element)
 
+    if media_hash.previous_path:
+        previous_path_element = E.previousPath(media_hash.previous_path)
+        previous_path_element.text = media_hash.previous_path
+        hash_element.append(previous_path_element)
+
     return hash_element
 
 

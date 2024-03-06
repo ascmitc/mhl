@@ -314,36 +314,53 @@ def create_for_folder_subcommand(
         found_file_paths = set()
         for new_path in new_paths:
             for not_found_path in not_found_paths:
-                not_found_path_hash = existing_history.find_first_hash_entry_for_path(
+                # find hashes to not_found_path and new_path
+                not_found_path_history, relative_not_found_path = existing_history.find_history_for_path(
                     existing_history.get_relative_file_path(not_found_path)
                 )
-                new_path_hash = None
-                for hash_list in list(session.new_hash_lists.values()):
-                    new_path_hash = hash_list.media_hashes_path_map.get(
-                        existing_history.get_relative_file_path(new_path), None
-                    )
-                    if new_path_hash is not None:
+                not_found_path_hash = not_found_path_history.find_first_hash_entry_for_path(relative_not_found_path)
+
+                new_path_history, new_path_media_hash = None, None
+                for history, hash_list in session.new_hash_lists.items():
+                    new_path_media_hash = hash_list.find_media_hash_for_path(history.get_relative_file_path(new_path))
+                    if new_path_media_hash is not None:
+                        new_path_history = history
                         break
-                if new_path_hash.hash_entries[0].hash_format == not_found_path_hash.hash_format:
-                    if new_path_hash.hash_entries[0].hash_string == not_found_path_hash.hash_string:
-                        logger.info(
-                            "a renamed file was detected: from {} to {}".format(
-                                existing_history.get_relative_file_path(not_found_path), new_path_hash.path
+                new_path_hash = new_path_media_hash.find_hash_entry_for_format(not_found_path_hash.hash_format)
+                # compare found hashes
+                if new_path_hash:
+                    if new_path_hash.hash_string == not_found_path_hash.hash_string:
+                        if os.path.basename(new_path) != os.path.basename(not_found_path):
+                            logger.info(
+                                "a renamed {} was detected: from {} to {}".format(
+                                    "folder" if os.path.isdir(new_path) else "file",
+                                    relative_not_found_path,
+                                    existing_history.get_relative_file_path(new_path),
+                                )
                             )
-                        )
-                        new_path_hash.previous_path = existing_history.get_relative_file_path(not_found_path)
+                        if new_path_media_hash.path == ".":
+                            root_hash = session.new_hash_lists[
+                                new_path_history.parent_history
+                            ].find_media_hash_for_path(new_path_history.parent_history.get_relative_file_path(new_path))
+                            if root_hash:
+                                root_hash.previous_path = relative_not_found_path
+                        else:
+                            new_path_media_hash.previous_path = relative_not_found_path
                         found_file_paths.add(not_found_path)
                 else:
-                    old_hash_for_new_path = hasher.hash_file(
-                        os.path.join(root_path, new_path_hash.path), not_found_path_hash.hash_format
+                    old_hash_format_for_new_path = hasher.hash_file(
+                        os.path.join(root_path, new_path), not_found_path_hash.hash_format
                     )
-                    if old_hash_for_new_path == not_found_path_hash.hash_string:
-                        logger.info(
-                            "a renamed file was detected: from {} to {}".format(
-                                existing_history.get_relative_file_path(not_found_path), new_path_hash.path
+                    if old_hash_format_for_new_path == not_found_path_hash.hash_string:
+                        if os.path.basename(new_path) != os.path.basename(not_found_path):
+                            logger.info(
+                                "a renamed {} was detected: from {} to {}".format(
+                                    "folder" if os.path.isdir(new_path) else "file",
+                                    relative_not_found_path,
+                                    existing_history.get_relative_file_path(new_path),
+                                )
                             )
-                        )
-                        new_path_hash.previous_path = existing_history.get_relative_file_path(not_found_path)
+                        new_path_media_hash.previous_path = relative_not_found_path
                         found_file_paths.add(not_found_path)
         not_found_paths = not_found_paths - found_file_paths
     commit_session(session, author_name, author_email, author_phone, author_role, location, comment)

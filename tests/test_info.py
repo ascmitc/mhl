@@ -19,7 +19,7 @@ def test_simple_info_fails_no_history(fs, simple_mhl_history):
     runner = CliRunner()
     os.rename("/root/ascmhl", "/root/_ascmhl")
     result = runner.invoke(ascmhl.commands.info, ["-sf", "/root/Stuff.txt"])
-    assert result.exit_code == 14
+    assert result.exit_code == 30
 
 
 @freeze_time("2020-01-16 09:15:00")

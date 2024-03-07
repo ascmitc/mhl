@@ -133,6 +133,10 @@ def test_detect_renamed_files(fs):
     result = runner.invoke(ascmhl.commands.verify, ["/root", "-h", "xxh64"])
     assert not result.exception
 
+    os.rename("/root/A/AA/AA1_renamed.txt", "/root/A/AA/AA1.txt")
+    result = runner.invoke(ascmhl.commands.create, ["/root", "-h", "xxh64", "-v", "-dr"])
+    assert not result.exception
+
 
 @freeze_time("2020-01-16 09:15:00")
 def test_detect_renamed_files_different_hash(fs):
@@ -242,10 +246,15 @@ def test_detect_renamed_folders(fs):
 
     result = runner.invoke(ascmhl.commands.create, ["/root", "-h", "xxh64", "-v", "-dr"])
     assert not result.exception
+    assert "a renamed" in result.output
 
     with open("/root/A/AB/ascmhl/0003_AB_2020-01-16_091500Z.mhl", "r") as fin:
         fileContents = fin.read()
         assert fileContents.count("previousPath") == 2
 
     result = runner.invoke(ascmhl.commands.verify, ["/root", "-h", "xxh64"])
+    assert not result.exception
+
+    result = runner.invoke(ascmhl.commands.create, ["/root", "-h", "xxh64", "-v", "-dr"])
+    assert "a renamed" not in result.output
     assert not result.exception

@@ -183,7 +183,7 @@ def test_create_no_directory_hashes(fs):
     os.removedirs("/root/emptyFolder")
     runner = CliRunner()
     result = runner.invoke(ascmhl.commands.create, ["/root", "-v", "-n"])
-    assert result.exit_code == 15
+    assert result.exit_code == 10
     assert "1 missing file(s):\n  emptyFolder" in result.output
 
 
@@ -193,17 +193,17 @@ def test_create_fail_altered_file(fs, simple_mhl_history):
         file.write("!!")
 
     result = CliRunner().invoke(ascmhl.commands.create, ["/root"])
-    assert result.exit_code == 12
+    assert result.exit_code == 11
     assert "Stuff.txt" in result.output
 
     # since the file is still altered every other seal will fail as well since we compare to the original hash
     result = CliRunner().invoke(ascmhl.commands.create, ["/root"])
-    assert result.exit_code == 12
+    assert result.exit_code == 11
     assert "Stuff.txt" in result.output
 
     # when we now choose a new hash format we still fail but will add the new hash in the new format
     result = CliRunner().invoke(ascmhl.commands.create, ["/root", "-h", "md5"])
-    assert result.exit_code == 12
+    assert result.exit_code == 11
     assert "Stuff.txt" in result.output
 
     root_history = MHLHistory.load_from_path("/root")
@@ -217,7 +217,7 @@ def test_create_fail_altered_file(fs, simple_mhl_history):
 
     # since we didn't add a new md5 hash for the failing file before creating a new generation will still fail for the altered file
     result = CliRunner().invoke(ascmhl.commands.create, ["/root", "-h", "md5"])
-    assert result.exit_code == 12
+    assert result.exit_code == 11
     assert "Stuff.txt" in result.output
 
 
@@ -233,7 +233,7 @@ def test_create_fail_missing_file(fs, nested_mhl_histories):
     os.remove("/root/A/AA/AA1.txt")
     runner = CliRunner()
     result = runner.invoke(ascmhl.commands.create, ["/root"])
-    assert result.exit_code == 15
+    assert result.exit_code == 10
     assert "1 missing file(s):\n  A/AA/AA1.txt" in result.output
 
     # the actual seal has been written to disk anyways we expect the history to contain
@@ -261,7 +261,7 @@ def test_create_fail_missing_file(fs, nested_mhl_histories):
     # since the file /root/A/AA/AA1.txt is still missing all further seal attempts will still fail
     runner = CliRunner()
     result = runner.invoke(ascmhl.commands.create, ["/root"])
-    assert result.exit_code == 15
+    assert result.exit_code == 10
     assert "1 missing file(s):\n  A/AA/AA1.txt" in result.output
 
 

@@ -104,7 +104,7 @@ def test_create_nested_mhl_file_modified(fs):
         mhl_file.write("changed content")
     result = runner.invoke(ascmhl.commands.create, ["/root", "-h", "xxh64", "-v"])
     assert result.exception
-    assert result.exit_code == 16
+    assert result.exit_code == 31
 
 
 @freeze_time("2020-01-16 09:15:00")
@@ -145,11 +145,11 @@ def test_create_nested_mhl_file_missing(fs):
     os.remove("/root/A/AA/ascmhl/0001_AA_2020-01-16_091500Z.mhl")
     result = runner.invoke(ascmhl.commands.create, ["/root", "-h", "xxh64", "-v"])
     assert result.exception
-    assert result.exit_code == 11
+    assert result.exit_code == 30
 
     result = runner.invoke(ascmhl.commands.diff, ["/root"])
     assert result.exception
-    assert result.exit_code == 11
+    assert result.exit_code == 30
 
 
 @freeze_time("2020-01-16 09:15:00")
@@ -189,8 +189,8 @@ def test_create_nested_mhl_chain_missing(fs):
     os.remove("/root/A/AA/ascmhl/ascmhl_chain.xml")
     result = runner.invoke(ascmhl.commands.create, ["/root", "-h", "xxh64", "-v"])
     assert result.exception
-    assert result.exit_code == 17
+    assert result.exit_code == 32
 
     result = runner.invoke(ascmhl.commands.diff, ["/root"])
     assert result.exception
-    assert result.exit_code == 17
+    assert result.exit_code == 32

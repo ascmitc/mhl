@@ -322,7 +322,7 @@ def test_scenario_04(fs, reference, card_a002):
         log_message("This will verify all existing hashes and fail because Sidecar.txt was altered.")
         log_message("An error is shown and create a new generation that documents the failed verification")
         result = execute_command(ascmhl.commands.create, ["-v", "/file_server/A002R2EC", "-h", "xxh64"])
-        assert result.exit_code == 12
+        assert result.exit_code == 11
         assert compare_files_against_reference("scenario_04", ["/travel_01", "/file_server"], fs)
 
         # the second generation will include the failed verification result

@@ -81,7 +81,7 @@ def test_record_fail_altered_file(fs, simple_mhl_history):
 
     runner = CliRunner()
     result = runner.invoke(ascmhl.commands.create, ["/root", "-sf", "/root/Stuff.txt"])
-    assert result.exit_code == 12
+    assert result.exit_code == 11
     assert "Stuff.txt" in result.output
 
     # when passing a different file to record no error ws thrown since the altered file is ignored

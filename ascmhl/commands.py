@@ -223,6 +223,7 @@ def create_for_folder_subcommand(
     renamed_files = existing_history.renamed_path_with_previous_path()
     not_found_paths = {p if renamed_files.get(p, None) is None else renamed_files[p] for p in not_found_paths}
     new_paths = set()
+    missing_asc_mhl_folder = set()
 
     # create the ignore specification
     ignore_spec = ignore.MHLIgnoreSpec(existing_history.latest_ignore_patterns(), ignore_list, ignore_spec_file)
@@ -310,6 +311,14 @@ def create_for_folder_subcommand(
             folder_path, modification_date, dir_content_hash_lookup, dir_structure_hash_lookup
         )
 
+    if len(existing_history.hash_lists) > 0:
+        for ref in existing_history.hash_lists[-1].hash_list_references:
+            referenced_asc_folder = os.path.join(
+                os.path.dirname(existing_history.asc_mhl_path), os.path.dirname(ref.path)
+            )
+            if not os.path.exists(referenced_asc_folder):
+                missing_asc_mhl_folder.add(os.path.dirname(referenced_asc_folder))
+
     if detect_renaming:
         found_file_paths = set()
         for new_path in new_paths:
@@ -346,6 +355,12 @@ def create_for_folder_subcommand(
                                 root_hash.previous_path = relative_not_found_path
                         else:
                             new_path_media_hash.previous_path = relative_not_found_path
+                        if not_found_path in missing_asc_mhl_folder:
+                            if os.path.exists(os.path.join(new_path, ascmhl_folder_name)):
+                                missing_asc_mhl_folder.discard(not_found_path)
+                            else:
+                                missing_asc_mhl_folder.discard(not_found_path)
+                                missing_asc_mhl_folder.add(new_path)
                         found_file_paths.add(not_found_path)
                 else:
                     old_hash_format_for_new_path = hasher.hash_file(
@@ -371,6 +386,9 @@ def create_for_folder_subcommand(
 
     if exception:
         raise exception
+
+    if len(missing_asc_mhl_folder) > 0:
+        raise errors.NoMHLHistoryException(", ".join(missing_asc_mhl_folder))
 
 
 def create_for_single_files_subcommand(
@@ -644,8 +662,8 @@ def verify_entire_folder(
 
     exception = test_for_missing_files(not_found_paths, root_path, ignore_spec)
 
-    if found_single_file == False:
-        exception = errors.SingelFileNotFoundException()
+    if not found_single_file:
+        exception = errors.SingleFileNotFoundException()
 
     if num_new_files > 0:
         exception = errors.NewFilesFoundException()
@@ -1251,8 +1269,8 @@ def info(verbose, single_file, root_path):
                     root_path = current_dir
                     break
                 current_dir = os.path.dirname(current_dir)
-        if root_path == None:
-            raise errors.NoMHLHistoryExceptionForPath(single_file[0])
+        if root_path is None:
+            raise errors.NoMHLHistoryException(single_file[0])
         else:
             info_for_single_file(root_path, verbose, single_file)
         return

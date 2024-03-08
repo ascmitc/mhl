@@ -27,7 +27,7 @@ def test_record_succeed_single_file(fs):
     runner = CliRunner()
     result = runner.invoke(ascmhl.commands.create, ["/root", "-sf", "/root/A/A1.txt"])
     assert result.exit_code == 0
-    assert os.path.exists("/root/ascmhl/0001_root_2020-01-16_091500.mhl")
+    assert os.path.exists("/root/ascmhl/0001_root_2020-01-16_091500Z.mhl")
     assert os.path.exists("/root/ascmhl/ascmhl_chain.xml")
 
     # make sure that only the specified file was added
@@ -45,7 +45,7 @@ def test_record_succeed_single_directory(fs):
     runner = CliRunner()
     result = runner.invoke(ascmhl.commands.create, ["/root", "-sf", "/root/A"])
     assert result.exit_code == 0
-    assert os.path.exists("/root/ascmhl/0001_root_2020-01-16_091500.mhl")
+    assert os.path.exists("/root/ascmhl/0001_root_2020-01-16_091500Z.mhl")
     assert os.path.exists("/root/ascmhl/ascmhl_chain.xml")
 
     # make sure that only the specified file was added
@@ -64,7 +64,7 @@ def test_record_succeed_multiple_files(fs):
     runner = CliRunner()
     result = runner.invoke(ascmhl.commands.create, ["/root", "-sf", "/root/A/A1.txt", "-sf", "/root/A/A2.txt"])
     assert result.exit_code == 0
-    assert os.path.exists("/root/ascmhl/0001_root_2020-01-16_091500.mhl")
+    assert os.path.exists("/root/ascmhl/0001_root_2020-01-16_091500Z.mhl")
     assert os.path.exists("/root/ascmhl/ascmhl_chain.xml")
 
     # make sure that only the specified file was added
@@ -81,7 +81,7 @@ def test_record_fail_altered_file(fs, simple_mhl_history):
 
     runner = CliRunner()
     result = runner.invoke(ascmhl.commands.create, ["/root", "-sf", "/root/Stuff.txt"])
-    assert result.exit_code == 12
+    assert result.exit_code == 11
     assert "Stuff.txt" in result.output
 
     # when passing a different file to record no error ws thrown since the altered file is ignored

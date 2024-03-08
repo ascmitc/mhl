@@ -6,6 +6,7 @@ __license__ = "MIT"
 __maintainer__ = "Patrick Renner, Alexander Sahm"
 __email__ = "opensource@pomfort.com"
 """
+
 import os
 import textwrap
 from timeit import default_timer as timer
@@ -165,7 +166,12 @@ def parse(file_path):
                         root_media_hash = current_object
                         root_media_hash.is_directory = True
                         current_object = object_stack.pop()
+                        root_media_hash.path = "."
+                        hash_list.append_hash(root_media_hash)
                         current_object.root_media_hash = root_media_hash
+
+                    elif tag == "previousPath":
+                        current_object.previous_path = element.text
 
                 elif type(current_object) is MHLHashListReference:
                     if tag == "path":
@@ -270,6 +276,11 @@ def _media_hash_xml_element(media_hash: MHLMediaHash):
             entry_element.attrib["hashdate"] = datetime_isostring(hash_entry.hash_date, True)
         hash_element.append(entry_element)
 
+    if media_hash.previous_path:
+        previous_path_element = E.previousPath(media_hash.previous_path)
+        previous_path_element.text = media_hash.previous_path
+        hash_element.append(previous_path_element)
+
     return hash_element
 
 
@@ -308,6 +319,11 @@ def _directory_hash_xml_element(media_hash: MHLMediaHash, skipPath=False):
 
     hash_element.append(content_element)
     hash_element.append(structure_element)
+
+    if media_hash.previous_path:
+        previous_path_element = E.previousPath(media_hash.previous_path)
+        previous_path_element.text = media_hash.previous_path
+        hash_element.append(previous_path_element)
 
     return hash_element
 

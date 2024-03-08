@@ -216,3 +216,6 @@ def test_ignore_on_nested_histories(temp_tree):
     runner.invoke(ascmhl.commands.create, [root_dir, "-i", "p2"])
     assert_mhl_file_has_exact_ignore_patterns(mhl_file_for_gen(root_mhl_dir, 2), {"p1", "p2"})
     assert_mhl_file_has_exact_ignore_patterns(mhl_file_for_gen(child_mhl_dir, 4), {"c1", "p1", "c2", "p2"})
+
+    result = runner.invoke(ascmhl.commands.verify, [root_dir])
+    assert not result.exception

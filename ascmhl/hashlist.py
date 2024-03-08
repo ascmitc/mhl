@@ -82,6 +82,14 @@ class MHLHashList:
             all_paths.add(os.path.join(root_path, media_hash.path))
         return all_paths
 
+    def renamed_path_with_previous_path(self, root_path):
+        all_paths = {}
+        for media_hash in self.media_hashes:
+            if media_hash.previous_path is None:
+                continue
+            all_paths[os.path.join(root_path, media_hash.previous_path)] = os.path.join(root_path, media_hash.path)
+        return all_paths
+
     def get_file_name(self):
         return os.path.basename(self.file_path)
 
@@ -97,6 +105,7 @@ class MHLHashList:
             self.process_info.root_media_hash = media_hash
         else:
             self.media_hashes.append(media_hash)
+        self.media_hashes_path_map[media_hash.previous_path or media_hash.path] = media_hash
         self.media_hashes_path_map[media_hash.path] = media_hash
 
     def append_hash_list_reference(self, reference: MHLHashListReference):
@@ -132,6 +141,7 @@ class MHLMediaHash:
     path -- relative file path to the file (supplements the root_path from the MHLHashList object)
     file_size -- size of the file
     last_modification_date -- last modification date as read from the filesystem
+    previous_path -- file was renamed, new file path in path, old file path here
 
     other member variables:
     """
@@ -141,6 +151,7 @@ class MHLMediaHash:
     file_size: Optional[int]
     last_modification_date: Optional[datetime]
     is_directory: bool
+    previous_path: Optional[str]
 
     # init
     def __init__(self):
@@ -149,6 +160,7 @@ class MHLMediaHash:
         self.file_size = None
         self.last_modification_date = None
         self.is_directory = False
+        self.previous_path = None
 
     # methods to query for hashes
     def find_hash_entry_for_format(self, hash_format):

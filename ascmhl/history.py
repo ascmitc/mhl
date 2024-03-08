@@ -7,17 +7,17 @@ __maintainer__ = "Patrick Renner, Alexander Sahm"
 __email__ = "opensource@pomfort.com"
 """
 
-
 from __future__ import annotations
 import os
 import re
 from datetime import datetime, date, time
 
+from . import hasher
 from .__version__ import ascmhl_folder_name, ascmhl_file_extension, ascmhl_chainfile_name, ascmhl_collectionfile_name
 from . import hashlist_xml_parser, chain_xml_parser
 from .utils import datetime_now_filename_string
 from typing import Tuple, List, Dict, Optional, Set
-from . import logger
+from . import logger, errors
 from .chain import MHLChain
 from .hashlist import MHLHashList, MHLHashEntry
 
@@ -194,6 +194,15 @@ class MHLHistory:
             all_paths.update(hash_list.set_of_file_paths(self.get_root_path()))
         for child_history in self.child_histories:
             all_paths.update(child_history.set_of_file_paths())
+
+        return all_paths
+
+    def renamed_path_with_previous_path(self):
+        all_paths = {}
+        for hash_list in self.hash_lists:
+            all_paths.update(hash_list.renamed_path_with_previous_path(self.get_root_path()))
+        for child_history in self.child_histories:
+            all_paths.update(child_history.renamed_path_with_previous_path())
         return all_paths
 
     def hash_list_with_file_name(self, file_name) -> Optional[MHLHashList]:
@@ -216,7 +225,18 @@ class MHLHistory:
         history.asc_mhl_path = asc_mhl_folder_path
 
         file_path = os.path.join(asc_mhl_folder_path, ascmhl_chainfile_name)
+        if os.path.exists(asc_mhl_folder_path) and not os.path.exists(file_path):
+            raise errors.NoMHLChainExceptionForPath(file_path)
         history.chain = chain_xml_parser.parse(file_path)
+        if history.chain.generations:
+            for generation in history.chain.generations:
+                expected_file = os.path.join(asc_mhl_folder_path, generation.ascmhl_filename)
+                if os.path.exists(expected_file):
+                    hash = hasher.hash_file(expected_file, generation.hash_format)
+                    if hash != generation.hash_string:
+                        raise errors.ModifiedMHLHistoryFile(expected_file)
+                else:
+                    raise errors.NoMHLHistoryException(expected_file)
 
         hash_lists = []
         for root, directories, filenames in os.walk(asc_mhl_folder_path):
@@ -324,7 +344,9 @@ class MHLHistory:
         for hash_list in self.hash_lists:
             for reference in hash_list.hash_list_references:
                 reference_path = os.path.dirname(os.path.dirname(reference.path))
-                history = self.child_history_mappings[reference_path]
+                history = self.child_history_mappings.get(reference_path, None)
+                if history is None:
+                    return
                 referenced_hash_list = history.hash_list_with_file_name(os.path.basename(reference.path))
                 assert referenced_hash_list is not None
                 generated_hash = referenced_hash_list.generate_reference_hash()

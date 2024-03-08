@@ -6,6 +6,7 @@ __license__ = "MIT"
 __maintainer__ = "Patrick Renner"
 __email__ = "opensource@pomfort.com"
 """
+
 import binascii
 import hashlib
 

@@ -16,7 +16,7 @@ setup(
     },
     include_package_data=True,
     install_requires=[
-        "Click~=7.0",
+        "Click~=8.1.7",
         "lxml>=4.6.2",
         "packaging>=20.9",
         "pathspec>=0.8.0",

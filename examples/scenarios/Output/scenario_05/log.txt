@@ -13,7 +13,7 @@ Creating new generation for folder at path: /travel_01/Reels/A002R2EC ...
   calculated directory hash for Clips  xxh64: 4c226b42e27d7af3 (content), 906faa843d591a9f (structure)
   created original hash for     Sidecar.txt  xxh64: 3ab5a4166b9bde44
   calculated root hash  xxh64: 8d02114c32e28cbe (content), f557f8ca8e5a88ef (structure)
-Created new generation ascmhl/0001_A002R2EC_2020-01-16_091500.mhl
+Created new generation ascmhl/0001_A002R2EC_2020-01-16_091500Z.mhl
 
 
 
@@ -28,7 +28,7 @@ Creating new generation for folder at path: /travel_01/Reels/A003R2EC ...
   calculated directory hash for Clips  xxh64: f2afc6434255a53d (content), a25d5ca89c95f9e2 (structure)
   created original hash for     Sidecar.txt  xxh64: e5dda75a353d8b34
   calculated root hash  xxh64: 7a82373c131cf40a (content), 1131a950fcc55e4b (structure)
-Created new generation ascmhl/0001_A003R2EC_2020-01-16_091500.mhl
+Created new generation ascmhl/0001_A003R2EC_2020-01-16_091500Z.mhl
 
 
 
@@ -57,8 +57,8 @@ Creating new generation for folder at path: /file_server/Reels ...
   calculated directory hash for A003R2EC  xxh64: 7a82373c131cf40a (content), 1131a950fcc55e4b (structure)
   created original hash for     Summary.txt  xxh64: 0ac48e431d4538ba
   calculated root hash  xxh64: 92950bc8fda076ec (content), 2c2ce52605558158 (structure)
-Created new generation A002R2EC/ascmhl/0002_A002R2EC_2020-01-17_143000.mhl
-Created new generation A003R2EC/ascmhl/0002_A003R2EC_2020-01-17_143000.mhl
-Created new generation ascmhl/0001_Reels_2020-01-17_143000.mhl
+Created new generation A002R2EC/ascmhl/0002_A002R2EC_2020-01-17_143000Z.mhl
+Created new generation A003R2EC/ascmhl/0002_A003R2EC_2020-01-17_143000Z.mhl
+Created new generation ascmhl/0001_Reels_2020-01-17_143000Z.mhl
 
 

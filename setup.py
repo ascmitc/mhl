@@ -23,7 +23,7 @@ setup(
         "requests>=2.25.1",
         "xxhash>=2.0.0",
         "python-dateutil>=2.8.2",
-        "importlib-metadata>=4.0.1; python_version < '3.8'",
+        "importlib-metadata>=4.0.1; python_version >= '3.11'",
     ],
     dependency_links=[],
     long_description=long_description,
@@ -34,7 +34,7 @@ setup(
     tests_require=["pytest", "pytest_mock", "pyfakefs", "freezegun", "requests-mock", "testfixtures"],
     url="https://github.com/ascmitc/mhl",
     use_scm_version=True,
-    python_requires="~=3.7",
+    python_requires=">=3.11",
     classifiers=[
         "Programming Language :: Python :: 3 :: Only",
         "License :: OSI Approved :: MIT License",

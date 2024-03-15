@@ -52,15 +52,22 @@ class NoMHLHistoryException(click.ClickException):
         super().__init__(f"Missing ASC MHL history at path {path}")
 
 
-class ModifiedMHLHistoryFile(click.ClickException):
+class ModifiedMHLManifestFileException(click.ClickException):
     exit_code = 31
 
     def __init__(self, path):
-        super().__init__(f"Modified ASC MHL history at path {path}")
+        super().__init__(f"Modified ASC MHL manifest in history at path {path}")
 
 
-class NoMHLChainExceptionForPath(click.ClickException):
+class NoMHLChainException(click.ClickException):
     exit_code = 32
 
     def __init__(self, path):
-        super().__init__(f"Missing ASC MHL history for path {path}")
+        super().__init__(f"Missing ASC MHL chain file for path {path}")
+
+
+class MissingMHLManifestException(click.ClickException):
+    exit_code = 33
+
+    def __init__(self, path):
+        super().__init__(f"Missing ASC MHL manifest in history at path {path}")

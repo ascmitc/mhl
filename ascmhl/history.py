@@ -226,7 +226,7 @@ class MHLHistory:
 
         file_path = os.path.join(asc_mhl_folder_path, ascmhl_chainfile_name)
         if os.path.exists(asc_mhl_folder_path) and not os.path.exists(file_path):
-            raise errors.NoMHLChainExceptionForPath(file_path)
+            raise errors.NoMHLChainException(file_path)
         history.chain = chain_xml_parser.parse(file_path)
         if history.chain.generations:
             for generation in history.chain.generations:
@@ -234,9 +234,9 @@ class MHLHistory:
                 if os.path.exists(expected_file):
                     hash = hasher.hash_file(expected_file, generation.hash_format)
                     if hash != generation.hash_string:
-                        raise errors.ModifiedMHLHistoryFile(expected_file)
+                        raise errors.ModifiedMHLManifestFileException(expected_file)
                 else:
-                    raise errors.NoMHLHistoryException(expected_file)
+                    raise errors.MissingMHLManifestException(expected_file)
 
         hash_lists = []
         for root, directories, filenames in os.walk(asc_mhl_folder_path):

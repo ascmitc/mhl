@@ -145,11 +145,11 @@ def test_create_nested_mhl_file_missing(fs):
     os.remove("/root/A/AA/ascmhl/0001_AA_2020-01-16_091500Z.mhl")
     result = runner.invoke(ascmhl.commands.create, ["/root", "-h", "xxh64", "-v"])
     assert result.exception
-    assert result.exit_code == 30
+    assert result.exit_code == 33
 
     result = runner.invoke(ascmhl.commands.diff, ["/root"])
     assert result.exception
-    assert result.exit_code == 30
+    assert result.exit_code == 33
 
 
 @freeze_time("2020-01-16 09:15:00")

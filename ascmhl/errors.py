@@ -59,7 +59,7 @@ class ModifiedMHLManifestFileException(click.ClickException):
         super().__init__(f"Modified ASC MHL manifest in history at path {path}")
 
 
-class NoMHLChainExceptionForPath(click.ClickException):
+class NoMHLChainException(click.ClickException):
     exit_code = 32
 
     def __init__(self, path):

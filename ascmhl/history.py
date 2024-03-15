@@ -234,9 +234,9 @@ class MHLHistory:
                 if os.path.exists(expected_file):
                     hash = hasher.hash_file(expected_file, generation.hash_format)
                     if hash != generation.hash_string:
-                        raise errors.ModifiedMHLHistoryFile(expected_file)
+                        raise errors.ModifiedMHLManifestFileException(expected_file)
                 else:
-                    raise errors.NoMHLHistoryException(expected_file)
+                    raise errors.MissingMHLManifestException(expected_file)
 
         hash_lists = []
         for root, directories, filenames in os.walk(asc_mhl_folder_path):

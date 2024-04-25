@@ -1449,7 +1449,6 @@ def test_for_missing_files(not_found_paths, root_path, ignore_spec: MHLIgnoreSpe
 
 def commit_session(session, author_name, author_email, author_phone, author_role, location, comment, tool, tool_version):
     creator_info = MHLCreatorInfo()
-    creator_info.tool = MHLTool(tool, tool_version) if tool is not None else MHLTool(ascmhl_tool_name, ascmhl_tool_version)
     creator_info.creation_date = utils.datetime_now_isostring()
     creator_info.host_name = platform.node()
     creator_info.location = location
@@ -1457,6 +1456,11 @@ def commit_session(session, author_name, author_email, author_phone, author_role
     if author_name is not None:
         author_object = MHLAuthor(author_name, author_email, author_phone, author_role)
         creator_info.authors.append(author_object)
+
+    if tool is not None:
+        creator_info.tool = MHLTool(tool, tool_version if tool_version else '')
+    else:
+        creator_info.tool = MHLTool(ascmhl_tool_name, ascmhl_tool_version)
 
     process_info = MHLProcessInfo()
     process_info.process = MHLProcess("in-place")

@@ -109,6 +109,17 @@ def parse(file_path):
                         current_object = None
 
                     # author
+                    elif tag == "author":
+                        if current_object.authors[-1].name == "-":
+                            current_object.authors[-1].name = element.text
+                        if current_object.authors[-1].role == None:
+                            current_object.authors[-1].role = element.attrib.get("role")
+                        if current_object.authors[-1].email == None:
+                            current_object.authors[-1].email = element.attrib.get("email")
+                        if current_object.authors[-1].phone == None:
+                            current_object.authors[-1].phone = element.attrib.get("phone")
+
+                    # author (not as spec says, only here for backwards compatibility)
                     elif tag == "name":
                         current_object.authors[-1].name = element.text
                     elif tag == "role":
@@ -355,15 +366,7 @@ def _creator_info_xml_element(hash_list: MHLHashList):
         info_element.append(E.comment(creator_info.comment))
 
     for author in creator_info.authors:
-        author_element = E.author()
-        if author.name is not None:
-            author_element.append(E.name(author.name))
-        if author.role is not None:
-            author_element.append(E.role(author.role))
-        if author.email is not None:
-            author_element.append(E.email(author.email))
-        if author.phone is not None:
-            author_element.append(E.phone(author.phone))
+        author_element = E.author(author.name, role=author.role, email=author.email, phone=author.phone)
         info_element.append(author_element)
 
     return info_element

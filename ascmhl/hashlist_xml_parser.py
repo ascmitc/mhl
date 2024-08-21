@@ -359,15 +359,15 @@ def _creator_info_xml_element(hash_list: MHLHashList):
         E.hostname(creator_info.host_name),
         E.tool(creator_info.tool.name, version=creator_info.tool.version),
     )
+    for author in creator_info.authors:
+        author_element = E.author(author.name, role=author.role, email=author.email, phone=author.phone)
+        info_element.append(author_element)
+
     if creator_info.location is not None:
         info_element.append(E.location(creator_info.location))
 
     if creator_info.comment is not None:
         info_element.append(E.comment(creator_info.comment))
-
-    for author in creator_info.authors:
-        author_element = E.author(author.name, role=author.role, email=author.email, phone=author.phone)
-        info_element.append(author_element)
 
     return info_element
 

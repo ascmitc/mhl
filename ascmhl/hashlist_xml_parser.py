@@ -360,7 +360,15 @@ def _creator_info_xml_element(hash_list: MHLHashList):
         E.tool(creator_info.tool.name, version=creator_info.tool.version),
     )
     for author in creator_info.authors:
-        author_element = E.author(author.name, role=author.role, email=author.email, phone=author.phone)
+        author_element = E.author()
+        if author.role != None:
+            author_element.attrib['role'] = author.role
+        if author.email != None:
+            author_element.attrib['email'] = author.email
+        if author.phone != None:
+            author_element.attrib['phone'] = author.phone
+        if author.name != None and author.name != "-":
+            author_element.text = author.name
         info_element.append(author_element)
 
     if creator_info.location is not None:

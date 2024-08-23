@@ -1434,7 +1434,7 @@ def commit_session(session, author_name, author_email, author_phone, author_role
     creator_info.host_name = platform.node()
     creator_info.location = location
     creator_info.comment = comment
-    if author_name is not None:
+    if author_name is not None or author_email is not None or author_role is not None or author_phone is not None:
         author_object = MHLAuthor(author_name, author_email, author_phone, author_role)
         creator_info.authors.append(author_object)
 

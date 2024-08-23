@@ -122,6 +122,16 @@ from collections import namedtuple
     type=click.Path(exists=True),
     help="A file containing multiple file patterns to ignore.",
 )
+@click.option(
+    "--tool",
+    default=None,
+    help="Value for the <tool> element in the <creatorinfo> element",
+)
+@click.option(
+    "--tool_version",
+    default=None,
+    help="Value for the <tool> element in the <creatorinfo> element",
+)
 def create(
     root_path,
     verbose,
@@ -137,6 +147,8 @@ def create(
     author_role,
     location,
     comment,
+    tool,
+    tool_version
 ):
     """
     Create a new generation for a folder or file(s)
@@ -162,6 +174,8 @@ def create(
             comment,
             ignore_list,
             ignore_spec_file,
+            tool,
+            tool_version
         )
         return
     create_for_folder_subcommand(
@@ -178,6 +192,8 @@ def create(
         comment,
         ignore_list,
         ignore_spec_file,
+        tool,
+        tool_version
     )
     return
 
@@ -196,6 +212,8 @@ def create_for_folder_subcommand(
     comment,
     ignore_list=None,
     ignore_spec_file=None,
+    tool=None,
+    tool_version=None
 ):
     # command formerly known as "seal"
     """
@@ -378,7 +396,7 @@ def create_for_folder_subcommand(
                         new_path_media_hash.previous_path = relative_not_found_path
                         found_file_paths.add(not_found_path)
         not_found_paths = not_found_paths - found_file_paths
-    commit_session(session, author_name, author_email, author_phone, author_role, location, comment)
+    commit_session(session, author_name, author_email, author_phone, author_role, location, comment, tool, tool_version)
 
     exception = test_for_missing_files(not_found_paths, root_path, ignore_spec)
     if num_failed_verifications > 0:
@@ -405,6 +423,8 @@ def create_for_single_files_subcommand(
     comment,
     ignore_list=None,
     ignore_spec_file=None,
+    tool=None,
+    tool_version=None
 ):
     # command formerly known as "record"
     """
@@ -460,7 +480,7 @@ def create_for_single_files_subcommand(
             if not success:
                 num_failed_verifications += 1
 
-    commit_session(session, author_name, author_email, author_phone, author_role, location, comment)
+    commit_session(session, author_name, author_email, author_phone, author_role, location, comment, tool, tool_version)
 
     if num_failed_verifications > 0:
         raise errors.VerificationFailedException()
@@ -1427,9 +1447,8 @@ def test_for_missing_files(not_found_paths, root_path, ignore_spec: MHLIgnoreSpe
     return errors.CompletenessCheckFailedException()
 
 
-def commit_session(session, author_name, author_email, author_phone, author_role, location, comment):
+def commit_session(session, author_name, author_email, author_phone, author_role, location, comment, tool, tool_version):
     creator_info = MHLCreatorInfo()
-    creator_info.tool = MHLTool(ascmhl_tool_name, ascmhl_tool_version)
     creator_info.creation_date = utils.datetime_now_isostring()
     creator_info.host_name = platform.node()
     creator_info.location = location
@@ -1437,6 +1456,11 @@ def commit_session(session, author_name, author_email, author_phone, author_role
     if author_name is not None or author_email is not None or author_role is not None or author_phone is not None:
         author_object = MHLAuthor(author_name, author_email, author_phone, author_role)
         creator_info.authors.append(author_object)
+
+    if tool is not None:
+        creator_info.tool = MHLTool(tool, tool_version if tool_version else '')
+    else:
+        creator_info.tool = MHLTool(ascmhl_tool_name, ascmhl_tool_version)
 
     process_info = MHLProcessInfo()
     process_info.process = MHLProcess("in-place")

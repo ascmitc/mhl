@@ -164,9 +164,14 @@ def parse(file_path):
                             else:
                                 # find right hash entry and set structure hash
                                 entry = current_object.find_hash_entry_for_format(tag)
-                                entry.structure_hash_string = element.text
+                                entry.structure_hash_string = (
+                                    element.text.lower()
+                                )  # lower() for improved robustness for uppercase hashes in manifests (which is actually covered in the spec unambiguously)
+
                         else:
-                            entry = MHLHashEntry(tag, element.text, element.attrib.get("action"), hash_date)
+                            entry = MHLHashEntry(
+                                tag, element.text.lower(), element.attrib.get("action"), hash_date
+                            )  # lower() for improved robustness for uppercase hashes in manifests (which is actually covered in the spec unambiguously)
                             current_object.append_hash_entry(entry)
 
                     elif tag == "hash" or tag == "directoryhash":

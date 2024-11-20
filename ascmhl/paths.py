@@ -58,7 +58,7 @@ def _convert_xml_to_local_path(path: str, convert_from_windows_paths=False) -> s
         if os.name == "posix":
             return path
         elif os.name == "nt":
-            return str(PureWindowsPath(PurePosixPath(posix_path)))
+            return str(PureWindowsPath(PurePosixPath(path)))
         else:
             print(f"ERR: Unknown operating system: {os.name}")
             assert 0

@@ -60,7 +60,9 @@ def test_convert_to_xml_path():
         )  # not a real case, just for debugging
     elif os.name == "nt":
         assert posix_path == _convert_local_to_xml_path(windows_path)
-        assert windows_path == _convert_local_to_xml_path(windows_path)  # not a real case, just for debugging
+        assert windows_path == _convert_local_to_xml_path(
+            windows_path, _xml_path_type=_PathType.WINDOWS
+        )  # not a real case, just for debugging
     else:
         print(f"ERR: Unknown operating system: {os.name}")
         assert 0
@@ -87,7 +89,6 @@ def test_convert_xml_to_local_path():
         assert windows_path == _convert_xml_to_local_path(
             posix_path, convert_from_windows_paths=True
         )  # should still work
-        assert 0
     else:
         print(f"ERR: Unknown operating system: {os.name}")
         assert 0

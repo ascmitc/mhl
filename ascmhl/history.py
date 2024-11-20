@@ -194,7 +194,6 @@ class MHLHistory:
             all_paths.update(hash_list.set_of_file_paths(self.get_root_path()))
         for child_history in self.child_histories:
             all_paths.update(child_history.set_of_file_paths())
-
         return all_paths
 
     def renamed_path_with_previous_path(self):
@@ -217,7 +216,7 @@ class MHLHistory:
     # loading history and child histories from path
 
     @classmethod
-    def load_from_path(cls, root_path):
+    def load_from_path(cls, root_path, potential_windows_paths=False):
         """finds all MHL files in the asc-mhl folder, returns the mhl_history instance with all mhl_hashlists"""
 
         asc_mhl_folder_path = os.path.join(root_path, ascmhl_folder_name)
@@ -247,7 +246,9 @@ class MHLHistory:
                     parts = re.findall(MHLHistory.history_file_name_regex, filename_no_extension)
                     if len(parts) == 1 and len(parts[0]) == 2:
                         file_path = os.path.join(asc_mhl_folder_path, filename)
-                        hash_list = hashlist_xml_parser.parse(file_path)
+                        hash_list = hashlist_xml_parser.parse(
+                            file_path, potential_windows_paths=potential_windows_paths
+                        )
                         generation_number = int(parts[0][0])
                         hash_list.generation_number = generation_number
                         # FIXME is there a better way of accessing the generation from a hash entry?
@@ -267,7 +268,7 @@ class MHLHistory:
         return history
 
     @classmethod
-    def load_from_packing_list_path(cls, packing_list_path, root_path):
+    def load_from_packing_list_path(cls, packing_list_path, root_path, potential_windows_paths=False):
         """returns the mhl_history instance with the one packing list mhl_hashlists"""
         # via https://docs.google.com/document/d/1FVSyHq2XJdNt-3Vur_5I_FPOoeeC_cEjkv7p---biyg/edit#
 
@@ -275,7 +276,7 @@ class MHLHistory:
         history = cls()
         history.asc_mhl_path = asc_mhl_folder_path
 
-        hash_list = hashlist_xml_parser.parse(packing_list_path)
+        hash_list = hashlist_xml_parser.parse(packing_list_path, potential_windows_paths=potential_windows_paths)
         hash_list.generation_number = 1
         history.append_hash_list(hash_list)
 

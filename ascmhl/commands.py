@@ -13,6 +13,7 @@ import platform
 
 import click
 from lxml import etree
+from pathlib import Path
 
 from . import logger
 from . import errors
@@ -1504,7 +1505,7 @@ def test_for_missing_files(not_found_paths, root_path, ignore_spec: MHLIgnoreSpe
     # test our not_found_paths against our ignore spec to ensure these weren't explicitly ignored.
     logger.error(f"ERROR: {len(not_found_paths)} missing file(s):")
     for path in not_found_paths:
-        logger.error(f"  {os.path.relpath(path, root_path)}")
+        logger.error(f"  {Path(os.path.relpath(path, root_path)).as_posix()}")
     return errors.CompletenessCheckFailedException()
 
 

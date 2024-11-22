@@ -142,7 +142,7 @@ def test_create_nested_mhl_file_missing(fs):
         assert str(Path("C1.txt")) in fileContents
 
     fs.create_file("/root/A/AA/AA2.txt", contents="AA2\n")
-    remove_file = "C:" + str(Path("/root/A/AA/ascmhl/0001_AA_2020-01-16_091500Z.mhl"))
+    remove_file = str(Path("/root/A/AA/ascmhl/0001_AA_2020-01-16_091500Z.mhl"))
     print(f"DBG: remove_file {remove_file}")
     os.remove(remove_file)
     result = runner.invoke(ascmhl.commands.create, ["/root", "-h", "xxh64", "-v"])

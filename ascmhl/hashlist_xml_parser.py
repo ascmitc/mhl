@@ -351,7 +351,7 @@ def _ascmhlreference_xml_element(hash_list: MHLHashList, file_path: str):
 
     root_path = os.path.dirname(os.path.dirname(file_path))
     hash_element = E.hashlistreference(
-        E.path(os.path.relpath(hash_list.file_path, root_path)),
+        E.path(_convert_local_to_xml_path(os.path.relpath(hash_list.file_path, root_path))),
         E.c4(hash_list.generate_reference_hash()),
     )
 

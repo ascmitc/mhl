@@ -20,6 +20,7 @@ from lxml.builder import E
 from .hashlist import *
 from .__version__ import ascmhl_supported_hashformats
 from .hashlist import MHLHashList
+from .paths import _convert_local_to_xml_path, _convert_xml_to_local_path
 
 
 def parse(file_path):
@@ -51,7 +52,7 @@ def parse(file_path):
 
                 if type(current_object) is MHLChainGeneration:
                     if tag == "path":
-                        current_object.ascmhl_filename = element.text
+                        current_object.ascmhl_filename = _convert_xml_to_local_path(element.text)
                     elif tag in ascmhl_supported_hashformats:
                         current_object.hash_format = tag
                         current_object.hash_string = element.text
@@ -102,7 +103,7 @@ def _hashlist_xml_element_from_hashlist(hash_list: MHLHashList):
     """builds and returns one <hashlist> element for a given HashList object"""
 
     hash_list_element = E.hashlist(
-        E.path(os.path.basename(hash_list.file_path)),
+        E.path(_convert_local_to_xml_path(os.path.basename(hash_list.file_path))),
         E.c4(hash_list.generate_reference_hash()),
     )
     hash_list_element.attrib["sequencenr"] = str(hash_list.generation_number)
@@ -115,7 +116,7 @@ def _hashlist_xml_element_from_chaingeneration(generation: MHLChainGeneration):
 
     if generation.hash_format == "c4":
         hash_list_element = E.hashlist(
-            E.path(generation.ascmhl_filename),
+            E.path(_convert_local_to_xml_path(generation.ascmhl_filename)),
             E.c4(generation.hash_string),
         )
         hash_list_element.attrib["sequencenr"] = str(generation.generation_number)

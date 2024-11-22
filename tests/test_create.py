@@ -221,8 +221,10 @@ def test_create_fail_altered_file(fs, simple_mhl_history):
     assert result.exit_code == 11
     assert "Stuff.txt" in result.output
 
+
 def convert_to_posix(path):
     return Path(path).as_posix()
+
 
 def test_create_fail_missing_file(fs, nested_mhl_histories):
     """
@@ -270,7 +272,7 @@ def test_create_fail_missing_file(fs, nested_mhl_histories):
     # since we scan all generations for file paths we now get old files, missing files and new files here
     # as well as all entries for the directories
     assert paths == compare_paths
-    
+
     # since the file /root/A/AA/AA1.txt is still missing all further seal attempts will still fail
     runner = CliRunner()
     result = runner.invoke(ascmhl.commands.create, ["/root"])

@@ -74,13 +74,17 @@ class MHLGenerationCreationSession:
             hash_entry = MHLHashEntry(hash_format, hash_string, hash_date=hash_date)
             if original_hash_entry is None:
                 hash_entry.action = "original"
-                logger.verbose(f"  created original hash for     {Path(relative_path).as_posix()}  {hash_format}: {hash_string}")
+                logger.verbose(
+                    f"  created original hash for     {Path(relative_path).as_posix()}  {hash_format}: {hash_string}"
+                )
             else:
                 existing_hash_entry = history.find_first_hash_entry_for_path(history_relative_path, hash_format)
                 if existing_hash_entry is not None:
                     if existing_hash_entry.hash_string == hash_string:
                         hash_entry.action = "verified"
-                        logger.verbose(f"  verified                      {Path(relative_path).as_posix()} {hash_format}: OK")
+                        logger.verbose(
+                            f"  verified                      {Path(relative_path).as_posix()} {hash_format}: OK"
+                        )
                     else:
                         hash_entry.action = "failed"
                         failures += 1
@@ -94,7 +98,9 @@ class MHLGenerationCreationSession:
                     hash_entry.action = (  # mark as 'new' here, will be changed to verified in _validate_new_hash_list
                         "new"
                     )
-                    logger.verbose(f"  created new (verif.) hash for {Path(relative_path).as_posix()}  {hash_format}: {hash_string}")
+                    logger.verbose(
+                        f"  created new (verif.) hash for {Path(relative_path).as_posix()}  {hash_format}: {hash_string}"
+                    )
             # collection behavior: overwrite action with action from flattened history
             if action != None:
                 hash_entry.action = action
@@ -132,13 +138,17 @@ class MHLGenerationCreationSession:
         hash_entry = MHLHashEntry(hash_format, hash_string, hash_date=hash_date)
         if original_hash_entry is None:
             hash_entry.action = "original"
-            logger.verbose(f"  created original hash for     {Path(relative_path).as_posix()}  {hash_format}: {hash_string}")
+            logger.verbose(
+                f"  created original hash for     {Path(relative_path).as_posix()}  {hash_format}: {hash_string}"
+            )
         else:
             existing_hash_entry = history.find_first_hash_entry_for_path(history_relative_path, hash_format)
             if existing_hash_entry is not None:
                 if existing_hash_entry.hash_string == hash_string:
                     hash_entry.action = "verified"
-                    logger.verbose(f"  verified                      {Path(relative_path).as_posix()}  {hash_format}: OK")
+                    logger.verbose(
+                        f"  verified                      {Path(relative_path).as_posix()}  {hash_format}: OK"
+                    )
                 else:
                     hash_entry.action = "failed"
                     logger.error(
@@ -149,7 +159,9 @@ class MHLGenerationCreationSession:
             else:
                 # in case there is no hash entry for this hash format yet
                 hash_entry.action = "new"  # mark as 'new' here, will be changed to verified in _validate_new_hash_list
-                logger.verbose(f"  created new (verif.) hash for {Path(relative_path).as_posix()}  {hash_format}: {hash_string}")
+                logger.verbose(
+                    f"  created new (verif.) hash for {Path(relative_path).as_posix()}  {hash_format}: {hash_string}"
+                )
 
         # in case the same file is hashes multiple times we want to add all hash entries
         new_hash_list = self.new_hash_lists[history]

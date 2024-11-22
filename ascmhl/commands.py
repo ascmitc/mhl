@@ -693,7 +693,9 @@ def verify_entire_folder(
                 # create a new hash and compare it against the original hash entry
                 current_hash = hash_file(file_path, original_hash_entry.hash_format)
                 if original_hash_entry.hash_string == current_hash:
-                    logger.verbose(f"verification ({original_hash_entry.hash_format}) of file {Path(relative_path).as_posix()}: OK")
+                    logger.verbose(
+                        f"verification ({original_hash_entry.hash_format}) of file {Path(relative_path).as_posix()}: OK"
+                    )
                 else:
                     logger.error(
                         f"ERROR: hash mismatch        for {Path(relative_path).as_posix()} "

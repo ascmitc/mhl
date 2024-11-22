@@ -260,7 +260,9 @@ class MHLHistory:
                                 hash_entry.temp_generation_number = hash_list.generation_number
                         hash_lists.append(hash_list)
                     else:
-                        logger.error(f"name of ascmhl file {filename} does not conform to naming convention")
+                        logger.error(
+                            f"name of ascmhl file {Path(filename).as_posix()} does not conform to naming convention"
+                        )
         # sort all found hash lists by generation number first to make sure we add them to the history in order
         hash_lists.sort(key=lambda x: x.generation_number)
         for hash_list in hash_lists:

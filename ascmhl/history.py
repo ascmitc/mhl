@@ -11,6 +11,7 @@ from __future__ import annotations
 import os
 import re
 from datetime import datetime, date, time
+from pathlib import Path
 
 from . import hasher
 from .__version__ import ascmhl_folder_name, ascmhl_file_extension, ascmhl_chainfile_name, ascmhl_collectionfile_name
@@ -240,7 +241,9 @@ class MHLHistory:
         hash_lists = []
         for root, directories, filenames in os.walk(asc_mhl_folder_path):
             for filename in filenames:
-                if filename.endswith(ascmhl_file_extension):
+                if (len(filename) > 2 and filename[:2] != "._") and filename.endswith(
+                    ascmhl_file_extension
+                ):  # ignore ._ variants of mhl files that can happen when moving data from macOS to Windows and back
                     # file name example: 0001_root_2020-01-15_130000.mhl
                     filename_no_extension, _ = os.path.splitext(filename)
                     parts = re.findall(MHLHistory.history_file_name_regex, filename_no_extension)

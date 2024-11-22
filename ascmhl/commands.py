@@ -1347,7 +1347,7 @@ def info(verbose, single_file, root_path, convert_windows_paths):
     if single_file is not None and len(single_file) > 0:
         if root_path == None:
             current_dir = os.path.dirname(os.path.abspath(single_file[0]))
-            while current_dir != "/" and current_dir != "":
+            while current_dir != "/" and current_dir != "" and (len(current_dir)>4 and current_dir[1:4] != ":\\\\"):
                 asc_mhl_folder_path = os.path.join(current_dir, ascmhl_folder_name)
                 if os.path.exists(asc_mhl_folder_path):
                     root_path = current_dir
@@ -1373,7 +1373,8 @@ def info_for_entire_history(root_path, verbose, convert_windows_paths=False):
     if not os.path.isabs(root_path):
         root_path = os.path.join(os.getcwd(), root_path)
 
-    logger.info(f"Info with history at path: {root_path}")
+    _, tail = os.path.splitdrive(root_path)
+    logger.info(f"Info with history at path: {Path(tail).as_posix()}")
 
     existing_history = MHLHistory.load_from_path(root_path, potential_windows_paths=convert_windows_paths)
 
@@ -1411,7 +1412,8 @@ def info_for_single_file(root_path, verbose, single_file, convert_windows_paths=
     if not os.path.isabs(root_path):
         root_path = os.path.join(os.getcwd(), root_path)
 
-    logger.info(f"Info with history at path: {Path(root_path).as_posix()}")
+    _, tail = os.path.splitdrive(root_path)
+    logger.info(f"Info with history at path: {Path(tail).as_posix()}")
 
     existing_history = MHLHistory.load_from_path(root_path, potential_windows_paths=convert_windows_paths)
 

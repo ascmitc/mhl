@@ -138,9 +138,10 @@ class MHLGenerationCreationSession:
         hash_entry = MHLHashEntry(hash_format, hash_string, hash_date=hash_date)
         if original_hash_entry is None:
             hash_entry.action = "original"
-            logger.verbose(
-                f"  created original hash for     {Path(relative_path).as_posix()}  {hash_format}: {hash_string}"
-            )
+            if relative_path != None:
+                logger.verbose(
+                    f"  created original hash for     {Path(relative_path).as_posix()}  {hash_format}: {hash_string}"
+                )
         else:
             existing_hash_entry = history.find_first_hash_entry_for_path(history_relative_path, hash_format)
             if existing_hash_entry is not None:

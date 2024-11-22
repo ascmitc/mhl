@@ -10,6 +10,7 @@ __email__ = "opensource@pomfort.com"
 import os
 from click.testing import CliRunner
 from freezegun import freeze_time
+from pathlib import Path
 
 import ascmhl
 
@@ -42,10 +43,10 @@ def test_create_nested_succeed(fs):
     assert os.path.exists("/root/ascmhl/ascmhl_chain.xml")
     with open("/root/ascmhl/0001_root_2020-01-16_091500Z.mhl", "r") as fin:
         fileContents = fin.read()
-        assert "0002_AA_2020-01-16_091500Z.mhl" in fileContents
-        assert "B/ascmhl/0002_B_2020-01-16_091500Z.mhl" in fileContents
-        assert "AA1.txt" not in fileContents
-        assert "C1.txt" in fileContents
+        assert str(Path("0002_AA_2020-01-16_091500Z.mhl")) in fileContents
+        assert str(Path("B/ascmhl/0002_B_2020-01-16_091500Z.mhl")) in fileContents
+        assert str(Path("AA1.txt")) not in fileContents
+        assert str(Path("C1.txt")) in fileContents
 
     fs.create_file("/root/A/AA/AA2.txt", contents="AA2\n")
     result = runner.invoke(ascmhl.commands.create, ["/root", "-h", "xxh64", "-v"])
@@ -55,8 +56,8 @@ def test_create_nested_succeed(fs):
     assert not os.path.exists("/root/ascmhl/0003_B_2020-01-16_091500Z.mhl")
     with open("/root/ascmhl/0002_root_2020-01-16_091500Z.mhl", "r") as fin:
         fileContents = fin.read()
-        assert "0003_AA_2020-01-16_091500Z.mhl" in fileContents
-        assert "AA2.txt" not in fileContents
+        assert str(Path("0003_AA_2020-01-16_091500Z.mhl")) in fileContents
+        assert str(Path("AA2.txt")) not in fileContents
 
     # test history command
     result = runner.invoke(ascmhl.commands.info, ["/root"])
@@ -93,10 +94,10 @@ def test_create_nested_mhl_file_modified(fs):
     assert os.path.exists("/root/ascmhl/ascmhl_chain.xml")
     with open("/root/ascmhl/0001_root_2020-01-16_091500Z.mhl", "r") as fin:
         fileContents = fin.read()
-        assert "0002_AA_2020-01-16_091500Z.mhl" in fileContents
-        assert "B/ascmhl/0002_B_2020-01-16_091500Z.mhl" in fileContents
-        assert "AA1.txt" not in fileContents
-        assert "C1.txt" in fileContents
+        assert str(Path("0002_AA_2020-01-16_091500Z.mhl")) in fileContents
+        assert str(Path("B/ascmhl/0002_B_2020-01-16_091500Z.mhl")) in fileContents
+        assert str(Path("AA1.txt")) not in fileContents
+        assert str(Path("C1.txt")) in fileContents
 
     fs.create_file("/root/A/AA/AA2.txt", contents="AA2\n")
 
@@ -135,14 +136,15 @@ def test_create_nested_mhl_file_missing(fs):
     assert os.path.exists("/root/ascmhl/ascmhl_chain.xml")
     with open("/root/ascmhl/0001_root_2020-01-16_091500Z.mhl", "r") as fin:
         fileContents = fin.read()
-        assert "0002_AA_2020-01-16_091500Z.mhl" in fileContents
-        assert "B/ascmhl/0002_B_2020-01-16_091500Z.mhl" in fileContents
-        assert "AA1.txt" not in fileContents
-        assert "C1.txt" in fileContents
+        assert str(Path("0002_AA_2020-01-16_091500Z.mhl")) in fileContents
+        assert str(Path("B/ascmhl/0002_B_2020-01-16_091500Z.mhl")) in fileContents
+        assert str(Path("AA1.txt")) not in fileContents
+        assert str(Path("C1.txt")) in fileContents
 
     fs.create_file("/root/A/AA/AA2.txt", contents="AA2\n")
-
-    os.remove("/root/A/AA/ascmhl/0001_AA_2020-01-16_091500Z.mhl")
+    remove_file = "C:" + str(Path("/root/A/AA/ascmhl/0001_AA_2020-01-16_091500Z.mhl"))
+    print(f"DBG: remove_file {remove_file}")
+    os.remove(remove_file)
     result = runner.invoke(ascmhl.commands.create, ["/root", "-h", "xxh64", "-v"])
     assert result.exception
     assert result.exit_code == 33
@@ -180,13 +182,13 @@ def test_create_nested_mhl_chain_missing(fs):
     assert os.path.exists("/root/ascmhl/ascmhl_chain.xml")
     with open("/root/ascmhl/0001_root_2020-01-16_091500Z.mhl", "r") as fin:
         fileContents = fin.read()
-        assert "0002_AA_2020-01-16_091500Z.mhl" in fileContents
-        assert "B/ascmhl/0002_B_2020-01-16_091500Z.mhl" in fileContents
-        assert "AA1.txt" not in fileContents
-        assert "C1.txt" in fileContents
+        assert str(Path("0002_AA_2020-01-16_091500Z.mhl")) in fileContents
+        assert str(Path("B/ascmhl/0002_B_2020-01-16_091500Z.mhl")) in fileContents
+        assert str(Path("AA1.txt")) not in fileContents
+        assert str(Path("C1.txt")) in fileContents
 
     fs.create_file("/root/A/AA/AA2.txt", contents="AA2\n")
-    os.remove("/root/A/AA/ascmhl/ascmhl_chain.xml")
+    os.remove(str(Path("/root/A/AA/ascmhl/ascmhl_chain.xml")))
     result = runner.invoke(ascmhl.commands.create, ["/root", "-h", "xxh64", "-v"])
     assert result.exception
     assert result.exit_code == 32

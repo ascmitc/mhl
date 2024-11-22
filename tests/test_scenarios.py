@@ -14,6 +14,7 @@ import os
 import shutil
 from importlib import reload
 from typing import List
+from pathlib import Path
 
 import pytest
 from click.testing import CliRunner
@@ -173,10 +174,10 @@ def compare_files_against_reference(scenario_reference: str, folder_paths: List[
 
 def validate_all_mhl_files_against_xml_schema(folder_path: str):
     """Find all mhl files created and validate them against the xsd"""
-    mhl_files = glob.glob(folder_path + r"/**/*.mhl", recursive=True)
+    mhl_files = glob.glob(str(Path(folder_path + r"/**/*.mhl")), recursive=True)
     runner = CliRunner()
     for file in mhl_files:
-        result = runner.invoke(ascmhl.commands.xsd_schema_check, file)
+        result = runner.invoke(ascmhl.commands.xsd_schema_check, Path(file).as_posix())
         assert result.exit_code == 0, result.output
 
 

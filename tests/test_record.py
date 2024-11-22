@@ -10,6 +10,7 @@ __email__ = "opensource@pomfort.com"
 import os
 from freezegun import freeze_time
 from click.testing import CliRunner
+from pathlib import Path
 
 from ascmhl.history import MHLHistory
 import ascmhl.commands
@@ -33,7 +34,7 @@ def test_record_succeed_single_file(fs):
     # make sure that only the specified file was added
     history = MHLHistory.load_from_path("/root")
     assert len(history.hash_lists[0].media_hashes) == 1
-    assert history.hash_lists[0].media_hashes[0].path == "A/A1.txt"
+    assert history.hash_lists[0].media_hashes[0].path == str(Path("A/A1.txt"))
 
 
 @freeze_time("2020-01-16 09:15:00")
@@ -51,8 +52,8 @@ def test_record_succeed_single_directory(fs):
     # make sure that only the specified file was added
     history = MHLHistory.load_from_path("/root")
     assert len(history.hash_lists[0].media_hashes) == 2
-    assert history.hash_lists[0].media_hashes[0].path == "A/A1.txt"
-    assert history.hash_lists[0].media_hashes[1].path == "A/A2.txt"
+    assert history.hash_lists[0].media_hashes[0].path == str(Path("A/A1.txt"))
+    assert history.hash_lists[0].media_hashes[1].path == str(Path("A/A2.txt"))
 
 
 @freeze_time("2020-01-16 09:15:00")
@@ -70,8 +71,8 @@ def test_record_succeed_multiple_files(fs):
     # make sure that only the specified file was added
     history = MHLHistory.load_from_path("/root")
     assert len(history.hash_lists[0].media_hashes) == 2
-    assert history.hash_lists[0].media_hashes[0].path == "A/A1.txt"
-    assert history.hash_lists[0].media_hashes[1].path == "A/A2.txt"
+    assert history.hash_lists[0].media_hashes[0].path == str(Path("A/A1.txt"))
+    assert history.hash_lists[0].media_hashes[1].path == str(Path("A/A2.txt"))
 
 
 def test_record_fail_altered_file(fs, simple_mhl_history):
@@ -91,7 +92,7 @@ def test_record_fail_altered_file(fs, simple_mhl_history):
 
     # make sure we have created one failing and one succeeded generation
     history = MHLHistory.load_from_path("/root")
-    assert history.hash_lists[1].media_hashes[0].path == "Stuff.txt"
+    assert history.hash_lists[1].media_hashes[0].path == str(Path("Stuff.txt"))
     assert history.hash_lists[1].media_hashes[0].hash_entries[0].action == "failed"
-    assert history.hash_lists[2].media_hashes[0].path == "A/A1.txt"
+    assert history.hash_lists[2].media_hashes[0].path == str(Path("A/A1.txt"))
     assert history.hash_lists[2].media_hashes[0].hash_entries[0].action == "verified"

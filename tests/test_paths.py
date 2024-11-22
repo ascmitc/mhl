@@ -34,6 +34,16 @@ def test_conversion_to_windows(fs):
 
     assert converted_path == "\\foo\\bar\\test.txt"
 
+def test_conversion_from_posix_to_local():
+    posix_path = "/foo/bar/test.txt"
+
+    converted_path = str(Path(posix_path))
+
+    if os.name == "posix":
+        assert converted_path == "/foo/bar/test.txt"
+    elif os.name == "nt":
+        assert converted_path == "\\foo\\bar\\test.txt"
+
 
 def test_detect_path_type():
 

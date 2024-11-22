@@ -640,7 +640,7 @@ def verify_entire_folder(
     if single_file is not None and not os.path.isabs(single_file):
         single_file = os.path.join(root_path, single_file)
 
-    logger.verbose(f"check folder at path: {root_path}")
+    logger.verbose(f"check folder at path: {Path(root_path).as_posix()}")
 
     if packing_list_path is not None:
         existing_history = MHLHistory.load_from_packing_list_path(packing_list_path, root_path)
@@ -686,17 +686,17 @@ def verify_entire_folder(
 
                 # in case there is no original hash entry continue
                 if original_hash_entry is None:
-                    logger.error(f"found new file {relative_path}")
+                    logger.error(f"found new file {Path(relative_path).as_posix()}")
                     num_new_files += 1
                     continue
 
                 # create a new hash and compare it against the original hash entry
                 current_hash = hash_file(file_path, original_hash_entry.hash_format)
                 if original_hash_entry.hash_string == current_hash:
-                    logger.verbose(f"verification ({original_hash_entry.hash_format}) of file {relative_path}: OK")
+                    logger.verbose(f"verification ({original_hash_entry.hash_format}) of file {Path(relative_path).as_posix()}: OK")
                 else:
                     logger.error(
-                        f"ERROR: hash mismatch        for {relative_path} "
+                        f"ERROR: hash mismatch        for {Path(relative_path).as_posix()} "
                         f"old {original_hash_entry.hash_format}: {original_hash_entry.hash_string}, "
                         f"new {original_hash_entry.hash_format}: {current_hash}"
                     )
@@ -742,7 +742,7 @@ def verify_directory_hash_subcommand(
     if not os.path.isabs(root_path):
         root_path = os.path.join(os.getcwd(), root_path)
 
-    logger.verbose(f"check folder at path: {root_path}")
+    logger.verbose(f"check folder at path: {Path(root_path).as_posix()}")
 
     existing_history = MHLHistory.load_from_path(root_path, potential_windows_paths=convert_windows_paths)
 
@@ -1078,7 +1078,7 @@ def diff_entire_folder_against_full_history_subcommand(
     if not os.path.isabs(root_path):
         root_path = os.path.join(os.getcwd(), root_path)
 
-    logger.verbose(f"check folder at path: {root_path}")
+    logger.verbose(f"check folder at path: {Path(root_path).as_posix()}")
 
     existing_history = MHLHistory.load_from_path(root_path, potential_windows_paths=convert_windows_paths)
 
@@ -1395,7 +1395,7 @@ def log_child_histories(history):
             logger.info(f"  Generation {hash_list.generation_number} ({hash_list.creator_info.creation_date})")
 
     for child_history in history.child_histories:
-        logger.info(f"\nChild History at {child_history.get_root_path()}:")
+        logger.info(f"\nChild History at {Path(child_history.get_root_path()).as_posix()}:")
         log_child_histories(child_history)
 
 
@@ -1409,7 +1409,7 @@ def info_for_single_file(root_path, verbose, single_file, convert_windows_paths=
     if not os.path.isabs(root_path):
         root_path = os.path.join(os.getcwd(), root_path)
 
-    logger.info(f"Info with history at path: {root_path}")
+    logger.info(f"Info with history at path: {Path(root_path).as_posix()}")
 
     existing_history = MHLHistory.load_from_path(root_path, potential_windows_paths=convert_windows_paths)
 

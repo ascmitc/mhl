@@ -162,7 +162,14 @@ def parse(file_path, potential_windows_paths=False):
                             hash_date = dateutil.parser.parse(hash_date_string)
                         if current_object.is_directory:
                             if is_directory_structure == False:
-                                entry = MHLHashEntry(tag, element.text, element.attrib.get("action"), hash_date)
+                                entry = MHLHashEntry(
+                                    tag,
+                                    _convert_xml_to_local_path(
+                                        element.text, convert_from_windows_paths=potential_windows_paths
+                                    ),
+                                    element.attrib.get("action"),
+                                    hash_date,
+                                )
                                 current_object.append_hash_entry(entry)
                             else:
                                 # find right hash entry and set structure hash

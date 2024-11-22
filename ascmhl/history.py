@@ -268,7 +268,7 @@ class MHLHistory:
         for hash_list in hash_lists:
             history.append_hash_list(hash_list)
 
-        history._find_and_load_child_histories()
+        history._find_and_load_child_histories(potential_windows_paths=potential_windows_paths)
 
         return history
 
@@ -311,14 +311,14 @@ class MHLHistory:
 
         return history
 
-    def _find_and_load_child_histories(self) -> None:
+    def _find_and_load_child_histories(self, potential_windows_paths) -> None:
         """traverses the whole file system tree inside the history to find all sub histories"""
         history_root = self.get_root_path()
         for root, directories, _ in os.walk(history_root):
             if root != history_root and ascmhl_folder_name in directories:
                 # we parse the mhl folder and clear the directories so we are not going deeper
                 # everything beneath is handled by the child history
-                child_history = MHLHistory.load_from_path(root)
+                child_history = MHLHistory.load_from_path(root, potential_windows_paths=potential_windows_paths)
                 child_history.parent_history = self
                 self.append_child_history(child_history)
                 directories.clear()

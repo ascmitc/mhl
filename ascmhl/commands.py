@@ -1347,7 +1347,7 @@ def info(verbose, single_file, root_path, convert_windows_paths):
     if single_file is not None and len(single_file) > 0:
         if root_path == None:
             current_dir = os.path.dirname(os.path.abspath(single_file[0]))
-            while current_dir != "/" and current_dir != "" and (len(current_dir)>4 and current_dir[1:4] != ":\\\\"):
+            while current_dir != "/" and current_dir != "" and (len(current_dir) > 4 and current_dir[1:4] != ":\\\\"):
                 asc_mhl_folder_path = os.path.join(current_dir, ascmhl_folder_name)
                 if os.path.exists(asc_mhl_folder_path):
                     root_path = current_dir

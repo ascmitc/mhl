@@ -10,6 +10,7 @@ __email__ = "opensource@pomfort.com"
 import os
 from freezegun import freeze_time
 from click.testing import CliRunner
+from pathlib import Path
 
 from ascmhl.history import MHLHistory
 import ascmhl.commands
@@ -221,6 +222,10 @@ def test_create_fail_altered_file(fs, simple_mhl_history):
     assert "Stuff.txt" in result.output
 
 
+def convert_to_posix(path):
+    return Path(path).as_posix()
+
+
 def test_create_fail_missing_file(fs, nested_mhl_histories):
     """
     test that creating a new generation fails if there is a file missing on the file system that is referenced by one of the histories
@@ -228,8 +233,13 @@ def test_create_fail_missing_file(fs, nested_mhl_histories):
 
     root_history = MHLHistory.load_from_path("/root")
     paths = root_history.set_of_file_paths()
+    paths = list(map(convert_to_posix, paths))
+    paths.sort()
 
-    assert paths == {"/root/B/B1.txt", "/root/B/BB/BB1.txt", "/root/Stuff.txt", "/root/A/AA/AA1.txt"}
+    compare_paths = ["/root/B/B1.txt", "/root/B/BB/BB1.txt", "/root/Stuff.txt", "/root/A/AA/AA1.txt"]
+    compare_paths.sort()
+
+    assert paths == compare_paths
     os.remove("/root/A/AA/AA1.txt")
     runner = CliRunner()
     result = runner.invoke(ascmhl.commands.create, ["/root"])
@@ -240,10 +250,10 @@ def test_create_fail_missing_file(fs, nested_mhl_histories):
     # the new not yet referenced files (/root/B/BA/BA1.txt and /root/A/AB/AB1.txt) as well now
     root_history = MHLHistory.load_from_path("/root")
     paths = root_history.set_of_file_paths()
+    paths = list(map(convert_to_posix, paths))
+    paths.sort()
 
-    # since we scan all generations for file paths we now get old files, missing files and new files here
-    # as well as all entries for the directories
-    assert paths == {
+    compare_paths = [
         "/root/B/B1.txt",
         "/root/B/BA/BA1.txt",
         "/root/B",
@@ -256,7 +266,12 @@ def test_create_fail_missing_file(fs, nested_mhl_histories):
         "/root/B/BB",
         "/root/A",
         "/root/B/BB/BB1.txt",
-    }
+    ]
+    compare_paths.sort()
+
+    # since we scan all generations for file paths we now get old files, missing files and new files here
+    # as well as all entries for the directories
+    assert paths == compare_paths
 
     # since the file /root/A/AA/AA1.txt is still missing all further seal attempts will still fail
     runner = CliRunner()

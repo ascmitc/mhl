@@ -11,6 +11,7 @@ from __future__ import annotations
 import os
 import re
 from datetime import datetime, date, time
+from pathlib import Path
 
 from . import hasher
 from .__version__ import ascmhl_folder_name, ascmhl_file_extension, ascmhl_chainfile_name, ascmhl_collectionfile_name
@@ -188,13 +189,14 @@ class MHLHistory:
             dir_path = os.path.dirname(dir_path)
         return self, relative_path
 
-    def set_of_file_paths(self) -> Set[str]:
+    def set_of_file_paths(self, potential_windows_paths=False) -> Set[str]:
         all_paths = set()
         for hash_list in self.hash_lists:
-            all_paths.update(hash_list.set_of_file_paths(self.get_root_path()))
+            all_paths.update(
+                hash_list.set_of_file_paths(self.get_root_path(), potential_windows_paths=potential_windows_paths)
+            )
         for child_history in self.child_histories:
             all_paths.update(child_history.set_of_file_paths())
-
         return all_paths
 
     def renamed_path_with_previous_path(self):
@@ -217,7 +219,7 @@ class MHLHistory:
     # loading history and child histories from path
 
     @classmethod
-    def load_from_path(cls, root_path):
+    def load_from_path(cls, root_path, potential_windows_paths=False):
         """finds all MHL files in the asc-mhl folder, returns the mhl_history instance with all mhl_hashlists"""
 
         asc_mhl_folder_path = os.path.join(root_path, ascmhl_folder_name)
@@ -241,13 +243,17 @@ class MHLHistory:
         hash_lists = []
         for root, directories, filenames in os.walk(asc_mhl_folder_path):
             for filename in filenames:
-                if filename.endswith(ascmhl_file_extension):
+                if (len(filename) > 2 and filename[:2] != "._") and filename.endswith(
+                    ascmhl_file_extension
+                ):  # ignore ._ variants of mhl files that can happen when moving data from macOS to Windows and back
                     # file name example: 0001_root_2020-01-15_130000.mhl
                     filename_no_extension, _ = os.path.splitext(filename)
                     parts = re.findall(MHLHistory.history_file_name_regex, filename_no_extension)
                     if len(parts) == 1 and len(parts[0]) == 2:
                         file_path = os.path.join(asc_mhl_folder_path, filename)
-                        hash_list = hashlist_xml_parser.parse(file_path)
+                        hash_list = hashlist_xml_parser.parse(
+                            file_path, potential_windows_paths=potential_windows_paths
+                        )
                         generation_number = int(parts[0][0])
                         hash_list.generation_number = generation_number
                         # FIXME is there a better way of accessing the generation from a hash entry?
@@ -256,18 +262,20 @@ class MHLHistory:
                                 hash_entry.temp_generation_number = hash_list.generation_number
                         hash_lists.append(hash_list)
                     else:
-                        logger.error(f"name of ascmhl file {filename} does not conform to naming convention")
+                        logger.error(
+                            f"name of ascmhl file {Path(filename).as_posix()} does not conform to naming convention"
+                        )
         # sort all found hash lists by generation number first to make sure we add them to the history in order
         hash_lists.sort(key=lambda x: x.generation_number)
         for hash_list in hash_lists:
             history.append_hash_list(hash_list)
 
-        history._find_and_load_child_histories()
+        history._find_and_load_child_histories(potential_windows_paths=potential_windows_paths)
 
         return history
 
     @classmethod
-    def load_from_packing_list_path(cls, packing_list_path, root_path):
+    def load_from_packing_list_path(cls, packing_list_path, root_path, potential_windows_paths=False):
         """returns the mhl_history instance with the one packing list mhl_hashlists"""
         # via https://docs.google.com/document/d/1FVSyHq2XJdNt-3Vur_5I_FPOoeeC_cEjkv7p---biyg/edit#
 
@@ -275,7 +283,7 @@ class MHLHistory:
         history = cls()
         history.asc_mhl_path = asc_mhl_folder_path
 
-        hash_list = hashlist_xml_parser.parse(packing_list_path)
+        hash_list = hashlist_xml_parser.parse(packing_list_path, potential_windows_paths=potential_windows_paths)
         hash_list.generation_number = 1
         history.append_hash_list(hash_list)
 
@@ -305,14 +313,14 @@ class MHLHistory:
 
         return history
 
-    def _find_and_load_child_histories(self) -> None:
+    def _find_and_load_child_histories(self, potential_windows_paths) -> None:
         """traverses the whole file system tree inside the history to find all sub histories"""
         history_root = self.get_root_path()
         for root, directories, _ in os.walk(history_root):
             if root != history_root and ascmhl_folder_name in directories:
                 # we parse the mhl folder and clear the directories so we are not going deeper
                 # everything beneath is handled by the child history
-                child_history = MHLHistory.load_from_path(root)
+                child_history = MHLHistory.load_from_path(root, potential_windows_paths=potential_windows_paths)
                 child_history.parent_history = self
                 self.append_child_history(child_history)
                 directories.clear()

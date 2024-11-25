@@ -11,6 +11,7 @@ from __future__ import annotations
 from typing import List, Dict, Optional, Set
 from datetime import datetime
 import os
+from pathlib import Path
 
 from . import logger
 from .ignore import MHLIgnoreSpec
@@ -76,10 +77,13 @@ class MHLHashList:
             self.append_hash(media_hash)
         return media_hash
 
-    def set_of_file_paths(self, root_path) -> Set[str]:
+    def set_of_file_paths(self, root_path, potential_windows_paths=False) -> Set[str]:
         all_paths = set()
         for media_hash in self.media_hashes:
-            all_paths.add(os.path.join(root_path, media_hash.path))
+            media_path = media_hash.path
+            if potential_windows_paths:
+                media_path = Path(media_path).as_posix()
+            all_paths.add(os.path.join(root_path, media_path))
         return all_paths
 
     def renamed_path_with_previous_path(self, root_path):

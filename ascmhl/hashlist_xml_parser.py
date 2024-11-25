@@ -30,9 +30,10 @@ from .hashlist import (
 )
 from .ignore import MHLIgnoreSpec
 from .utils import datetime_isostring
+from .paths import _convert_local_to_xml_path, _convert_xml_to_local_path
 
 
-def parse(file_path):
+def parse(file_path, potential_windows_paths=False):
     """parsing the MHL XML file and building the MHLHashList for the hash_list member variable"""
     logger.debug(f"parsing {file_path}...")
 
@@ -146,7 +147,9 @@ def parse(file_path):
 
                 elif type(current_object) is MHLMediaHash:
                     if tag == "path":
-                        current_object.path = element.text
+                        current_object.path = _convert_xml_to_local_path(
+                            element.text, convert_from_windows_paths=potential_windows_paths
+                        )
                         file_size = element.attrib.get("size")
                         current_object.file_size = int(file_size) if file_size else None
                     # TODO: parse date
@@ -159,7 +162,14 @@ def parse(file_path):
                             hash_date = dateutil.parser.parse(hash_date_string)
                         if current_object.is_directory:
                             if is_directory_structure == False:
-                                entry = MHLHashEntry(tag, element.text, element.attrib.get("action"), hash_date)
+                                entry = MHLHashEntry(
+                                    tag,
+                                    _convert_xml_to_local_path(
+                                        element.text, convert_from_windows_paths=potential_windows_paths
+                                    ),
+                                    element.attrib.get("action"),
+                                    hash_date,
+                                )
                                 current_object.append_hash_entry(entry)
                             else:
                                 # find right hash entry and set structure hash
@@ -182,11 +192,15 @@ def parse(file_path):
                         current_object.root_media_hash = root_media_hash
 
                     elif tag == "previousPath":
-                        current_object.previous_path = element.text
+                        current_object.previous_path = _convert_xml_to_local_path(
+                            element.text, convert_from_windows_paths=potential_windows_paths
+                        )
 
                 elif type(current_object) is MHLHashListReference:
                     if tag == "path":
-                        current_object.path = element.text
+                        current_object.path = _convert_xml_to_local_path(
+                            element.text, convert_from_windows_paths=potential_windows_paths
+                        )
                     elif tag == "c4":
                         current_object.reference_hash = element.text
                     elif tag == "hashlistreference":
@@ -270,7 +284,7 @@ def _write_xml_string_to_file(file, xml_string: str, indent: str):
 def _media_hash_xml_element(media_hash: MHLMediaHash):
     """builds and returns one <hash> element for a given MediaHash object"""
 
-    path_element = E.path(media_hash.path)
+    path_element = E.path(_convert_local_to_xml_path(media_hash.path))
     if media_hash.file_size:
         path_element.attrib["size"] = str(media_hash.file_size)
     if media_hash.last_modification_date:
@@ -288,8 +302,8 @@ def _media_hash_xml_element(media_hash: MHLMediaHash):
         hash_element.append(entry_element)
 
     if media_hash.previous_path:
-        previous_path_element = E.previousPath(media_hash.previous_path)
-        previous_path_element.text = media_hash.previous_path
+        previous_path_element = E.previousPath(_convert_local_to_xml_path(media_hash.previous_path))
+        previous_path_element.text = _convert_local_to_xml_path(media_hash.previous_path)
         hash_element.append(previous_path_element)
 
     return hash_element
@@ -321,7 +335,7 @@ def _directory_hash_xml_element(media_hash: MHLMediaHash, skipPath=False):
     hash_element = E.directoryhash()
 
     if skipPath == False:
-        path_element = E.path(media_hash.path)
+        path_element = E.path(_convert_local_to_xml_path(media_hash.path))
         if media_hash.file_size:
             path_element.attrib["size"] = str(media_hash.file_size)
         if media_hash.last_modification_date:
@@ -332,8 +346,8 @@ def _directory_hash_xml_element(media_hash: MHLMediaHash, skipPath=False):
     hash_element.append(structure_element)
 
     if media_hash.previous_path:
-        previous_path_element = E.previousPath(media_hash.previous_path)
-        previous_path_element.text = media_hash.previous_path
+        previous_path_element = E.previousPath(_convert_local_to_xml_path(media_hash.previous_path))
+        previous_path_element.text = _convert_local_to_xml_path(media_hash.previous_path)
         hash_element.append(previous_path_element)
 
     return hash_element
@@ -344,7 +358,7 @@ def _ascmhlreference_xml_element(hash_list: MHLHashList, file_path: str):
 
     root_path = os.path.dirname(os.path.dirname(file_path))
     hash_element = E.hashlistreference(
-        E.path(os.path.relpath(hash_list.file_path, root_path)),
+        E.path(_convert_local_to_xml_path(os.path.relpath(hash_list.file_path, root_path))),
         E.c4(hash_list.generate_reference_hash()),
     )
 

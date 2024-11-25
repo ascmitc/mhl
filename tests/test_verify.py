@@ -10,6 +10,7 @@ __email__ = "opensource@pomfort.com"
 import os
 from freezegun import freeze_time
 from click.testing import CliRunner
+from pathlib import Path
 
 from ascmhl.history import MHLHistory
 import ascmhl.commands
@@ -26,10 +27,11 @@ def test_simple_verify_fails_no_history(fs, simple_mhl_history):
 @freeze_time("2020-01-16 09:15:00")
 def test_simple_verify(fs, simple_mhl_history):
     runner = CliRunner()
-    result = runner.invoke(ascmhl.commands.verify, ["-v", "/root/"])
+    result = runner.invoke(ascmhl.commands.verify, ["-v", str(Path("/root/"))])
+    # print(f"DBG: result.output {result.output}")
     assert (
         result.output
-        == "check folder at path: /root/\nverification (xxh64) of file A/A1.txt: OK\nverification (xxh64) of file"
+        == "check folder at path: /root\nverification (xxh64) of file A/A1.txt: OK\nverification (xxh64) of file"
         " Stuff.txt: OK\n"
     )
     assert result.exit_code == 0

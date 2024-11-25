@@ -13,6 +13,7 @@ import platform
 
 import click
 from lxml import etree
+from pathlib import Path
 
 from . import logger
 from . import errors
@@ -122,6 +123,14 @@ from collections import namedtuple
     type=click.Path(exists=True),
     help="A file containing multiple file patterns to ignore.",
 )
+@click.option(
+    "convert_windows_paths",
+    "--convertwindowspaths",
+    "-cvp",
+    default=False,
+    is_flag=True,
+    help="Interpret potential Windows paths in XML (which are against the spec)",
+)
 def create(
     root_path,
     verbose,
@@ -137,6 +146,7 @@ def create(
     author_role,
     location,
     comment,
+    convert_windows_paths,
 ):
     """
     Create a new generation for a folder or file(s)
@@ -162,6 +172,7 @@ def create(
             comment,
             ignore_list,
             ignore_spec_file,
+            convert_windows_paths,
         )
         return
     create_for_folder_subcommand(
@@ -178,6 +189,7 @@ def create(
         comment,
         ignore_list,
         ignore_spec_file,
+        convert_windows_paths,
     )
     return
 
@@ -196,6 +208,7 @@ def create_for_folder_subcommand(
     comment,
     ignore_list=None,
     ignore_spec_file=None,
+    convert_windows_paths=False,
 ):
     # command formerly known as "seal"
     """
@@ -215,11 +228,11 @@ def create_for_folder_subcommand(
 
     logger.verbose(f"Creating new generation for folder at path: {root_path} ...")
 
-    existing_history = MHLHistory.load_from_path(root_path)
+    existing_history = MHLHistory.load_from_path(root_path, potential_windows_paths=convert_windows_paths)
 
     # we collect all paths we expect to find first and remove every path that we actually found while
     # traversing the file system, so this set will at the end contain the file paths not found in the file system
-    not_found_paths = existing_history.set_of_file_paths()
+    not_found_paths = existing_history.set_of_file_paths(potential_windows_paths=convert_windows_paths)
     renamed_files = existing_history.renamed_path_with_previous_path()
     not_found_paths = {p if renamed_files.get(p, None) is None else renamed_files[p] for p in not_found_paths}
     new_paths = set()
@@ -405,6 +418,7 @@ def create_for_single_files_subcommand(
     comment,
     ignore_list=None,
     ignore_spec_file=None,
+    convert_windows_paths=False,
 ):
     # command formerly known as "record"
     """
@@ -430,7 +444,7 @@ def create_for_single_files_subcommand(
 
     assert len(single_file) != 0
 
-    existing_history = MHLHistory.load_from_path(root_path)
+    existing_history = MHLHistory.load_from_path(root_path, potential_windows_paths=convert_windows_paths)
     # start a creation session on the existing history
     session = MHLGenerationCreationSession(existing_history)
 
@@ -535,6 +549,14 @@ def create_for_single_files_subcommand(
 @click.option(
     "--packing_list", "-pl", default=None, type=click.Path(exists=True), help="Verify against an external packing list"
 )
+@click.option(
+    "convert_windows_paths",
+    "--convertwindowspaths",
+    "-cvp",
+    default=False,
+    is_flag=True,
+    help="Interpret potential Windows paths in XML (which are against the spec)",
+)
 def verify(
     root_path,
     verbose,
@@ -546,6 +568,7 @@ def verify(
     ignore_spec_file,
     calculate_only,
     root_only,
+    convert_windows_paths,
 ):
     """
     Verify a folder, single file(s), or a directory hash
@@ -560,22 +583,43 @@ def verify(
 
     if packing_list is not None:
         verify_entire_folder(
-            root_path, verbose, single_file, packing_list, ignore_list, ignore_spec_file, calculate_only
+            root_path,
+            verbose,
+            single_file,
+            packing_list,
+            ignore_list,
+            ignore_spec_file,
+            calculate_only,
+            convert_windows_paths,
         )
         return
 
     if directory_hash is True:
         verify_directory_hash_subcommand(
-            root_path, verbose, hash_format, ignore_list, ignore_spec_file, calculate_only, root_only
+            root_path,
+            verbose,
+            hash_format,
+            ignore_list,
+            ignore_spec_file,
+            calculate_only,
+            root_only,
+            convert_windows_paths,
         )
         return
 
-    verify_entire_folder(root_path, verbose, single_file, None, ignore_list, ignore_spec_file)
+    verify_entire_folder(root_path, verbose, single_file, None, ignore_list, ignore_spec_file, convert_windows_paths)
     return
 
 
 def verify_entire_folder(
-    root_path, verbose, single_file, packing_list_path, ignore_list=None, ignore_spec_file=None, calculate_only=None
+    root_path,
+    verbose,
+    single_file,
+    packing_list_path,
+    ignore_list=None,
+    ignore_spec_file=None,
+    calculate_only=None,
+    convert_windows_paths=False,
 ):
     """
     Checks MHL hashes from all generations / a packing list against all file hashes.
@@ -596,19 +640,19 @@ def verify_entire_folder(
     if single_file is not None and not os.path.isabs(single_file):
         single_file = os.path.join(root_path, single_file)
 
-    logger.verbose(f"check folder at path: {root_path}")
+    logger.verbose(f"check folder at path: {Path(root_path).as_posix()}")
 
     if packing_list_path is not None:
         existing_history = MHLHistory.load_from_packing_list_path(packing_list_path, root_path)
     else:
-        existing_history = MHLHistory.load_from_path(root_path)
+        existing_history = MHLHistory.load_from_path(root_path, potential_windows_paths=convert_windows_paths)
 
     if len(existing_history.hash_lists) == 0:
         raise errors.NoMHLHistoryException(root_path)
 
     # we collect all paths we expect to find first and remove every path that we actually found while
     # traversing the file system, so this set will at the end contain the file paths not found in the file system
-    not_found_paths = existing_history.set_of_file_paths()
+    not_found_paths = existing_history.set_of_file_paths(potential_windows_paths=convert_windows_paths)
     renamed_files = existing_history.renamed_path_with_previous_path()
     not_found_paths = {p if renamed_files.get(p, None) is None else renamed_files[p] for p in not_found_paths}
 
@@ -642,17 +686,19 @@ def verify_entire_folder(
 
                 # in case there is no original hash entry continue
                 if original_hash_entry is None:
-                    logger.error(f"found new file {relative_path}")
+                    logger.error(f"found new file {Path(relative_path).as_posix()}")
                     num_new_files += 1
                     continue
 
                 # create a new hash and compare it against the original hash entry
                 current_hash = hash_file(file_path, original_hash_entry.hash_format)
                 if original_hash_entry.hash_string == current_hash:
-                    logger.verbose(f"verification ({original_hash_entry.hash_format}) of file {relative_path}: OK")
+                    logger.verbose(
+                        f"verification ({original_hash_entry.hash_format}) of file {Path(relative_path).as_posix()}: OK"
+                    )
                 else:
                     logger.error(
-                        f"ERROR: hash mismatch        for {relative_path} "
+                        f"ERROR: hash mismatch        for {Path(relative_path).as_posix()} "
                         f"old {original_hash_entry.hash_format}: {original_hash_entry.hash_string}, "
                         f"new {original_hash_entry.hash_format}: {current_hash}"
                     )
@@ -675,7 +721,14 @@ def verify_entire_folder(
 
 
 def verify_directory_hash_subcommand(
-    root_path, verbose, hash_format, ignore_list=None, ignore_spec_file=None, calculate_only=False, root_only=False
+    root_path,
+    verbose,
+    hash_format,
+    ignore_list=None,
+    ignore_spec_file=None,
+    calculate_only=False,
+    root_only=False,
+    convert_windows_paths=False,
 ):
     """
     Checks MHL directory hashes from all generations against computed directory hashes.
@@ -691,9 +744,9 @@ def verify_directory_hash_subcommand(
     if not os.path.isabs(root_path):
         root_path = os.path.join(os.getcwd(), root_path)
 
-    logger.verbose(f"check folder at path: {root_path}")
+    logger.verbose(f"check folder at path: {Path(root_path).as_posix()}")
 
-    existing_history = MHLHistory.load_from_path(root_path)
+    existing_history = MHLHistory.load_from_path(root_path, potential_windows_paths=convert_windows_paths)
 
     ignore_spec = ignore.MHLIgnoreSpec(existing_history.latest_ignore_patterns(), ignore_list, ignore_spec_file)
 
@@ -985,7 +1038,15 @@ def hash(file_path, hash_format):
     type=click.Path(exists=True),
     help="A file containing multiple file patterns to ignore.",
 )
-def diff(root_path, verbose, ignore_list, ignore_spec_file):
+@click.option(
+    "convert_windows_paths",
+    "--convertwindowspaths",
+    "-cvp",
+    default=False,
+    is_flag=True,
+    help="Interpret potential Windows paths in XML (which are against the spec)",
+)
+def diff(root_path, verbose, ignore_list, ignore_spec_file, convert_windows_paths):
     """
     Diff an entire folder structure
 
@@ -996,11 +1057,15 @@ def diff(root_path, verbose, ignore_list, ignore_spec_file):
     in the file system are reported as errors. No new ASC MHL file / generation
     is created.
     """
-    diff_entire_folder_against_full_history_subcommand(root_path, verbose, ignore_list, ignore_spec_file)
+    diff_entire_folder_against_full_history_subcommand(
+        root_path, verbose, ignore_list, ignore_spec_file, convert_windows_paths
+    )
     return
 
 
-def diff_entire_folder_against_full_history_subcommand(root_path, verbose, ignore_list=None, ignore_spec_file=None):
+def diff_entire_folder_against_full_history_subcommand(
+    root_path, verbose, ignore_list=None, ignore_spec_file=None, convert_windows_paths=False
+):
     """
     Checks MHL hashes from all generations against all file hash entries.
 
@@ -1015,16 +1080,16 @@ def diff_entire_folder_against_full_history_subcommand(root_path, verbose, ignor
     if not os.path.isabs(root_path):
         root_path = os.path.join(os.getcwd(), root_path)
 
-    logger.verbose(f"check folder at path: {root_path}")
+    logger.verbose(f"check folder at path: {Path(root_path).as_posix()}")
 
-    existing_history = MHLHistory.load_from_path(root_path)
+    existing_history = MHLHistory.load_from_path(root_path, potential_windows_paths=convert_windows_paths)
 
     if len(existing_history.hash_lists) == 0:
         raise errors.NoMHLHistoryException(root_path)
 
     # we collect all paths we expect to find first and remove every path that we actually found while
     # traversing the file system, so this set will at the end contain the file paths not found in the file system
-    not_found_paths = existing_history.set_of_file_paths()
+    not_found_paths = existing_history.set_of_file_paths(potential_windows_paths=convert_windows_paths)
     renamed_files = existing_history.renamed_path_with_previous_path()
     not_found_paths = {p if renamed_files.get(p, None) is None else renamed_files[p] for p in not_found_paths}
 
@@ -1120,6 +1185,14 @@ def diff_entire_folder_against_full_history_subcommand(root_path, verbose, ignor
     default=None,
     help="Value for the <comment> element in the <creatorinfo> element",
 )
+@click.option(
+    "convert_windows_paths",
+    "--convertwindowspaths",
+    "-cvp",
+    default=False,
+    is_flag=True,
+    help="Interpret potential Windows paths in XML (which are against the spec)",
+)
 def flatten(
     root_path,
     destination_path,
@@ -1133,6 +1206,7 @@ def flatten(
     author_role,
     location,
     comment,
+    convert_windows_paths,
 ):
     """
     Flatten an MHL history into one external manifest
@@ -1155,6 +1229,7 @@ def flatten(
         comment,
         ignore_list,
         ignore_spec_file,
+        convert_windows_paths,
     )
     return
 
@@ -1172,6 +1247,7 @@ def flatten_history(
     comment,
     ignore_list=None,
     ignore_spec_file=None,
+    convert_windows_paths=False,
 ):
     logger.verbose_logging = verbose
 
@@ -1180,7 +1256,7 @@ def flatten_history(
 
     logger.verbose(f"Flattening folder at path: {root_path} ...")
 
-    existing_history = MHLHistory.load_from_path(root_path)
+    existing_history = MHLHistory.load_from_path(root_path, potential_windows_paths=convert_windows_paths)
 
     # create the ignore specification
     ignore_spec = ignore.MHLIgnoreSpec(existing_history.latest_ignore_patterns(), ignore_list, ignore_spec_file)
@@ -1254,7 +1330,15 @@ def flatten_history(
     type=click.Path(exists=True),
     help="Info for single file",
 )
-def info(verbose, single_file, root_path):
+@click.option(
+    "convert_windows_paths",
+    "--convertwindowspaths",
+    "-cvp",
+    default=False,
+    is_flag=True,
+    help="Interpret potential Windows paths in XML (which are against the spec)",
+)
+def info(verbose, single_file, root_path, convert_windows_paths):
     """
     Prints information from the ASC MHL history
 
@@ -1263,7 +1347,7 @@ def info(verbose, single_file, root_path):
     if single_file is not None and len(single_file) > 0:
         if root_path == None:
             current_dir = os.path.dirname(os.path.abspath(single_file[0]))
-            while current_dir != "/" and current_dir != "":
+            while current_dir != "/" and current_dir != "" and (len(current_dir) > 4 and current_dir[1:4] != ":\\\\"):
                 asc_mhl_folder_path = os.path.join(current_dir, ascmhl_folder_name)
                 if os.path.exists(asc_mhl_folder_path):
                     root_path = current_dir
@@ -1272,14 +1356,14 @@ def info(verbose, single_file, root_path):
         if root_path is None:
             raise errors.NoMHLHistoryException(single_file[0])
         else:
-            info_for_single_file(root_path, verbose, single_file)
+            info_for_single_file(root_path, verbose, single_file, convert_windows_paths)
         return
     else:
-        info_for_entire_history(root_path, verbose)
+        info_for_entire_history(root_path, verbose, convert_windows_paths)
     return
 
 
-def info_for_entire_history(root_path, verbose):
+def info_for_entire_history(root_path, verbose, convert_windows_paths=False):
     """
     ROOT_PATH: the root path to use for the asc mhl history
     """
@@ -1289,9 +1373,10 @@ def info_for_entire_history(root_path, verbose):
     if not os.path.isabs(root_path):
         root_path = os.path.join(os.getcwd(), root_path)
 
-    logger.info(f"Info with history at path: {root_path}")
+    _, tail = os.path.splitdrive(root_path)
+    logger.info(f"Info with history at path: {Path(tail).as_posix()}")
 
-    existing_history = MHLHistory.load_from_path(root_path)
+    existing_history = MHLHistory.load_from_path(root_path, potential_windows_paths=convert_windows_paths)
 
     if len(existing_history.hash_lists) == 0:
         raise errors.NoMHLHistoryException(root_path)
@@ -1313,11 +1398,11 @@ def log_child_histories(history):
             logger.info(f"  Generation {hash_list.generation_number} ({hash_list.creator_info.creation_date})")
 
     for child_history in history.child_histories:
-        logger.info(f"\nChild History at {child_history.get_root_path()}:")
+        logger.info(f"\nChild History at {Path(child_history.get_root_path()).as_posix()}:")
         log_child_histories(child_history)
 
 
-def info_for_single_file(root_path, verbose, single_file):
+def info_for_single_file(root_path, verbose, single_file, convert_windows_paths=False):
     """
     ROOT_PATH: the root path to use for the asc mhl history (optional)
     """
@@ -1327,9 +1412,10 @@ def info_for_single_file(root_path, verbose, single_file):
     if not os.path.isabs(root_path):
         root_path = os.path.join(os.getcwd(), root_path)
 
-    logger.info(f"Info with history at path: {root_path}")
+    _, tail = os.path.splitdrive(root_path)
+    logger.info(f"Info with history at path: {Path(tail).as_posix()}")
 
-    existing_history = MHLHistory.load_from_path(root_path)
+    existing_history = MHLHistory.load_from_path(root_path, potential_windows_paths=convert_windows_paths)
 
     if len(existing_history.hash_lists) == 0:
         raise errors.NoMHLHistoryException(root_path)
@@ -1423,7 +1509,7 @@ def test_for_missing_files(not_found_paths, root_path, ignore_spec: MHLIgnoreSpe
     # test our not_found_paths against our ignore spec to ensure these weren't explicitly ignored.
     logger.error(f"ERROR: {len(not_found_paths)} missing file(s):")
     for path in not_found_paths:
-        logger.error(f"  {os.path.relpath(path, root_path)}")
+        logger.error(f"  {Path(os.path.relpath(path, root_path)).as_posix()}")
     return errors.CompletenessCheckFailedException()
 
 

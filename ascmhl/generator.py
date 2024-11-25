@@ -9,6 +9,7 @@ __email__ = "opensource@pomfort.com"
 
 from collections import defaultdict
 from typing import Dict, List
+from pathlib import Path
 
 from . import chain_xml_parser
 from . import logger
@@ -73,18 +74,22 @@ class MHLGenerationCreationSession:
             hash_entry = MHLHashEntry(hash_format, hash_string, hash_date=hash_date)
             if original_hash_entry is None:
                 hash_entry.action = "original"
-                logger.verbose(f"  created original hash for     {relative_path}  {hash_format}: {hash_string}")
+                logger.verbose(
+                    f"  created original hash for     {Path(relative_path).as_posix()}  {hash_format}: {hash_string}"
+                )
             else:
                 existing_hash_entry = history.find_first_hash_entry_for_path(history_relative_path, hash_format)
                 if existing_hash_entry is not None:
                     if existing_hash_entry.hash_string == hash_string:
                         hash_entry.action = "verified"
-                        logger.verbose(f"  verified                      {relative_path} {hash_format}: OK")
+                        logger.verbose(
+                            f"  verified                      {Path(relative_path).as_posix()} {hash_format}: OK"
+                        )
                     else:
                         hash_entry.action = "failed"
                         failures += 1
                         logger.error(
-                            f"ERROR: hash mismatch for        {relative_path}  "
+                            f"ERROR: hash mismatch for        {Path(relative_path).as_posix()}  "
                             f"{hash_format} (old): {existing_hash_entry.hash_string}, "
                             f"{hash_format} (new): {hash_string}"
                         )
@@ -93,7 +98,9 @@ class MHLGenerationCreationSession:
                     hash_entry.action = (  # mark as 'new' here, will be changed to verified in _validate_new_hash_list
                         "new"
                     )
-                    logger.verbose(f"  created new (verif.) hash for {relative_path}  {hash_format}: {hash_string}")
+                    logger.verbose(
+                        f"  created new (verif.) hash for {Path(relative_path).as_posix()}  {hash_format}: {hash_string}"
+                    )
             # collection behavior: overwrite action with action from flattened history
             if action != None:
                 hash_entry.action = action
@@ -131,24 +138,31 @@ class MHLGenerationCreationSession:
         hash_entry = MHLHashEntry(hash_format, hash_string, hash_date=hash_date)
         if original_hash_entry is None:
             hash_entry.action = "original"
-            logger.verbose(f"  created original hash for     {relative_path}  {hash_format}: {hash_string}")
+            if relative_path != None:
+                logger.verbose(
+                    f"  created original hash for     {Path(relative_path).as_posix()}  {hash_format}: {hash_string}"
+                )
         else:
             existing_hash_entry = history.find_first_hash_entry_for_path(history_relative_path, hash_format)
             if existing_hash_entry is not None:
                 if existing_hash_entry.hash_string == hash_string:
                     hash_entry.action = "verified"
-                    logger.verbose(f"  verified                      {relative_path}  {hash_format}: OK")
+                    logger.verbose(
+                        f"  verified                      {Path(relative_path).as_posix()}  {hash_format}: OK"
+                    )
                 else:
                     hash_entry.action = "failed"
                     logger.error(
-                        f"ERROR: hash mismatch for        {relative_path}  "
+                        f"ERROR: hash mismatch for        {Path(relative_path).as_posix()}  "
                         f"{hash_format} (old): {existing_hash_entry.hash_string}, "
                         f"{hash_format} (new): {hash_string}"
                     )
             else:
                 # in case there is no hash entry for this hash format yet
                 hash_entry.action = "new"  # mark as 'new' here, will be changed to verified in _validate_new_hash_list
-                logger.verbose(f"  created new (verif.) hash for {relative_path}  {hash_format}: {hash_string}")
+                logger.verbose(
+                    f"  created new (verif.) hash for {Path(relative_path).as_posix()}  {hash_format}: {hash_string}"
+                )
 
         # in case the same file is hashes multiple times we want to add all hash entries
         new_hash_list = self.new_hash_lists[history]
@@ -203,12 +217,12 @@ class MHLGenerationCreationSession:
                     )
                 else:
                     logger.verbose(
-                        f"  calculated directory hash for {relative_path}  {hash_format}: "
+                        f"  calculated directory hash for {Path(relative_path).as_posix()}  {hash_format}: "
                         f"{content_hash_string} (content), "
                         f"{structure_hash_string} (structure)"
                     )
         else:
-            logger.verbose(f"  added directory entry for     {relative_path}")
+            logger.verbose(f"  added directory entry for     {Path(relative_path).as_posix()}")
 
         # in case we just created the root media hash of the current hash list we also add it one history level above
         if new_hash_list.process_info.root_media_hash is media_hash and history.parent_history:
@@ -302,7 +316,7 @@ class MHLGenerationCreationSession:
 
             history.write_new_generation(new_hash_list)
             relative_generation_path = self.root_history.get_relative_file_path(new_hash_list.file_path)
-            logger.verbose(f"Created new generation {relative_generation_path}")
+            logger.verbose(f"Created new generation {Path(relative_generation_path).as_posix()}")
             if history.parent_history is not None:
                 referenced_hash_lists[history.parent_history].append(new_hash_list)
 

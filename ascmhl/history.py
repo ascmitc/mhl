@@ -189,10 +189,12 @@ class MHLHistory:
             dir_path = os.path.dirname(dir_path)
         return self, relative_path
 
-    def set_of_file_paths(self) -> Set[str]:
+    def set_of_file_paths(self, potential_windows_paths=False) -> Set[str]:
         all_paths = set()
         for hash_list in self.hash_lists:
-            all_paths.update(hash_list.set_of_file_paths(self.get_root_path()))
+            all_paths.update(
+                hash_list.set_of_file_paths(self.get_root_path(), potential_windows_paths=potential_windows_paths)
+            )
         for child_history in self.child_histories:
             all_paths.update(child_history.set_of_file_paths())
         return all_paths

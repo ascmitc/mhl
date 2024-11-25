@@ -652,7 +652,7 @@ def verify_entire_folder(
 
     # we collect all paths we expect to find first and remove every path that we actually found while
     # traversing the file system, so this set will at the end contain the file paths not found in the file system
-    not_found_paths = existing_history.set_of_file_paths()
+    not_found_paths = existing_history.set_of_file_paths(potential_windows_paths=convert_windows_paths)
     renamed_files = existing_history.renamed_path_with_previous_path()
     not_found_paths = {p if renamed_files.get(p, None) is None else renamed_files[p] for p in not_found_paths}
 
@@ -1089,7 +1089,7 @@ def diff_entire_folder_against_full_history_subcommand(
 
     # we collect all paths we expect to find first and remove every path that we actually found while
     # traversing the file system, so this set will at the end contain the file paths not found in the file system
-    not_found_paths = existing_history.set_of_file_paths()
+    not_found_paths = existing_history.set_of_file_paths(potential_windows_paths=convert_windows_paths)
     renamed_files = existing_history.renamed_path_with_previous_path()
     not_found_paths = {p if renamed_files.get(p, None) is None else renamed_files[p] for p in not_found_paths}
 

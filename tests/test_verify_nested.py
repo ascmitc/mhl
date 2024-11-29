@@ -8,6 +8,8 @@ __email__ = "opensource@pomfort.com"
 """
 
 import os
+from .conftest import abspath_conversion_tests
+
 from freezegun import freeze_time
 from click.testing import CliRunner
 
@@ -35,5 +37,5 @@ def test_create_nested(fs, nested_mhl_histories):
     """
 
     runner = CliRunner()
-    result = runner.invoke(ascmhl.commands.create, ["/root", "-h", "md5"])
+    result = runner.invoke(ascmhl.commands.create, [abspath_conversion_tests("/root"), "-h", "md5"])
     assert result.exit_code == 0

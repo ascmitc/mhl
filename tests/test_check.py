@@ -9,13 +9,14 @@ __email__ = "opensource@pomfort.com"
 
 import os
 from click.testing import CliRunner
+from .conftest import abspath_conversion_tests
 
 import ascmhl.commands
 
 
 def test_check_succeed(fs, simple_mhl_history):
     runner = CliRunner()
-    result = runner.invoke(ascmhl.commands.verify, ["/root"])
+    result = runner.invoke(ascmhl.commands.verify, [abspath_conversion_tests("/root")])
     assert result.exit_code == 0
 
 
@@ -23,9 +24,9 @@ def test_check_fail_missing_history(fs):
     fs.create_file("/root/Stuff.txt", contents="stuff\n")
 
     runner = CliRunner()
-    result = runner.invoke(ascmhl.commands.verify, ["/root"])
+    result = runner.invoke(ascmhl.commands.verify, [abspath_conversion_tests("/root")])
     assert result.exit_code == 30
-    assert "/root" in result.output
+    assert abspath_conversion_tests("/root") in result.output
 
 
 def test_check_fail_altered_file(fs, simple_mhl_history):
@@ -34,7 +35,7 @@ def test_check_fail_altered_file(fs, simple_mhl_history):
         file.write("!!")
 
     runner = CliRunner()
-    result = runner.invoke(ascmhl.commands.verify, ["/root"])
+    result = runner.invoke(ascmhl.commands.verify, [abspath_conversion_tests("/root")])
     assert result.exit_code == 11
     assert "Stuff.txt" in result.output
 
@@ -43,7 +44,7 @@ def test_check_fail_new_file(fs, simple_mhl_history):
     # create a file not referenced in the history
     fs.create_file("/root/other.txt", contents="other\n")
     runner = CliRunner()
-    result = runner.invoke(ascmhl.commands.verify, ["/root"])
+    result = runner.invoke(ascmhl.commands.verify, [abspath_conversion_tests("/root")])
     assert result.exit_code == 21
     assert "other.txt" in result.output
 
@@ -53,6 +54,6 @@ def test_check_fail_missing_file(fs, simple_mhl_history):
     os.remove("/root/Stuff.txt")
 
     runner = CliRunner()
-    result = runner.invoke(ascmhl.commands.verify, ["/root"])
+    result = runner.invoke(ascmhl.commands.verify, [abspath_conversion_tests("/root")])
     assert result.exit_code == 10
     assert "Stuff.txt" in result.output

@@ -1263,12 +1263,18 @@ def info(verbose, single_file, root_path):
     if single_file is not None and len(single_file) > 0:
         if root_path == None:
             current_dir = os.path.dirname(os.path.abspath(single_file[0]))
-            while current_dir != "/" and current_dir != "":
+            while os.path.isdir(current_dir):
                 asc_mhl_folder_path = os.path.join(current_dir, ascmhl_folder_name)
                 if os.path.exists(asc_mhl_folder_path):
                     root_path = current_dir
                     break
-                current_dir = os.path.dirname(current_dir)
+                parent_dir = os.path.dirname(current_dir)
+                # in case we get the same path again, we seem to be at the root
+                # this works both on windows and unix
+                if parent_dir == current_dir:
+                    break
+                current_dir = parent_dir
+
         if root_path is None:
             raise errors.NoMHLHistoryException(single_file[0])
         else:
@@ -1405,6 +1411,7 @@ def xsd_schema_check(file_path, directory_file, xsd_file):
     # pass a file handle to support the fake file system used in the tests
     file = open(file_path, "rb")
     result = xsd.validate(etree.parse(file))
+    file.close()
 
     if result:
         logger.info(f"validated: {file_path}")

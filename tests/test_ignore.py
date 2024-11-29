@@ -7,6 +7,8 @@ __email__ = "opensource@pomfort.com"
 """
 
 import os
+from .conftest import path_conversion_tests
+
 import pytest
 import shutil
 from click.testing import CliRunner
@@ -93,7 +95,7 @@ def test_default_ignore(temp_tree):
     tests that .DS_Store and ascmhl/ fs entries are ignored from the mhl spec
     """
     runner = CliRunner()
-    root_dir, mhl_dir = f"{temp_tree.path}", f"{temp_tree.path}/ascmhl"
+    root_dir, mhl_dir = f"{temp_tree.path}", f"{os.path.join(temp_tree.path,'ascmhl')}"
 
     # write 2 generations (since ascmhl folder won't exist til after gen 1)
     assert runner.invoke(ascmhl.commands.create, [root_dir]).exit_code == 0
@@ -113,7 +115,7 @@ def test_ignore_on_create(temp_tree):
     tests that the "create" command properly receives and processes all ignore spec arguments
     """
     runner = CliRunner()
-    root_dir, mhl_dir = f"{temp_tree.path}", f"{temp_tree.path}/ascmhl"
+    root_dir, mhl_dir = f"{temp_tree.path}", f"{os.path.join(temp_tree.path,'ascmhl')}"
 
     # write generation 1,
     runner.invoke(ascmhl.commands.create, [root_dir, "-i", "1"])
@@ -122,11 +124,12 @@ def test_ignore_on_create(temp_tree):
     # write generation 3, appending ignore_spec from file and both CLI args
     temp_tree.write("ignorespec", b"6\n7")  # write an ignore spec to file
     runner.invoke(
-        ascmhl.commands.create, [root_dir, "-i", "4", "--ignore", "5", "--ignore_spec", f"{temp_tree.path}/ignorespec"]
+        ascmhl.commands.create,
+        [root_dir, "-i", "4", "--ignore", "5", "--ignore_spec", f"{os.path.join(temp_tree.path,'ignorespec')}"],
     )
 
     # we should now have 3 total mhl generations. ensure each one has exactly the expected patterns
-    mhl_files = os.listdir(f"{temp_tree.path}/ascmhl")
+    mhl_files = os.listdir(f"{os.path.join(temp_tree.path,'ascmhl')}")
     mhl_files.sort()
     assert_mhl_file_has_exact_ignore_patterns(mhl_file_for_gen(mhl_dir, 1), {"1"})
     assert_mhl_file_has_exact_ignore_patterns(mhl_file_for_gen(mhl_dir, 2), {"1", "2", "3"})
@@ -138,7 +141,7 @@ def test_ignore_on_verify(temp_tree):
     tests that the "verify" command properly receives and processes all ignore spec arguments
     """
     runner = CliRunner()
-    root_dir, mhl_dir = f"{temp_tree.path}", f"{temp_tree.path}/ascmhl"
+    root_dir, mhl_dir = f"{temp_tree.path}", f"{os.path.join(temp_tree.path,'ascmhl')}"
 
     # create a generation
     runner.invoke(ascmhl.commands.create, [root_dir])
@@ -158,7 +161,9 @@ def test_ignore_on_verify(temp_tree):
 
     # assert that the same verification works by using an ignore spec from file
     temp_tree.write("ignorespec", b"a.txt\n1/c.txt")  # write an ignore spec to file
-    assert runner.invoke(ascmhl.commands.verify, [root_dir, "--ignore_spec", f"{temp_tree.path}/ignorespec"])
+    assert runner.invoke(
+        ascmhl.commands.verify, [root_dir, "--ignore_spec", f"{os.path.join(temp_tree.path,'ignorespec')}"]
+    )
 
 
 def test_ignore_on_diff(temp_tree):
@@ -166,7 +171,7 @@ def test_ignore_on_diff(temp_tree):
     tests that the "diff" command properly receives and processes all ignore spec arguments
     """
     runner = CliRunner()
-    root_dir, mhl_dir = f"{temp_tree.path}", f"{temp_tree.path}/ascmhl"
+    root_dir, mhl_dir = f"{temp_tree.path}", f"{os.path.join(temp_tree.path,'ascmhl')}"
 
     # create a generation
     runner.invoke(ascmhl.commands.create, [root_dir])
@@ -186,7 +191,9 @@ def test_ignore_on_diff(temp_tree):
 
     # assert that the same verification works by using an ignore spec from file
     temp_tree.write("ignorespec", b"a.txt\n1/c.txt")  # write an ignore spec to file
-    assert runner.invoke(ascmhl.commands.diff, [root_dir, "--ignore_spec", f"{temp_tree.path}/ignorespec"])
+    assert runner.invoke(
+        ascmhl.commands.diff, [root_dir, "--ignore_spec", f"{os.path.join(temp_tree.path,'ignorespec')}"]
+    )
 
 
 def test_ignore_on_nested_histories(temp_tree):
@@ -196,8 +203,11 @@ def test_ignore_on_nested_histories(temp_tree):
     ensure we append but do not overwrite.
     """
     runner = CliRunner()
-    root_dir, root_mhl_dir = f"{temp_tree.path}", f"{temp_tree.path}/ascmhl"
-    child_dir, child_mhl_dir = f"{temp_tree.path}/1", f"{temp_tree.path}/1/ascmhl"
+    root_dir, root_mhl_dir = f"{temp_tree.path}", f"{os.path.join(temp_tree.path,'ascmhl')}"
+    child_dir, child_mhl_dir = (
+        f"{os.path.join(temp_tree.path,'1')}",
+        f"{os.path.join(temp_tree.path,str(path_conversion_tests('1/ascmhl')))}",
+    )
 
     # create an mhl gen on a nested dir
     runner.invoke(ascmhl.commands.create, [child_dir, "-i", "c1"])

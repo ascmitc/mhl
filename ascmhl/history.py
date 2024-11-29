@@ -241,22 +241,24 @@ class MHLHistory:
         hash_lists = []
         for root, directories, filenames in os.walk(asc_mhl_folder_path):
             for filename in filenames:
-                if filename.endswith(ascmhl_file_extension):
-                    # file name example: 0001_root_2020-01-15_130000.mhl
-                    filename_no_extension, _ = os.path.splitext(filename)
-                    parts = re.findall(MHLHistory.history_file_name_regex, filename_no_extension)
-                    if len(parts) == 1 and len(parts[0]) == 2:
-                        file_path = os.path.join(asc_mhl_folder_path, filename)
-                        hash_list = hashlist_xml_parser.parse(file_path)
-                        generation_number = int(parts[0][0])
-                        hash_list.generation_number = generation_number
-                        # FIXME is there a better way of accessing the generation from a hash entry?
-                        if hash_list.process_info.root_media_hash is not None:
-                            for hash_entry in hash_list.process_info.root_media_hash.hash_entries:
-                                hash_entry.temp_generation_number = hash_list.generation_number
-                        hash_lists.append(hash_list)
-                    else:
-                        logger.error(f"name of ascmhl file {filename} does not conform to naming convention")
+                # file name example: 0001_root_2020-01-15_130000.mhl
+                # ignore ._ variants of mhl files that can happen when moving data from macOS to Windows and back
+                if (len(filename) > 2 and filename[:2] == "._") or not filename.endswith(ascmhl_file_extension):
+                    continue
+                filename_no_extension, _ = os.path.splitext(filename)
+                parts = re.findall(MHLHistory.history_file_name_regex, filename_no_extension)
+                if len(parts) == 1 and len(parts[0]) == 2:
+                    file_path = os.path.join(asc_mhl_folder_path, filename)
+                    hash_list = hashlist_xml_parser.parse(file_path)
+                    generation_number = int(parts[0][0])
+                    hash_list.generation_number = generation_number
+                    # FIXME is there a better way of accessing the generation from a hash entry?
+                    if hash_list.process_info.root_media_hash is not None:
+                        for hash_entry in hash_list.process_info.root_media_hash.hash_entries:
+                            hash_entry.temp_generation_number = hash_list.generation_number
+                    hash_lists.append(hash_list)
+                else:
+                    logger.error(f"name of ascmhl file {filename} does not conform to naming convention")
         # sort all found hash lists by generation number first to make sure we add them to the history in order
         hash_lists.sort(key=lambda x: x.generation_number)
         for hash_list in hash_lists:

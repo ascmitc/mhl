@@ -260,7 +260,7 @@ class MHLCreatorInfo:
 
     host_name: Optional[str]
     tool: Optional[MHLTool]
-    creation_date: Optional[datetime]
+    creation_date: Optional[str]
     authors: List[MHLAuthor]
     location: Optional[str]
     comment: Optional[str]

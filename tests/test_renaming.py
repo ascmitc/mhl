@@ -8,6 +8,8 @@ __email__ = "opensource@pomfort.com"
 """
 
 import os
+from .conftest import abspath_conversion_tests
+
 from click.testing import CliRunner
 from freezegun import freeze_time
 
@@ -23,12 +25,12 @@ def test_verify_renamed_files(fs):
     fs.create_file("/root/A/AA/AA1.txt", contents="AA1\n")
 
     runner = CliRunner()
-    result = runner.invoke(ascmhl.commands.create, ["/root", "-h", "xxh64", "-v"])
-    result = runner.invoke(ascmhl.commands.create, ["/root", "-h", "xxh64", "-v"])
+    result = runner.invoke(ascmhl.commands.create, [abspath_conversion_tests("/root"), "-h", "xxh64", "-v"])
+    result = runner.invoke(ascmhl.commands.create, [abspath_conversion_tests("/root"), "-h", "xxh64", "-v"])
     assert not result.exception
     assert os.path.exists("/root/ascmhl/0002_root_2020-01-16_091500Z.mhl")
     assert os.path.exists("/root/ascmhl/ascmhl_chain.xml")
-    result = runner.invoke(ascmhl.commands.verify, ["/root"])
+    result = runner.invoke(ascmhl.commands.verify, [abspath_conversion_tests("/root")])
     assert not result.exception
 
     os.rename("/root/A/AA/AA1.txt", "/root/A/AA/AA1_renamed.txt")
@@ -57,10 +59,14 @@ def test_verify_renamed_files(fs):
         f.seek(0)
         f.writelines(contents)
 
-    result = runner.invoke(ascmhl.commands.verify, ["/root"])
+    result = runner.invoke(ascmhl.commands.verify, [abspath_conversion_tests("/root")])
     assert not result.exception
 
-    result = runner.invoke(ascmhl.commands.info, ["-sf", "/root/A/AA/AA1_renamed.txt", "-v", "/root"])
+    result = runner.invoke(
+        ascmhl.commands.info,
+        ["-sf", abspath_conversion_tests("/root/A/AA/AA1_renamed.txt"), "-v", abspath_conversion_tests("/root")],
+    )
+
     assert not result.exception
     assert result.output.count("AA1.txt") == 3
     assert result.output.count("AA1_renamed.txt") == 3
@@ -75,12 +81,12 @@ def test_verify_renamed_file_but_also_changed_file(fs):
     fs.create_file("/root/A/AA/AA1.txt", contents="AA1\n")
 
     runner = CliRunner()
-    result = runner.invoke(ascmhl.commands.create, ["/root", "-h", "xxh64", "-v"])
-    result = runner.invoke(ascmhl.commands.create, ["/root", "-h", "xxh64", "-v"])
+    result = runner.invoke(ascmhl.commands.create, [abspath_conversion_tests("/root"), "-h", "xxh64", "-v"])
+    result = runner.invoke(ascmhl.commands.create, [abspath_conversion_tests("/root"), "-h", "xxh64", "-v"])
     assert not result.exception
     assert os.path.exists("/root/ascmhl/0002_root_2020-01-16_091500Z.mhl")
     assert os.path.exists("/root/ascmhl/ascmhl_chain.xml")
-    result = runner.invoke(ascmhl.commands.verify, ["/root"])
+    result = runner.invoke(ascmhl.commands.verify, [abspath_conversion_tests("/root")])
     assert not result.exception
 
     os.rename("/root/A/AA/AA1.txt", "/root/A/AA/AA1_renamed.txt")
@@ -98,7 +104,7 @@ def test_verify_renamed_file_but_also_changed_file(fs):
         f.seek(0)
         f.writelines(contents)
 
-    result = runner.invoke(ascmhl.commands.verify, ["/root"])
+    result = runner.invoke(ascmhl.commands.verify, [abspath_conversion_tests("/root")])
     assert result.exception
 
 
@@ -110,18 +116,18 @@ def test_detect_renamed_files(fs):
     fs.create_file("/root/A/AA/AA1.txt", contents="AA1\n")
 
     runner = CliRunner()
-    result = runner.invoke(ascmhl.commands.create, ["/root", "-h", "xxh64", "-v"])
-    result = runner.invoke(ascmhl.commands.create, ["/root", "-h", "xxh64", "-v"])
+    result = runner.invoke(ascmhl.commands.create, [abspath_conversion_tests("/root"), "-h", "xxh64", "-v"])
+    result = runner.invoke(ascmhl.commands.create, [abspath_conversion_tests("/root"), "-h", "xxh64", "-v"])
     assert not result.exception
     assert os.path.exists("/root/ascmhl/0002_root_2020-01-16_091500Z.mhl")
     assert os.path.exists("/root/ascmhl/ascmhl_chain.xml")
-    result = runner.invoke(ascmhl.commands.verify, ["/root"])
+    result = runner.invoke(ascmhl.commands.verify, [abspath_conversion_tests("/root")])
     assert not result.exception
 
     os.rename("/root/A/AA/AA1.txt", "/root/A/AA/AA1_renamed.txt")
     fs.create_file("/root/B/B2.txt", contents="B2\n")
 
-    result = runner.invoke(ascmhl.commands.create, ["/root", "-h", "xxh64", "-v", "-dr"])
+    result = runner.invoke(ascmhl.commands.create, [abspath_conversion_tests("/root"), "-h", "xxh64", "-v", "-dr"])
     assert not result.exception
 
     with open("/root/ascmhl/0003_root_2020-01-16_091500Z.mhl", "r") as fin:
@@ -130,11 +136,11 @@ def test_detect_renamed_files(fs):
         assert "AA1.txt" in fileContents
         assert "AA1_renamed.txt" in fileContents
 
-    result = runner.invoke(ascmhl.commands.verify, ["/root", "-h", "xxh64"])
+    result = runner.invoke(ascmhl.commands.verify, [abspath_conversion_tests("/root"), "-h", "xxh64"])
     assert not result.exception
 
     os.rename("/root/A/AA/AA1_renamed.txt", "/root/A/AA/AA1.txt")
-    result = runner.invoke(ascmhl.commands.create, ["/root", "-h", "xxh64", "-v", "-dr"])
+    result = runner.invoke(ascmhl.commands.create, [abspath_conversion_tests("/root"), "-h", "xxh64", "-v", "-dr"])
     assert not result.exception
 
 
@@ -146,18 +152,18 @@ def test_detect_renamed_files_different_hash(fs):
     fs.create_file("/root/A/AA/AA1.txt", contents="AA1\n")
 
     runner = CliRunner()
-    result = runner.invoke(ascmhl.commands.create, ["/root", "-h", "xxh64", "-v"])
-    result = runner.invoke(ascmhl.commands.create, ["/root", "-h", "xxh64", "-v"])
+    result = runner.invoke(ascmhl.commands.create, [abspath_conversion_tests("/root"), "-h", "xxh64", "-v"])
+    result = runner.invoke(ascmhl.commands.create, [abspath_conversion_tests("/root"), "-h", "xxh64", "-v"])
     assert not result.exception
     assert os.path.exists("/root/ascmhl/0002_root_2020-01-16_091500Z.mhl")
     assert os.path.exists("/root/ascmhl/ascmhl_chain.xml")
-    result = runner.invoke(ascmhl.commands.verify, ["/root"])
+    result = runner.invoke(ascmhl.commands.verify, [abspath_conversion_tests("/root")])
     assert not result.exception
 
     os.rename("/root/A/AA/AA1.txt", "/root/A/AA/AA1_renamed.txt")
     fs.create_file("/root/B/B2.txt", contents="B2\n")
 
-    result = runner.invoke(ascmhl.commands.create, ["/root", "-v", "-dr"])
+    result = runner.invoke(ascmhl.commands.create, [abspath_conversion_tests("/root"), "-v", "-dr"])
     assert not result.exception
 
     with open("/root/ascmhl/0003_root_2020-01-16_091500Z.mhl", "r") as fin:
@@ -166,7 +172,7 @@ def test_detect_renamed_files_different_hash(fs):
         assert "AA1.txt" in fileContents
         assert "AA1_renamed.txt" in fileContents
 
-    result = runner.invoke(ascmhl.commands.verify, ["/root", "-h", "xxh64"])
+    result = runner.invoke(ascmhl.commands.verify, [abspath_conversion_tests("/root"), "-h", "xxh64"])
     assert not result.exception
 
 
@@ -178,18 +184,18 @@ def test_detect_renamed_files_different_hash(fs):
     fs.create_file("/root/A/AA/AA1.txt", contents="AA1\n")
 
     runner = CliRunner()
-    result = runner.invoke(ascmhl.commands.create, ["/root", "-h", "xxh64", "-v"])
-    result = runner.invoke(ascmhl.commands.create, ["/root", "-h", "xxh64", "-v"])
+    result = runner.invoke(ascmhl.commands.create, [abspath_conversion_tests("/root"), "-h", "xxh64", "-v"])
+    result = runner.invoke(ascmhl.commands.create, [abspath_conversion_tests("/root"), "-h", "xxh64", "-v"])
     assert not result.exception
     assert os.path.exists("/root/ascmhl/0002_root_2020-01-16_091500Z.mhl")
     assert os.path.exists("/root/ascmhl/ascmhl_chain.xml")
-    result = runner.invoke(ascmhl.commands.verify, ["/root"])
+    result = runner.invoke(ascmhl.commands.verify, [abspath_conversion_tests("/root")])
     assert not result.exception
 
     os.rename("/root/A/AA/AA1.txt", "/root/A/AA/AA1_renamed.txt")
     fs.create_file("/root/B/B2.txt", contents="B2\n")
 
-    result = runner.invoke(ascmhl.commands.create, ["/root", "-v", "-dr"])
+    result = runner.invoke(ascmhl.commands.create, [abspath_conversion_tests("/root"), "-v", "-dr"])
     assert not result.exception
 
     with open("/root/ascmhl/0003_root_2020-01-16_091500Z.mhl", "r") as fin:
@@ -198,7 +204,7 @@ def test_detect_renamed_files_different_hash(fs):
         assert "AA1.txt" in fileContents
         assert "AA1_renamed.txt" in fileContents
 
-    result = runner.invoke(ascmhl.commands.verify, ["/root", "-h", "xxh64"])
+    result = runner.invoke(ascmhl.commands.verify, [abspath_conversion_tests("/root"), "-h", "xxh64"])
     assert not result.exception
 
 
@@ -210,18 +216,18 @@ def test_do_not_detect_renamed_files(fs):
     fs.create_file("/root/A/AA/AA1.txt", contents="AA1\n")
 
     runner = CliRunner()
-    result = runner.invoke(ascmhl.commands.create, ["/root", "-h", "xxh64", "-v"])
-    result = runner.invoke(ascmhl.commands.create, ["/root", "-h", "xxh64", "-v"])
+    result = runner.invoke(ascmhl.commands.create, [abspath_conversion_tests("/root"), "-h", "xxh64", "-v"])
+    result = runner.invoke(ascmhl.commands.create, [abspath_conversion_tests("/root"), "-h", "xxh64", "-v"])
     assert not result.exception
     assert os.path.exists("/root/ascmhl/0002_root_2020-01-16_091500Z.mhl")
     assert os.path.exists("/root/ascmhl/ascmhl_chain.xml")
-    result = runner.invoke(ascmhl.commands.verify, ["/root"])
+    result = runner.invoke(ascmhl.commands.verify, [abspath_conversion_tests("/root")])
     assert not result.exception
 
     os.rename("/root/A/AA/AA1.txt", "/root/A/AA/AA1_renamed.txt")
     fs.create_file("/root/B/B2.txt", contents="B2\n")
 
-    result = runner.invoke(ascmhl.commands.create, ["/root", "-h", "xxh64", "-v"])
+    result = runner.invoke(ascmhl.commands.create, [abspath_conversion_tests("/root"), "-h", "xxh64", "-v"])
     assert result.exception
 
 
@@ -233,18 +239,18 @@ def test_detect_renamed_folders(fs):
     fs.create_file("/root/A/AA/AA1.txt", contents="AA1\n")
 
     runner = CliRunner()
-    result = runner.invoke(ascmhl.commands.create, ["/root/A/AA", "-h", "xxh64", "-v"])
-    result = runner.invoke(ascmhl.commands.create, ["/root", "-h", "xxh64", "-v"])
+    result = runner.invoke(ascmhl.commands.create, [abspath_conversion_tests("/root/A/AA"), "-h", "xxh64", "-v"])
+    result = runner.invoke(ascmhl.commands.create, [abspath_conversion_tests("/root"), "-h", "xxh64", "-v"])
     assert not result.exception
     assert os.path.exists("/root/ascmhl/0001_root_2020-01-16_091500Z.mhl")
     assert os.path.exists("/root/ascmhl/ascmhl_chain.xml")
-    result = runner.invoke(ascmhl.commands.verify, ["/root"])
+    result = runner.invoke(ascmhl.commands.verify, [abspath_conversion_tests("/root")])
     assert not result.exception
 
     os.rename("/root/A/AA", "/root/A/AB")
     os.rename("/root/A/AB/AA1.txt", "/root/A/AB/AA2.txt")
 
-    result = runner.invoke(ascmhl.commands.create, ["/root", "-h", "xxh64", "-v", "-dr"])
+    result = runner.invoke(ascmhl.commands.create, [abspath_conversion_tests("/root"), "-h", "xxh64", "-v", "-dr"])
     assert not result.exception
     assert "a renamed" in result.output
 
@@ -252,9 +258,9 @@ def test_detect_renamed_folders(fs):
         fileContents = fin.read()
         assert fileContents.count("previousPath") == 2
 
-    result = runner.invoke(ascmhl.commands.verify, ["/root", "-h", "xxh64"])
+    result = runner.invoke(ascmhl.commands.verify, [abspath_conversion_tests("/root"), "-h", "xxh64"])
     assert not result.exception
 
-    result = runner.invoke(ascmhl.commands.create, ["/root", "-h", "xxh64", "-v", "-dr"])
+    result = runner.invoke(ascmhl.commands.create, [abspath_conversion_tests("/root"), "-h", "xxh64", "-v", "-dr"])
     assert "a renamed" not in result.output
     assert not result.exception

@@ -9,6 +9,8 @@ __email__ = "opensource@pomfort.com"
 
 import datetime
 import time
+import os
+from pathlib import Path, PurePosixPath, PureWindowsPath
 
 
 def matches_prefixes(text: str, prefixes: list):
@@ -26,7 +28,7 @@ def datetime_isostring(date, keep_microseconds=False):
     date -- date object
     keep_microseconds -- include microseconds in iso
     """
-    utc_offset_sec = time.altzone if time.localtime().tm_isdst else time.timezone
+    utc_offset_sec = time.altzone if time.localtime().tm_isdst == 1 else time.timezone
     utc_offset = datetime.timedelta(seconds=-utc_offset_sec)
 
     if keep_microseconds:
@@ -43,8 +45,18 @@ def datetime_now_isostring():
 
 def datetime_now_filename_string():
     """create a string representation for now() for use as part of the MHL filename"""
-    return datetime.datetime.strftime(datetime.datetime.now(datetime.UTC), "%Y-%m-%d_%H%M%SZ")
+    return datetime.datetime.strftime(datetime.datetime.now(datetime.timezone.utc), "%Y-%m-%d_%H%M%SZ")
 
 
 def datetime_now_isostring_with_microseconds():
     return datetime_isostring(datetime.datetime.now(), keep_microseconds=True)
+
+
+def convert_local_path_to_posix(path: str) -> str:
+    return str(Path(path).as_posix())
+
+
+def convert_posix_to_local_path(path: str) -> str:
+    if os.name == "nt":
+        return str(PureWindowsPath(PurePosixPath(path)))
+    return path

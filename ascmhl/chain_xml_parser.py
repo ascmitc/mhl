@@ -7,11 +7,7 @@ __maintainer__ = "Patrick Renner, Alexander Sahm"
 __email__ = "opensource@pomfort.com"
 """
 
-from . import logger
-from .__version__ import ascmhl_reference_hash_format
 from .chain import MHLChain, MHLChainGeneration
-from .hashlist import MHLHashList
-import os
 import textwrap
 
 from lxml import etree
@@ -20,6 +16,7 @@ from lxml.builder import E
 from .hashlist import *
 from .__version__ import ascmhl_supported_hashformats
 from .hashlist import MHLHashList
+from .utils import convert_local_path_to_posix, convert_posix_to_local_path
 
 
 def parse(file_path):
@@ -51,7 +48,7 @@ def parse(file_path):
 
                 if type(current_object) is MHLChainGeneration:
                     if tag == "path":
-                        current_object.ascmhl_filename = element.text
+                        current_object.ascmhl_filename = convert_posix_to_local_path(element.text)
                     elif tag in ascmhl_supported_hashformats:
                         current_object.hash_format = tag
                         current_object.hash_string = element.text
@@ -59,6 +56,7 @@ def parse(file_path):
                         current_object.generation_number = element.attrib.get("sequencenr")
                         chain.append_generation(current_object)
                         current_object = None
+    file.close()
 
     return chain
 
@@ -86,6 +84,7 @@ def write_chain(chain: MHLChain, new_hash_list: MHLHashList):
     current_indent = current_indent[:-2]
     _write_xml_string_to_file(file, "</ascmhldirectory>\n", current_indent)
     file.flush()
+    file.close()
 
 
 def _write_xml_element_to_file(file, xml_element, indent: str):
@@ -102,7 +101,7 @@ def _hashlist_xml_element_from_hashlist(hash_list: MHLHashList):
     """builds and returns one <hashlist> element for a given HashList object"""
 
     hash_list_element = E.hashlist(
-        E.path(os.path.basename(hash_list.file_path)),
+        E.path(convert_local_path_to_posix(os.path.basename(hash_list.file_path))),
         E.c4(hash_list.generate_reference_hash()),
     )
     hash_list_element.attrib["sequencenr"] = str(hash_list.generation_number)
@@ -115,7 +114,7 @@ def _hashlist_xml_element_from_chaingeneration(generation: MHLChainGeneration):
 
     if generation.hash_format == "c4":
         hash_list_element = E.hashlist(
-            E.path(generation.ascmhl_filename),
+            E.path(convert_local_path_to_posix(generation.ascmhl_filename)),
             E.c4(generation.hash_string),
         )
         hash_list_element.attrib["sequencenr"] = str(generation.generation_number)

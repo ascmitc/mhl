@@ -1,0 +1,3 @@
+# make sure the scenario output files are not converted to a different line ending when checked out by git on windows
+# otherwise the scenario tests will fail and the files can't be verified with the ascmhl tool
+/examples/scenarios/Output/** binary

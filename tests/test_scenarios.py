@@ -13,9 +13,12 @@ import glob
 import os
 import shutil
 from importlib import reload
+from .conftest import abspath_conversion_tests
 from typing import List
+from .conftest import path_conversion_tests
 
 import pytest
+from ascmhl import utils
 from click.testing import CliRunner
 from freezegun import freeze_time
 from pyfakefs.fake_filesystem_unittest import Pause
@@ -95,7 +98,7 @@ def dirs_are_equal(dir1, dir2):
 
 def compare_dir_content(reference: str, dir_path: str) -> bool:
     if os.path.isabs(dir_path):
-        relative_path = dir_path.lstrip(os.sep)
+        relative_path = dir_path.lstrip("/")
     else:
         relative_path = dir_path
     ref_path = os.path.join(fake_ref_root_path, reference, relative_path)
@@ -173,10 +176,10 @@ def compare_files_against_reference(scenario_reference: str, folder_paths: List[
 
 def validate_all_mhl_files_against_xml_schema(folder_path: str):
     """Find all mhl files created and validate them against the xsd"""
-    mhl_files = glob.glob(folder_path + r"/**/*.mhl", recursive=True)
+    mhl_files = glob.glob(abspath_conversion_tests(folder_path) + r"/**/*.mhl", recursive=True)
     runner = CliRunner()
     for file in mhl_files:
-        result = runner.invoke(ascmhl.commands.xsd_schema_check, file)
+        result = runner.invoke(ascmhl.commands.xsd_schema_check, [file])
         assert result.exit_code == 0, result.output
 
 

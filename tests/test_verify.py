@@ -8,6 +8,9 @@ __email__ = "opensource@pomfort.com"
 """
 
 import os
+from .conftest import abspath_conversion_tests
+from .conftest import path_conversion_tests
+
 from freezegun import freeze_time
 from click.testing import CliRunner
 
@@ -19,17 +22,17 @@ import ascmhl.commands
 def test_simple_verify_fails_no_history(fs, simple_mhl_history):
     runner = CliRunner()
     os.rename("/root/ascmhl", "/root/_ascmhl")
-    result = runner.invoke(ascmhl.commands.verify, ["-v", "/root/Stuff.txt"])
+    result = runner.invoke(ascmhl.commands.verify, ["-v", abspath_conversion_tests("/root/Stuff.txt")])
     assert result.exit_code == 30
 
 
 @freeze_time("2020-01-16 09:15:00")
 def test_simple_verify(fs, simple_mhl_history):
     runner = CliRunner()
-    result = runner.invoke(ascmhl.commands.verify, ["-v", "/root/"])
+    result = runner.invoke(ascmhl.commands.verify, ["-v", abspath_conversion_tests("/root")])
     assert (
         result.output
-        == "check folder at path: /root/\nverification (xxh64) of file A/A1.txt: OK\nverification (xxh64) of file"
+        == f"check folder at path: {abspath_conversion_tests('/root')}\nverification (xxh64) of file {str(path_conversion_tests('A/A1.txt'))}: OK\nverification (xxh64) of file"
         " Stuff.txt: OK\n"
     )
     assert result.exit_code == 0
@@ -38,7 +41,7 @@ def test_simple_verify(fs, simple_mhl_history):
 @freeze_time("2020-01-16 09:15:00")
 def test_directory_verify(fs, simple_mhl_history):
     runner = CliRunner()
-    result = runner.invoke(ascmhl.commands.verify, ["-v", "-dh", "/root/"])
+    result = runner.invoke(ascmhl.commands.verify, ["-v", "-dh", abspath_conversion_tests("/root")])
     assert "verification of root folder   OK (generation 0001)\n" in result.output
     assert result.exit_code == 0
 
@@ -56,10 +59,10 @@ def test_directory_verify_detect_changes(fs, simple_mhl_history):
     os.mkdir("/root/emptyFolderC/emptyFolderCB")
 
     runner = CliRunner()
-    result = runner.invoke(ascmhl.commands.create, ["/root", "-v"])
+    result = runner.invoke(ascmhl.commands.create, [abspath_conversion_tests("/root"), "-v"])
     assert result.exit_code == 0
 
-    result = runner.invoke(ascmhl.commands.verify, ["-v", "-dh", "/root/"])
+    result = runner.invoke(ascmhl.commands.verify, ["-v", "-dh", abspath_conversion_tests("/root")])
     # assert verification works before we purposefully mess things up
     assert result.exit_code == 0
 
@@ -67,14 +70,14 @@ def test_directory_verify_detect_changes(fs, simple_mhl_history):
     with open("/root/A/A2.txt", "a") as file:
         file.write("!!")
 
-    result = runner.invoke(ascmhl.commands.verify, ["-v", "-dh", "/root/"])
+    result = runner.invoke(ascmhl.commands.verify, ["-v", "-dh", abspath_conversion_tests("/root")])
     assert "ERROR: content hash mismatch" in result.output
     assert result.exit_code == 12
 
     # rename one file
     os.rename("/root/B/B1.txt", "/root/B/B2.txt")
 
-    result = runner.invoke(ascmhl.commands.verify, ["-v", "-dh", "/root/"])
+    result = runner.invoke(ascmhl.commands.verify, ["-v", "-dh", abspath_conversion_tests("/root")])
     assert "ERROR: structure hash mismatch" in result.output
     assert result.exit_code == 12
 
@@ -84,25 +87,38 @@ def test_verify_single_file(fs, simple_mhl_history):
     runner = CliRunner()
 
     # verify relative path
-    result = runner.invoke(ascmhl.commands.verify, ["-v", "-sf", "A/A1.txt", "/root/"])
+    result = runner.invoke(
+        ascmhl.commands.verify, ["-v", "-sf", str(path_conversion_tests("A/A1.txt")), abspath_conversion_tests("/root")]
+    )
     assert result.exit_code == 0
 
     # verify absolute path
-    result = runner.invoke(ascmhl.commands.verify, ["-v", "-sf", "/root/A/A1.txt", "/root/"])
+    result = runner.invoke(
+        ascmhl.commands.verify,
+        ["-v", "-sf", abspath_conversion_tests("/root/A/A1.txt"), abspath_conversion_tests("/root")],
+    )
     assert result.exit_code == 0
 
     # verify existing, but not listed file
     fs.create_file("/root/B/B1.txt", contents="B1\n")
-    result = runner.invoke(ascmhl.commands.verify, ["-v", "-sf", "B/B1.txt", "/root/"])
+    result = runner.invoke(
+        ascmhl.commands.verify,
+        ["-v", "-sf", str(path_conversion_tests("B/B1.txt")), abspath_conversion_tests("/root/")],
+    )
     assert result.exit_code == 21
 
     # verify non existing file
-    result = runner.invoke(ascmhl.commands.verify, ["-v", "-sf", "B/B2.txt", "/root/"])
+    result = runner.invoke(
+        ascmhl.commands.verify,
+        ["-v", "-sf", str(path_conversion_tests("B/B2.txt")), abspath_conversion_tests("/root/")],
+    )
     assert result.exit_code == 20
 
     # altering the content of one file
     with open("/root/A/A1.txt", "a") as file:
         file.write("!!")
     # verify
-    result = runner.invoke(ascmhl.commands.verify, ["-v", "-sf", "A/A1.txt", "/root/"])
+    result = runner.invoke(
+        ascmhl.commands.verify, ["-v", "-sf", str(path_conversion_tests("A/A1.txt")), abspath_conversion_tests("/root")]
+    )
     assert result.exit_code == 11

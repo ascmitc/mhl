@@ -1,15 +1,7 @@
-*.DS_Store
-/TODOs.md
-/venv
-/env
-/.idea
-__pycache__
-xsd/xsdvi.log
-.eggs
-*.egg-info/
+# Exclude all executable files
+*.exe
 
-docs/build
-docs/docenv
-.coverage
-htmlcov
-/.vscode/
+# Ignore PyInstaller build files
+build/
+dist/
+*.spec

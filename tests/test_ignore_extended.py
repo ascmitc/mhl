@@ -946,8 +946,8 @@ def test_ignore_from_file(fs, post_house_file_structure):
         "/root/ShootingDay1/CameraMedia/A/A001/A1.txt",
         "/root/ShootingDay1/CameraMedia/A/A001/Sidecar.txt",
         "/root/ShootingDay1/CameraMedia/B/B002/Sidecar.txt",
-        "/root/ShootingDay1/CameraMedia/A/Proxy/A001",
-        "/root/ShootingDay1/CameraMedia/B/Proxy/B001",
+        "/root/ShootingDay1/CameraMedia/A/Proxy",
+        "/root/ShootingDay1/CameraMedia/B/Proxy",
         "/root/ShootingDay1/Sound/Sidecar.txt",
     ]
     assert_pattern_ignored_in_result(pattern, result)

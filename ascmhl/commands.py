@@ -249,13 +249,11 @@ def create_for_folder_subcommand(
                 dir_hash_context_lookup[hash_format] = DirectoryHashContext(hash_format)
         for item_name, is_dir in children:
             file_path = os.path.join(folder_path, item_name)
-            not_found_paths.discard(file_path)
-            for hash_list in existing_history.hash_lists:
-                for media_hash in hash_list.media_hashes:
-                    if media_hash.path == existing_history.get_relative_file_path(file_path):
-                        break
-                else:
-                    new_paths.add(file_path)
+            if file_path in not_found_paths:
+                not_found_paths.discard(file_path)
+            else:
+                new_paths.add(file_path)
+
             if is_dir:
                 if not no_directory_hashes:
                     path_content_hash_lookup = dir_content_hash_mapping_lookup.pop(file_path)

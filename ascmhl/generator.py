@@ -8,6 +8,8 @@ __email__ = "opensource@pomfort.com"
 """
 
 import os
+import shutil
+
 from collections import defaultdict
 from pathlib import PureWindowsPath
 from typing import Dict, List
@@ -17,6 +19,7 @@ from . import logger
 from .ignore import MHLIgnoreSpec
 from .hashlist import MHLHashList, MHLHashEntry, MHLCreatorInfo, MHLProcessInfo
 from .history import MHLHistory
+from .utils import convert_posix_to_local_path
 
 
 class MHLGenerationCreationSession:
@@ -133,7 +136,13 @@ class MHLGenerationCreationSession:
         hash_entry = MHLHashEntry(hash_format, hash_string, hash_date=hash_date)
         if original_hash_entry is None:
             hash_entry.action = "original"
-            logger.verbose(f"  created original hash for     {relative_path}  {hash_format}: {hash_string}")
+            if relative_path is not None:
+                logger.verbose(f"  created original hash for     {relative_path}  {hash_format}: {hash_string}")
+            else:
+                # flattening works a bit different, because we don't add to individual (nested) histories
+                logger.verbose(
+                    f"  created original hash for     {convert_posix_to_local_path(file_path)}  {hash_format}: {hash_string}"
+                )
         else:
             existing_hash_entry = history.find_first_hash_entry_for_path(history_relative_path, hash_format)
             if existing_hash_entry is not None:
@@ -274,7 +283,7 @@ class MHLGenerationCreationSession:
                 hash_entry.structure_hash_string = structure_hash_string
                 parent_media_hash.append_hash_entry(hash_entry)
 
-    def commit(self, creator_info: MHLCreatorInfo, process_info: MHLProcessInfo):
+    def commit(self, creator_info: MHLCreatorInfo, process_info: MHLProcessInfo, writeChain=True):
         """
         this method needs to create the generations of the children bottom up
         # so each history can reference the children correctly and can get the actual hash of the file
@@ -306,7 +315,29 @@ class MHLGenerationCreationSession:
             if history.parent_history is not None:
                 referenced_hash_lists[history.parent_history].append(new_hash_list)
 
-            chain_xml_parser.write_chain(history.chain, new_hash_list)
+            if writeChain:
+                # regular history ....
+                chain_xml_parser.write_chain(history.chain, new_hash_list)
+            else:
+                # ... or flattened history manifest
+                root_path = os.path.dirname(new_hash_list.file_path)
+                if not os.path.exists(root_path):
+                    logger.error(f"ERROR: folder {root_path} with flattened manifest does not exist")
+                    return
+
+                parent_folder = os.path.dirname(root_path)
+
+                for file_name in os.listdir(root_path):
+                    if file_name.endswith(".mhl"):
+                        src_path = os.path.join(root_path, file_name)
+                        dst_path = os.path.join(parent_folder, file_name)
+                        shutil.move(src_path, dst_path)
+
+                # Remove the folder if empty
+                if not os.listdir(root_path):
+                    os.rmdir(root_path)
+                else:
+                    logger.error(f"ERROR: temp folder not empty, did not remove {root_path}")
 
     def get_relevant_ignore_pattern(self, history) -> MHLIgnoreSpec:
         """

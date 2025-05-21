@@ -12,6 +12,7 @@ import os
 import platform
 
 import click
+import pathspec
 from lxml import etree
 
 from . import logger
@@ -34,6 +35,8 @@ from .history import MHLHistory
 from .traverse import post_order_lexicographic
 from typing import Dict
 from collections import namedtuple
+
+from .utils import check_path_is_absolute_to_history
 
 
 @click.command()
@@ -231,6 +234,9 @@ def create_for_folder_subcommand(
     # start a verification session on the existing history
     session = MHLGenerationCreationSession(existing_history, ignore_spec)
 
+    # update the ignore spec and include ignores from nested histories
+    ignore_spec = get_ignore_spec_including_nested_ignores(existing_history, ignore_list, ignore_spec_file)
+
     num_failed_verifications = 0
     # store the directory hashes of sub folders so we can use it when calculating the hash of the parent folder
     # the mapping lookups will follow the dictionary format of [string: [hash_format: hash_value]] where string
@@ -239,7 +245,7 @@ def create_for_folder_subcommand(
     dir_structure_hash_mapping_lookup = {}
     hash_format_list = sorted(hash_formats)
 
-    for folder_path, children in post_order_lexicographic(root_path, session.ignore_spec.get_path_spec()):
+    for folder_path, children in post_order_lexicographic(root_path, ignore_spec.get_path_spec()):
         # generate directory hashes
         dir_hash_context_lookup = {}
 
@@ -693,7 +699,7 @@ def verify_directory_hash_subcommand(
 
     existing_history = MHLHistory.load_from_path(root_path)
 
-    ignore_spec = ignore.MHLIgnoreSpec(existing_history.latest_ignore_patterns(), ignore_list, ignore_spec_file)
+    ignore_spec = get_ignore_spec_including_nested_ignores(existing_history, ignore_list, ignore_spec_file)
 
     # FIXME: Update once argument signature has been modified to supply a list of formats
     hash_formats = []
@@ -1029,7 +1035,7 @@ def diff_entire_folder_against_full_history_subcommand(root_path, verbose, ignor
     num_failed_verifications = 0
     num_new_files = 0
 
-    ignore_spec = ignore.MHLIgnoreSpec(existing_history.latest_ignore_patterns(), ignore_list, ignore_spec_file)
+    ignore_spec = get_ignore_spec_including_nested_ignores(existing_history, ignore_list, ignore_spec_file)
 
     for folder_path, children in post_order_lexicographic(root_path, ignore_spec.get_path_spec()):
         for item_name, is_dir in children:
@@ -1570,3 +1576,55 @@ def seal_file_path(existing_history, file_path, hash_formats: [str], session) ->
             hash_result_lookup[hash_format] = SealPathResult(current_hash_lookup[hash_format], success)
 
     return hash_result_lookup
+
+
+def get_ignore_spec_including_nested_ignores(existing_history, ignore_list, ignore_spec_file=None):
+    """Get the ignore patterns from nested histories with their respective paths,
+    so that ignored files from nested histories are also ignored in this session, but are not stored
+    in the root ascmhl manifest"""
+    ignore_patterns_cumulated = ignore.default_ignore_list()
+    # handle non-existent ignores in root history
+    if existing_history.latest_ignore_patterns() is not None:
+        for x in existing_history.latest_ignore_patterns():
+            if x not in ignore.default_ignore_list():
+                ignore_patterns_cumulated.append(x)
+
+    for x in existing_history.latest_ignore_pattern_from_nested_histories():
+        ignore_patterns_cumulated.append(x)
+
+    for x in ignore_list:
+        ignore_patterns_cumulated.append(x)
+
+    patterns_from_file = []
+    if ignore_spec_file:
+        with open(ignore_spec_file, "r") as fh:
+            patterns_from_file.extend(line.rstrip("\n") for line in fh if line != "\n")
+        for x in patterns_from_file:
+            if x not in ignore_patterns_cumulated:
+                ignore_patterns_cumulated.append(x)
+
+    # we now build the absolute ignore paths for the current session from all nested ignores
+    # otherwise the post_order_lexicographic() won't ignore these paths
+    absolute_ignore_paths = []
+    path = existing_history.get_root_path()
+    for pattern in ignore_patterns_cumulated:
+        if pattern in ignore.default_ignore_list():
+            absolute_ignore_paths.append(pattern)
+        else:
+            if pattern.find("/") != -1:
+                if pattern.startswith("/"):
+                    absolute_ignore_paths.append(path + pattern)
+                elif pattern.startswith("**"):
+                    absolute_ignore_paths.append(pattern)
+                elif pattern.endswith("/") and pattern[:-1].find("/") == -1:
+                    absolute_ignore_paths.append(pattern)
+                elif pattern.endswith("/" + "**") and pattern[:-3].find("/") == -1:
+                    absolute_ignore_paths.append(pattern)
+                else:
+                    absolute_ignore_paths.append(path + os.sep + pattern)
+            else:
+                absolute_ignore_paths.append(pattern)
+
+    normalized_paths = [pathspec.util.normalize_file(p) for p in absolute_ignore_paths]
+    spec = ignore.MHLIgnoreSpec(existing_history.latest_ignore_patterns(), normalized_paths)
+    return spec

@@ -31,12 +31,14 @@ def post_order_lexicographic(top: str, ignore_pathspec: pathspec.PathSpec = None
     children = []
     for name in names:
         file_path = os.path.join(top, name)
+        is_directory = isdir(file_path)
+        if is_directory:
+            file_path = file_path + "/"
         if ignore_pathspec and ignore_pathspec.match_file(file_path):
             if os.path.basename(os.path.normpath(file_path)) != ascmhl_folder_name:
-                logger.verbose(f"ignoring filepath {file_path}")
+                logger.verbose(f"ignoring filepath {file_path.rstrip('/')}")
             continue
-        path = join(top, name)
-        children.append((name, isdir(path)))
+        children.append((name, is_directory))
 
     # if directory, yield children recursively in post order until exhausted.
     for name, is_dir in children:

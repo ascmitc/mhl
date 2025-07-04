@@ -7,6 +7,8 @@ __email__ = "opensource@pomfort.com"
 """
 
 import os
+from pathlib import Path
+
 from .conftest import path_conversion_tests
 
 import pytest
@@ -78,6 +80,23 @@ def assert_mhl_file_has_exact_ignore_patterns(mhl_file: str, patterns_to_check: 
     """
     patterns_in_file = set(ignore_patterns_from_mhl_file(mhl_file))
     assert patterns_in_file == DEFAULT_IGNORE_SET | patterns_to_check, "mhl file has incorrect ignore patterns"
+
+
+def assert_pattern_ignored_in_result(pattern: [str], result, negate=False):
+    if negate:
+        for pattern in pattern:
+            if os.name == "posix":
+                assert f"ignoring filepath {pattern}" not in result.output
+            else:
+                pattern = Path(pattern).resolve()
+                assert f"ignoring filepath {pattern}" not in result.output
+    else:
+        for pattern in pattern:
+            if os.name == "posix":
+                assert f"ignoring filepath {pattern}" in result.output
+            else:
+                pattern = Path(pattern).resolve()
+                assert f"ignoring filepath {pattern}" in result.output
 
 
 def mhl_file_for_gen(mhl_dir: str, mhl_gen: int):

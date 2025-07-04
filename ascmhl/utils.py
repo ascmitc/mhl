@@ -60,3 +60,10 @@ def convert_posix_to_local_path(path: str) -> str:
     if os.name == "nt":
         return str(PureWindowsPath(PurePosixPath(path)))
     return path
+
+
+def check_path_is_absolute_to_history(base_path, relative_path) -> bool:
+    base_abs = os.path.abspath(base_path)
+    relative_abs = os.path.abspath(relative_path)
+
+    return relative_abs.startswith(base_abs)

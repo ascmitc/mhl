@@ -7,14 +7,19 @@ __maintainer__ = "Patrick Renner, Alexander Sahm"
 __email__ = "opensource@pomfort.com"
 """
 
+import os
+import shutil
+
 from collections import defaultdict
+from pathlib import PureWindowsPath
 from typing import Dict, List
 
-from . import chain_xml_parser
+from . import chain_xml_parser, ignore
 from . import logger
 from .ignore import MHLIgnoreSpec
 from .hashlist import MHLHashList, MHLHashEntry, MHLCreatorInfo, MHLProcessInfo
 from .history import MHLHistory
+from .utils import convert_posix_to_local_path
 
 
 class MHLGenerationCreationSession:
@@ -131,7 +136,13 @@ class MHLGenerationCreationSession:
         hash_entry = MHLHashEntry(hash_format, hash_string, hash_date=hash_date)
         if original_hash_entry is None:
             hash_entry.action = "original"
-            logger.verbose(f"  created original hash for     {relative_path}  {hash_format}: {hash_string}")
+            if relative_path is not None:
+                logger.verbose(f"  created original hash for     {relative_path}  {hash_format}: {hash_string}")
+            else:
+                # flattening works a bit different, because we don't add to individual (nested) histories
+                logger.verbose(
+                    f"  created original hash for     {convert_posix_to_local_path(file_path)}  {hash_format}: {hash_string}"
+                )
         else:
             existing_hash_entry = history.find_first_hash_entry_for_path(history_relative_path, hash_format)
             if existing_hash_entry is not None:
@@ -272,7 +283,7 @@ class MHLGenerationCreationSession:
                 hash_entry.structure_hash_string = structure_hash_string
                 parent_media_hash.append_hash_entry(hash_entry)
 
-    def commit(self, creator_info: MHLCreatorInfo, process_info: MHLProcessInfo):
+    def commit(self, creator_info: MHLCreatorInfo, process_info: MHLProcessInfo, writeChain=True):
         """
         this method needs to create the generations of the children bottom up
         # so each history can reference the children correctly and can get the actual hash of the file
@@ -296,9 +307,7 @@ class MHLGenerationCreationSession:
                 new_hash_list.process_info.root_media_hash = process_info.root_media_hash
             new_hash_list.process_info.hashlist_custom_basename = process_info.hashlist_custom_basename
             new_hash_list.process_info.process = process_info.process
-            new_hash_list.process_info.ignore_spec = MHLIgnoreSpec(
-                history.latest_ignore_patterns(), self.ignore_spec.get_pattern_list()
-            )
+            new_hash_list.process_info.ignore_spec = self.get_relevant_ignore_pattern(history)
 
             history.write_new_generation(new_hash_list)
             relative_generation_path = self.root_history.get_relative_file_path(new_hash_list.file_path)
@@ -306,4 +315,214 @@ class MHLGenerationCreationSession:
             if history.parent_history is not None:
                 referenced_hash_lists[history.parent_history].append(new_hash_list)
 
-            chain_xml_parser.write_chain(history.chain, new_hash_list)
+            if writeChain:
+                # regular history ....
+                chain_xml_parser.write_chain(history.chain, new_hash_list)
+            else:
+                # ... or flattened history manifest
+                root_path = os.path.dirname(new_hash_list.file_path)
+                if not os.path.exists(root_path):
+                    logger.error(f"ERROR: folder {root_path} with flattened manifest does not exist")
+                    return
+
+                parent_folder = os.path.dirname(root_path)
+
+                for file_name in os.listdir(root_path):
+                    if file_name.endswith(".mhl"):
+                        src_path = os.path.join(root_path, file_name)
+                        dst_path = os.path.join(parent_folder, file_name)
+                        shutil.move(src_path, dst_path)
+
+                # Remove the folder if empty
+                if not os.listdir(root_path):
+                    os.rmdir(root_path)
+                else:
+                    logger.error(f"ERROR: temp folder not empty, did not remove {root_path}")
+
+    def get_relevant_ignore_pattern(self, history) -> MHLIgnoreSpec:
+        """
+        Only store the relevant ignore patterns for an ascmhl-history and ignore others.
+        This will split the pattern into the relevant bits for the lowest ascmhl-history relative to it
+        """
+
+        # get the ignore pattern from the latest history, if there is none, use the default pattern
+        final_ignores = []
+        latest_ignore_patterns = history.latest_ignore_patterns()
+        if latest_ignore_patterns is None:
+            final_ignores += ignore.default_ignore_list()
+        else:
+            final_ignores += latest_ignore_patterns
+
+        ignore_patterns = self.ignore_spec.get_pattern_list()
+
+        history_path = history.get_root_path()
+        # get the highest parent history to build the correct relative paths for this generation
+        if history.parent_history is not None:
+            parent_history = history.parent_history
+            while parent_history.parent_history is not None:
+                parent_history = parent_history.parent_history
+
+            parent_history_path = parent_history.get_root_path()
+            parent_rel_path = os.path.relpath(history_path, parent_history_path)
+            for pattern in ignore_patterns:
+                if not pattern in final_ignores:
+                    if "/" not in pattern:
+                        final_ignores.append(pattern)
+                    elif pattern.startswith("/**/"):
+                        final_ignores.append(pattern)
+                    elif belongs_to_child(pattern, history, parent_history_path):
+                        # if child is ignored itself, we need to append the ignore pattern to the next parent
+                        for child in history.walk_child_histories(history):
+                            child_root: str
+                            if os.name == "nt":
+                                child_root = PureWindowsPath(child.get_root_path()).as_posix()
+                            else:
+                                child_root = child.get_root_path()
+                            if child_root.endswith(pattern):
+                                pattern = extract_ignore_pattern(pattern, history_path)
+                                final_ignores.append(pattern)
+                        continue
+                    elif belongs_to_parent_or_neighbour(pattern, parent_rel_path):
+                        continue
+                    else:
+                        pattern = extract_ignore_pattern(pattern, parent_rel_path)
+                        final_ignores.append(pattern)
+                else:
+                    continue
+        else:
+            for pattern in ignore_patterns:
+                if not pattern in final_ignores:
+                    if (
+                        not belongs_to_child(pattern, history, history_path)
+                        and not pattern in ignore.default_ignore_list()
+                    ):
+                        if pattern.startswith("/"):
+                            final_ignores.append(pattern)
+                        elif pattern.find("/") != -1:
+                            final_ignores.append(extract_ignore_pattern(pattern))
+                        else:
+                            final_ignores.append(pattern)
+                    else:
+                        for child in history.walk_child_histories(history):
+                            child_root: str
+                            if os.name == "nt":
+                                child_root = PureWindowsPath(child.get_root_path()).as_posix()
+                            else:
+                                child_root = child.get_root_path()
+                            if child_root.endswith(pattern):
+                                if history == child.parent_history:
+                                    pattern = extract_ignore_pattern(pattern)
+                                    final_ignores.append(pattern)
+        return MHLIgnoreSpec(final_ignores, latest_ignore_patterns)
+
+
+def belongs_to_child(pattern, history, parent_history_path, ignore_child=None) -> bool:
+    if pattern.startswith("/"):
+        pattern = pattern[1:]
+    for child in history.child_histories:
+        if ignore_child == child:
+            continue
+        child_path = child.get_root_path()
+        parent_rel_path = os.path.relpath(child_path, parent_history_path)
+        if os.name == "nt":
+            parent_rel_path = parent_rel_path.replace("\\", "/")
+        if pattern.startswith(parent_rel_path):
+            return True
+
+    return False
+
+
+def belongs_to_parent_or_neighbour(pattern, parent_rel_path) -> bool:
+    if "/" not in pattern:
+        return False
+    if pattern.startswith("/") and "/" not in pattern[1:]:
+        return True
+    if pattern.endswith("/") and "/" not in pattern[:-1]:
+        return False
+
+    if pattern.startswith("**/"):
+        return False
+
+    pattern_parts = pattern.strip("/").split("/")
+    parent_parts = parent_rel_path.strip(os.sep).split(os.sep)
+    i = 0
+    while i < min(len(pattern_parts), len(parent_parts)):
+        if pattern_parts[i] != parent_parts[i]:
+            if i > 0 and i < len(pattern_parts) - 1 and pattern_parts[i] == "**":
+                return False
+            return True
+        else:
+            i += 1
+    if i == len(pattern_parts):
+        return True
+
+    return False
+
+
+def extract_ignore_pattern(pattern: str, parent_rel_path=None) -> str:
+    if pattern.startswith("/"):
+        if "/" in pattern[1:]:
+            pattern = pattern[1:]
+        else:
+            return pattern
+
+    pattern_rel_path = _extract_pattern_relative_to_history(pattern, parent_rel_path)
+
+    if pattern_rel_path is not None:
+        if pattern.endswith("/"):
+            if "/" in pattern[:-1]:
+                return "/" + (pattern if pattern.startswith("**/") else pattern_rel_path)
+            return pattern
+
+        if pattern.endswith("/**"):
+            if pattern.startswith("**/"):
+                return pattern
+            if "/" in pattern[:-3]:
+                return pattern_rel_path if pattern.startswith("/") else "/" + pattern_rel_path
+            return pattern
+
+        if "/" in pattern[:-1]:
+            return (
+                "/" + pattern
+                if pattern.startswith("**/")
+                else pattern_rel_path if pattern_rel_path.startswith("/") else "/" + pattern_rel_path
+            )
+
+    return pattern
+
+
+def _extract_pattern_relative_to_history(pattern: str, history_path=None) -> str:
+    if pattern.startswith("**"):
+        return pattern
+    if history_path is None:
+        return pattern
+
+    pattern_parts = pattern.lstrip("/").split("/")
+    history_path_parts = history_path.lstrip(os.sep).split(os.sep)
+
+    i = j = k = 0
+
+    while i < len(history_path_parts):
+        if history_path_parts[i] == pattern_parts[0]:
+            break
+        else:
+            i += 1
+
+    while j < len(pattern_parts) and i + j < len(history_path_parts):
+        if history_path_parts[i + j] == pattern_parts[j]:
+            j += 1
+        else:
+            break
+
+    result = ""
+
+    while j < (len(pattern_parts)):
+        if k == 0:
+            result += pattern_parts[j]
+            j += 1
+            k += 1
+        else:
+            result += "/" + pattern_parts[j]
+            j += 1
+    if result != "":
+        return result

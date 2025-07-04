@@ -12,6 +12,7 @@ import os
 import platform
 
 import click
+import pathspec
 from lxml import etree
 
 from . import logger
@@ -34,6 +35,9 @@ from .history import MHLHistory
 from .traverse import post_order_lexicographic
 from typing import Dict
 from collections import namedtuple
+from .utils import convert_local_path_to_posix
+
+from .utils import check_path_is_absolute_to_history
 
 
 @click.command()
@@ -231,6 +235,9 @@ def create_for_folder_subcommand(
     # start a verification session on the existing history
     session = MHLGenerationCreationSession(existing_history, ignore_spec)
 
+    # update the ignore spec and include ignores from nested histories
+    ignore_spec = get_ignore_spec_including_nested_ignores(existing_history, ignore_list, ignore_spec_file)
+
     num_failed_verifications = 0
     # store the directory hashes of sub folders so we can use it when calculating the hash of the parent folder
     # the mapping lookups will follow the dictionary format of [string: [hash_format: hash_value]] where string
@@ -239,7 +246,7 @@ def create_for_folder_subcommand(
     dir_structure_hash_mapping_lookup = {}
     hash_format_list = sorted(hash_formats)
 
-    for folder_path, children in post_order_lexicographic(root_path, session.ignore_spec.get_path_spec()):
+    for folder_path, children in post_order_lexicographic(root_path, ignore_spec.get_path_spec()):
         # generate directory hashes
         dir_hash_context_lookup = {}
 
@@ -249,13 +256,11 @@ def create_for_folder_subcommand(
                 dir_hash_context_lookup[hash_format] = DirectoryHashContext(hash_format)
         for item_name, is_dir in children:
             file_path = os.path.join(folder_path, item_name)
-            not_found_paths.discard(file_path)
-            for hash_list in existing_history.hash_lists:
-                for media_hash in hash_list.media_hashes:
-                    if media_hash.path == existing_history.get_relative_file_path(file_path):
-                        break
-                else:
-                    new_paths.add(file_path)
+            if file_path in not_found_paths:
+                not_found_paths.discard(file_path)
+            else:
+                new_paths.add(file_path)
+
             if is_dir:
                 if not no_directory_hashes:
                     path_content_hash_lookup = dir_content_hash_mapping_lookup.pop(file_path)
@@ -316,7 +321,10 @@ def create_for_folder_subcommand(
             referenced_asc_folder = os.path.join(
                 os.path.dirname(existing_history.asc_mhl_path), os.path.dirname(ref.path)
             )
-            if not os.path.exists(referenced_asc_folder):
+            # as we also ignore the ascmhl folder itself check the ignore patterns for the enclosing folder
+            if not os.path.exists(referenced_asc_folder) and not ignore_spec.get_path_spec().match_file(
+                os.path.dirname(referenced_asc_folder)
+            ):
                 missing_asc_mhl_folder.add(os.path.dirname(referenced_asc_folder))
 
     if detect_renaming:
@@ -695,7 +703,7 @@ def verify_directory_hash_subcommand(
 
     existing_history = MHLHistory.load_from_path(root_path)
 
-    ignore_spec = ignore.MHLIgnoreSpec(existing_history.latest_ignore_patterns(), ignore_list, ignore_spec_file)
+    ignore_spec = get_ignore_spec_including_nested_ignores(existing_history, ignore_list, ignore_spec_file)
 
     # FIXME: Update once argument signature has been modified to supply a list of formats
     hash_formats = []
@@ -1031,7 +1039,7 @@ def diff_entire_folder_against_full_history_subcommand(root_path, verbose, ignor
     num_failed_verifications = 0
     num_new_files = 0
 
-    ignore_spec = ignore.MHLIgnoreSpec(existing_history.latest_ignore_patterns(), ignore_list, ignore_spec_file)
+    ignore_spec = get_ignore_spec_including_nested_ignores(existing_history, ignore_list, ignore_spec_file)
 
     for folder_path, children in post_order_lexicographic(root_path, ignore_spec.get_path_spec()):
         for item_name, is_dir in children:
@@ -1195,18 +1203,30 @@ def flatten_history(
     if len(existing_history.hash_lists) == 0:
         raise errors.NoMHLHistoryException(root_path)
 
-    for hash_list in existing_history.hash_lists:
+    flatten_child_histories(existing_history, session, root_path)
+
+    commit_session_for_collection(
+        session, root_path, author_name, author_email, author_phone, author_role, location, comment
+    )
+
+
+def flatten_child_histories(history, session, roothistorypath, pathprefix=""):
+    for hash_list in history.hash_lists:
         for media_hash in hash_list.media_hashes:
             if not media_hash.is_directory:
                 for hash_entry in media_hash.hash_entries:
                     if hash_entry.action != "failed":
+                        # add prefix to media path if subhistory
+                        media_path = media_hash.path
+                        if pathprefix != "":
+                            media_path = convert_local_path_to_posix(pathprefix) + "/" + media_hash.path
                         # check if this entry is newer than the one already in there to avoid duplicate entries
-                        found_media_hash = session.new_hash_lists[collection_history].find_media_hash_for_path(
-                            media_hash.path
+                        found_media_hash = session.new_hash_lists[session.root_history].find_media_hash_for_path(
+                            media_path
                         )
                         if found_media_hash == None:
                             session.append_file_hash(
-                                media_hash.path,
+                                media_path,
                                 media_hash.file_size,
                                 media_hash.last_modification_date,
                                 hash_entry.hash_format,
@@ -1222,7 +1242,7 @@ def flatten_history(
                             if not hashformat_is_already_there:
                                 # assuming that hash_entry of same type also has same hash_value ..
                                 session.append_file_hash(
-                                    media_hash.path,
+                                    media_path,
                                     media_hash.file_size,
                                     media_hash.last_modification_date,
                                     hash_entry.hash_format,
@@ -1231,9 +1251,12 @@ def flatten_history(
                                     hash_date=hash_entry.hash_date,
                                 )
 
-    commit_session_for_collection(
-        session, root_path, author_name, author_email, author_phone, author_role, location, comment
-    )
+    for child_history in history.child_histories:
+        childpath = child_history.get_root_path()
+        childrelativepath = os.path.relpath(childpath, roothistorypath)
+
+        logger.info(f"\nChild History at {childrelativepath}:")
+        flatten_child_histories(child_history, session, roothistorypath, childrelativepath)
 
 
 @click.command()
@@ -1471,7 +1494,7 @@ def commit_session_for_collection(
     process_info.root_media_hash = root_hash
     process_info.hashlist_custom_basename = "packinglist_" + os.path.basename(root_path)
 
-    session.commit(creator_info, process_info)
+    session.commit(creator_info, process_info, writeChain=False)
 
 
 """
@@ -1572,3 +1595,55 @@ def seal_file_path(existing_history, file_path, hash_formats: [str], session) ->
             hash_result_lookup[hash_format] = SealPathResult(current_hash_lookup[hash_format], success)
 
     return hash_result_lookup
+
+
+def get_ignore_spec_including_nested_ignores(existing_history, ignore_list, ignore_spec_file=None):
+    """Get the ignore patterns from nested histories with their respective paths,
+    so that ignored files from nested histories are also ignored in this session, but are not stored
+    in the root ascmhl manifest"""
+    ignore_patterns_cumulated = ignore.default_ignore_list()
+    # handle non-existent ignores in root history
+    if existing_history.latest_ignore_patterns() is not None:
+        for x in existing_history.latest_ignore_patterns():
+            if x not in ignore.default_ignore_list():
+                ignore_patterns_cumulated.append(x)
+
+    for x in existing_history.latest_ignore_pattern_from_nested_histories():
+        ignore_patterns_cumulated.append(x)
+
+    for x in ignore_list:
+        ignore_patterns_cumulated.append(x)
+
+    patterns_from_file = []
+    if ignore_spec_file:
+        with open(ignore_spec_file, "r") as fh:
+            patterns_from_file.extend(line.rstrip("\n") for line in fh if line != "\n")
+        for x in patterns_from_file:
+            if x not in ignore_patterns_cumulated:
+                ignore_patterns_cumulated.append(x)
+
+    # we now build the absolute ignore paths for the current session from all nested ignores
+    # otherwise the post_order_lexicographic() won't ignore these paths
+    absolute_ignore_paths = []
+    path = existing_history.get_root_path()
+    for pattern in ignore_patterns_cumulated:
+        if pattern in ignore.default_ignore_list():
+            absolute_ignore_paths.append(pattern)
+        else:
+            if pattern.find("/") != -1:
+                if pattern.startswith("/"):
+                    absolute_ignore_paths.append(path + pattern)
+                elif pattern.startswith("**"):
+                    absolute_ignore_paths.append(pattern)
+                elif pattern.endswith("/") and pattern[:-1].find("/") == -1:
+                    absolute_ignore_paths.append(pattern)
+                elif pattern.endswith("/" + "**") and pattern[:-3].find("/") == -1:
+                    absolute_ignore_paths.append(pattern)
+                else:
+                    absolute_ignore_paths.append(path + os.sep + pattern)
+            else:
+                absolute_ignore_paths.append(pattern)
+
+    normalized_paths = [pathspec.util.normalize_file(p) for p in absolute_ignore_paths]
+    spec = ignore.MHLIgnoreSpec(existing_history.latest_ignore_patterns(), normalized_paths)
+    return spec

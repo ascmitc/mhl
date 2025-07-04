@@ -12,7 +12,7 @@ import os
 import re
 from datetime import datetime, date, time
 
-from . import hasher
+from . import hasher, ignore
 from .__version__ import ascmhl_folder_name, ascmhl_file_extension, ascmhl_chainfile_name, ascmhl_collectionfile_name
 from . import hashlist_xml_parser, chain_xml_parser
 from .utils import datetime_now_filename_string
@@ -97,6 +97,25 @@ class MHLHistory:
         if not hash_list or not hash_list.process_info.ignore_spec:
             return None
         return hash_list.process_info.ignore_spec.get_pattern_list()
+
+    def latest_ignore_pattern_from_nested_histories(self) -> Optional[List[str]]:
+        parent_path = self.get_root_path()
+        cumulated_ignores = []
+        for path, history in self.child_history_mappings.items():
+            for pattern in history.latest_ignore_patterns():
+                # don't add the default pattern
+                child_path = history.get_root_path()
+                path = os.path.relpath(child_path, parent_path)
+                if pattern in ignore.default_ignore_list():
+                    continue
+                else:
+                    # return the directory of the history with the pattern appended
+                    if pattern.find("/") != -1:
+                        cumulated_ignores.append(path + pattern)
+                    else:
+                        cumulated_ignores.append(path + "/**/" + pattern)
+
+        return cumulated_ignores
 
     # methods to query and compare hashes
     def find_original_hash_entry_for_path(self, relative_path: str) -> Optional[MHLHashEntry]:

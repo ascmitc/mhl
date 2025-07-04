@@ -15,7 +15,7 @@ from freezegun import freeze_time
 import ascmhl.commands
 from ascmhl.generator import _extract_pattern_relative_to_history
 from ascmhl.history import MHLHistory
-from tests.conftest import abspath_conversion_tests
+from tests.conftest import abspath_conversion_tests, remove_tree
 from tests.test_ignore import assert_mhl_file_has_exact_ignore_patterns, assert_pattern_ignored_in_result
 from ascmhl.generator import belongs_to_parent_or_neighbour
 
@@ -1198,3 +1198,18 @@ def test_ignore_unit_extract_relpath():
     expected = "docs/"
     result = ascmhl.generator._extract_pattern_relative_to_history(target, base)
     assert result == expected
+
+
+def test_ignore_missing_subhistory(fs, post_house_file_structure):
+    """
+    test that creating a new generation doesn't fail if we ignore a missing subhistory
+    """
+
+    # delete the whole subhistory, it is referenced from the history in the CameraMedia folder but as we ignore it
+    # the create command doesn't fail
+    remove_tree("/root/ShootingDay1/CameraMedia/A")
+    runner = CliRunner()
+    result = runner.invoke(
+        ascmhl.commands.create, [abspath_conversion_tests("/root/ShootingDay1/CameraMedia"), "-i", "/A"]
+    )
+    assert result.exit_code == 0

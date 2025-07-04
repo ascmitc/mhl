@@ -28,6 +28,36 @@ def path_conversion_tests(path):
     return Path(path)
 
 
+# The shutil.rmtree will not work with the fake filesystem on Python 3.12 (because it will not take symlinks),
+# so here is an implementation for removing entire directories that will work with the fake fs
+def remove_tree(path):
+    """Recursively delete a directory tree, correctly handling symbolic links."""
+    for root, dirs, files in os.walk(path, topdown=False):
+        for name in files:
+            file_path = os.path.join(root, name)
+            try:
+                os.remove(file_path)  # Remove files
+            except OSError as e:
+                print(f"Error removing file {file_path}: {e}")
+
+        for name in dirs:
+            dir_path = os.path.join(root, name)
+            try:
+                # If it's a symbolic link, just remove the link itself
+                if os.path.islink(dir_path):
+                    os.remove(dir_path)
+                else:
+                    os.rmdir(dir_path)  # Remove empty directories
+            except OSError as e:
+                print(f"Error removing directory {dir_path}: {e}")
+
+    # Finally remove the root directory (if not a symlink)
+    if os.path.islink(path):
+        os.remove(path)
+    else:
+        os.rmdir(path)
+
+
 @pytest.fixture(scope="session", autouse=True)
 def set_timezone():
     """Fakes the host timezone to UTC so we don't get different mhl files if the tests run on different time zones

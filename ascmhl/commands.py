@@ -321,7 +321,10 @@ def create_for_folder_subcommand(
             referenced_asc_folder = os.path.join(
                 os.path.dirname(existing_history.asc_mhl_path), os.path.dirname(ref.path)
             )
-            if not os.path.exists(referenced_asc_folder):
+            # as we also ignore the ascmhl folder itself check the ignore patterns for the enclosing folder
+            if not os.path.exists(referenced_asc_folder) and not ignore_spec.get_path_spec().match_file(
+                os.path.dirname(referenced_asc_folder)
+            ):
                 missing_asc_mhl_folder.add(os.path.dirname(referenced_asc_folder))
 
     if detect_renaming:

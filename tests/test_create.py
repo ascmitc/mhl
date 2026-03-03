@@ -8,12 +8,15 @@ __email__ = "opensource@pomfort.com"
 """
 
 import os
+import datetime
 from freezegun import freeze_time
 from click.testing import CliRunner
 from .conftest import path_conversion_tests
 from .conftest import abspath_conversion_tests
 
 from ascmhl import utils
+from ascmhl.generator import MHLGenerationCreationSession
+from ascmhl.hashlist import MHLHashEntry
 from ascmhl.history import MHLHistory
 import ascmhl.commands
 
@@ -376,3 +379,63 @@ def test_create_mulitple_hashformats_double_hashformat(fs, simple_mhl_history):
         print(result.output)
 
     assert result.exit_code == 0
+
+
+@freeze_time("2020-01-15 13:00:00")
+def test_multiple_format_hash_entries_are_instances(fs):
+    """Bug: generator.py:75 — hash_entries = [MHLHashEntry] includes the class
+    itself as a list element. Every hash entry must be an instance, not the class."""
+    fs.create_file("/root/Stuff.txt", contents="stuff\n")
+
+    runner = CliRunner()
+    result = runner.invoke(ascmhl.commands.create, [abspath_conversion_tests("/root"), "-h", "xxh64"])
+    assert result.exit_code == 0
+
+    history = MHLHistory.load_from_path(abspath_conversion_tests("/root"))
+    session = MHLGenerationCreationSession(history)
+
+    file_path = abspath_conversion_tests("/root/Stuff.txt")
+    file_size = os.path.getsize(file_path)
+    modification_date = datetime.datetime.fromtimestamp(os.path.getmtime(file_path))
+
+    hash_lookup = {"xxh64": "aabbccdd11223344", "md5": "d41d8cd98f00b204e9800998ecf8427e"}
+    session.append_multiple_format_file_hashes(file_path, file_size, hash_lookup, modification_date)
+
+    new_hash_list = session.new_hash_lists[history]
+    media_hash = new_hash_list.find_media_hash_for_path("Stuff.txt")
+    assert media_hash is not None
+
+    for entry in media_hash.hash_entries:
+        assert isinstance(entry, MHLHashEntry), (
+            f"Expected an instance of MHLHashEntry, got {entry!r}. "
+            f"The MHLHashEntry class itself was inserted into hash_entries."
+        )
+
+
+@freeze_time("2020-01-15 13:00:00")
+def test_multiple_format_hash_entries_correct_count(fs):
+    """Bug: generator.py:75 — hash_entries = [MHLHashEntry] causes 3 entries
+    instead of 2 when appending 2 hash formats."""
+    fs.create_file("/root/File.txt", contents="data\n")
+
+    runner = CliRunner()
+    result = runner.invoke(ascmhl.commands.create, [abspath_conversion_tests("/root"), "-h", "xxh64"])
+    assert result.exit_code == 0
+
+    history = MHLHistory.load_from_path(abspath_conversion_tests("/root"))
+    session = MHLGenerationCreationSession(history)
+
+    file_path = abspath_conversion_tests("/root/File.txt")
+    file_size = os.path.getsize(file_path)
+    modification_date = datetime.datetime.fromtimestamp(os.path.getmtime(file_path))
+
+    hash_lookup = {"xxh64": "aabbccdd11223344", "md5": "d41d8cd98f00b204e9800998ecf8427e"}
+    session.append_multiple_format_file_hashes(file_path, file_size, hash_lookup, modification_date)
+
+    new_hash_list = session.new_hash_lists[history]
+    media_hash = new_hash_list.find_media_hash_for_path("File.txt")
+    assert media_hash is not None
+    assert len(media_hash.hash_entries) == 2, (
+        f"Expected 2 hash entries (one per format), got {len(media_hash.hash_entries)}. "
+        f"Extra entry is likely the MHLHashEntry class from `hash_entries = [MHLHashEntry]`."
+    )

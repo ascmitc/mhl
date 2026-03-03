@@ -9,6 +9,7 @@ __email__ = "opensource@pomfort.com"
 
 import pytest
 from ascmhl.hasher import *
+from ascmhl.hasher import AggregateHasher
 
 
 def test_cannot_instantiate_abstract_classes():
@@ -149,3 +150,26 @@ def test_hash_list_concat_equals_chunking():
         concat = hasher.bytes_from_string_digest("".join(hash_list))
         h2 = hasher.hash_data(concat)
         assert h1 == h2  # assert that sequentially feeding hashes is same as concat then feeding hashes
+
+
+def test_aggregate_hasher_can_be_instantiated():
+    """Bug: hasher.py:250 — hasher_lookup = Dict[str, str] assigns the type
+    instead of creating an empty dict, crashing on item assignment."""
+    try:
+        hasher = AggregateHasher(["xxh64", "md5"])
+    except TypeError as e:
+        pytest.fail(
+            f"AggregateHasher.__init__ crashed: {e}. "
+            f"hasher_lookup = Dict[str, str] assigns the type, not an empty dict."
+        )
+
+
+def test_aggregate_hasher_has_correct_lookups():
+    """Bug: hasher.py:250 — after instantiation, hasher_lookup should be a
+    real dict keyed by format name."""
+    hasher = AggregateHasher(["xxh64"])
+    assert isinstance(hasher.hasher_lookup, dict), (
+        f"hasher_lookup should be a dict, got {type(hasher.hasher_lookup)}. "
+        f"It was assigned Dict[str, str] (a type) instead of an empty dict."
+    )
+    assert "xxh64" in hasher.hasher_lookup

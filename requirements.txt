@@ -1,6 +1,6 @@
 Click==8.1.7
 freezegun==1.4.0
-lxml==5.1.0
+lxml==6.1.0
 packaging==23.2
 pathspec==0.12.1
 pyfakefs==5.3.5

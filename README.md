@@ -177,6 +177,16 @@ Hashing and verifying single files against hash information stored in the `ascmh
 much longer running) check of the integrity of the entire folder structure. 
 
 
+### Contents of an `ascmhl` folder
+
+The loader reads `ascmhl_chain.xml` and `.mhl` files at the root level of the `ascmhl` folder.
+Manifest filenames must follow the ASC MHL naming convention; invalid names are reported
+and skipped. Other files, including macOS `._` sidecar files, are ignored.
+
+Subdirectories and their contents are skipped with a warning. They are not loaded as
+manifests or child histories, and the operation can continue.
+
+
 ## Commands of `ascmhl`
 
 _Implementation status 2022-09:_

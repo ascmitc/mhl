@@ -258,26 +258,36 @@ class MHLHistory:
                     raise errors.MissingMHLManifestException(expected_file)
 
         hash_lists = []
-        for root, directories, filenames in os.walk(asc_mhl_folder_path):
-            for filename in filenames:
-                # file name example: 0001_root_2020-01-15_130000.mhl
-                # ignore ._ variants of mhl files that can happen when moving data from macOS to Windows and back
-                if (len(filename) > 2 and filename[:2] == "._") or not filename.endswith(ascmhl_file_extension):
-                    continue
-                filename_no_extension, _ = os.path.splitext(filename)
-                parts = re.findall(MHLHistory.history_file_name_regex, filename_no_extension)
-                if len(parts) == 1 and len(parts[0]) == 2:
-                    file_path = os.path.join(asc_mhl_folder_path, filename)
-                    hash_list = hashlist_xml_parser.parse(file_path)
-                    generation_number = int(parts[0][0])
-                    hash_list.generation_number = generation_number
-                    # FIXME is there a better way of accessing the generation from a hash entry?
-                    if hash_list.process_info.root_media_hash is not None:
-                        for hash_entry in hash_list.process_info.root_media_hash.hash_entries:
-                            hash_entry.temp_generation_number = hash_list.generation_number
-                    hash_lists.append(hash_list)
-                else:
-                    logger.error(f"name of ascmhl file {filename} does not conform to naming convention")
+        # Each history's manifests share one scope. Metadata subdirectories must
+        # not contribute generations or be interpreted as nested media histories.
+        if os.path.isdir(asc_mhl_folder_path):
+            with os.scandir(asc_mhl_folder_path) as entries:
+                for entry in entries:
+                    if entry.is_dir():
+                        logger.error(
+                            f"Warning: Ignoring subdirectory '{entry.path}'. "
+                            "Manifests inside this directory are not part of the current ASC MHL "
+                            "history and will not be loaded or verified."
+                        )
+                        continue
+                    filename = entry.name
+                    # file name example: 0001_root_2020-01-15_130000.mhl
+                    # ignore ._ variants of mhl files that can happen when moving data from macOS to Windows and back
+                    if (len(filename) > 2 and filename[:2] == "._") or not filename.endswith(ascmhl_file_extension):
+                        continue
+                    filename_no_extension, _ = os.path.splitext(filename)
+                    parts = re.findall(MHLHistory.history_file_name_regex, filename_no_extension)
+                    if len(parts) == 1 and len(parts[0]) == 2:
+                        hash_list = hashlist_xml_parser.parse(entry.path)
+                        generation_number = int(parts[0][0])
+                        hash_list.generation_number = generation_number
+                        # FIXME is there a better way of accessing the generation from a hash entry?
+                        if hash_list.process_info.root_media_hash is not None:
+                            for hash_entry in hash_list.process_info.root_media_hash.hash_entries:
+                                hash_entry.temp_generation_number = hash_list.generation_number
+                        hash_lists.append(hash_list)
+                    else:
+                        logger.error(f"name of ascmhl file {filename} does not conform to naming convention")
         # sort all found hash lists by generation number first to make sure we add them to the history in order
         hash_lists.sort(key=lambda x: x.generation_number)
         for hash_list in hash_lists:
@@ -337,6 +347,9 @@ class MHLHistory:
                 child_history.parent_history = self
                 self.append_child_history(child_history)
                 directories.clear()
+            elif ascmhl_folder_name in directories:
+                # The current history's metadata is not part of the media tree.
+                directories.remove(ascmhl_folder_name)
 
         # update parent children mapping with the found children
         self._update_child_history_mapping()

@@ -29,7 +29,7 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     name="ascmhl",
-    packages=find_packages() + ["ascmhl.xsd"],
+    packages=find_packages(exclude=["tests", "tests.*"]) + ["ascmhl.xsd"],
     # ship the schema files from the top level xsd folder inside the package, for xsd-schema-check
     package_dir={"ascmhl.xsd": "xsd"},
     package_data={"ascmhl.xsd": ["*.xsd"]},

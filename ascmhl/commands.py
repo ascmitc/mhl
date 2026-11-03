@@ -1005,7 +1005,7 @@ def diff(root_path, verbose, ignore_list, ignore_spec_file):
 
     \b
     The diff command is used to quickly compare files in the file system with
-    records in the ASC MHL history. In comparison to the verify command, no
+    records in the ASC MHL history. Unlike `ascmhl-debug verify`, no
     hash values are created and compared. Missing files or additional files
     in the file system are reported as errors. No new ASC MHL file / generation
     is created.

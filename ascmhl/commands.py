@@ -39,6 +39,12 @@ from .utils import convert_local_path_to_posix
 
 from .utils import check_path_is_absolute_to_history
 
+# The schema files are installed inside the package (see package_dir in setup.py).
+# In a source checkout they are in the xsd folder at the top of the repository.
+xsd_folder_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "xsd")
+if not os.path.isdir(xsd_folder_path):
+    xsd_folder_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "xsd")
+
 
 @click.command()
 @click.argument("root_path", type=click.Path(exists=True))
@@ -999,7 +1005,7 @@ def diff(root_path, verbose, ignore_list, ignore_spec_file):
 
     \b
     The diff command is used to quickly compare files in the file system with
-    records in the ASC MHL history. In comparison to the verify command, no
+    records in the ASC MHL history. Unlike `ascmhl-debug verify`, no
     hash values are created and compared. Missing files or additional files
     in the file system are reported as errors. No new ASC MHL file / generation
     is created.
@@ -1421,10 +1427,10 @@ def xsd_schema_check(file_path, directory_file, xsd_file):
     files.
     """
 
-    xsd_path = "xsd/ASCMHL.xsd"
+    xsd_path = os.path.join(xsd_folder_path, "ASCMHL.xsd")
 
     if directory_file:
-        xsd_path = "xsd/ASCMHLDirectory__combined.xsd"
+        xsd_path = os.path.join(xsd_folder_path, "ASCMHLDirectory__combined.xsd")
 
     if xsd_file != None:
         xsd_path = xsd_file

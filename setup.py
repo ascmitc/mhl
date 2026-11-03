@@ -29,7 +29,11 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     name="ascmhl",
-    packages=find_packages(),
+    packages=find_packages(exclude=["tests", "tests.*"]) + ["ascmhl.xsd"],
+    # ship the schema files from the top level xsd folder inside the package, for xsd-schema-check
+    package_dir={"ascmhl.xsd": "xsd"},
+    package_data={"ascmhl.xsd": ["*.xsd"]},
+    exclude_package_data={"ascmhl.xsd": ["*.md", "*.xpr", "doc/*", "examples/*", "lib/*"]},
     setup_requires=["pytest-runner", "setuptools_scm"],
     tests_require=["pytest", "pytest_mock", "pyfakefs", "freezegun", "requests-mock", "testfixtures"],
     url="https://github.com/ascmitc/mhl",
